@@ -76,6 +76,60 @@ it.layer(TestLayer)("ProjectFaviconResolverLive", (it) => {
       }),
     );
 
+    it.effect("prefers explicit project files over generated fallback icons", () =>
+      Effect.gen(function* () {
+        const resolver = yield* ProjectFaviconResolver;
+        const tempDir = yield* makeTempDir;
+        const path = yield* Path.Path;
+        const cwd = path.join(tempDir, "sunwatcher");
+        yield* writeTextFile(cwd, "logo.svg", "<svg>sunwatcher</svg>");
+
+        const resolved = yield* resolver.resolve(cwd);
+
+        expect(resolved?._tag).toBe("File");
+        if (resolved?._tag === "File") {
+          expect(resolved.path).toContain("logo.svg");
+        }
+      }),
+    );
+
+    it.effect("resolves generated icons for known projects", () =>
+      Effect.gen(function* () {
+        const resolver = yield* ProjectFaviconResolver;
+        const tempDir = yield* makeTempDir;
+        const path = yield* Path.Path;
+        const cwd = path.join(tempDir, "the-anonymous-coder");
+        const fileSystem = yield* FileSystem.FileSystem;
+        yield* fileSystem.makeDirectory(cwd, { recursive: true }).pipe(Effect.orDie);
+
+        const resolved = yield* resolver.resolve(cwd);
+
+        expect(resolved?._tag).toBe("Svg");
+        if (resolved?._tag === "Svg") {
+          expect(resolved.svg).toContain("project-favicon-youtube");
+        }
+      }),
+    );
+
+    it.effect("resolves generated icons from package dependencies", () =>
+      Effect.gen(function* () {
+        const resolver = yield* ProjectFaviconResolver;
+        const cwd = yield* makeTempDir;
+        yield* writeTextFile(
+          cwd,
+          "package.json",
+          '{"dependencies":{"react":"latest"}}',
+        );
+
+        const resolved = yield* resolver.resolve(cwd);
+
+        expect(resolved?._tag).toBe("Svg");
+        if (resolved?._tag === "Svg") {
+          expect(resolved.svg).toContain("project-favicon-react");
+        }
+      }),
+    );
+
     it.effect("returns null when no icon is present", () =>
       Effect.gen(function* () {
         const resolver = yield* ProjectFaviconResolver;

@@ -244,8 +244,8 @@ export const projectFaviconRouteLayer = HttpRouter.add(
     }
 
     const faviconResolver = yield* ProjectFaviconResolver;
-    const faviconFilePath = yield* faviconResolver.resolvePath(projectCwd);
-    if (!faviconFilePath) {
+    const favicon = yield* faviconResolver.resolve(projectCwd);
+    if (!favicon) {
       return HttpServerResponse.text(FALLBACK_PROJECT_FAVICON_SVG, {
         status: 200,
         contentType: "image/svg+xml",
@@ -255,7 +255,17 @@ export const projectFaviconRouteLayer = HttpRouter.add(
       });
     }
 
-    return yield* HttpServerResponse.file(faviconFilePath, {
+    if (favicon._tag === "Svg") {
+      return HttpServerResponse.text(favicon.svg, {
+        status: 200,
+        contentType: "image/svg+xml",
+        headers: {
+          "Cache-Control": PROJECT_FAVICON_CACHE_CONTROL,
+        },
+      });
+    }
+
+    return yield* HttpServerResponse.file(favicon.path, {
       status: 200,
       headers: {
         "Cache-Control": PROJECT_FAVICON_CACHE_CONTROL,
