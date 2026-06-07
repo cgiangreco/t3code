@@ -115,11 +115,7 @@ it.layer(TestLayer)("ProjectFaviconResolverLive", (it) => {
       Effect.gen(function* () {
         const resolver = yield* ProjectFaviconResolver;
         const cwd = yield* makeTempDir;
-        yield* writeTextFile(
-          cwd,
-          "package.json",
-          '{"dependencies":{"react":"latest"}}',
-        );
+        yield* writeTextFile(cwd, "package.json", '{"dependencies":{"react":"latest"}}');
 
         const resolved = yield* resolver.resolve(cwd);
 
