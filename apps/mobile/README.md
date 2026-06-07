@@ -20,6 +20,19 @@ T3 Cloud is optional and disabled in a fresh clone. Public configuration belongs
 repository-root `.env` or `.env.local`, not an `apps/mobile/.env` file. See
 [`../../.env.example`](../../.env.example).
 
+## Fork builds
+
+The default config points at the upstream Expo project owned by `pingdotgg`. If you want to
+build from a fork under your own Expo account, set these repository-root environment variables:
+
+```bash
+EXPO_OWNER=your-expo-account
+EXPO_PROJECT_ID=your-eas-project-id
+EXPO_UPDATES_URL=https://u.expo.dev/your-eas-project-id
+```
+
+The app config falls back to the upstream values when these are unset.
+
 ## Development
 
 Start Metro for the dev client:

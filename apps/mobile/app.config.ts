@@ -8,6 +8,9 @@ const repoEnv = loadRepoEnv();
 Object.assign(process.env, repoEnv);
 
 const APP_VARIANT = resolveAppVariant(repoEnv.APP_VARIANT);
+const EXPO_OWNER = repoEnv.EXPO_OWNER ?? "pingdotgg";
+const EXPO_PROJECT_ID = repoEnv.EXPO_PROJECT_ID ?? "d763fcb8-d37c-41ea-a773-b54a0ab4a454";
+const EXPO_UPDATES_URL = repoEnv.EXPO_UPDATES_URL ?? `https://u.expo.dev/${EXPO_PROJECT_ID}`;
 
 const VARIANT_CONFIG: Record<
   AppVariant,
@@ -69,7 +72,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
   updates: {
     enabled: true,
-    url: "https://u.expo.dev/d763fcb8-d37c-41ea-a773-b54a0ab4a454",
+    url: EXPO_UPDATES_URL,
     checkAutomatically: "ON_LOAD",
     fallbackToCacheTimeout: 0,
   },
@@ -162,10 +165,10 @@ const config: ExpoConfig = {
       jwtTemplate: repoEnv.EXPO_PUBLIC_CLERK_JWT_TEMPLATE ?? null,
     },
     eas: {
-      projectId: "d763fcb8-d37c-41ea-a773-b54a0ab4a454",
+      projectId: EXPO_PROJECT_ID,
     },
   },
-  owner: "pingdotgg",
+  owner: EXPO_OWNER,
 };
 
 export default config;
