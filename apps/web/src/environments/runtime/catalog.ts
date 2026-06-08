@@ -245,8 +245,16 @@ export function resolveEnvironmentHttpUrl(input: {
 
   const url = new URL(httpBaseUrl);
   url.pathname = input.pathname;
-  if (input.searchParams) {
-    url.search = new URLSearchParams(input.searchParams).toString();
+  const searchParams = new URLSearchParams(input.searchParams);
+  const primaryEnvironment = getPrimaryKnownEnvironment();
+  if (primaryEnvironment?.environmentId !== input.environmentId) {
+    const rawHttpToken = getSavedEnvironmentRuntimeState(input.environmentId).rawHttpToken;
+    if (rawHttpToken && !searchParams.has("token")) {
+      searchParams.set("token", rawHttpToken);
+    }
+  }
+  if (searchParams.size > 0) {
+    url.search = searchParams.toString();
   }
   return url.toString();
 }
@@ -321,6 +329,7 @@ export interface SavedEnvironmentRuntimeState {
   readonly authState: SavedEnvironmentAuthState;
   readonly lastError: string | null;
   readonly lastErrorAt: string | null;
+  readonly rawHttpToken: string | null;
   readonly scopes: ReadonlyArray<AuthEnvironmentScope> | null;
   readonly descriptor: ExecutionEnvironmentDescriptor | null;
   readonly serverConfig: ServerConfig | null;
@@ -344,6 +353,7 @@ const DEFAULT_SAVED_ENVIRONMENT_RUNTIME_STATE: SavedEnvironmentRuntimeState = Ob
   authState: "unknown",
   lastError: null,
   lastErrorAt: null,
+  rawHttpToken: null,
   scopes: null,
   descriptor: null,
   serverConfig: null,

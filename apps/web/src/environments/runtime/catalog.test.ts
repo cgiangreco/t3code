@@ -9,6 +9,7 @@ import {
   readSavedEnvironmentCredential,
   resetSavedEnvironmentRegistryStoreForTests,
   resetSavedEnvironmentRuntimeStoreForTests,
+  resolveEnvironmentHttpUrl,
   useSavedEnvironmentRegistryStore,
   useSavedEnvironmentRuntimeStore,
   waitForSavedEnvironmentRegistryHydration,
@@ -180,5 +181,33 @@ describe("environment runtime catalog stores", () => {
     await hydrationPromise;
 
     expect(useSavedEnvironmentRegistryStore.getState().byId[environmentId]).toEqual(record);
+  });
+
+  it("adds the saved bearer token to raw HTTP URLs for remote environments", () => {
+    const environmentId = EnvironmentId.make("environment-1");
+
+    useSavedEnvironmentRegistryStore.getState().upsert({
+      environmentId,
+      label: "Remote environment",
+      httpBaseUrl: "https://remote.example.com/",
+      wsBaseUrl: "wss://remote.example.com/",
+      createdAt: "2026-04-09T00:00:00.000Z",
+      lastConnectedAt: null,
+    });
+    useSavedEnvironmentRuntimeStore.getState().patch(environmentId, {
+      rawHttpToken: "saved-bearer-token",
+    });
+
+    expect(
+      resolveEnvironmentHttpUrl({
+        environmentId,
+        pathname: "/api/project-favicon",
+        searchParams: {
+          cwd: "/tmp/project",
+        },
+      }),
+    ).toBe(
+      "https://remote.example.com/api/project-favicon?cwd=%2Ftmp%2Fproject&token=saved-bearer-token",
+    );
   });
 });

@@ -1330,6 +1330,8 @@ async function refreshSavedEnvironmentMetadata(
     authState: sessionState.authenticated ? "authenticated" : "requires-auth",
     descriptor: serverConfig.environment,
     serverConfig,
+    rawHttpToken:
+      sessionState.authenticated && credential.method === "bearer" ? credential.token : null,
     scopes: sessionState.authenticated ? (sessionState.scopes ?? scopeHint ?? null) : null,
   });
   useSavedEnvironmentRegistryStore
@@ -1485,6 +1487,7 @@ async function ensureSavedEnvironmentConnection(
         } else {
           useSavedEnvironmentRuntimeStore.getState().patch(record.environmentId, {
             authState: "requires-auth",
+            rawHttpToken: null,
             scopes: null,
             connectionState: "disconnected",
             lastError: "Saved environment is missing its saved credential. Pair it again.",
