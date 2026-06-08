@@ -86,6 +86,8 @@
 :root {
   color-scheme: light;
   --radius: 0.625rem;
+  --fork-accent: #9f8ad1;
+  --fork-accent-foreground: #ffffff;
   --background: var(--color-white);
   --app-chrome-background: var(--background);
   --foreground: var(--color-neutral-800);
@@ -142,6 +144,28 @@
     --warning: var(--color-amber-500);
     --warning-foreground: var(--color-amber-400);
   }
+}
+
+.fork-accent-composer {
+  border-color: color-mix(in srgb, var(--fork-accent) 52%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fork-accent) 14%, transparent);
+}
+
+.fork-accent-composer:focus-within {
+  border-color: var(--fork-accent);
+  box-shadow:
+    0 0 0 1px var(--fork-accent),
+    0 0 0 4px color-mix(in srgb, var(--fork-accent) 18%, transparent);
+}
+
+.fork-accent-send {
+  background-color: var(--fork-accent);
+  color: var(--fork-accent-foreground);
+  box-shadow: 0 10px 24px -16px color-mix(in srgb, var(--fork-accent) 70%, transparent);
+}
+
+.fork-accent-send:hover:enabled {
+  background-color: color-mix(in srgb, var(--fork-accent) 88%, black);
 }
 
 body {
