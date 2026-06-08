@@ -111,6 +111,24 @@ it.layer(TestLayer)("ProjectFaviconResolverLive", (it) => {
       }),
     );
 
+    it.effect("resolves a pokeball icon for jeu-concours projects", () =>
+      Effect.gen(function* () {
+        const resolver = yield* ProjectFaviconResolver;
+        const tempDir = yield* makeTempDir;
+        const path = yield* Path.Path;
+        const cwd = path.join(tempDir, "jeu-concours-bardakoff");
+        const fileSystem = yield* FileSystem.FileSystem;
+        yield* fileSystem.makeDirectory(cwd, { recursive: true }).pipe(Effect.orDie);
+
+        const resolved = yield* resolver.resolve(cwd);
+
+        expect(resolved?._tag).toBe("Svg");
+        if (resolved?._tag === "Svg") {
+          expect(resolved.svg).toContain("project-favicon-pokeball");
+        }
+      }),
+    );
+
     it.effect("resolves generated icons from package dependencies", () =>
       Effect.gen(function* () {
         const resolver = yield* ProjectFaviconResolver;
