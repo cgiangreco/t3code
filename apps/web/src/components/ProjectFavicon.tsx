@@ -7,6 +7,7 @@ import {
 } from "../environments/runtime";
 
 const loadedProjectFaviconSrcs = new Set<string>();
+const fetchedProjectFaviconObjectUrls = new Map<string, string>();
 
 export function ProjectFavicon(input: {
   environmentId: EnvironmentId;
@@ -27,12 +28,72 @@ export function ProjectFavicon(input: {
       return null;
     }
   }, [input.cwd, input.environmentId, rawHttpToken]);
+  const [displaySrc, setDisplaySrc] = useState<string | null>(() => {
+    if (!src) {
+      return null;
+    }
+
+    return rawHttpToken ? (fetchedProjectFaviconObjectUrls.get(src) ?? null) : src;
+  });
   const [status, setStatus] = useState<"loading" | "loaded" | "error">(() =>
     src && loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading",
   );
+
   useEffect(() => {
-    setStatus(src && loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
-  }, [src]);
+    if (!src) {
+      setDisplaySrc(null);
+      setStatus("error");
+      return;
+    }
+
+    if (!rawHttpToken) {
+      setDisplaySrc(src);
+      setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
+      return;
+    }
+
+    const cachedObjectUrl = fetchedProjectFaviconObjectUrls.get(src);
+    if (cachedObjectUrl) {
+      setDisplaySrc(cachedObjectUrl);
+      setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
+      return;
+    }
+
+    const abortController = new AbortController();
+    setDisplaySrc(null);
+    setStatus("loading");
+    void fetch(src, {
+      signal: abortController.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch project favicon: ${response.status}`);
+        }
+        return await response.blob();
+      })
+      .then((blob) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        fetchedProjectFaviconObjectUrls.set(src, objectUrl);
+        setDisplaySrc(objectUrl);
+        setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
+      })
+      .catch((error: unknown) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        console.error("[PROJECT_FAVICON] fetch failed", error);
+        setStatus("error");
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [rawHttpToken, src]);
 
   if (!src) {
     return (
@@ -50,7 +111,7 @@ export function ProjectFavicon(input: {
         />
       ) : null}
       <img
-        src={src}
+        src={displaySrc ?? undefined}
         alt=""
         className={`size-3.5 shrink-0 rounded-sm object-contain ${status === "loaded" ? "" : "hidden"} ${input.className ?? ""}`}
         onLoad={() => {
