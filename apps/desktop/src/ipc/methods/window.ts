@@ -191,8 +191,16 @@ export const fetchProjectFavicon = makeIpcMethod({
       ),
     );
 
+    const headers = new Headers();
+    if (input.bearerToken) {
+      headers.set("authorization", `Bearer ${input.bearerToken}`);
+    }
+
     const response = yield* Effect.tryPromise({
-      try: () => fetchImpl(url.toString()),
+      try: () =>
+        fetchImpl(url.toString(), {
+          headers,
+        }),
       catch: (cause) =>
         new DesktopProjectFaviconFetchError({
           reason: "Desktop project favicon fetch failed to execute.",

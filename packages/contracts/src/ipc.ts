@@ -396,6 +396,7 @@ export type DesktopCloudAuthFetchResult = typeof DesktopCloudAuthFetchResultSche
 
 export const DesktopProjectFaviconFetchInputSchema = Schema.Struct({
   url: Schema.String,
+  bearerToken: Schema.optionalKey(Schema.String),
 });
 export type DesktopProjectFaviconFetchInput = typeof DesktopProjectFaviconFetchInputSchema.Type;
 

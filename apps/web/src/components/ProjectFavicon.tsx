@@ -63,12 +63,17 @@ export function ProjectFavicon(input: {
     setDisplaySrc(null);
     setStatus("loading");
     const loadRemoteProjectFavicon = window.desktopBridge?.fetchProjectFavicon
-      ? window.desktopBridge.fetchProjectFavicon({ url: src }).then((value) => {
-          if (!value) {
-            throw new Error("Desktop bridge returned no favicon data.");
-          }
-          return value;
-        })
+      ? window.desktopBridge
+          .fetchProjectFavicon({
+            url: src,
+            ...(rawHttpToken ? { bearerToken: rawHttpToken } : {}),
+          })
+          .then((value) => {
+            if (!value) {
+              throw new Error("Desktop bridge returned no favicon data.");
+            }
+            return value;
+          })
       : fetch(src, {
           signal: abortController.signal,
         })
