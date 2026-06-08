@@ -164,6 +164,7 @@ export const fetchProjectFavicon = makeIpcMethod({
   payload: DesktopProjectFaviconFetchInputSchema,
   result: DesktopProjectFaviconFetchResultSchema,
   handler: Effect.fn("desktop.ipc.window.fetchProjectFavicon")(function* (input) {
+    yield* Effect.logInfo("desktop project favicon fetch requested", { url: input.url });
     const url = yield* Effect.try({
       try: () => validateProjectFaviconUrl(input.url),
       catch: (cause) =>
@@ -199,6 +200,10 @@ export const fetchProjectFavicon = makeIpcMethod({
         }),
     });
     if (!response.ok) {
+      yield* Effect.logWarning("desktop project favicon fetch returned non-ok status", {
+        url: url.toString(),
+        status: response.status,
+      });
       return null;
     }
 
@@ -211,6 +216,11 @@ export const fetchProjectFavicon = makeIpcMethod({
         }),
     });
     const contentType = response.headers.get("content-type")?.split(";")[0] ?? "image/svg+xml";
+    yield* Effect.logInfo("desktop project favicon fetch succeeded", {
+      url: url.toString(),
+      status: response.status,
+      contentType,
+    });
     return `data:${contentType};base64,${Buffer.from(bytes).toString("base64")}`;
   }),
 });
