@@ -41,6 +41,7 @@ import {
 } from "./methods/updates.ts";
 import {
   confirm,
+  fetchProjectFavicon,
   getAppBranding,
   getLocalEnvironmentBootstrap,
   openExternal,
@@ -82,6 +83,7 @@ export const installDesktopIpcHandlers = Effect.gen(function* () {
   yield* ipc.handle(setTheme);
   yield* ipc.handle(showContextMenu);
   yield* ipc.handle(openExternal);
+  yield* ipc.handle(fetchProjectFavicon);
   yield* ipc.handle(createCloudAuthRequest);
   yield* ipc.handle(getCloudAuthToken);
   yield* ipc.handle(setCloudAuthToken);

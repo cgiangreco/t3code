@@ -2,9 +2,12 @@ import {
   ContextMenuItemSchema,
   DesktopAppBrandingSchema,
   DesktopEnvironmentBootstrapSchema,
+  DesktopProjectFaviconFetchInputSchema,
+  DesktopProjectFaviconFetchResultSchema,
   DesktopThemeSchema,
   PickFolderOptionsSchema,
 } from "@t3tools/contracts";
+import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
@@ -33,6 +36,28 @@ function toWebSocketBaseUrl(httpBaseUrl: URL): string {
   const url = new URL(httpBaseUrl.href);
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
   return url.href;
+}
+
+class DesktopProjectFaviconFetchError extends Data.TaggedError("DesktopProjectFaviconFetchError")<{
+  readonly reason: string;
+  readonly cause?: unknown;
+}> {
+  override get message() {
+    return this.reason;
+  }
+}
+
+function validateProjectFaviconUrl(rawUrl: string): URL {
+  const url = new URL(rawUrl);
+  if (
+    (url.protocol !== "http:" && url.protocol !== "https:") ||
+    url.pathname !== "/api/project-favicon"
+  ) {
+    throw new DesktopProjectFaviconFetchError({
+      reason: "Desktop project favicon fetch is restricted to HTTP(S) project favicon URLs.",
+    });
+  }
+  return url;
 }
 
 export const getAppBranding = makeSyncIpcMethod({
@@ -131,5 +156,61 @@ export const openExternal = makeIpcMethod({
   handler: Effect.fn("desktop.ipc.window.openExternal")(function* (url) {
     const shell = yield* ElectronShell.ElectronShell;
     return yield* shell.openExternal(url);
+  }),
+});
+
+export const fetchProjectFavicon = makeIpcMethod({
+  channel: IpcChannels.FETCH_PROJECT_FAVICON_CHANNEL,
+  payload: DesktopProjectFaviconFetchInputSchema,
+  result: DesktopProjectFaviconFetchResultSchema,
+  handler: Effect.fn("desktop.ipc.window.fetchProjectFavicon")(function* (input) {
+    const url = yield* Effect.try({
+      try: () => validateProjectFaviconUrl(input.url),
+      catch: (cause) =>
+        cause instanceof DesktopProjectFaviconFetchError
+          ? cause
+          : new DesktopProjectFaviconFetchError({
+              reason: "Desktop project favicon fetch received an invalid URL.",
+              cause,
+            }),
+    });
+
+    const fetchImpl = yield* Effect.promise(async () => {
+      const electron = (await import("electron")) as {
+        readonly net?: { readonly fetch?: typeof globalThis.fetch };
+      };
+      return electron.net?.fetch?.bind(electron.net) ?? globalThis.fetch;
+    }).pipe(
+      Effect.mapError(
+        (cause) =>
+          new DesktopProjectFaviconFetchError({
+            reason: "Desktop project favicon fetch could not resolve a fetch implementation.",
+            cause,
+          }),
+      ),
+    );
+
+    const response = yield* Effect.tryPromise({
+      try: () => fetchImpl(url.toString()),
+      catch: (cause) =>
+        new DesktopProjectFaviconFetchError({
+          reason: "Desktop project favicon fetch failed to execute.",
+          cause,
+        }),
+    });
+    if (!response.ok) {
+      return null;
+    }
+
+    const bytes = yield* Effect.tryPromise({
+      try: () => response.arrayBuffer(),
+      catch: (cause) =>
+        new DesktopProjectFaviconFetchError({
+          reason: "Desktop project favicon response could not be read.",
+          cause,
+        }),
+    });
+    const contentType = response.headers.get("content-type")?.split(";")[0] ?? "image/svg+xml";
+    return `data:${contentType};base64,${Buffer.from(bytes).toString("base64")}`;
   }),
 });

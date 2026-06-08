@@ -394,6 +394,14 @@ export const DesktopCloudAuthFetchResultSchema = Schema.Struct({
 });
 export type DesktopCloudAuthFetchResult = typeof DesktopCloudAuthFetchResultSchema.Type;
 
+export const DesktopProjectFaviconFetchInputSchema = Schema.Struct({
+  url: Schema.String,
+});
+export type DesktopProjectFaviconFetchInput = typeof DesktopProjectFaviconFetchInputSchema.Type;
+
+export const DesktopProjectFaviconFetchResultSchema = Schema.NullOr(Schema.String);
+export type DesktopProjectFaviconFetchResult = typeof DesktopProjectFaviconFetchResultSchema.Type;
+
 export interface DesktopBridge {
   getAppBranding: () => DesktopAppBranding | null;
   getLocalEnvironmentBootstrap: () => DesktopEnvironmentBootstrap | null;
@@ -444,6 +452,9 @@ export interface DesktopBridge {
   setCloudAuthToken: (token: string) => Promise<boolean>;
   clearCloudAuthToken: () => Promise<void>;
   fetchCloudAuth: (input: DesktopCloudAuthFetchInput) => Promise<DesktopCloudAuthFetchResult>;
+  fetchProjectFavicon?: (
+    input: DesktopProjectFaviconFetchInput,
+  ) => Promise<DesktopProjectFaviconFetchResult>;
   onCloudAuthCallback: (listener: (rawUrl: string) => void) => () => void;
   onMenuAction: (listener: (action: string) => void) => () => void;
   getUpdateState: () => Promise<DesktopUpdateState>;

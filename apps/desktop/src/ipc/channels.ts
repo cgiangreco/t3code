@@ -8,6 +8,7 @@ export const GET_CLOUD_AUTH_TOKEN_CHANNEL = "desktop:get-cloud-auth-token";
 export const SET_CLOUD_AUTH_TOKEN_CHANNEL = "desktop:set-cloud-auth-token";
 export const CLEAR_CLOUD_AUTH_TOKEN_CHANNEL = "desktop:clear-cloud-auth-token";
 export const FETCH_CLOUD_AUTH_CHANNEL = "desktop:fetch-cloud-auth";
+export const FETCH_PROJECT_FAVICON_CHANNEL = "desktop:fetch-project-favicon";
 export const CLOUD_AUTH_CALLBACK_CHANNEL = "desktop:cloud-auth-callback";
 export const MENU_ACTION_CHANNEL = "desktop:menu-action";
 export const UPDATE_STATE_CHANNEL = "desktop:update-state";

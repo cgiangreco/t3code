@@ -102,6 +102,8 @@ contextBridge.exposeInMainWorld("desktopBridge", {
     ipcRenderer.invoke(IpcChannels.SET_CLOUD_AUTH_TOKEN_CHANNEL, token),
   clearCloudAuthToken: () => ipcRenderer.invoke(IpcChannels.CLEAR_CLOUD_AUTH_TOKEN_CHANNEL),
   fetchCloudAuth: (input) => ipcRenderer.invoke(IpcChannels.FETCH_CLOUD_AUTH_CHANNEL, input),
+  fetchProjectFavicon: (input) =>
+    ipcRenderer.invoke(IpcChannels.FETCH_PROJECT_FAVICON_CHANNEL, input),
   onCloudAuthCallback: (listener) => {
     const wrappedListener = (_event: Electron.IpcRendererEvent, rawUrl: unknown) => {
       if (typeof rawUrl !== "string") return;

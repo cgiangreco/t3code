@@ -62,23 +62,37 @@ export function ProjectFavicon(input: {
     const abortController = new AbortController();
     setDisplaySrc(null);
     setStatus("loading");
-    void fetch(src, {
-      signal: abortController.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch project favicon: ${response.status}`);
-        }
-        return await response.blob();
-      })
-      .then((blob) => {
+    const loadRemoteProjectFavicon = window.desktopBridge?.fetchProjectFavicon
+      ? window.desktopBridge.fetchProjectFavicon({ url: src }).then((value) => {
+          if (!value) {
+            throw new Error("Desktop bridge returned no favicon data.");
+          }
+          return value;
+        })
+      : fetch(src, {
+          signal: abortController.signal,
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              throw new Error(`Failed to fetch project favicon: ${response.status}`);
+            }
+            return await response.blob();
+          })
+          .then((blob) => {
+            const objectUrl = URL.createObjectURL(blob);
+            fetchedProjectFaviconObjectUrls.set(src, objectUrl);
+            return objectUrl;
+          });
+    void loadRemoteProjectFavicon
+      .then((resolvedSrc) => {
         if (abortController.signal.aborted) {
           return;
         }
 
-        const objectUrl = URL.createObjectURL(blob);
-        fetchedProjectFaviconObjectUrls.set(src, objectUrl);
-        setDisplaySrc(objectUrl);
+        if (!window.desktopBridge?.fetchProjectFavicon) {
+          fetchedProjectFaviconObjectUrls.set(src, resolvedSrc);
+        }
+        setDisplaySrc(resolvedSrc);
         setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
       })
       .catch((error: unknown) => {
