@@ -1,6 +1,7 @@
 import type { EnvironmentId } from "@t3tools/contracts";
 import { FolderIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { APP_VERSION } from "../branding";
 import {
   resolveEnvironmentHttpUrl,
   useSavedEnvironmentRuntimeStore,
@@ -22,7 +23,7 @@ export function ProjectFavicon(input: {
       return resolveEnvironmentHttpUrl({
         environmentId: input.environmentId,
         pathname: "/api/project-favicon",
-        searchParams: { cwd: input.cwd },
+        searchParams: { cwd: input.cwd, v: APP_VERSION },
       });
     } catch {
       return null;
