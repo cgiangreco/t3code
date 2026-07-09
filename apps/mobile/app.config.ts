@@ -134,6 +134,11 @@ const config: ExpoConfig = {
       {
         ios: {
           deploymentTarget: "18.0",
+          // AppCheckCore 11.3+ includes Swift and needs module maps for these Objective-C dependencies.
+          extraPods: [
+            { name: "GoogleUtilities", modular_headers: true },
+            { name: "RecaptchaInterop", modular_headers: true },
+          ],
         },
       },
     ],
@@ -163,6 +168,11 @@ const config: ExpoConfig = {
     clerk: {
       publishableKey: repoEnv.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? null,
       jwtTemplate: repoEnv.EXPO_PUBLIC_CLERK_JWT_TEMPLATE ?? null,
+    },
+    observability: {
+      tracesUrl: repoEnv.EXPO_PUBLIC_OTLP_TRACES_URL ?? "https://api.axiom.co/v1/traces",
+      tracesDataset: repoEnv.EXPO_PUBLIC_OTLP_TRACES_DATASET ?? null,
+      tracesToken: repoEnv.EXPO_PUBLIC_OTLP_TRACES_TOKEN ?? null,
     },
     eas: {
       projectId: EXPO_PROJECT_ID,

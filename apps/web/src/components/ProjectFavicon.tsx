@@ -1,139 +1,49 @@
 import type { EnvironmentId } from "@t3tools/contracts";
 import { FolderIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { APP_VERSION } from "../branding";
-import {
-  resolveEnvironmentHttpUrl,
-  useSavedEnvironmentRuntimeStore,
-} from "../environments/runtime";
+import { useState } from "react";
+import { useAssetUrl } from "../assets/assetUrls";
 
 const loadedProjectFaviconSrcs = new Set<string>();
-const fetchedProjectFaviconObjectUrls = new Map<string, string>();
 
 export function ProjectFavicon(input: {
   environmentId: EnvironmentId;
   cwd: string;
-  className?: string;
+  className?: string | undefined;
 }) {
-  const rawHttpToken = useSavedEnvironmentRuntimeStore(
-    (state) => state.byId[input.environmentId]?.rawHttpToken ?? null,
-  );
-  const src = useMemo(() => {
-    try {
-      return resolveEnvironmentHttpUrl({
-        environmentId: input.environmentId,
-        pathname: "/api/project-favicon",
-        searchParams: { cwd: input.cwd, v: APP_VERSION },
-      });
-    } catch {
-      return null;
-    }
-  }, [input.cwd, input.environmentId, rawHttpToken]);
-  const [displaySrc, setDisplaySrc] = useState<string | null>(() => {
-    if (!src) {
-      return null;
-    }
-
-    return rawHttpToken ? (fetchedProjectFaviconObjectUrls.get(src) ?? null) : src;
+  const src = useAssetUrl(input.environmentId, {
+    _tag: "project-favicon",
+    cwd: input.cwd,
   });
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">(() =>
-    src && loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading",
-  );
-
-  useEffect(() => {
-    if (!src) {
-      setDisplaySrc(null);
-      setStatus("error");
-      return;
-    }
-
-    if (!rawHttpToken) {
-      setDisplaySrc(src);
-      setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
-      return;
-    }
-
-    const cachedObjectUrl = fetchedProjectFaviconObjectUrls.get(src);
-    if (cachedObjectUrl) {
-      setDisplaySrc(cachedObjectUrl);
-      setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
-      return;
-    }
-
-    const abortController = new AbortController();
-    setDisplaySrc(null);
-    setStatus("loading");
-    const loadRemoteProjectFavicon = window.desktopBridge?.fetchProjectFavicon
-      ? window.desktopBridge
-          .fetchProjectFavicon({
-            url: src,
-            ...(rawHttpToken ? { bearerToken: rawHttpToken } : {}),
-          })
-          .then((value) => {
-            if (!value) {
-              throw new Error("Desktop bridge returned no favicon data.");
-            }
-            return value;
-          })
-      : fetch(src, {
-          signal: abortController.signal,
-        })
-          .then(async (response) => {
-            if (!response.ok) {
-              throw new Error(`Failed to fetch project favicon: ${response.status}`);
-            }
-            return await response.blob();
-          })
-          .then((blob) => {
-            const objectUrl = URL.createObjectURL(blob);
-            fetchedProjectFaviconObjectUrls.set(src, objectUrl);
-            return objectUrl;
-          });
-    void loadRemoteProjectFavicon
-      .then((resolvedSrc) => {
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        if (!window.desktopBridge?.fetchProjectFavicon) {
-          fetchedProjectFaviconObjectUrls.set(src, resolvedSrc);
-        }
-        setDisplaySrc(resolvedSrc);
-        setStatus(loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading");
-      })
-      .catch((error: unknown) => {
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        console.error("[PROJECT_FAVICON] fetch failed", error);
-        setStatus("error");
-      });
-
-    return () => {
-      abortController.abort();
-    };
-  }, [rawHttpToken, src]);
 
   if (!src) {
-    return (
-      <FolderIcon
-        className={`size-3.5 shrink-0 text-muted-foreground/50 ${input.className ?? ""}`}
-      />
-    );
+    return <ProjectFaviconFallback className={input.className} />;
   }
+
+  return <ProjectFaviconImage key={src} src={src} className={input.className} />;
+}
+
+function ProjectFaviconFallback({ className }: { readonly className?: string | undefined }) {
+  return <FolderIcon className={`size-3.5 shrink-0 text-muted-foreground/50 ${className ?? ""}`} />;
+}
+
+function ProjectFaviconImage({
+  src,
+  className,
+}: {
+  readonly src: string;
+  readonly className?: string | undefined;
+}) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(() =>
+    loadedProjectFaviconSrcs.has(src) ? "loaded" : "loading",
+  );
 
   return (
     <>
-      {status !== "loaded" ? (
-        <FolderIcon
-          className={`size-3.5 shrink-0 text-muted-foreground/50 ${input.className ?? ""}`}
-        />
-      ) : null}
+      {status !== "loaded" ? <ProjectFaviconFallback className={className} /> : null}
       <img
-        src={displaySrc ?? undefined}
+        src={src}
         alt=""
-        className={`size-3.5 shrink-0 rounded-sm object-contain ${status === "loaded" ? "" : "hidden"} ${input.className ?? ""}`}
+        className={`size-3.5 shrink-0 rounded-sm object-contain ${status === "loaded" ? "" : "hidden"} ${className ?? ""}`}
         onLoad={() => {
           loadedProjectFaviconSrcs.add(src);
           setStatus("loaded");
