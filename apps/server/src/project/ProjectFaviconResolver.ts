@@ -19,6 +19,9 @@ import * as WorkspacePaths from "../workspace/WorkspacePaths.ts";
 
 // Well-known favicon paths checked in order.
 const FAVICON_CANDIDATES = [
+  "logo.svg",
+  "logo.ico",
+  "logo.png",
   "favicon.svg",
   "favicon.ico",
   "favicon.png",
