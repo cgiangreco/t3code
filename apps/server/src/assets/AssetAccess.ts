@@ -41,22 +41,34 @@ import * as WorkspacePaths from "../workspace/WorkspacePaths.ts";
 
 export const ASSET_ROUTE_PREFIX = "/api/assets";
 export const FALLBACK_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#6b728080" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-fallback="project-favicon"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg>`;
+const NEXTJS_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-nextjs"><circle cx="64" cy="64" r="64" fill="#000"/><path d="M106.5 110.6 49.2 38H38v52h9.5V49.9l52.8 66.2c2.2-1.7 4.2-3.5 6.2-5.5Z" fill="#fff"/><path d="M81 38h9v52h-9z" fill="url(#ng)"/><defs><linearGradient id="ng" x1="85.5" y1="38" x2="85.5" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>`;
 const REACT_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-11.5 -10.23174 23 20.46348" data-fallback="project-favicon-react"><circle cx="0" cy="0" r="2.05" fill="#61dafb"/><g fill="none" stroke="#61dafb" stroke-width="1"><ellipse rx="11" ry="4.2"/><ellipse rx="11" ry="4.2" transform="rotate(60)"/><ellipse rx="11" ry="4.2" transform="rotate(120)"/></g></svg>`;
-const ANDROID_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-android"><path fill="#3ddc84" d="M32 54h64v44c0 7.7-6.3 14-14 14H46c-7.7 0-14-6.3-14-14V54Z"/><path fill="#3ddc84" d="M39.5 48C42.8 34.2 52.2 26 64 26s21.2 8.2 24.5 22h-49Z"/><path stroke="#3ddc84" stroke-width="7" stroke-linecap="round" d="M46 24 36 8m46 16L92 8M22 62v31m84-31v31M49 112v10m30-10v10"/><circle cx="52" cy="40" r="4" fill="#173b2d"/><circle cx="76" cy="40" r="4" fill="#173b2d"/></svg>`;
+const VUE_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-vue"><path fill="#41b883" d="M78.8 10 64 35.4 49.2 10H0l64 108L128 10z"/><path fill="#35495e" d="M78.8 10 64 35.4 49.2 10H25.6L64 76l38.4-66z"/></svg>`;
+const SVELTE_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-svelte"><path d="M110.3 26.3C99 10.1 77 5.5 60.9 15.6L27.5 36.4C19.8 41 14.4 48.5 12.8 57.1c-1.4 7.2-.2 14.7 3.4 21.1a31.5 31.5 0 0 0-4.7 11.9c-1.6 8.9.6 18 6.1 25.1C28.9 131.4 51 136 67.1 125.9l33.4-20.8c7.7-4.6 13.1-12.1 14.7-20.7 1.4-7.2.2-14.7-3.4-21.1a31.5 31.5 0 0 0 4.7-11.9c1.6-8.9-.6-18-6.2-25.1z" fill="#ff3e00"/><path d="M59.4 109.8c-9.6 2.6-19.9-1.3-25.2-9.6a23.5 23.5 0 0 1-3.3-14.2c.2-1.3.5-2.5.9-3.7l.7-2.1 1.8 1.4a47 47 0 0 0 14.3 7.2l1.4.4-.1 1.4a7.2 7.2 0 0 0 1.3 4.6c1.8 2.6 5 3.8 8 3a7.4 7.4 0 0 0 2-.9L93.8 75c1.9-1.1 3.2-3 3.4-5.1.3-2.2-.6-4.4-2.3-5.8a7.2 7.2 0 0 0-7.9-.8l-.1.1-13.4 8.3a24.6 24.6 0 0 1-6.7 3 23.8 23.8 0 0 1-25.2-9.6 23.5 23.5 0 0 1-3.3-14.2 22 22 0 0 1 9.9-16l33.4-20.8a24.6 24.6 0 0 1 6.7-3c9.6-2.6 19.9 1.3 25.2 9.6a23.5 23.5 0 0 1 3.3 14.2c-.2 1.3-.5 2.5-.9 3.7l-.7 2.1-1.8-1.4a47 47 0 0 0-14.3-7.2l-1.4-.4.1-1.4a7.2 7.2 0 0 0-1.3-4.6c-1.8-2.6-5-3.8-8-3a7.4 7.4 0 0 0-2 .9L34.2 53c-1.9 1.1-3.2 3-3.4 5.1-.3 2.2.6 4.4 2.3 5.8a7.2 7.2 0 0 0 7.9.8l.1-.1 13.4-8.3a24.6 24.6 0 0 1 6.7-3 23.8 23.8 0 0 1 25.2 9.6 23.5 23.5 0 0 1 3.3 14.2 22 22 0 0 1-9.9 16L46.4 113.9a24.6 24.6 0 0 1-7 3z" fill="#fff"/></svg>`;
+const ANGULAR_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-angular"><path fill="#dd0031" d="M64 4 8.6 23.8l8.3 69.9L64 124l47.1-30.3 8.3-69.9z"/><path fill="#c3002f" d="M64 4v120l47.1-30.3 8.3-69.9z"/><path fill="#fff" d="m64 21.1-28 63.9h10.4l5.6-14.2h24l5.6 14.2H92L64 21.1zm0 20.1 9.4 21.6H54.6L64 41.2z"/></svg>`;
+const ANDROID_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-android"><path stroke="#3ddc84" stroke-width="6" stroke-linecap="round" fill="none" d="M46 32L36 20M82 32L92 20"/><path fill="#3ddc84" d="M26 64A38 38 0 0 1 102 64L102 80Q102 86 96 86L32 86Q26 86 26 80Z"/><circle cx="50" cy="52" r="5.5" fill="#fff"/><circle cx="78" cy="52" r="5.5" fill="#fff"/></svg>`;
 const YOUTUBE_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-youtube"><rect x="10" y="28" width="108" height="72" rx="18" fill="#ff0033"/><path d="M55 48v32l29-16-29-16Z" fill="white"/></svg>`;
+const TIKTOK_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-tiktok"><rect width="128" height="128" rx="24" fill="#010101"/><path d="M90 30c2 13 10 19 22 20v15c-8 0-15-2-22-7v32c0 19-14 34-33 34-8 0-16-3-22-8a33 33 0 0 1 22-58v16c-10 2-17 11-15 21 2 9 11 15 20 13 9-2 16-10 16-19V30h12Z" fill="#fff"/><path d="M88 28c2 13 10 19 22 20v15c-8 0-15-2-22-7v32c0 19-14 34-33 34-8 0-16-3-22-8a33 33 0 0 1 22-58v16c-10 2-17 11-15 21 2 9 11 15 20 13 9-2 16-10 16-19V28h12Z" fill="#69c9d0"/></svg>`;
+const INSTAGRAM_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-instagram"><defs><radialGradient id="ig" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="10%" stop-color="#fdf497"/><stop offset="50%" stop-color="#fd5949"/><stop offset="68%" stop-color="#d6249f"/><stop offset="100%" stop-color="#285aeb"/></radialGradient></defs><rect width="128" height="128" rx="28" fill="url(#ig)"/><rect x="22" y="22" width="84" height="84" rx="22" fill="none" stroke="#fff" stroke-width="8"/><circle cx="64" cy="64" r="22" fill="none" stroke="#fff" stroke-width="8"/><circle cx="91" cy="37" r="6" fill="#fff"/></svg>`;
 const T3_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-t3"><path d="M0 10C0 4.477 4.477 0 10 0h108c5.523 0 10 4.477 10 10v108c0 5.523-4.477 10-10 10H10c-5.523 0-10-4.477-10-10V10Z" fill="#000"/><path d="M33.451 93V47.56h-17.92V37h48.8v10.56h-17.92V93h-12.96Zm53.274.96c-3.893 0-7.76-.507-11.6-1.52-3.84-1.067-7.093-2.56-9.76-4.48l5.04-9.92c2.134 1.547 4.614 2.773 7.44 3.68 2.827.907 5.68 1.36 8.56 1.36 3.254 0 5.814-.64 7.68-1.92 1.867-1.28 2.8-3.04 2.8-5.28 0-2.133-.826-3.813-2.48-5.04-1.653-1.227-4.32-1.84-8-1.84h-5.92v-8.56l15.6-17.68 1.44 4.64h-29.36V37h39.2v8.4l-15.52 17.68-6.56-3.76h3.76c6.88 0 12.08 1.547 15.6 4.64 3.52 3.093 5.28 7.067 5.28 11.92 0 3.147-.826 6.107-2.48 8.88-1.653 2.72-4.186 4.933-7.6 6.64-3.413 1.707-7.786 2.56-13.12 2.56Z" fill="#fff"/></svg>`;
 const POKEBALL_PROJECT_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" data-fallback="project-favicon-pokeball"><circle cx="64" cy="64" r="58" fill="#fff" stroke="#1f2937" stroke-width="8"/><path d="M12 64a52 52 0 0 1 104 0Z" fill="#ef4444"/><path d="M12 64h104" stroke="#1f2937" stroke-width="10"/><circle cx="64" cy="64" r="18" fill="#fff" stroke="#1f2937" stroke-width="8"/><circle cx="64" cy="64" r="7" fill="#e5e7eb"/></svg>`;
 
-const PROJECT_FAVICON_FALLBACKS_BY_NAME: Record<string, string> = {
+const PROJECT_FAVICON_OVERRIDES_BY_NAME: Record<string, string> = {
   "jeu-concours": POKEBALL_PROJECT_FAVICON_SVG,
   "jeu-concours-bardakoff": POKEBALL_PROJECT_FAVICON_SVG,
-  "newsletter-companion": ANDROID_PROJECT_FAVICON_SVG,
-  "react-kofi-button-modern": REACT_PROJECT_FAVICON_SVG,
-  "react-native-kofi-button-modern": REACT_PROJECT_FAVICON_SVG,
-  sunwatcher: REACT_PROJECT_FAVICON_SVG,
   "t3code-app": T3_PROJECT_FAVICON_SVG,
-  "the-anonymous-coder": YOUTUBE_PROJECT_FAVICON_SVG,
 };
+
+const ANDROID_PROJECT_MARKER_FILES = [
+  "settings.gradle",
+  "settings.gradle.kts",
+  "build.gradle",
+  "build.gradle.kts",
+];
+
+const YOUTUBE_PROJECT_NAME_PATTERNS = /\byt\b|youtube/i;
+const TIKTOK_PROJECT_NAME_PATTERNS = /tiktok|tik[_-]?tok/i;
+const INSTAGRAM_PROJECT_NAME_PATTERNS = /instagram|\binsta\b/i;
 
 const SIGNING_SECRET_NAME = "asset-access-signing-key";
 const ASSET_TOKEN_TTL_MS = 60 * 60 * 1000;
@@ -111,18 +123,60 @@ export type ResolvedAsset =
   | { readonly kind: "file"; readonly path: string }
   | { readonly kind: "project-favicon-fallback"; readonly svg: string };
 
-function resolveProjectFaviconFallbackSvg(
-  workspaceRoot: string,
-  path: Path.Path,
-): string {
-  const projectName = path.basename(workspaceRoot);
-  const parentName = path.basename(path.dirname(workspaceRoot));
-  return (
-    PROJECT_FAVICON_FALLBACKS_BY_NAME[projectName] ??
-    PROJECT_FAVICON_FALLBACKS_BY_NAME[parentName] ??
-    FALLBACK_PROJECT_FAVICON_SVG
-  );
-}
+// Detection failures degrade to the generic fallback icon rather than failing
+// the asset request.
+const resolveProjectFaviconFallbackSvg = Effect.fn("AssetAccess.resolveProjectFaviconFallbackSvg")(
+  function* (workspaceRoot: string) {
+    const fileSystem = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+
+    const projectName = path.basename(workspaceRoot);
+    const parentName = path.basename(path.dirname(workspaceRoot));
+
+    const nameOverride =
+      PROJECT_FAVICON_OVERRIDES_BY_NAME[projectName] ??
+      PROJECT_FAVICON_OVERRIDES_BY_NAME[parentName];
+    if (nameOverride) return nameOverride;
+
+    if (YOUTUBE_PROJECT_NAME_PATTERNS.test(projectName)) return YOUTUBE_PROJECT_FAVICON_SVG;
+    if (TIKTOK_PROJECT_NAME_PATTERNS.test(projectName)) return TIKTOK_PROJECT_FAVICON_SVG;
+    if (INSTAGRAM_PROJECT_NAME_PATTERNS.test(projectName)) return INSTAGRAM_PROJECT_FAVICON_SVG;
+
+    const PackageJsonDependenciesJson = Schema.fromJsonString(
+      Schema.Struct({
+        dependencies: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+        devDependencies: Schema.optional(Schema.Record(Schema.String, Schema.String)),
+      }),
+    );
+    const decodePackageJsonDependencies = Schema.decodeUnknownOption(PackageJsonDependenciesJson);
+
+    const packageJsonContents = yield* fileSystem
+      .readFileString(path.join(workspaceRoot, "package.json"))
+      .pipe(Effect.orElseSucceed(() => null));
+    if (packageJsonContents !== null) {
+      const parsed = Option.getOrNull(decodePackageJsonDependencies(packageJsonContents));
+      const deps = new Set([
+        ...Object.keys(parsed?.dependencies ?? {}),
+        ...Object.keys(parsed?.devDependencies ?? {}),
+      ]);
+      if (deps.has("next")) return NEXTJS_PROJECT_FAVICON_SVG;
+      if (deps.has("@angular/core")) return ANGULAR_PROJECT_FAVICON_SVG;
+      if (deps.has("svelte") || deps.has("@sveltejs/kit")) return SVELTE_PROJECT_FAVICON_SVG;
+      if (deps.has("vue") || deps.has("nuxt")) return VUE_PROJECT_FAVICON_SVG;
+      if (deps.has("expo") || deps.has("react-native")) return ANDROID_PROJECT_FAVICON_SVG;
+      if (deps.has("react")) return REACT_PROJECT_FAVICON_SVG;
+    }
+
+    for (const markerFile of ANDROID_PROJECT_MARKER_FILES) {
+      const markerExists = yield* fileSystem
+        .exists(path.join(workspaceRoot, markerFile))
+        .pipe(Effect.orElseSucceed(() => false));
+      if (markerExists) return ANDROID_PROJECT_FAVICON_SVG;
+    }
+
+    return FALLBACK_PROJECT_FAVICON_SVG;
+  },
+);
 
 function decodeClaims(encodedPayload: string): AssetClaims | null {
   try {
@@ -421,10 +475,9 @@ export const resolveAsset = Effect.fn("AssetAccess.resolveAsset")(function* (
 
   if (claims.kind === "project-favicon") {
     if (claims.relativePath === null) {
-      const path = yield* Path.Path;
       return {
         kind: "project-favicon-fallback",
-        svg: resolveProjectFaviconFallbackSvg(claims.workspaceRoot, path),
+        svg: yield* resolveProjectFaviconFallbackSvg(claims.workspaceRoot),
       } satisfies ResolvedAsset;
     }
     const faviconPath = yield* resolveCanonicalWorkspaceFileForRequest({

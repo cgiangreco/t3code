@@ -235,7 +235,38 @@ describe("AssetAccess", () => {
           fallbackSuffix.slice(0, fallbackSeparatorIndex),
           fallbackSuffix.slice(fallbackSeparatorIndex + 1),
         ),
-      ).toEqual({ kind: "project-favicon-fallback" });
+      ).toMatchObject({
+        kind: "project-favicon-fallback",
+        svg: expect.stringContaining('data-fallback="project-favicon"'),
+      });
+    }).pipe(Effect.provide(testLayer)),
+  );
+
+  it.effect("uses the fork-specific fallback for jeu-concours projects", () =>
+    Effect.gen(function* () {
+      const fileSystem = yield* FileSystem.FileSystem;
+      const path = yield* Path.Path;
+      const root = yield* fileSystem.makeTempDirectoryScoped({
+        prefix: "t3-asset-favicon-custom-",
+      });
+      const projectRoot = path.join(root, "jeu-concours");
+      yield* fileSystem.makeDirectory(projectRoot);
+
+      const fallbackResult = yield* issueAssetUrl({
+        resource: { _tag: "project-favicon", cwd: projectRoot },
+      });
+      const fallbackSuffix = fallbackResult.relativeUrl.slice(`${ASSET_ROUTE_PREFIX}/`.length);
+      const fallbackSeparatorIndex = fallbackSuffix.indexOf("/");
+
+      expect(
+        yield* resolveAsset(
+          fallbackSuffix.slice(0, fallbackSeparatorIndex),
+          fallbackSuffix.slice(fallbackSeparatorIndex + 1),
+        ),
+      ).toMatchObject({
+        kind: "project-favicon-fallback",
+        svg: expect.stringContaining('data-fallback="project-favicon-pokeball"'),
+      });
     }).pipe(Effect.provide(testLayer)),
   );
 
