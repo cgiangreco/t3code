@@ -4,7 +4,6 @@ import {
   type Turn,
   type StreamEvent,
   type ApprovalResponse,
-  type ContentPart,
 } from "@moonshot-ai/kimi-agent-sdk";
 import {
   ApprovalRequestId,
@@ -31,13 +30,14 @@ import {
 } from "@t3tools/contracts";
 import { trimOrNull } from "@t3tools/shared/model";
 import * as Cause from "effect/Cause";
+import * as Crypto from "effect/Crypto";
 import * as DateTime from "effect/DateTime";
 import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as Fiber from "effect/Fiber";
 import * as Queue from "effect/Queue";
-import * as Random from "effect/Random";
+import * as Schema from "effect/Schema";
 import * as Stream from "effect/Stream";
 
 import { resolveAttachmentPath } from "../../attachmentStore.ts";
@@ -55,7 +55,15 @@ import { type EventNdjsonLogger, makeEventNdjsonLogger } from "./EventNdjsonLogg
 const PROVIDER = ProviderDriverKind.make("kimi");
 const PROVIDER_STR = "kimi";
 
+const decodeJsonArgs = Schema.decodeUnknownExit(Schema.fromJsonString(Schema.Unknown));
+
 type KimiTextStreamKind = Extract<RuntimeContentStreamKind, "assistant_text" | "reasoning_text">;
+
+type KimiContentPart =
+  | { readonly type: "text"; readonly text: string }
+  | { readonly type: "think"; readonly think: string }
+  | { readonly type: "image_url"; readonly image_url: { readonly url: string } }
+  | { readonly type: string };
 
 interface KimiTurnState {
   readonly turnId: TurnId;
@@ -258,19 +266,19 @@ function titleForTool(itemType: CanonicalItemType): string {
   }
 }
 
-function streamKindFromContentPart(part: ContentPart): KimiTextStreamKind {
+function streamKindFromContentPart(part: KimiContentPart): KimiTextStreamKind {
   if (part.type === "think") {
     return "reasoning_text";
   }
   return "assistant_text";
 }
 
-function textFromContentPart(part: ContentPart): string {
+function textFromContentPart(part: KimiContentPart): string {
   if (part.type === "text") {
-    return part.text;
+    return (part as { type: "text"; text: string }).text;
   }
   if (part.type === "think") {
-    return part.think;
+    return (part as { type: "think"; think: string }).think;
   }
   return "";
 }
@@ -352,6 +360,7 @@ function mapKimiRuntimeMode(runtimeMode: RuntimeMode): boolean {
   switch (runtimeMode) {
     case "full-access":
       return true;
+    case "auto":
     case "auto-accept-edits":
     case "approval-required":
       return false;
@@ -384,9 +393,21 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
   const sessions = new Map<ThreadId, KimiSessionContext>();
   const runtimeEventQueue = yield* Queue.unbounded<ProviderRuntimeEvent>();
   const serverConfig = yield* ServerConfig;
+  const crypto = yield* Crypto.Crypto;
 
   const nowIso = Effect.map(DateTime.now, DateTime.formatIso);
-  const nextEventId = Effect.map(Random.nextUUIDv4, (id) => EventId.make(id));
+  const randomUUIDv4 = crypto.randomUUIDv4.pipe(
+    Effect.mapError(
+      (cause) =>
+        new ProviderAdapterRequestError({
+          provider: PROVIDER_STR,
+          method: "crypto/randomUUIDv4",
+          detail: "Failed to generate Kimi runtime identifier.",
+          cause,
+        }),
+    ),
+  );
+  const nextEventId = Effect.map(randomUUIDv4, (id) => EventId.make(id));
   const makeEventStamp = () => Effect.all({ eventId: nextEventId, createdAt: nowIso });
 
   const offerRuntimeEvent = (event: ProviderRuntimeEvent): Effect.Effect<void> =>
@@ -397,13 +418,14 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
     event: StreamEvent,
   ) {
     if (!nativeEventLogger) return;
-    const observedAt = new Date().toISOString();
+    const observedAt = yield* nowIso;
     const eventType = "type" in event ? (event as { type: string }).type : "unknown";
+    const eventId = yield* randomUUIDv4;
     yield* nativeEventLogger.write(
       {
         observedAt,
         event: {
-          id: crypto.randomUUID(),
+          id: eventId,
           kind: "notification",
           provider: PROVIDER_STR,
           createdAt: observedAt,
@@ -556,7 +578,7 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
     switch (typedEvent.type) {
       case "TurnBegin": {
         if (turnId) yield* emitTurnCompleted(context, "completed");
-        const newTurnId = TurnId.make(crypto.randomUUID());
+        const newTurnId = TurnId.make(yield* randomUUIDv4);
         yield* emitTurnStarted(context, newTurnId);
         if (context.pendingPlanMode !== undefined) {
           const targetPlanMode = context.pendingPlanMode;
@@ -574,7 +596,7 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
 
       case "ContentPart": {
         if (!turnId) break;
-        const part = typedEvent.payload as ContentPart;
+        const part = typedEvent.payload as KimiContentPart;
         const { eventId, createdAt } = yield* makeEventStamp();
         const text = textFromContentPart(part);
         if (text.length > 0) {
@@ -646,15 +668,13 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
         const toolName = toolCall.function.name;
         const itemType = classifyToolItemType(toolName);
         const itemId = nextSyntheticItemId(context);
-        const input: Record<string, unknown> = yield* Effect.try({
-          try: () => {
-            if (toolCall.function.arguments) {
-              return JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
-            }
-            return {};
-          },
-          catch: () => ({ raw: toolCall.function.arguments }),
-        });
+        const parsedArgs = decodeJsonArgs(toolCall.function.arguments ?? "{}");
+        const input: Record<string, unknown> =
+          Exit.isSuccess(parsedArgs) &&
+          typeof parsedArgs.value === "object" &&
+          parsedArgs.value !== null
+            ? (parsedArgs.value as Record<string, unknown>)
+            : ({ raw: toolCall.function.arguments } as Record<string, unknown>);
         const title = titleForTool(itemType);
         const detail = summarizeToolRequest(toolName, input);
         context.inFlightTools.set(toolCall.id, { itemId, itemType, toolName, title, detail, input });
@@ -721,7 +741,7 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
         const requestType = classifyRequestType(req.sender);
         const pending: PendingApproval = {
           requestType,
-          detail: req.description,
+          ...(req.description !== undefined ? { detail: req.description } : {}),
           decision: yield* Deferred.make<ProviderApprovalDecision>(),
         };
         context.pendingApprovals.set(requestId, pending);
@@ -1014,10 +1034,10 @@ export const makeKimiAdapter = Effect.fn("makeKimiAdapter")(function* (
         });
       }
 
-      const turnId = TurnId.make(crypto.randomUUID());
+      const turnId = TurnId.make(yield* randomUUIDv4);
       const text = trimOrNull(input.input) ?? "";
 
-      const contentParts: Array<ContentPart> = [];
+      const contentParts: Array<KimiContentPart> = [];
       if (text.length > 0) {
         contentParts.push({ type: "text", text });
       }

@@ -4,8 +4,11 @@ import * as Duration from "effect/Duration";
 import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
+import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import { HttpClient } from "effect/unstable/http";
+
+import * as BackgroundPolicy from "../../background/BackgroundPolicy.ts";
 
 import { ServerConfig } from "../../config.ts";
 import { ServerSettingsService } from "../../serverSettings.ts";
@@ -49,9 +52,11 @@ const UPDATE = makeStaticProviderMaintenanceResolver(
 );
 
 export type KimiDriverEnv =
+  | BackgroundPolicy.BackgroundPolicy
   | Crypto.Crypto
   | FileSystem.FileSystem
   | HttpClient.HttpClient
+  | Path.Path
   | ProviderEventLoggers
   | ServerConfig
   | ServerSettingsService;

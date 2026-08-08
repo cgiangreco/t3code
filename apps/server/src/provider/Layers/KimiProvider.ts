@@ -65,7 +65,7 @@ function kimiModelsFromSettings(
   customModels: ReadonlyArray<string> | undefined,
 ): ReadonlyArray<ServerProviderModel> {
   const builtIn = discoverKimiModelsFromConfig();
-  return providerModelsFromSettings(builtIn, PROVIDER, customModels ?? [], EMPTY_CAPABILITIES);
+  return providerModelsFromSettings(builtIn, customModels ?? [], EMPTY_CAPABILITIES);
 }
 
 export function buildInitialKimiProviderSnapshot(
