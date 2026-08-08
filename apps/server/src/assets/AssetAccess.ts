@@ -436,7 +436,9 @@ export const issueAssetUrl = Effect.fn("AssetAccess.issueAssetUrl")(function* (i
         );
         fileName = `${PROJECT_FAVICON_VERSION_PREFIX}${revision}-${path.basename(relativePath)}`;
       } else {
-        fileName = PROJECT_FAVICON_FALLBACK_MARKER;
+        // Use a plain filename so the browser requests the SVG from the server
+        // rather than being intercepted by isProjectFaviconFallbackUrl on the web side.
+        fileName = "favicon.svg";
       }
       break;
     }

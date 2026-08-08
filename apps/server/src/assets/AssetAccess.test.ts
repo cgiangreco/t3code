@@ -252,7 +252,7 @@ describe("AssetAccess", () => {
       const fallbackResult = yield* issueAssetUrl({
         resource: { _tag: "project-favicon", cwd: root },
       });
-      expect(fallbackResult.relativeUrl.endsWith(`/${PROJECT_FAVICON_FALLBACK_MARKER}`)).toBe(true);
+      expect(fallbackResult.relativeUrl.endsWith("/favicon.svg")).toBe(true);
       const fallbackSuffix = fallbackResult.relativeUrl.slice(`${ASSET_ROUTE_PREFIX}/`.length);
       const fallbackSeparatorIndex = fallbackSuffix.indexOf("/");
       expect(
