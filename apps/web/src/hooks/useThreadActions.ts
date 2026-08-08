@@ -2,8 +2,10 @@ import {
   parseScopedThreadKey,
   scopeProjectRef,
   scopeThreadRef,
+  scopedThreadKey,
 } from "@t3tools/client-runtime/environment";
 import { settlePromise, squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
+import { canSettle, canSnooze, threadWokeAt } from "@t3tools/client-runtime/state/thread-settled";
 import { EnvironmentId, type ScopedThreadRef, ThreadId } from "@t3tools/contracts";
 import * as Cause from "effect/Cause";
 import * as Schema from "effect/Schema";
@@ -19,8 +21,16 @@ import { vcsEnvironment } from "../state/vcs";
 import { useNewThreadHandler } from "./useHandleNewThread";
 import { refreshArchivedThreadsForEnvironment } from "../lib/archivedThreadsState";
 import { readLocalApi } from "../localApi";
-import { readEnvironmentThreadRefs, readProject, readThreadShell } from "../state/entities";
+import {
+  readEnvironmentSupportsPinning,
+  readEnvironmentSupportsSettlement,
+  readEnvironmentSupportsSnooze,
+  readEnvironmentThreadRefs,
+  readProject,
+  readThreadShell,
+} from "../state/entities";
 import { useTerminalUiStateStore } from "../terminalUiStateStore";
+import { useUiStateStore } from "../uiStateStore";
 import { buildThreadRouteParams, resolveThreadRouteRef } from "../threadRoutes";
 import { formatWorktreePathForDisplay, getOrphanedWorktreePathForThread } from "../worktreeCleanup";
 import { stackedThreadToast, toastManager } from "../components/ui/toast";
@@ -39,6 +49,66 @@ export class ThreadArchiveBlockedError extends Schema.TaggedErrorClass<ThreadArc
   }
 }
 
+export class ThreadSettlementUnsupportedError extends Schema.TaggedErrorClass<ThreadSettlementUnsupportedError>()(
+  "ThreadSettlementUnsupportedError",
+  {
+    environmentId: EnvironmentId,
+    threadId: ThreadId,
+  },
+) {
+  override get message(): string {
+    return "This environment's server does not support settling yet. Update the server to use Settle.";
+  }
+}
+
+export class ThreadSettleBlockedError extends Schema.TaggedErrorClass<ThreadSettleBlockedError>()(
+  "ThreadSettleBlockedError",
+  {
+    environmentId: EnvironmentId,
+    threadId: ThreadId,
+  },
+) {
+  override get message(): string {
+    return "This thread still needs attention. Resolve or interrupt it first, then try again.";
+  }
+}
+
+export class ThreadSnoozeUnsupportedError extends Schema.TaggedErrorClass<ThreadSnoozeUnsupportedError>()(
+  "ThreadSnoozeUnsupportedError",
+  {
+    environmentId: EnvironmentId,
+    threadId: ThreadId,
+  },
+) {
+  override get message(): string {
+    return "This environment's server does not support snoozing yet. Update the server to use Snooze.";
+  }
+}
+
+export class ThreadSnoozeBlockedError extends Schema.TaggedErrorClass<ThreadSnoozeBlockedError>()(
+  "ThreadSnoozeBlockedError",
+  {
+    environmentId: EnvironmentId,
+    threadId: ThreadId,
+  },
+) {
+  override get message(): string {
+    return "This thread is waiting on you. Respond to the pending request before snoozing it.";
+  }
+}
+
+export class ThreadPinningUnsupportedError extends Schema.TaggedErrorClass<ThreadPinningUnsupportedError>()(
+  "ThreadPinningUnsupportedError",
+  {
+    environmentId: EnvironmentId,
+    threadId: ThreadId,
+  },
+) {
+  override get message(): string {
+    return "This environment's server does not support pinning yet. Update the server to use Pin.";
+  }
+}
+
 export function useThreadActions() {
   const closeTerminal = useAtomCommand(terminalEnvironment.close);
   const archiveThreadMutation = useAtomCommand(threadEnvironment.archive, {
@@ -48,6 +118,24 @@ export function useThreadActions() {
     reportFailure: false,
   });
   const deleteThreadMutation = useAtomCommand(threadEnvironment.delete, {
+    reportFailure: false,
+  });
+  const settleThreadMutation = useAtomCommand(threadEnvironment.settle, {
+    reportFailure: false,
+  });
+  const unsettleThreadMutation = useAtomCommand(threadEnvironment.unsettle, {
+    reportFailure: false,
+  });
+  const pinThreadMutation = useAtomCommand(threadEnvironment.pin, {
+    reportFailure: false,
+  });
+  const unpinThreadMutation = useAtomCommand(threadEnvironment.unpin, {
+    reportFailure: false,
+  });
+  const snoozeThreadMutation = useAtomCommand(threadEnvironment.snooze, {
+    reportFailure: false,
+  });
+  const unsnoozeThreadMutation = useAtomCommand(threadEnvironment.unsnooze, {
     reportFailure: false,
   });
   const stopThreadSession = useAtomCommand(threadEnvironment.stopSession);
@@ -64,6 +152,7 @@ export function useThreadActions() {
     (store) => store.clearProjectDraftThreadById,
   );
   const clearTerminalUiState = useTerminalUiStateStore((state) => state.clearTerminalUiState);
+  const markThreadVisited = useUiStateStore((state) => state.markThreadVisited);
   const router = useRouter();
   const handleNewThread = useNewThreadHandler();
   // Keep a ref so archiveThread can call handleNewThread without appearing in
@@ -89,7 +178,7 @@ export function useThreadActions() {
   }, [router]);
 
   const archiveThread = useCallback(
-    async (target: ScopedThreadRef) => {
+    async (target: ScopedThreadRef, opts: { onArchived?: () => void } = {}) => {
       const resolved = resolveThreadTarget(target);
       if (!resolved) return AsyncResult.success(undefined);
       const { thread, threadRef } = resolved;
@@ -115,6 +204,12 @@ export function useThreadActions() {
       if (archiveResult._tag === "Failure") {
         return archiveResult;
       }
+      const wokeAt = threadWokeAt(thread, { now: new Date().toISOString() });
+      if (wokeAt !== null) {
+        markThreadVisited(scopedThreadKey(threadRef), wokeAt);
+      }
+      refreshArchivedThreadsForEnvironment(threadRef.environmentId);
+      opts.onArchived?.();
 
       if (shouldNavigateToDraft) {
         const navigationResult = await settlePromise(() =>
@@ -123,14 +218,12 @@ export function useThreadActions() {
         if (navigationResult._tag === "Failure") {
           return navigationResult;
         }
-        refreshArchivedThreadsForEnvironment(threadRef.environmentId);
         return archiveResult;
       }
 
-      refreshArchivedThreadsForEnvironment(threadRef.environmentId);
       return archiveResult;
     },
-    [archiveThreadMutation, getCurrentRouteThreadRef, resolveThreadTarget],
+    [archiveThreadMutation, getCurrentRouteThreadRef, markThreadVisited, resolveThreadTarget],
   );
 
   const unarchiveThread = useCallback(
@@ -345,6 +438,169 @@ export function useThreadActions() {
     ],
   );
 
+  const settleThread = useCallback(
+    async (target: ScopedThreadRef) => {
+      // Version skew: never send the command to a server that predates it —
+      // the raw protocol rejection would read as a random failure.
+      if (!readEnvironmentSupportsSettlement(target.environmentId)) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadSettlementUnsupportedError({
+              environmentId: target.environmentId,
+              threadId: target.threadId,
+            }),
+          ),
+        );
+      }
+      const resolved = resolveThreadTarget(target);
+      // Settle may only target what effectiveSettled could classify as
+      // settled: not starting/running sessions, not threads waiting on
+      // approvals or user input. Anything else would hide live work.
+      if (resolved && !canSettle(resolved.thread, { now: new Date().toISOString() })) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadSettleBlockedError({
+              environmentId: resolved.threadRef.environmentId,
+              threadId: resolved.threadRef.threadId,
+            }),
+          ),
+        );
+      }
+      const wokeAt = resolved
+        ? threadWokeAt(resolved.thread, { now: new Date().toISOString() })
+        : null;
+      // Settle is a high-frequency lifecycle action and stays silent — no
+      // toast.
+      const result = await settleThreadMutation({
+        environmentId: target.environmentId,
+        input: { threadId: target.threadId },
+      });
+      if (result._tag === "Success" && wokeAt !== null) {
+        markThreadVisited(scopedThreadKey(target), wokeAt);
+      }
+      return result;
+    },
+    [markThreadVisited, resolveThreadTarget, settleThreadMutation],
+  );
+
+  const unsettleThread = useCallback(
+    async (target: ScopedThreadRef) => {
+      if (!readEnvironmentSupportsSettlement(target.environmentId)) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadSettlementUnsupportedError({
+              environmentId: target.environmentId,
+              threadId: target.threadId,
+            }),
+          ),
+        );
+      }
+      // reason "user" pins the thread active: auto-settle (PR merged /
+      // inactivity) stays suppressed until real activity clears the pin.
+      return unsettleThreadMutation({
+        environmentId: target.environmentId,
+        input: { threadId: target.threadId, reason: "user" },
+      });
+    },
+    [unsettleThreadMutation],
+  );
+
+  const pinThread = useCallback(
+    async (target: ScopedThreadRef) => {
+      // Version skew: never send the command to a server that predates it.
+      if (!readEnvironmentSupportsPinning(target.environmentId)) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadPinningUnsupportedError({
+              environmentId: target.environmentId,
+              threadId: target.threadId,
+            }),
+          ),
+        );
+      }
+      return pinThreadMutation({
+        environmentId: target.environmentId,
+        input: { threadId: target.threadId },
+      });
+    },
+    [pinThreadMutation],
+  );
+
+  const unpinThread = useCallback(
+    async (target: ScopedThreadRef) => {
+      if (!readEnvironmentSupportsPinning(target.environmentId)) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadPinningUnsupportedError({
+              environmentId: target.environmentId,
+              threadId: target.threadId,
+            }),
+          ),
+        );
+      }
+      return unpinThreadMutation({
+        environmentId: target.environmentId,
+        input: { threadId: target.threadId },
+      });
+    },
+    [unpinThreadMutation],
+  );
+
+  const snoozeThread = useCallback(
+    async (target: ScopedThreadRef, snoozedUntil: string) => {
+      // Version skew: never send the command to a server that predates it.
+      if (!readEnvironmentSupportsSnooze(target.environmentId)) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadSnoozeUnsupportedError({
+              environmentId: target.environmentId,
+              threadId: target.threadId,
+            }),
+          ),
+        );
+      }
+      const resolved = resolveThreadTarget(target);
+      // Blocked-on-you work and queued turns can't be snoozed away —
+      // client-side twin of the server invariants so the UI rejects before
+      // a round trip.
+      if (resolved && !canSnooze(resolved.thread, { now: new Date().toISOString() })) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadSnoozeBlockedError({
+              environmentId: resolved.threadRef.environmentId,
+              threadId: resolved.threadRef.threadId,
+            }),
+          ),
+        );
+      }
+      return snoozeThreadMutation({
+        environmentId: target.environmentId,
+        input: { threadId: target.threadId, snoozedUntil },
+      });
+    },
+    [resolveThreadTarget, snoozeThreadMutation],
+  );
+
+  const unsnoozeThread = useCallback(
+    async (target: ScopedThreadRef) => {
+      if (!readEnvironmentSupportsSnooze(target.environmentId)) {
+        return AsyncResult.failure(
+          Cause.fail(
+            new ThreadSnoozeUnsupportedError({
+              environmentId: target.environmentId,
+              threadId: target.threadId,
+            }),
+          ),
+        );
+      }
+      return unsnoozeThreadMutation({
+        environmentId: target.environmentId,
+        input: { threadId: target.threadId, reason: "user" },
+      });
+    },
+    [unsnoozeThreadMutation],
+  );
+
   const confirmAndDeleteThread = useCallback(
     async (target: ScopedThreadRef) => {
       const localApi = readLocalApi();
@@ -379,7 +635,24 @@ export function useThreadActions() {
       unarchiveThread,
       deleteThread,
       confirmAndDeleteThread,
+      settleThread,
+      unsettleThread,
+      snoozeThread,
+      unsnoozeThread,
+      pinThread,
+      unpinThread,
     }),
-    [archiveThread, confirmAndDeleteThread, deleteThread, unarchiveThread],
+    [
+      archiveThread,
+      confirmAndDeleteThread,
+      deleteThread,
+      pinThread,
+      settleThread,
+      snoozeThread,
+      unarchiveThread,
+      unpinThread,
+      unsettleThread,
+      unsnoozeThread,
+    ],
   );
 }

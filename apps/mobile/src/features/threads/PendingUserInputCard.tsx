@@ -24,8 +24,11 @@ export interface PendingUserInputCardProps {
 }
 
 export function PendingUserInputCard(props: PendingUserInputCardProps) {
+  // The surface is opaque on purpose: the card floats over the thread feed
+  // with no blur behind it, so a translucent background renders the questions
+  // on top of whatever message happens to sit underneath.
   return (
-    <View className="gap-2.5 rounded-[20px] border border-neutral-200 bg-neutral-100/80 p-4 dark:border-white/6 dark:bg-neutral-900/80">
+    <View className="gap-2.5 rounded-[20px] border border-neutral-200 bg-neutral-100 p-4 dark:border-white/6 dark:bg-neutral-900">
       <Text className="font-t3-bold text-2xs uppercase tracking-[1.1px] text-sky-700 dark:text-sky-300">
         User input needed
       </Text>
@@ -39,7 +42,7 @@ export function PendingUserInputCard(props: PendingUserInputCardProps) {
             <Text className="font-t3-bold text-xs uppercase tracking-[1px] text-neutral-500 dark:text-neutral-500">
               {question.header}
             </Text>
-            <Text className="font-sans text-base leading-[21px] text-neutral-950 dark:text-neutral-50">
+            <Text className="font-sans text-base leading-snug text-neutral-950 dark:text-neutral-50">
               {question.question}
             </Text>
             <View className="flex-row flex-wrap gap-2.5">

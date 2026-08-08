@@ -69,6 +69,8 @@ export interface DeviceRow {
   readonly platform: "ios";
   readonly ios_major_version: number;
   readonly app_version: string | null;
+  readonly bundle_id: string | null;
+  readonly aps_environment: "sandbox" | "production" | null;
   readonly push_token: string | null;
   readonly push_to_start_token: string | null;
   readonly preferences_json: string;
@@ -120,8 +122,8 @@ export class LiveActivities extends Context.Service<
   }
 >()("t3code-relay/agentActivity/LiveActivities") {}
 
-const decodeJsonString = Schema.decodeEffect(Schema.UnknownFromJsonString);
-const encodeJsonValue = Schema.encodeEffect(Schema.UnknownFromJsonString);
+const decodeJsonString = Schema.decodeEffect(Schema.fromJsonString(Schema.Unknown));
+const encodeJsonValue = Schema.encodeEffect(Schema.fromJsonString(Schema.Unknown));
 
 const encodeRelayAgentActivityAggregateStateJson = Schema.encodeEffect(
   Schema.fromJsonString(RelayAgentActivityAggregateStateSchema),
@@ -196,6 +198,8 @@ export const make = Effect.gen(function* () {
           platform: relayMobileDevices.platform,
           ios_major_version: relayMobileDevices.iosMajorVersion,
           app_version: relayMobileDevices.appVersion,
+          bundle_id: relayMobileDevices.bundleId,
+          aps_environment: relayMobileDevices.apsEnvironment,
           push_token: relayMobileDevices.pushToken,
           push_to_start_token: relayMobileDevices.pushToStartToken,
           preferences_json: relayMobileDevices.preferencesJson,
@@ -276,10 +280,26 @@ export const make = Effect.gen(function* () {
           .onConflictDoUpdate({
             target: [relayLiveActivities.userId, relayLiveActivities.deviceId],
             set: {
-              remoteStartedAt: sql`coalesce(
-                ${relayLiveActivities.remoteStartedAt},
-                excluded.remote_started_at
-              )`,
+              // A delivered start begins a NEW activity generation: the stored
+              // update token belongs to the previous activity (dead once a new
+              // one starts, and certainly dead after an end), so keep it only
+              // for plain updates. Deliveries pause until the app registers
+              // the fresh activity's token; registerLiveActivity + replay then
+              // reconcile content (or end the activity if work already
+              // finished). Without this, updates and ends route to the dead
+              // token and the new lock-screen card is stranded at its start
+              // content forever.
+              activityPushToken:
+                input.kind === "live_activity_update"
+                  ? sql`${relayLiveActivities.activityPushToken}`
+                  : null,
+              remoteStartedAt:
+                input.kind === "live_activity_start"
+                  ? input.deliveredAt
+                  : sql`coalesce(
+                      ${relayLiveActivities.remoteStartedAt},
+                      excluded.remote_started_at
+                    )`,
               remoteStartQueuedAt: null,
               endedAt:
                 input.kind === "live_activity_start"
