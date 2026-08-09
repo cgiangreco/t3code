@@ -4,6 +4,14 @@ T3 Code is an "agent harness control surface". It enables control of the agents 
 
 Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, and OpenCode. If they're set up on your computer, T3 Code can control them.
 
+## This fork
+
+This is a personal, custom fork of the upstream [pingdotgg/t3code](https://github.com/pingdotgg/t3code) project. On top of upstream, it adds:
+
+- **Default project stack icons** — when a project has no favicon yet, the picker/thread UI falls back to an icon inferred from the detected tech stack instead of a generic placeholder.
+- **Kimi (Moonshot AI) provider** — an experimental provider integration ported from [rafaelcg/t3code-kimi](https://github.com/rafaelcg/t3code-kimi), a personal work-in-progress fork by [rafaelcg](https://github.com/rafaelcg). It wires up Moonshot AI's [`@moonshot-ai/kimi-agent-sdk`](https://www.npmjs.com/package/@moonshot-ai/kimi-agent-sdk) as a driver alongside Claude, Codex, Cursor, Grok Build and OpenCode. Treat it as experimental — the upstream fork it's based on describes itself as "very early WIP".
+- **Custom chatbox accent color** — a purple accent (`#9f8ad1`) on the chat composer's border/focus ring and send button, for a bit of visual distinction from stock T3 Code.
+
 ## "Wait, what are you selling me?"
 
 Nothing. We built T3 Code because we wanted the best possible development experience with agents. We were inspired by existing solutions like the Codex desktop app, Conductor, Claude Desktop and Cursor Glass, but none met our bar.
