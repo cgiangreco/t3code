@@ -4,6 +4,21 @@ for (const stream of [process.stdout, process.stderr]) {
   });
 }
 
+// Dependencies like electron-updater talk raw Node http/https with
+// keep-alive sockets outside our Effect HttpClient layer. A remote/proxy
+// resetting an idle pooled connection surfaces as an 'error' event with no
+// in-flight request listening for it, which Node treats as fatal. Swallow
+// just that transient class so a stray network blip doesn't take down the
+// whole app; anything else still crashes as before.
+const TRANSIENT_NETWORK_ERROR_CODES = new Set(["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT"]);
+process.on("uncaughtException", (err: NodeJS.ErrnoException) => {
+  if (err.code !== undefined && TRANSIENT_NETWORK_ERROR_CODES.has(err.code)) {
+    console.error("[main] ignoring transient network error:", err);
+    return;
+  }
+  throw err;
+});
+
 import * as NodeHttpClient from "@effect/platform-node/NodeHttpClient";
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import * as NodeServices from "@effect/platform-node/NodeServices";
