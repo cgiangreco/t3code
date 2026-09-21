@@ -361,7 +361,7 @@ export function resolveSelectableModel(
 }
 
 /** Trim a string, returning null for empty/missing values. */
-function trimOrNull<T extends string>(value: T | null | undefined): T | null {
+export function trimOrNull<T extends string>(value: T | null | undefined): T | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim() as T;
   return trimmed || null;
