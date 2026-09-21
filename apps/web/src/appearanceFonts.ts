@@ -41,6 +41,15 @@ export function resolveTerminalFontPreference(input: {
   return input.code;
 }
 
+export function resolveTerminalFontSizePreference(input: {
+  readonly advanced: boolean;
+  readonly code: number;
+  readonly terminal: number;
+}): number {
+  if (input.advanced) return input.terminal;
+  return input.code;
+}
+
 function quoteFontFamilyName(name: string): string {
   const bare = name.trim();
   if (bare.length === 0) return "";
@@ -60,12 +69,6 @@ export function cssFontFamilies(input: string): string | null {
     .map(quoteFontFamilyName)
     .filter((name) => name.length > 0);
   return families.length > 0 ? families.join(", ") : null;
-}
-
-/** The full stack a preference resolves to: custom families before the default. */
-export function appearanceFontStack(custom: string, defaultStack: string): string {
-  const families = cssFontFamilies(custom);
-  return families === null ? defaultStack : `${families}, ${defaultStack}`;
 }
 
 export interface AppearanceFontPreferences {

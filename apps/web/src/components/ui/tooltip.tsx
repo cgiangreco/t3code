@@ -2,8 +2,6 @@ import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
 
 import { cn } from "~/lib/utils";
 
-const TooltipCreateHandle = TooltipPrimitive.createHandle;
-
 const TooltipProvider = TooltipPrimitive.Provider;
 
 const Tooltip = TooltipPrimitive.Root;
@@ -33,7 +31,7 @@ function TooltipPopup({
       <TooltipPrimitive.Positioner
         align={align}
         anchor={anchor}
-        className="pointer-events-none z-70 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] data-instant:transition-none"
+        className="pointer-events-none z-[140] h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom,transform] data-instant:transition-none"
         data-slot="tooltip-positioner"
         side={side}
         sideOffset={sideOffset}
@@ -61,4 +59,4 @@ function TooltipPopup({
   );
 }
 
-export { TooltipCreateHandle, TooltipProvider, Tooltip, TooltipTrigger, TooltipPopup };
+export { TooltipProvider, Tooltip, TooltipTrigger, TooltipPopup };

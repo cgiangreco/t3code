@@ -5,12 +5,10 @@ import {
   clampCodeFontSize,
   clampInterfaceFontSize,
   clampPromptFontSize,
-  DEFAULT_CODE_FONT_STACK,
-  DEFAULT_SANS_FONT_STACK,
-  appearanceFontStack,
   cssFontFamilies,
   resolveDefaultFamilyLabel,
   resolveTerminalFontPreference,
+  resolveTerminalFontSizePreference,
 } from "./appearanceFonts";
 
 describe("areFontAdvancesMonospace", () => {
@@ -57,18 +55,6 @@ describe("resolveDefaultFamilyLabel", () => {
   });
 });
 
-describe("appearanceFontStack", () => {
-  it("prepends the custom family to the default stack", () => {
-    expect(appearanceFontStack("Fira Code", DEFAULT_CODE_FONT_STACK)).toBe(
-      `"Fira Code", ${DEFAULT_CODE_FONT_STACK}`,
-    );
-  });
-
-  it("falls back to the default stack when unset", () => {
-    expect(appearanceFontStack("", DEFAULT_SANS_FONT_STACK)).toBe(DEFAULT_SANS_FONT_STACK);
-  });
-});
-
 describe("resolveTerminalFontPreference", () => {
   it("inherits the code font in simple mode", () => {
     expect(
@@ -94,6 +80,16 @@ describe("resolveTerminalFontPreference", () => {
         terminal: "Berkeley Mono",
       }),
     ).toBe("Berkeley Mono");
+  });
+});
+
+describe("resolveTerminalFontSizePreference", () => {
+  it("inherits the code font size in simple mode", () => {
+    expect(resolveTerminalFontSizePreference({ advanced: false, code: 15, terminal: 12 })).toBe(15);
+  });
+
+  it("keeps code and terminal font sizes independent in advanced mode", () => {
+    expect(resolveTerminalFontSizePreference({ advanced: true, code: 15, terminal: 12 })).toBe(12);
   });
 });
 
