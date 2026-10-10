@@ -9,7 +9,6 @@ Works with your subscriptions on Claude Code, Codex, Cursor, Grok Build, OpenCod
 This is a personal, custom fork of the upstream [pingdotgg/t3code](https://github.com/pingdotgg/t3code) project. On top of upstream, it adds:
 
 - **Default project stack icons** — when a project has no favicon yet, the picker/thread UI falls back to an icon inferred from the detected tech stack instead of a generic placeholder.
-- **Kimi (Moonshot AI) provider** — an experimental provider integration ported from [rafaelcg/t3code-kimi](https://github.com/rafaelcg/t3code-kimi), a personal work-in-progress fork by [rafaelcg](https://github.com/rafaelcg). It wires up Moonshot AI's [`@moonshot-ai/kimi-agent-sdk`](https://www.npmjs.com/package/@moonshot-ai/kimi-agent-sdk) as a driver alongside Claude, Codex, Cursor, Grok Build and OpenCode. Treat it as experimental — the upstream fork it's based on describes itself as "very early WIP".
 - **Custom chatbox accent color** — a purple accent (`#9f8ad1`) on the chat composer's border/focus ring and send button, for a bit of visual distinction from stock T3 Code.
 
 ## "Wait, what are you selling me?"
@@ -56,10 +55,24 @@ Install the latest version of the desktop app from [GitHub Releases](https://git
 winget install T3Tools.T3Code
 ```
 
+#### Windows (`scoop`)
+
+```bash
+scoop install extras/t3code
+```
+
 #### macOS (Homebrew)
 
 ```bash
 brew install --cask t3-code
+```
+
+#### Debian, Ubuntu (`.deb`)
+
+Download the `.deb` from [GitHub Releases](https://github.com/pingdotgg/t3code/releases), then:
+
+```bash
+sudo apt install ./T3-Code-*.deb
 ```
 
 #### Arch Linux (AUR)
@@ -92,7 +105,9 @@ Full docs live in [docs/](./docs). There's no docs site yet.
 - [Permission modes](./docs/user/permission-modes.md)
 - [Keyboard shortcuts](./docs/user/keybindings.md)
 - [Project settings](./docs/user/project-settings.md)
+- [Appearance preferences](./docs/user/appearance.md)
 - [Remote access from a phone or another machine](./docs/user/remote-access.md)
+- [Connect Claude Code, Codex, ChatGPT and other agents over MCP](./docs/user/outside-agents.md)
 - [Keeping app and server in sync](./docs/user/updating.md)
 - [Source control integrations](./docs/user/source-control.md)
 - Multiple accounts: [Codex](./docs/user/providers-codex.md) · [Claude](./docs/user/providers-claude.md)
