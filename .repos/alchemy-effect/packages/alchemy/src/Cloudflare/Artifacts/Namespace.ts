@@ -70,19 +70,22 @@ export const isNamespace = (value: unknown): value is Namespace =>
  * auto-bind when yielded — it always requires an explicit access level via
  * {@link ReadNamespace} / {@link WriteNamespace} / {@link ReadWriteNamespace}.
  *
- * ### Declaring a Namespace
- * **Example:** Default namespace (a unique physical name is generated)
+ * @binding
+ * @product Artifacts
+ * @category Developer Platform
+ * @section Declaring a Namespace
+ * @example Default namespace (a unique physical name is generated)
  * ```typescript
  * const Repos = Cloudflare.Artifacts.Namespace("Repos");
  * ```
  *
- * **Example:** Override the namespace name (must be lowercase, 3–63 chars)
+ * @example Override the namespace name (must be lowercase, 3–63 chars)
  * ```typescript
  * const Repos = Cloudflare.Artifacts.Namespace("Repos", { namespace: "starter-repos" });
  * ```
  *
- * ### Binding to a Worker
- * **Example:** Wiring it into a Worker
+ * @section Binding to a Worker
+ * @example Wiring it into a Worker
  * ```typescript
  * export const Worker = Cloudflare.Worker("Worker", {
  *   main: "./src/worker.ts",
@@ -93,7 +96,7 @@ export const isNamespace = (value: unknown): value is Namespace =>
  * //   { Repos: Artifacts }
  * ```
  *
- * **Example:** Async-style worker
+ * @example Async-style worker
  * ```typescript
  * export default {
  *   async fetch(request: Request, env: WorkerEnv) {
@@ -103,17 +106,13 @@ export const isNamespace = (value: unknown): value is Namespace =>
  * };
  * ```
  *
- * **Example:** Effect-style worker (explicit access level)
+ * @example Effect-style worker (explicit access level)
  * ```typescript
  * const artifacts = yield* Cloudflare.Artifacts.ReadWriteNamespace(Repos);
  * const repo = yield* artifacts.create("starter-repo", {
  *   setDefaultBranch: "main",
  * });
  * ```
- *
- * @binding
- * @product Artifacts
- * @category Developer Platform
  */
 export const Namespace: (
   name: string,

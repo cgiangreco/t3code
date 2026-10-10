@@ -1,35 +1,10 @@
 import { Component, type ReactNode } from "react";
 
-interface RenderErrorBoundaryProps {
-  readonly children: ReactNode;
-  readonly fallback: ReactNode;
-  readonly resetKeys?: ReadonlyArray<unknown>;
-}
-
-interface RenderErrorBoundaryState {
-  readonly failed: boolean;
-  readonly resetKeys?: ReadonlyArray<unknown> | undefined;
-}
-
 export class RenderErrorBoundary extends Component<
-  RenderErrorBoundaryProps,
-  RenderErrorBoundaryState
+  { readonly children: ReactNode; readonly fallback: ReactNode },
+  { readonly failed: boolean }
 > {
-  override state = { failed: false, resetKeys: this.props.resetKeys };
-
-  // Retry changed inputs without remounting healthy children or their controls.
-  static getDerivedStateFromProps(
-    { resetKeys }: RenderErrorBoundaryProps,
-    state: RenderErrorBoundaryState,
-  ) {
-    if (
-      resetKeys?.length !== state.resetKeys?.length ||
-      resetKeys?.some((key, index) => !Object.is(key, state.resetKeys?.[index]))
-    ) {
-      return { failed: false, resetKeys };
-    }
-    return null;
-  }
+  override state = { failed: false };
 
   static getDerivedStateFromError() {
     return { failed: true };

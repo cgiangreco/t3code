@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — Organizations is a management-account-scoped
  * global service, so the binding takes no resource argument. Provide the
  * implementation with `Effect.provide(AWS.Organizations.ListDelegatedServicesForAccountHttp)`.
- * ### Delegated Administration & Trusted Access
- * **Example:** List an Account's Delegated Services
+ * @binding
+ * @section Delegated Administration & Trusted Access
+ * @example List an Account's Delegated Services
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listDelegatedServicesForAccount = yield* AWS.Organizations.ListDelegatedServicesForAccount();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   AccountId: accountId,
  * });
  * ```
- *
- * @binding
  */
 export interface ListDelegatedServicesForAccount extends Binding.Service<
   ListDelegatedServicesForAccount,

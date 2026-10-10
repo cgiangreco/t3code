@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:UpdateKxVolume` — changes a volume's description or NAS_1 size/throughput in the bound environment.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.UpdateKxVolumeHttp)`.
- * ### Managing Volumes
- * **Example:** Grow a Volume
+ * @binding
+ * @section Managing Volumes
+ * @example Grow a Volume
  * ```typescript
  * const updateVolume = yield* AWS.FinSpace.UpdateKxVolume(kdb);
  *
@@ -18,8 +19,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   clientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateKxVolume extends Binding.Service<
   UpdateKxVolume,

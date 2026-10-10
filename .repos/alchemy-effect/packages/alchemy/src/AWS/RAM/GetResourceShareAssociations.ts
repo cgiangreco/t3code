@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * are chosen per request at runtime, so the binding takes no resource
  * argument. Provide the implementation with
  * `Effect.provide(AWS.RAM.GetResourceShareAssociationsHttp)`.
- * ### Discovering Shares & Shared Resources
- * **Example:** List the Principals Associated with Your Shares
+ * @binding
+ * @section Discovering Shares & Shared Resources
+ * @example List the Principals Associated with Your Shares
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getResourceShareAssociations = yield* AWS.RAM.GetResourceShareAssociations();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * const { resourceShareAssociations } =
  *   yield* getResourceShareAssociations({ associationType: "PRINCIPAL" });
  * ```
- *
- * @binding
  */
 export interface GetResourceShareAssociations extends Binding.Service<
   GetResourceShareAssociations,

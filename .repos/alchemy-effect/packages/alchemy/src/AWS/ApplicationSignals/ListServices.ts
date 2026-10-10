@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Lists the services discovered by Application Signals during a time range.
  * Provide the implementation with
  * `Effect.provide(AWS.ApplicationSignals.ListServicesHttp)`.
- * ### Discovering Services
- * **Example:** List Discovered Services
+ * @binding
+ * @section Discovering Services
+ * @example List Discovered Services
  * ```typescript
  * // init — account-level, no resource argument
  * const listServices = yield* AWS.ApplicationSignals.ListServices();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.log(service.KeyAttributes?.Name);
  * }
  * ```
- *
- * @binding
  */
 export interface ListServices extends Binding.Service<
   ListServices,

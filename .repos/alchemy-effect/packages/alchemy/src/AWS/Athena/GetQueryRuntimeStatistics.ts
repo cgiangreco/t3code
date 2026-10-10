@@ -9,8 +9,9 @@ import type { WorkGroup } from "./WorkGroup.ts";
  * Reads the runtime statistics (timeline, rows/bytes processed, stage tree)
  * of a query that ran in the bound workgroup. Provide the implementation with
  * `Effect.provide(AWS.Athena.GetQueryRuntimeStatisticsHttp)`.
- * ### Inspecting Query Executions
- * **Example:** Read a Query's Runtime Statistics
+ * @binding
+ * @section Inspecting Query Executions
+ * @example Read a Query's Runtime Statistics
  * ```typescript
  * // init — bind the operation to the workgroup
  * const getQueryRuntimeStatistics =
@@ -20,8 +21,6 @@ import type { WorkGroup } from "./WorkGroup.ts";
  * const res = yield* getQueryRuntimeStatistics({ QueryExecutionId: id });
  * console.log(res.QueryRuntimeStatistics?.Timeline?.TotalExecutionTimeInMillis);
  * ```
- *
- * @binding
  */
 export interface GetQueryRuntimeStatistics extends Binding.Service<
   GetQueryRuntimeStatistics,

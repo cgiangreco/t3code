@@ -12,8 +12,9 @@ import type { EndpointGroup } from "./EndpointGroup.ts";
  * just registered. The endpoint group ARN is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.GlobalAccelerator.DescribeEndpointGroupHttp)`.
- * ### Observing Endpoint Groups
- * **Example:** Check Endpoint Health
+ * @binding
+ * @section Observing Endpoint Groups
+ * @example Check Endpoint Health
  * ```typescript
  * // init — bind the operation to the endpoint group
  * const describeEndpointGroup =
@@ -25,8 +26,6 @@ import type { EndpointGroup } from "./EndpointGroup.ts";
  *   (endpoint) => endpoint.HealthState === "UNHEALTHY",
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeEndpointGroup extends Binding.Service<
   DescribeEndpointGroup,

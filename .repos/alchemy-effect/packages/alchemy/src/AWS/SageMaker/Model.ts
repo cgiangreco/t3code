@@ -83,8 +83,9 @@ export interface Model extends Resource<
  *
  * SageMaker models are immutable — any change other than tags replaces the
  * model.
- * ### Creating Models
- * **Example:** Model from an ECR image
+ * @resource
+ * @section Creating Models
+ * @example Model from an ECR image
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -109,7 +110,7 @@ export interface Model extends Resource<
  * });
  * ```
  *
- * **Example:** Serverless deployment (Model → EndpointConfig → Endpoint)
+ * @example Serverless deployment (Model → EndpointConfig → Endpoint)
  * ```typescript
  * const config = yield* AWS.SageMaker.EndpointConfig("MyConfig", {
  *   productionVariants: [{
@@ -122,8 +123,6 @@ export interface Model extends Resource<
  *   endpointConfigName: config.endpointConfigName,
  * });
  * ```
- *
- * @resource
  */
 export const Model = Resource<Model>("AWS.SageMaker.Model");
 

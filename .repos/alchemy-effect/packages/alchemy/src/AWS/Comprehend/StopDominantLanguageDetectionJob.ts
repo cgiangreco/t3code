@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * The binding takes no arguments and grants the action on `*` (job APIs
  * have no resource-level IAM).
  *
- * ### Stopping Analysis Jobs
- * **Example:** Stop a Running DominantLanguageDetection Job
+ * @binding
+ * @section Stopping Analysis Jobs
+ * @example Stop a Running DominantLanguageDetection Job
  * ```typescript
  * // init
  * const stopDominantLanguageDetectionJob = yield* AWS.Comprehend.StopDominantLanguageDetectionJob();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* stopDominantLanguageDetectionJob({ JobId: jobId });
  * // result.JobStatus === "STOP_REQUESTED"
  * ```
- *
- * @binding
  */
 export interface StopDominantLanguageDetectionJob extends Binding.Service<
   StopDominantLanguageDetectionJob,

@@ -59,8 +59,9 @@ export interface Deployment extends Resource<
  * target creates a new deployment (a replacement). Use an all-at-once strategy
  * (duration 0, bake 0) for a near-instant rollout.
  *
- * ### Deploying a Configuration
- * **Example:** Deploy a Hosted Version
+ * @resource
+ * @section Deploying a Configuration
+ * @example Deploy a Hosted Version
  * ```typescript
  * const deployment = yield* AppConfig.Deployment("Rollout", {
  *   applicationId: app.applicationId,
@@ -70,8 +71,6 @@ export interface Deployment extends Resource<
  *   configurationVersion: String(version.versionNumber),
  * });
  * ```
- *
- * @resource
  */
 export const Deployment = Resource<Deployment>("AWS.AppConfig.Deployment");
 

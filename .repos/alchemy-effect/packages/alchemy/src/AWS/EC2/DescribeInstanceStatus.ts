@@ -23,8 +23,9 @@ export interface DescribeInstanceStatusRequest extends Omit<
  * `IncludeAllInstances: true` to also see the status while the instance is
  * stopped. Provide the implementation with
  * `Effect.provide(AWS.EC2.DescribeInstanceStatusHttp)`.
- * ### Observing Instances
- * **Example:** Check the instance's status checks
+ * @binding
+ * @section Observing Instances
+ * @example Check the instance's status checks
  * ```typescript
  * // init — bind the operation to the instance
  * const describeStatus = yield* AWS.EC2.DescribeInstanceStatus(instance);
@@ -33,8 +34,6 @@ export interface DescribeInstanceStatusRequest extends Omit<
  * const result = yield* describeStatus({ IncludeAllInstances: true });
  * console.log(result.InstanceStatuses?.[0]?.InstanceStatus?.Status);
  * ```
- *
- * @binding
  */
 export interface DescribeInstanceStatus extends Binding.Service<
   DescribeInstanceStatus,

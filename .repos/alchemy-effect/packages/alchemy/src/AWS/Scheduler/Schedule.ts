@@ -12,16 +12,19 @@ import type { Providers } from "../Providers.ts";
 /**
  * EventBridge Scheduler validates that the target's execution role is
  * assumable by `scheduler.amazonaws.com`. A freshly-created IAM role can take
- * well over a minute to propagate, surfacing as the typed
- * `ExecutionRoleNotAssumable` error ("The execution role you provide must
- * allow AWS EventBridge Scheduler to assume the role"). Retry (bounded) until
- * propagation completes.
+ * well over a minute to propagate, surfacing as a `ValidationException` with
+ * the message "The execution role you provide must allow AWS EventBridge
+ * Scheduler to assume the role." Retry (bounded) until propagation completes.
  */
 const retryUntilRoleAssumable = <A, E extends { _tag: string }, R>(
   effect: Effect.Effect<A, E, R>,
 ): Effect.Effect<A, E, R> =>
   Effect.retry(effect, {
-    while: (e) => e._tag === "ExecutionRoleNotAssumable",
+    while: (e) => {
+      if (e._tag !== "ValidationException") return false;
+      const message = (e as { Message?: unknown }).Message;
+      return typeof message === "string" && message.includes("assume the role");
+    },
     schedule: Schedule_.spaced("5 seconds"),
     times: 24,
   });
@@ -83,8 +86,9 @@ export interface ScheduleProps {
  * `Schedule` is the canonical time-based delivery primitive. High-level helpers
  * like `every`, `cron`, and `at` can synthesize the target role and scheduler
  * target configuration on top of this resource.
- * ### Creating Schedules
- * **Example:** Hourly Schedule
+ * @resource
+ * @section Creating Schedules
+ * @example Hourly Schedule
  * ```typescript
  * const schedule = yield* Schedule("HourlyJob", {
  *   scheduleExpression: "rate(1 hour)",
@@ -97,8 +101,6 @@ export interface ScheduleProps {
  *   },
  * });
  * ```
- *
- * @resource
  */
 export interface Schedule extends Resource<
   "AWS.Scheduler.Schedule",

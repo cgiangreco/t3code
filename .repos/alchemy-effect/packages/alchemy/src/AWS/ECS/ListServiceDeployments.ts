@@ -15,8 +15,9 @@ export interface ListServiceDeploymentsRequest extends Omit<
  * callable that lists the bound service's deployments (newest first). The
  * service and cluster ARNs are injected automatically and the host is
  * granted `ecs:ListServiceDeployments` on the service.
- * ### Service Deployments
- * **Example:** Find the In-Progress Deployment
+ * @binding
+ * @section Service Deployments
+ * @example Find the In-Progress Deployment
  * ```typescript
  * const listServiceDeployments = yield* AWS.ECS.ListServiceDeployments(service);
  *
@@ -25,8 +26,6 @@ export interface ListServiceDeploymentsRequest extends Omit<
  * });
  * const deploymentArn = response.serviceDeployments?.[0]?.serviceDeploymentArn;
  * ```
- *
- * @binding
  */
 export interface ListServiceDeployments extends Binding.Service<
   ListServiceDeployments,

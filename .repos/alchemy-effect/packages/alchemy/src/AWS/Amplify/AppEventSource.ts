@@ -60,8 +60,8 @@ export interface DeploymentStatusChangeEventSourceProps extends EventRouteProps 
  * Function. Provide `AWS.Lambda.EventSource` on the Function effect to
  * implement the subscription.
  *
- * ### Reacting To Deployments
- * **Example:** Alert on Failed Builds
+ * @section Reacting To Deployments
+ * @example Alert on Failed Builds
  * ```typescript
  * yield* AWS.Amplify.consumeDeploymentStatusChanges(
  *   { jobStatus: ["FAILED"] },
@@ -75,7 +75,7 @@ export interface DeploymentStatusChangeEventSourceProps extends EventRouteProps 
  * );
  * ```
  *
- * **Example:** Register the Event Source inside a Lambda Function
+ * @example Register the Event Source inside a Lambda Function
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

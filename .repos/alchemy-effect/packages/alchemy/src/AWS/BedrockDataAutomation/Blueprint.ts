@@ -82,8 +82,9 @@ export interface Blueprint extends Resource<
  * Attach blueprints to a `DataAutomationProject` via its
  * `customOutputConfiguration`.
  *
- * ### Creating Blueprints
- * **Example:** Document blueprint with custom fields
+ * @resource
+ * @section Creating Blueprints
+ * @example Document blueprint with custom fields
  * ```typescript
  * import * as BDA from "alchemy/AWS/BedrockDataAutomation";
  *
@@ -105,7 +106,7 @@ export interface Blueprint extends Resource<
  * });
  * ```
  *
- * **Example:** Attach a blueprint to a project
+ * @example Attach a blueprint to a project
  * ```typescript
  * const project = yield* BDA.DataAutomationProject("Docs", {
  *   standardOutputConfiguration: {},
@@ -114,8 +115,6 @@ export interface Blueprint extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Blueprint = Resource<Blueprint>(
   "AWS.BedrockDataAutomation.Blueprint",

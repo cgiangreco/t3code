@@ -1,8 +1,6 @@
 import { PRIMARY_LOCAL_ENVIRONMENT_ID, type DesktopEnvironmentBootstrap } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 
-import { isLocalEnvironmentDisabled } from "../../localEnvironment";
-
 const PrimaryEnvironmentTargetSource = Schema.Literals([
   "configured",
   "window-origin",
@@ -18,7 +16,7 @@ const PrimaryEnvironmentUrlKind = Schema.Literals([
 ]);
 type PrimaryEnvironmentUrlKind = typeof PrimaryEnvironmentUrlKind.Type;
 
-export class PrimaryEnvironmentUrlInvalidError extends Schema.TaggedError<PrimaryEnvironmentUrlInvalidError>()(
+export class PrimaryEnvironmentUrlInvalidError extends Schema.TaggedErrorClass<PrimaryEnvironmentUrlInvalidError>()(
   "PrimaryEnvironmentUrlInvalidError",
   {
     source: PrimaryEnvironmentTargetSource,
@@ -31,7 +29,7 @@ export class PrimaryEnvironmentUrlInvalidError extends Schema.TaggedError<Primar
   }
 }
 
-export class PrimaryEnvironmentProtocolUnsupportedError extends Schema.TaggedError<PrimaryEnvironmentProtocolUnsupportedError>()(
+export class PrimaryEnvironmentProtocolUnsupportedError extends Schema.TaggedErrorClass<PrimaryEnvironmentProtocolUnsupportedError>()(
   "PrimaryEnvironmentProtocolUnsupportedError",
   {
     source: PrimaryEnvironmentTargetSource,
@@ -43,7 +41,7 @@ export class PrimaryEnvironmentProtocolUnsupportedError extends Schema.TaggedErr
   }
 }
 
-export class DesktopEnvironmentBootstrapIncompleteError extends Schema.TaggedError<DesktopEnvironmentBootstrapIncompleteError>()(
+export class DesktopEnvironmentBootstrapIncompleteError extends Schema.TaggedErrorClass<DesktopEnvironmentBootstrapIncompleteError>()(
   "DesktopEnvironmentBootstrapIncompleteError",
   {
     hasHttpBaseUrl: Schema.Boolean,
@@ -56,15 +54,6 @@ export class DesktopEnvironmentBootstrapIncompleteError extends Schema.TaggedErr
       ...(this.hasWsBaseUrl ? [] : ["wsBaseUrl"]),
     ];
     return `Desktop bootstrap is missing ${missing.join(" and ")} for the local environment.`;
-  }
-}
-
-export class PrimaryEnvironmentDisabledError extends Schema.TaggedError<PrimaryEnvironmentDisabledError>()(
-  "PrimaryEnvironmentDisabledError",
-  {},
-) {
-  override get message(): string {
-    return "The local environment is disabled.";
   }
 }
 
@@ -200,18 +189,14 @@ function resolveConfiguredPrimaryTarget(): PrimaryEnvironmentTarget | null {
     return null;
   }
 
-  // Scheme checks run on the raw configured string, while the URL parser
-  // folds schemes to lowercase ("WSS://host" parses fine). Without the
-  // case folding an uppercase scheme would be classified as plaintext and
-  // swapped to http/ws, silently downgrading TLS.
   const resolvedHttpBaseUrl =
     configuredHttpBaseUrl ??
-    (configuredWsBaseUrl?.toLowerCase().startsWith("wss:")
+    (configuredWsBaseUrl?.startsWith("wss:")
       ? swapBaseUrlProtocol(configuredWsBaseUrl, "https:", "websocket-base-url")
       : swapBaseUrlProtocol(configuredWsBaseUrl!, "http:", "websocket-base-url"));
   const resolvedWsBaseUrl =
     configuredWsBaseUrl ??
-    (configuredHttpBaseUrl?.toLowerCase().startsWith("https:")
+    (configuredHttpBaseUrl?.startsWith("https:")
       ? swapBaseUrlProtocol(configuredHttpBaseUrl, "wss:", "http-base-url")
       : swapBaseUrlProtocol(configuredHttpBaseUrl!, "ws:", "http-base-url"));
 
@@ -287,9 +272,6 @@ export function resolvePrimaryEnvironmentHttpUrl(
   searchParams?: Record<string, string>,
 ): string {
   const primaryTarget = readPrimaryEnvironmentTarget();
-  if (!primaryTarget) {
-    throw new PrimaryEnvironmentDisabledError();
-  }
 
   const url = parseTargetUrl({
     rawValue: resolveHttpRequestBaseUrl(primaryTarget),
@@ -303,12 +285,7 @@ export function resolvePrimaryEnvironmentHttpUrl(
   return url.toString();
 }
 
-// Null only when the desktop app runs with its local environment disabled;
-// every other host has a primary (falling back to the page origin).
-export function readPrimaryEnvironmentTarget(): PrimaryEnvironmentTarget | null {
-  if (isLocalEnvironmentDisabled()) {
-    return null;
-  }
+export function readPrimaryEnvironmentTarget(): PrimaryEnvironmentTarget {
   return (
     resolveDesktopPrimaryTarget() ??
     resolveConfiguredPrimaryTarget() ??

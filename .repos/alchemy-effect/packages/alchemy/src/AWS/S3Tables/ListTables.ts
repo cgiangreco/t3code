@@ -20,8 +20,9 @@ export interface ListTablesRequest extends Omit<
  * a namespace or name prefix. Useful for compute that enumerates the
  * catalog at runtime. Provide the implementation with
  * `Effect.provide(AWS.S3Tables.ListTablesHttp)`.
- * ### Discovering Namespaces and Tables
- * **Example:** List the tables in a namespace
+ * @binding
+ * @section Discovering Namespaces and Tables
+ * @example List the tables in a namespace
  * ```typescript
  * const listTables = yield* AWS.S3Tables.ListTables(bucket);
  *
@@ -30,8 +31,6 @@ export interface ListTablesRequest extends Omit<
  *   yield* Effect.log(`table: ${table.name}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListTables extends Binding.Service<
   ListTables,

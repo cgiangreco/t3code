@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+// @effect-diagnostics nodeBuiltinImport:off - node:os resolves the shared T3 home guard.
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as NodeOS from "node:os";
@@ -11,15 +12,15 @@ import * as FileSystem from "effect/FileSystem";
 import * as Option from "effect/Option";
 import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
-import * as SqlClient from "effect/sql/SqlClient";
-import { Argument, Command, Flag } from "effect/cli";
+import * as SqlClient from "effect/unstable/sql/SqlClient";
+import { Argument, Command, Flag } from "effect/unstable/cli";
 
-import * as NodeSqliteClient from "@t3tools/shared/nodeSqliteClient";
+import * as NodeSqliteClient from "../src/persistence/NodeSqliteClient.ts";
 
 export const SqliteStateOperation = Schema.Literals(["query", "exec"]);
 export type SqliteStateOperation = typeof SqliteStateOperation.Type;
 
-export class SqliteStateMultipleSqlSourcesError extends Schema.TaggedError<SqliteStateMultipleSqlSourcesError>()(
+export class SqliteStateMultipleSqlSourcesError extends Schema.TaggedErrorClass<SqliteStateMultipleSqlSourcesError>()(
   "SqliteStateMultipleSqlSourcesError",
   {},
 ) {
@@ -28,7 +29,7 @@ export class SqliteStateMultipleSqlSourcesError extends Schema.TaggedError<Sqlit
   }
 }
 
-export class SqliteStateMissingSqlSourceError extends Schema.TaggedError<SqliteStateMissingSqlSourceError>()(
+export class SqliteStateMissingSqlSourceError extends Schema.TaggedErrorClass<SqliteStateMissingSqlSourceError>()(
   "SqliteStateMissingSqlSourceError",
   {},
 ) {
@@ -37,7 +38,7 @@ export class SqliteStateMissingSqlSourceError extends Schema.TaggedError<SqliteS
   }
 }
 
-export class SqliteStateEmptySqlError extends Schema.TaggedError<SqliteStateEmptySqlError>()(
+export class SqliteStateEmptySqlError extends Schema.TaggedErrorClass<SqliteStateEmptySqlError>()(
   "SqliteStateEmptySqlError",
   {},
 ) {
@@ -46,7 +47,7 @@ export class SqliteStateEmptySqlError extends Schema.TaggedError<SqliteStateEmpt
   }
 }
 
-export class SqliteStateDatabaseMissingError extends Schema.TaggedError<SqliteStateDatabaseMissingError>()(
+export class SqliteStateDatabaseMissingError extends Schema.TaggedErrorClass<SqliteStateDatabaseMissingError>()(
   "SqliteStateDatabaseMissingError",
   {
     databasePath: Schema.String,
@@ -57,7 +58,7 @@ export class SqliteStateDatabaseMissingError extends Schema.TaggedError<SqliteSt
   }
 }
 
-export class SqliteStateSharedHomeMutationError extends Schema.TaggedError<SqliteStateSharedHomeMutationError>()(
+export class SqliteStateSharedHomeMutationError extends Schema.TaggedErrorClass<SqliteStateSharedHomeMutationError>()(
   "SqliteStateSharedHomeMutationError",
   {},
 ) {
@@ -66,7 +67,7 @@ export class SqliteStateSharedHomeMutationError extends Schema.TaggedError<Sqlit
   }
 }
 
-export class SqliteStateSqlFileError extends Schema.TaggedError<SqliteStateSqlFileError>()(
+export class SqliteStateSqlFileError extends Schema.TaggedErrorClass<SqliteStateSqlFileError>()(
   "SqliteStateSqlFileError",
   {
     filePath: Schema.String,
@@ -78,7 +79,7 @@ export class SqliteStateSqlFileError extends Schema.TaggedError<SqliteStateSqlFi
   }
 }
 
-export class SqliteStateDatabaseError extends Schema.TaggedError<SqliteStateDatabaseError>()(
+export class SqliteStateDatabaseError extends Schema.TaggedErrorClass<SqliteStateDatabaseError>()(
   "SqliteStateDatabaseError",
   {
     operation: SqliteStateOperation,
@@ -182,7 +183,7 @@ export const runSqliteState = Effect.fn("runSqliteState")(function* (
   const path = yield* Path.Path;
   const baseDir = path.resolve(input.baseDir);
   const sharedHome = path.resolve(options.sharedHome ?? path.join(NodeOS.homedir(), ".t3"));
-  const databasePath = path.join(baseDir, "userdata", "statev2.sqlite");
+  const databasePath = path.join(baseDir, "userdata", "state.sqlite");
   const source = yield* resolveSqlSource(input.sql, input.file);
 
   if (!(yield* fs.exists(databasePath))) {
@@ -245,20 +246,20 @@ export const runSqliteState = Effect.fn("runSqliteState")(function* (
   );
 });
 
-const t3SqliteStateCommand = Command.make(
+export const t3SqliteStateCommand = Command.make(
   "t3-sqlite-state",
   {
-    operation: Argument.Literals("operation", SqliteStateOperation.literals).pipe(
+    operation: Argument.choice("operation", SqliteStateOperation.literals).pipe(
       Argument.withDescription("Run a read-only query or a backed-up fixture mutation."),
     ),
-    baseDir: Flag.String("base-dir").pipe(
-      Flag.withDescription("Explicit T3 base directory containing userdata/statev2.sqlite."),
+    baseDir: Flag.string("base-dir").pipe(
+      Flag.withDescription("Explicit T3 base directory containing userdata/state.sqlite."),
     ),
-    sql: Flag.String("sql").pipe(
+    sql: Flag.string("sql").pipe(
       Flag.optional,
       Flag.withDescription("SQL source supplied directly on the command line."),
     ),
-    file: Flag.String("file").pipe(
+    file: Flag.string("file").pipe(
       Flag.optional,
       Flag.withDescription("Path to a SQL source file."),
     ),

@@ -19,8 +19,9 @@ export interface GetTopPathStatisticsByTrafficRequest extends Omit<
  *
  * Provide `WAFv2.GetTopPathStatisticsByTrafficHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Inspecting Traffic
- * **Example:** Read Top Bot-Trafficked Paths
+ * @binding
+ * @section Inspecting Traffic
+ * @example Read Top Bot-Trafficked Paths
  * ```typescript
  * // init — grants wafv2:GetTopPathStatisticsByTraffic on the web ACL
  * const getTopPaths = yield* AWS.WAFv2.GetTopPathStatisticsByTraffic(acl);
@@ -36,8 +37,6 @@ export interface GetTopPathStatisticsByTrafficRequest extends Omit<
  *   NumberOfTopTrafficBotsPerPath: 3,
  * });
  * ```
- *
- * @binding
  */
 export interface GetTopPathStatisticsByTraffic extends Binding.Service<
   GetTopPathStatisticsByTraffic,

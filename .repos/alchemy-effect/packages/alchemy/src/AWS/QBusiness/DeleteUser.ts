@@ -19,15 +19,14 @@ export interface DeleteUserRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.DeleteUserHttp)`.
  *
- * ### User Management
- * **Example:** Delete a User
+ * @binding
+ * @section User Management
+ * @example Delete a User
  * ```typescript
  * const deleteUser = yield* AWS.QBusiness.DeleteUser(app);
  *
  * yield* deleteUser({ userId: "user@example.com" });
  * ```
- *
- * @binding
  */
 export interface DeleteUser extends Binding.Service<
   DeleteUser,

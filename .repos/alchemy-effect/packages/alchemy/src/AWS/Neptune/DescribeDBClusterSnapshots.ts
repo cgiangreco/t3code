@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Lists the account's Neptune cluster snapshots (manual and automated) —
  * for backup verification and restore tooling. Provide the implementation
  * with `Effect.provide(AWS.Neptune.DescribeDBClusterSnapshotsHttp)`.
- * ### Managing Snapshots
- * **Example:** List a Cluster's Snapshots
+ * @binding
+ * @section Managing Snapshots
+ * @example List a Cluster's Snapshots
  * ```typescript
  * const describeDBClusterSnapshots =
  *   yield* AWS.Neptune.DescribeDBClusterSnapshots();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const count = page.DBClusterSnapshots?.length;
  * ```
- *
- * @binding
  */
 export interface DescribeDBClusterSnapshots extends Binding.Service<
   DescribeDBClusterSnapshots,

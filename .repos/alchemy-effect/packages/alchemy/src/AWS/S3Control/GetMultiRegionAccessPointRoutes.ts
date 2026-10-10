@@ -11,8 +11,9 @@ import type { MultiRegionAccessPoint } from "./MultiRegionAccessPoint.ts";
  * of an active/passive failover controller. Requests are routed to the
  * `us-west-2` MRAP control plane. Provide the implementation with
  * `Effect.provide(AWS.S3Control.GetMultiRegionAccessPointRoutesHttp)`.
- * ### Controlling Multi-Region Failover
- * **Example:** Read the Current Routes
+ * @binding
+ * @section Controlling Multi-Region Failover
+ * @example Read the Current Routes
  * ```typescript
  * // init — bind the operation to the Multi-Region Access Point
  * const getRoutes =
@@ -22,8 +23,6 @@ import type { MultiRegionAccessPoint } from "./MultiRegionAccessPoint.ts";
  * const { Routes } = yield* getRoutes();
  * // Routes?.map((r) => `${r.Region}: ${r.TrafficDialPercentage}%`)
  * ```
- *
- * @binding
  */
 export interface GetMultiRegionAccessPointRoutes extends Binding.Service<
   GetMultiRegionAccessPointRoutes,

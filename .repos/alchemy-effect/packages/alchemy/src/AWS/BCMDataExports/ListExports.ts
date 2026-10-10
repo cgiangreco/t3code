@@ -14,8 +14,9 @@ export interface ListExportsRequest extends bcm.ListExportsRequest {}
  * export definition in the account. Useful for governance sweeps that audit
  * where billing data is being delivered. Provide the implementation with
  * `Effect.provide(AWS.BCMDataExports.ListExportsHttp)`.
- * ### Inspecting an Export
- * **Example:** List Every Export in the Account
+ * @binding
+ * @section Inspecting an Export
+ * @example List Every Export in the Account
  * ```typescript
  * // init — account-level binding takes no resource
  * const listExports = yield* AWS.BCMDataExports.ListExports();
@@ -24,8 +25,6 @@ export interface ListExportsRequest extends bcm.ListExportsRequest {}
  * const result = yield* listExports({ MaxResults: 100 });
  * const names = (result.Exports ?? []).map((e) => e.ExportName);
  * ```
- *
- * @binding
  */
 export interface ListExports extends Binding.Service<
   ListExports,

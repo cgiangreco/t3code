@@ -81,8 +81,9 @@ export interface Flow extends Resource<
  * the flow is created — AppFlow validates connectivity by listing the source
  * at `CreateFlow` time and rejects an empty prefix with
  * `ConnectorServerException`.
- * ### Creating a Flow
- * **Example:** S3 to S3 On-Demand Flow
+ * @resource
+ * @section Creating a Flow
+ * @example S3 to S3 On-Demand Flow
  * ```typescript
  * const flow = yield* AppFlow.Flow("Copy", {
  *   triggerConfig: { triggerType: "OnDemand" },
@@ -110,8 +111,6 @@ export interface Flow extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const Flow = Resource<Flow>("AWS.AppFlow.Flow");
 

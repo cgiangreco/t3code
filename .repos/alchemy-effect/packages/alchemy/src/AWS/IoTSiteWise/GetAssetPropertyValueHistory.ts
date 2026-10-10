@@ -17,12 +17,13 @@ export interface GetAssetPropertyValueHistoryRequest extends Omit<
  * historical timestamp-quality-values of one property of the bound asset
  * over a time range from a deployed Lambda or Task.
  *
- * ### Reading Value History
+ * @binding
+ * @section Reading Value History
  * Provide the `GetAssetPropertyValueHistoryHttp` implementation layer on
  * the Function effect, bind the asset in the init phase, then call the
  * returned client at runtime. Page through large ranges with `nextToken`.
  *
- * **Example:** Read the Last Hour of Values
+ * @example Read the Last Hour of Values
  * ```typescript
  * // init
  * const getHistory = yield* AWS.IoTSiteWise.GetAssetPropertyValueHistory(asset);
@@ -38,8 +39,6 @@ export interface GetAssetPropertyValueHistoryRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTSiteWise.GetAssetPropertyValueHistoryHttp))
  * ```
- *
- * @binding
  */
 export interface GetAssetPropertyValueHistory extends Binding.Service<
   GetAssetPropertyValueHistory,

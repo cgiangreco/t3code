@@ -95,8 +95,11 @@ export type HostnameContentList = Resource<
  * `ipfs_universal_path` hostname (empty by default), so this resource never
  * creates or deletes a physical object. Reconciliation replaces the whole
  * list declaratively via the bulk PUT, and destroy resets the list to empty.
- * ### Blocking content
- * **Example:** Block a CID and a content path
+ * @resource
+ * @product Web3
+ * @category Domains & DNS
+ * @section Blocking content
+ * @example Block a CID and a content path
  * ```typescript
  * const gateway = yield* Cloudflare.Web3.Hostname("UniversalGateway", {
  *   zoneId: zone.zoneId,
@@ -121,7 +124,7 @@ export type HostnameContentList = Resource<
  * });
  * ```
  *
- * **Example:** Clear the blocklist
+ * @example Clear the blocklist
  * ```typescript
  * // An empty entries array removes every block (also what destroy does).
  * yield* Cloudflare.Web3.HostnameContentList("Blocklist", {
@@ -132,10 +135,6 @@ export type HostnameContentList = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/web3/
- *
- * @resource
- * @product Web3
- * @category Domains & DNS
  */
 export const HostnameContentList = Resource<HostnameContentList>(TypeId, {
   aliases: ["Cloudflare.Web3HostnameContentList"],
@@ -305,13 +304,15 @@ const observeContentList = (zoneId: string, hostnameId: string) =>
       zoneId,
       hostnameId,
       action: (list.action ?? "block") as "block",
-      entries: (entries.entries ?? []).map((entry): ContentListEntry => ({
-        content: entry.content ?? "",
-        type: (entry.type ?? "cid") as ContentListEntryType,
-        ...(entry.description != null
-          ? { description: entry.description }
-          : {}),
-      })),
+      entries: (entries.entries ?? []).map(
+        (entry): ContentListEntry => ({
+          content: entry.content ?? "",
+          type: (entry.type ?? "cid") as ContentListEntryType,
+          ...(entry.description != null
+            ? { description: entry.description }
+            : {}),
+        }),
+      ),
     } satisfies HostnameContentListAttributes;
   }).pipe(
     Effect.catchTag(["Web3HostnameNotFound", "InvalidWeb3HostnameTarget"], () =>

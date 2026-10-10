@@ -20,16 +20,15 @@ export interface UpdateCampaignRequest extends Omit<
  * the implementation with
  * `Effect.provide(AWS.IoTFleetWise.UpdateCampaignHttp)`.
  *
- * ### Campaign Control
- * **Example:** Suspend and Resume a Campaign
+ * @binding
+ * @section Campaign Control
+ * @example Suspend and Resume a Campaign
  * ```typescript
  * const updateCampaign = yield* IoTFleetWise.UpdateCampaign(campaign);
  *
  * yield* updateCampaign({ action: "SUSPEND" });
  * yield* updateCampaign({ action: "RESUME" });
  * ```
- *
- * @binding
  */
 export interface UpdateCampaign extends Binding.Service<
   UpdateCampaign,

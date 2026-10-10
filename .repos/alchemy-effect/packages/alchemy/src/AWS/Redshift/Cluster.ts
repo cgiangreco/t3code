@@ -243,8 +243,9 @@ export interface Cluster extends Resource<
  * node while they exist (`ra3.large` and `dc2.large` are the smallest node
  * types). For serverless data warehousing see the `RedshiftServerless`
  * namespace instead. Destroy clusters you are not using.
- * ### Creating a Cluster
- * **Example:** Single-Node Cluster
+ * @resource
+ * @section Creating a Cluster
+ * @example Single-Node Cluster
  * ```typescript
  * const cluster = yield* Redshift.Cluster("Warehouse", {
  *   nodeType: "ra3.large",
@@ -254,7 +255,7 @@ export interface Cluster extends Resource<
  *   dbName: "analytics",
  * });
  * ```
- * **Example:** Cluster in a VPC Subnet Group
+ * @example Cluster in a VPC Subnet Group
  * ```typescript
  * const subnetGroup = yield* Redshift.ClusterSubnetGroup("WarehouseSubnets", {
  *   subnetIds: [subnetA.subnetId, subnetB.subnetId],
@@ -269,8 +270,6 @@ export interface Cluster extends Resource<
  *   encrypted: true,
  * });
  * ```
- *
- * @resource
  */
 export const Cluster = Resource<Cluster>("AWS.Redshift.Cluster");
 

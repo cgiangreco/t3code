@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * results of an asynchronous document-analysis job started with
  * `StartDocumentAnalysis`. Page through large result sets with `NextToken`.
  *
- * ### Asynchronous Document Analysis
- * **Example:** Poll an Analysis Job
+ * @binding
+ * @section Asynchronous Document Analysis
+ * @example Poll an Analysis Job
  * ```typescript
  * // init
  * const getDocumentAnalysis = yield* AWS.Textract.GetDocumentAnalysis();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   const blocks = result.Blocks;
  * }
  * ```
- *
- * @binding
  */
 export interface GetDocumentAnalysis extends Binding.Service<
   GetDocumentAnalysis,

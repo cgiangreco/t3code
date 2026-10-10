@@ -11,8 +11,9 @@ import type { Endpoint } from "./Endpoint.ts";
  * callable that automatically injects the endpoint name. Use it to check
  * `EndpointStatus` (e.g. gate invocations while an update is rolling) or to
  * observe per-variant weights and instance counts.
- * ### Observing Endpoints
- * **Example:** Check Endpoint Status
+ * @binding
+ * @section Observing Endpoints
+ * @example Check Endpoint Status
  * ```typescript
  * // init
  * const describeEndpoint = yield* AWS.SageMaker.DescribeEndpoint(endpoint);
@@ -20,8 +21,6 @@ import type { Endpoint } from "./Endpoint.ts";
  * // runtime
  * const { EndpointStatus, ProductionVariants } = yield* describeEndpoint();
  * ```
- *
- * @binding
  */
 export interface DescribeEndpoint extends Binding.Service<
   DescribeEndpoint,

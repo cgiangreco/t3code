@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * `engaged`, stops all running experiments and prevents new ones from
  * starting. The account's lever has the well-known id `default`. Provide the
  * implementation with `Effect.provide(AWS.FIS.GetSafetyLeverHttp)`.
- * ### The Safety Lever
- * **Example:** Check Whether Experiments Are Halted
+ * @binding
+ * @section The Safety Lever
+ * @example Check Whether Experiments Are Halted
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getSafetyLever = yield* AWS.FIS.GetSafetyLever();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const { safetyLever } = yield* getSafetyLever({ id: "default" });
  * console.log(safetyLever?.state?.status); // "disengaged"
  * ```
- *
- * @binding
  */
 export interface GetSafetyLever extends Binding.Service<
   GetSafetyLever,

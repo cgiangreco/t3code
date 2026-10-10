@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.CreateDatasetImportJobHttp)`.
  *
- * ### Retraining Loop
- * **Example:** Import Training Data
+ * @binding
+ * @section Retraining Loop
+ * @example Import Training Data
  * ```typescript
  * // init
  * const createDatasetImportJob = yield* Personalize.CreateDatasetImportJob();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   roleArn: importRoleArn,
  * });
  * ```
- *
- * @binding
  */
 export interface CreateDatasetImportJob extends Binding.Service<
   CreateDatasetImportJob,

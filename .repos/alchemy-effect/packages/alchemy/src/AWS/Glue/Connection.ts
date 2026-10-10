@@ -92,8 +92,9 @@ export interface Connection extends Resource<
 /**
  * An AWS Glue connection — stores the connection details (JDBC URL, VPC
  * networking, credentials) that crawlers and jobs use to reach a data store.
- * ### Creating Connections
- * **Example:** JDBC Connection
+ * @resource
+ * @section Creating Connections
+ * @example JDBC Connection
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  * import * as Redacted from "effect/Redacted";
@@ -112,8 +113,6 @@ export interface Connection extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Connection = Resource<Connection>("AWS.Glue.Connection");
 

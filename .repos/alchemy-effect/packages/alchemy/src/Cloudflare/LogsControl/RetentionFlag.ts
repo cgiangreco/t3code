@@ -61,8 +61,11 @@ export type LogsRetentionFlag = Resource<
  *
  * Logpull is an Enterprise feature — on unentitled zones every operation
  * fails with the typed `LogsControlNotAuthorized` error.
- * ### Managing log retention
- * **Example:** Enable Logpull retention on a zone
+ * @resource
+ * @product Logs
+ * @category Observability & Analytics
+ * @section Managing log retention
+ * @example Enable Logpull retention on a zone
  * ```typescript
  * const retention = yield* Cloudflare.LogsControl.LogsRetentionFlag("Retention", {
  *   zoneId: zone.zoneId,
@@ -70,7 +73,7 @@ export type LogsRetentionFlag = Resource<
  * });
  * ```
  *
- * **Example:** Explicitly disable retention
+ * @example Explicitly disable retention
  * ```typescript
  * yield* Cloudflare.LogsControl.LogsRetentionFlag("Retention", {
  *   zoneId: zone.zoneId,
@@ -79,10 +82,6 @@ export type LogsRetentionFlag = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/logs/logpull/enabling-log-retention/
- *
- * @resource
- * @product Logs
- * @category Observability & Analytics
  */
 export const LogsRetentionFlag = Resource<LogsRetentionFlag>(TypeId);
 

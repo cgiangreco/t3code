@@ -20,15 +20,14 @@ export interface ListPrefetchSchedulesRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.MediaTailor.ListPrefetchSchedulesHttp)`.
  *
- * ### Prefetching Ads
- * **Example:** List prefetch schedules for a stream
+ * @binding
+ * @section Prefetching Ads
+ * @example List prefetch schedules for a stream
  * ```typescript
  * const listPrefetchSchedules = yield* AWS.MediaTailor.ListPrefetchSchedules(config);
  *
  * const { Items } = yield* listPrefetchSchedules({ StreamId: streamId });
  * ```
- *
- * @binding
  */
 export interface ListPrefetchSchedules extends Binding.Service<
   ListPrefetchSchedules,

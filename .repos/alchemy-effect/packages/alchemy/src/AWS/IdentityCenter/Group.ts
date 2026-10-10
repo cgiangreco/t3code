@@ -54,16 +54,15 @@ export interface Group extends Resource<
 
 /**
  * A group in the IAM Identity Center identity store.
- * ### Creating Groups
- * **Example:** Platform Engineers
+ * @resource
+ * @section Creating Groups
+ * @example Platform Engineers
  * ```typescript
  * const engineers = yield* Group("PlatformEngineers", {
  *   displayName: "platform-engineers",
  *   description: "Platform engineering team",
  * });
  * ```
- *
- * @resource
  */
 export const Group = Resource<Group>("AWS.IdentityCenter.Group");
 

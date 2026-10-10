@@ -64,8 +64,11 @@ export type Subdomain = Resource<
  * URL of every deployed Worker on the account that relies on
  * `workers.dev`. Only manage this resource on accounts where that is
  * acceptable.
- * ### Managing the subdomain
- * **Example:** Pin the account's workers.dev subdomain
+ * @resource
+ * @product Workers
+ * @category Workers & Compute
+ * @section Managing the subdomain
+ * @example Pin the account's workers.dev subdomain
  * ```typescript
  * const sub = yield* Cloudflare.Workers.Subdomain("Subdomain", {
  *   subdomain: "my-team",
@@ -74,10 +77,6 @@ export type Subdomain = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/workers/configuration/routing/workers-dev/
- *
- * @resource
- * @product Workers
- * @category Workers & Compute
  */
 export const Subdomain = Resource<Subdomain>(TypeId);
 

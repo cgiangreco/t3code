@@ -17,8 +17,9 @@ export interface GetJobBookmarkRequest extends Omit<
  * the job has never recorded a bookmark. The job name is injected from the
  * binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.GetJobBookmarkHttp)`.
- * ### Job Bookmarks
- * **Example:** Read the Bookmark
+ * @binding
+ * @section Job Bookmarks
+ * @example Read the Bookmark
  * ```typescript
  * // init
  * const getJobBookmark = yield* AWS.Glue.GetJobBookmark(job);
@@ -31,8 +32,6 @@ export interface GetJobBookmarkRequest extends Omit<
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GetJobBookmark extends Binding.Service<
   GetJobBookmark,

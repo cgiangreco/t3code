@@ -47,7 +47,7 @@ export interface Attributes {
    * managed it. Restored on destroy, so deleting the resource puts the
    * zone back the way it was found.
    */
-  initialValue: ContentScanningStatus;
+  initialValue: string;
 }
 
 export type ContentScanning = Resource<
@@ -71,8 +71,11 @@ export type ContentScanning = Resource<
  * Content Scanning is an Enterprise paid add-on. Reading the status works
  * on every plan, but enabling it on a zone without the add-on fails with
  * the typed `ContentScanningNotEntitled` error.
- * ### Enabling Content Scanning
- * **Example:** Turn on malicious-upload scanning for a zone
+ * @resource
+ * @product Content Scanning
+ * @category Application Security
+ * @section Enabling Content Scanning
+ * @example Turn on malicious-upload scanning for a zone
  * ```typescript
  * const zone = yield* Cloudflare.Zone.Zone("Site", { name: "example.com" });
  *
@@ -81,7 +84,7 @@ export type ContentScanning = Resource<
  * });
  * ```
  *
- * **Example:** Pin Content Scanning off
+ * @example Pin Content Scanning off
  * ```typescript
  * yield* Cloudflare.ContentScanning.ContentScanning("UploadScanning", {
  *   zoneId: zone.zoneId,
@@ -89,8 +92,8 @@ export type ContentScanning = Resource<
  * });
  * ```
  *
- * ### Custom scan expressions
- * **Example:** Scan a JSON-embedded file field
+ * @section Custom scan expressions
+ * @example Scan a JSON-embedded file field
  * ```typescript
  * const scanning = yield* Cloudflare.ContentScanning.ContentScanning("UploadScanning", {
  *   zoneId: zone.zoneId,
@@ -103,10 +106,6 @@ export type ContentScanning = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/waf/detections/malicious-uploads/
- *
- * @resource
- * @product Content Scanning
- * @category Application Security
  */
 export const ContentScanning = Resource<ContentScanning>(TypeId, {
   aliases: ["Cloudflare.ContentScanning"],
@@ -234,7 +233,7 @@ const toAttributes = (
   setting:
     | contentScanning.GetContentScanningResponse
     | contentScanning.PutContentScanningResponse,
-  initialValue: ContentScanningStatus,
+  initialValue: string,
 ): Attributes => ({
   zoneId,
   enabled: statusOf(setting) === "enabled",

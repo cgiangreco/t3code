@@ -128,8 +128,9 @@ export interface Job extends Resource<
  * streaming ETL job definition (script in S3 + IAM role + arguments). The
  * definition lifecycle is instant and free; job *runs* are billed and are
  * started via `startJobRun`.
- * ### Creating Jobs
- * **Example:** Python Shell Job
+ * @resource
+ * @section Creating Jobs
+ * @example Python Shell Job
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -146,7 +147,7 @@ export interface Job extends Resource<
  * });
  * ```
  *
- * **Example:** Spark ETL Job
+ * @example Spark ETL Job
  * ```typescript
  * const job = yield* AWS.Glue.Job("SparkEtl", {
  *   role: jobRole.roleArn,
@@ -161,8 +162,8 @@ export interface Job extends Resource<
  * });
  * ```
  *
- * ### Running Jobs
- * **Example:** Start a Job Run from a Lambda
+ * @section Running Jobs
+ * @example Start a Job Run from a Lambda
  * ```typescript
  * // init
  * const startJobRun = yield* AWS.Glue.StartJobRun(job);
@@ -170,8 +171,6 @@ export interface Job extends Resource<
  * // runtime
  * const { JobRunId } = yield* startJobRun({});
  * ```
- *
- * @resource
  */
 export const Job = Resource<Job>("AWS.Glue.Job");
 

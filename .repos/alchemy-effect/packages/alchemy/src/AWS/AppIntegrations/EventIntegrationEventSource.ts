@@ -59,8 +59,8 @@ export interface IntegrationEventsProps {
  * Returns the created {@link EventIntegration} so it can be passed to other
  * bindings (e.g. `ListEventIntegrationAssociations`).
  *
- * ### Consuming Integration Events
- * **Example:** Consume Partner Events on a Lambda Function
+ * @section Consuming Integration Events
+ * @example Consume Partner Events on a Lambda Function
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  * import { consumeIntegrationEvents } from "alchemy/AWS/AppIntegrations";
@@ -77,7 +77,7 @@ export interface IntegrationEventsProps {
  * );
  * ```
  *
- * **Example:** Narrow by Detail Type on a Custom Bus
+ * @example Narrow by Detail Type on a Custom Bus
  * ```typescript
  * const bus = yield* AWS.EventBridge.EventBus("PartnerBus");
  * yield* consumeIntegrationEvents(

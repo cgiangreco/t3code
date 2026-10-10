@@ -1,39 +1,33 @@
 import * as Effect from "effect/Effect";
-import { AsyncResult, Atom } from "effect/reactivity";
+import { AsyncResult, Atom } from "effect/unstable/reactivity";
 
-import * as MobilePreferences from "../persistence/mobile-preferences";
+import { MobilePreferencesStore, type Preferences } from "../persistence/mobile-preferences";
 import * as Runtime from "../lib/runtime";
 
-interface OptimisticPreferences {
-  readonly values: Partial<MobilePreferences.Preferences>;
-  readonly versions: Partial<Record<keyof MobilePreferences.Preferences, number>>;
-}
+export {
+  MobilePreferencesLoadError,
+  MobilePreferencesSaveError,
+  MobilePreferencesStore,
+} from "../persistence/mobile-preferences";
 
-// A bare function is interpreted by useAtomSet as an update to the command's
-// AsyncResult, not as a preference transform. Keep transforms inside a payload.
-type PreferencesUpdate =
-  | Partial<MobilePreferences.Preferences>
-  | {
-      readonly transform: (
-        current: MobilePreferences.Preferences,
-      ) => Partial<MobilePreferences.Preferences>;
-    };
+interface OptimisticPreferences {
+  readonly values: Partial<Preferences>;
+  readonly versions: Partial<Record<keyof Preferences, number>>;
+}
 
 /**
  * Owns the device preference blob for the lifetime of the app registry.
  * Optimistic patches are kept separately so writes made while persistence is
  * still loading cannot be replaced by the eventual read result.
  */
-export function createMobilePreferencesState(
-  runtime: Atom.AtomRuntime<MobilePreferences.MobilePreferencesStore>,
-) {
+export function createMobilePreferencesState(runtime: Atom.AtomRuntime<MobilePreferencesStore>) {
   const storedPreferencesAtom = runtime
     .atom(
-      MobilePreferences.MobilePreferencesStore.pipe(
+      MobilePreferencesStore.pipe(
         Effect.flatMap((store) => store.load),
         Effect.catch((error) =>
           Effect.logWarning("Could not load mobile preferences.", error).pipe(
-            Effect.as<MobilePreferences.Preferences>({}),
+            Effect.as<Preferences>({}),
           ),
         ),
       ),
@@ -44,7 +38,7 @@ export function createMobilePreferencesState(
     Atom.keepAlive,
     Atom.withLabel("mobile:preferences:optimistic-patch"),
   );
-  const confirmedPreferencesAtom = Atom.make<MobilePreferences.Preferences>({}).pipe(
+  const confirmedPreferencesAtom = Atom.make<Preferences>({}).pipe(
     Atom.keepAlive,
     Atom.withLabel("mobile:preferences:confirmed"),
   );
@@ -63,45 +57,34 @@ export function createMobilePreferencesState(
 
   const updatePreferencesAtom = runtime
     .fn(
-      (update: PreferencesUpdate, get) => {
-        const currentPreferences = get(preferencesAtom);
-        const patch =
-          "transform" in update
-            ? update.transform(
-                AsyncResult.isSuccess(currentPreferences) ? currentPreferences.value : {},
-              )
-            : update;
+      (patch: Partial<Preferences>, get) => {
         const version = ++nextPatchVersion;
         const current = get(optimisticPatchAtom);
         const versions = { ...current.versions };
-        for (const key of Object.keys(patch) as Array<keyof MobilePreferences.Preferences>) {
+        for (const key of Object.keys(patch) as Array<keyof Preferences>) {
           versions[key] = version;
         }
         get.set(optimisticPatchAtom, {
           values: { ...current.values, ...patch },
           versions,
         });
-        return MobilePreferences.MobilePreferencesStore.pipe(
-          Effect.flatMap((store) =>
-            "transform" in update ? store.update(update.transform) : store.savePatch(patch),
-          ),
+        return MobilePreferencesStore.pipe(
+          Effect.flatMap((store) => store.savePatch(patch)),
           Effect.tap((saved) =>
             Effect.sync(() => {
               get.set(confirmedPreferencesAtom, saved);
               const optimistic = get(optimisticPatchAtom);
               const values = { ...optimistic.values } as Record<string, unknown>;
               const currentVersions = { ...optimistic.versions } as Record<string, unknown>;
-              for (const key of Object.keys(patch) as Array<keyof MobilePreferences.Preferences>) {
+              for (const key of Object.keys(patch) as Array<keyof Preferences>) {
                 if (optimistic.versions[key] === version) {
                   delete values[key];
                   delete currentVersions[key];
                 }
               }
               get.set(optimisticPatchAtom, {
-                values: values as Partial<MobilePreferences.Preferences>,
-                versions: currentVersions as Partial<
-                  Record<keyof MobilePreferences.Preferences, number>
-                >,
+                values: values as Partial<Preferences>,
+                versions: currentVersions as Partial<Record<keyof Preferences, number>>,
               });
             }),
           ),
@@ -110,17 +93,15 @@ export function createMobilePreferencesState(
               const optimistic = get(optimisticPatchAtom);
               const values = { ...optimistic.values } as Record<string, unknown>;
               const currentVersions = { ...optimistic.versions } as Record<string, unknown>;
-              for (const key of Object.keys(patch) as Array<keyof MobilePreferences.Preferences>) {
+              for (const key of Object.keys(patch) as Array<keyof Preferences>) {
                 if (optimistic.versions[key] === version) {
                   delete values[key];
                   delete currentVersions[key];
                 }
               }
               get.set(optimisticPatchAtom, {
-                values: values as Partial<MobilePreferences.Preferences>,
-                versions: currentVersions as Partial<
-                  Record<keyof MobilePreferences.Preferences, number>
-                >,
+                values: values as Partial<Preferences>,
+                versions: currentVersions as Partial<Record<keyof Preferences, number>>,
               });
             }),
           ),
@@ -136,7 +117,7 @@ export function createMobilePreferencesState(
   return { preferencesAtom, updatePreferencesAtom } as const;
 }
 
-const mobilePreferencesRuntime = Atom.runtime(Runtime.layer);
+const mobilePreferencesRuntime = Atom.runtime(Runtime.runtimeContextLayer);
 export const mobilePreferencesState = createMobilePreferencesState(mobilePreferencesRuntime);
 
 export const mobilePreferencesAtom = mobilePreferencesState.preferencesAtom;

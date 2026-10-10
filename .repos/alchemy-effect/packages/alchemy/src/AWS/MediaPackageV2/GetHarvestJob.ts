@@ -11,8 +11,9 @@ import type { OriginEndpoint } from "./OriginEndpoint.ts";
  * the VOD asset. The endpoint's group, channel, and name are injected from
  * the binding. Provide the implementation with
  * `Effect.provide(AWS.MediaPackageV2.GetHarvestJobHttp)`.
- * ### Harvesting Live-to-VOD Clips
- * **Example:** Poll a Harvest Job Until It Completes
+ * @binding
+ * @section Harvesting Live-to-VOD Clips
+ * @example Poll a Harvest Job Until It Completes
  * ```typescript
  * // init — bind the operation to the endpoint
  * const getHarvestJob = yield* AWS.MediaPackageV2.GetHarvestJob(endpoint);
@@ -20,8 +21,6 @@ import type { OriginEndpoint } from "./OriginEndpoint.ts";
  * // runtime
  * const { Status } = yield* getHarvestJob({ HarvestJobName: job.HarvestJobName });
  * ```
- *
- * @binding
  */
 export interface GetHarvestJob extends Binding.Service<
   GetHarvestJob,

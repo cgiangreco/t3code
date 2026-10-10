@@ -8,14 +8,13 @@ import * as Binding from "../../Binding.ts";
  * Lists the latest control analytics for a specific control domain
  * across active assessments. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.ListControlInsightsByControlDomainHttp)`.
- * ### Insights
- * **Example:** Control Insights for a Domain
+ * @binding
+ * @section Insights
+ * @example Control Insights for a Domain
  * ```typescript
  * const listControlInsightsByControlDomain = yield* AWS.AuditManager.ListControlInsightsByControlDomain();
  * const result = yield* listControlInsightsByControlDomain({ controlDomainId });
  * ```
- *
- * @binding
  */
 export interface ListControlInsightsByControlDomain extends Binding.Service<
   ListControlInsightsByControlDomain,

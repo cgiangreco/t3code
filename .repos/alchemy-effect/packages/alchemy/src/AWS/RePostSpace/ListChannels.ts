@@ -16,15 +16,14 @@ export interface ListChannelsRequest extends Omit<
  * (`nextToken`/`maxResults`).
  * Provide the implementation with
  * `Effect.provide(AWS.RePostSpace.ListChannelsHttp)`.
- * ### Managing Channels
- * **Example:** List the space's channels
+ * @binding
+ * @section Managing Channels
+ * @example List the space's channels
  * ```typescript
  * const listChannels = yield* AWS.RePostSpace.ListChannels(space);
  *
  * const { channels } = yield* listChannels();
  * ```
- *
- * @binding
  */
 export interface ListChannels extends Binding.Service<
   ListChannels,

@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import * as RelayTracing from "@t3tools/shared/relayTracing";
+import { makeRelayClientTracingLayer } from "@t3tools/shared/relayTracing";
 
 import { hasTracingPublicConfig, resolveCloudPublicConfig } from "../cloud/publicConfig";
 
@@ -23,16 +23,16 @@ export function resolveTracingConfig(): TracingConfig | null {
   return { tracesUrl, tracesDataset, tracesToken };
 }
 
-export function layerFromConfig(config: TracingConfig | null, resource: TracingResource) {
-  return RelayTracing.layer(config, {
-    serviceName: "t3code-mobile",
+export function makeTracingLayer(config: TracingConfig | null, resource: TracingResource) {
+  return makeRelayClientTracingLayer(config, {
+    serviceName: "t3-mobile-relay-client",
     serviceVersion: resource.serviceVersion,
     runtime: "react-native",
     client: `mobile-${resource.appVariant}`,
   });
 }
 
-export const layer = layerFromConfig(resolveTracingConfig(), {
+export const tracingLayer = makeTracingLayer(resolveTracingConfig(), {
   serviceVersion: Constants.expoConfig?.version,
   appVariant:
     typeof Constants.expoConfig?.extra?.appVariant === "string"

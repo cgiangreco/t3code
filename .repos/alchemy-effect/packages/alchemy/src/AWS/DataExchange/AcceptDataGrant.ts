@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * automation of direct data sharing.
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.AcceptDataGrantHttp)`.
- * ### Data Grants
- * **Example:** Accept An Incoming Grant
+ * @binding
+ * @section Data Grants
+ * @example Accept An Incoming Grant
  * ```typescript
  * const acceptDataGrant = yield* AWS.DataExchange.AcceptDataGrant();
  *
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const accepted = yield* acceptDataGrant({ DataGrantArn: grantArn });
  * yield* Effect.log(`entitled data set: ${accepted.DataSetId}`);
  * ```
- *
- * @binding
  */
 export interface AcceptDataGrant extends Binding.Service<
   AcceptDataGrant,

@@ -99,8 +99,8 @@ export interface SageMakerEventSourceProps extends EventRouteProps {
  * host-specific implementation layer (e.g. `AWS.Lambda.EventSource`) on the
  * Function effect.
  *
- * ### Consuming SageMaker Events
- * **Example:** Alert When an Endpoint Fails
+ * @section Consuming SageMaker Events
+ * @example Alert When an Endpoint Fails
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

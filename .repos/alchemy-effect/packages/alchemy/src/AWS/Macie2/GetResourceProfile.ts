@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.GetResourceProfileHttp)`.
- * ### Automated Discovery
- * **Example:** Read a Bucket's Sensitivity Profile
+ * @binding
+ * @section Automated Discovery
+ * @example Read a Bucket's Sensitivity Profile
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getResourceProfile = yield* AWS.Macie2.GetResourceProfile();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const profile = yield* getResourceProfile({ resourceArn: bucketArn });
  * ```
- *
- * @binding
  */
 export interface GetResourceProfile extends Binding.Service<
   GetResourceProfile,

@@ -43,8 +43,9 @@ export interface ResourcePolicy extends Resource<
  * principals may send events to (`rum:PutRumEvents`) or read data from the
  * app monitor. An app monitor has at most one.
  *
- * ### Creating a Resource Policy
- * **Example:** Allow the Account to Send RUM Events
+ * @resource
+ * @section Creating a Resource Policy
+ * @example Allow the Account to Send RUM Events
  * ```typescript
  * const monitor = yield* RUM.AppMonitor("SiteMonitor", {
  *   domain: "example.com",
@@ -66,8 +67,6 @@ export interface ResourcePolicy extends Resource<
  *   ),
  * });
  * ```
- *
- * @resource
  */
 export const ResourcePolicy = Resource<ResourcePolicy>(
   "AWS.RUM.ResourcePolicy",

@@ -1,13 +1,10 @@
 import * as Cloudflare from "@/Cloudflare";
-import { CloudflareEnvironment } from "@/Cloudflare/CloudflareEnvironment";
 import * as Test from "@/Test/Alchemy";
-import * as workers from "@distilled.cloud/cloudflare/workers";
 import { expect } from "alchemy-test";
 import * as Effect from "effect/Effect";
 import { MinimumLogLevel } from "effect/References";
 import * as Schedule from "effect/Schedule";
-import * as Schema from "effect/Schema";
-import * as HttpClient from "effect/http/HttpClient";
+import * as HttpClient from "effect/unstable/http/HttpClient";
 import Stack from "./fixtures/cron/stack.ts";
 
 const { test, beforeAll, afterAll, deploy, destroy } = Test.make({
@@ -23,30 +20,7 @@ const logLevel = Effect.provideService(
 const stack = beforeAll(deploy(Stack));
 afterAll.skipIf(!!process.env.NO_DESTROY)(destroy(Stack));
 
-test.provider(
-  "registers the event source's schedule with Cloudflare",
-  (scratch) =>
-    Effect.gen(function* () {
-      yield* scratch.destroy();
-      const { workerName, crons } = yield* stack;
-      const { accountId } = yield* yield* CloudflareEnvironment;
-      const { schedules } = yield* workers.getScriptSchedule({
-        accountId,
-        scriptName: workerName,
-      });
-      expect(crons).toEqual(["* * * * *"]);
-      expect(schedules.map(({ cron }) => cron)).toEqual(crons);
-      yield* scratch.destroy();
-    }).pipe(logLevel),
-  { tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"] },
-);
-
-// New schedules can take up to 15 minutes to propagate. Retain the fixture
-// with NO_DESTROY=1 before opting into wall-clock delivery. The local suite
-// covers native scheduled dispatch without waiting for cloud propagation.
-test.skipIf(
-  !!process.env.FAST || process.env.CLOUDFLARE_TEST_CRON_DELIVERY !== "1",
-)(
+test.skipIf(!!process.env.FAST)(
   "deployed worker fires the scheduled handler on its cron trigger",
   Effect.gen(function* () {
     const { url, crons } = yield* stack;
@@ -54,7 +28,8 @@ test.skipIf(
 
     const client = yield* HttpClient.HttpClient;
 
-    // Reset also probes readiness of a fresh workers.dev URL.
+    // Reset any leftover state from prior runs. Doubles as a readiness probe —
+    // a fresh workers.dev URL can take a few seconds to start serving 200s.
     yield* Effect.gen(function* () {
       const res = yield* client.post(`${url}/reset`);
       if (res.status !== 200) {
@@ -62,38 +37,33 @@ test.skipIf(
       }
     }).pipe(
       Effect.retry({
-        schedule: Schedule.spaced("2 seconds"),
-        times: 8,
+        schedule: Schedule.exponential("500 millis"),
+        times: 10,
       }),
     );
-    const resetAt = yield* Effect.sync(() => Date.now());
+    const resetAt = Date.now();
 
+    // Cloudflare cron granularity is one minute and there's some propagation
+    // delay after deploy, so we poll up to ~3 minutes for the first fire.
     const times = yield* Effect.gen(function* () {
       const res = yield* client.get(`${url}/times`);
-      expect(res.status).toBe(200);
-      const body = yield* res.json.pipe(
-        Effect.flatMap(
-          Schema.decodeUnknownEffect(
-            Schema.Struct({ times: Schema.Array(Schema.Number) }),
-          ),
-        ),
-      );
-      return body.times.filter((time) => time >= resetAt);
+      if (res.status !== 200) return [];
+      const body = (yield* res.json) as { times?: unknown };
+      if (!Array.isArray(body.times)) return [];
+      return body.times.filter((t) => t >= resetAt);
     }).pipe(
+      Effect.catch(() => Effect.succeed([])),
       Effect.repeat({
-        schedule: Schedule.spaced("10 seconds"),
+        schedule: Schedule.spaced("5 seconds"),
         until: (recent) => recent.length > 0,
-        times: 9,
+        times: 36,
       }),
     );
 
     expect(times.length).toBeGreaterThan(0);
-    for (const time of times) {
-      expect(time).toBeGreaterThanOrEqual(resetAt);
+    for (const t of times) {
+      expect(t).toBeGreaterThanOrEqual(resetAt);
     }
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 120_000,
-  },
+  { timeout: 120_000 },
 );

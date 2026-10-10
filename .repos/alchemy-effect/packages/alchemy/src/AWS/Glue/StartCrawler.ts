@@ -11,8 +11,9 @@ import type { Crawler } from "./Crawler.ts";
  * typed `CrawlerRunningException` if a crawl is already in progress. The
  * crawler name is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.StartCrawlerHttp)`.
- * ### Running Crawlers
- * **Example:** Kick Off a Crawl
+ * @binding
+ * @section Running Crawlers
+ * @example Kick Off a Crawl
  * ```typescript
  * // init
  * const startCrawler = yield* AWS.Glue.StartCrawler(crawler);
@@ -22,8 +23,6 @@ import type { Crawler } from "./Crawler.ts";
  *   Effect.catchTag("CrawlerRunningException", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface StartCrawler extends Binding.Service<
   StartCrawler,

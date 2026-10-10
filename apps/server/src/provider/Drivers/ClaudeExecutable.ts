@@ -2,7 +2,7 @@
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessPlatform } from "@t3tools/shared/hostProcess";
 import { SpawnExecutableResolution } from "@t3tools/shared/shell";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -13,13 +13,6 @@ import * as Effect from "effect/Effect";
  * cannot use as `pathToClaudeCodeExecutable`.
  */
 const WINDOWS_SHIM_EXTENSIONS: ReadonlySet<string> = new Set([".cmd", ".bat", ".ps1"]);
-
-/**
- * Whether `filePath` names a Windows launcher script that the Claude Agent SDK
- * cannot spawn directly as `pathToClaudeCodeExecutable`.
- */
-export const isWindowsClaudeLauncherShimPath = (filePath: string): boolean =>
-  WINDOWS_SHIM_EXTENSIONS.has(NodePath.win32.extname(filePath).toLowerCase());
 
 /**
  * Entry points of the npm `@anthropic-ai/claude-code` package relative to the
@@ -67,7 +60,7 @@ export const ClaudeExecutableFileCheck = Context.Reference<ExecutableFileCheck>(
  */
 export const resolveClaudeSdkExecutablePath = Effect.fn("resolveClaudeSdkExecutablePath")(
   function* (binaryPath: string, environment: NodeJS.ProcessEnv): Effect.fn.Return<string> {
-    const platform = yield* HostProcess.Platform;
+    const platform = yield* HostProcessPlatform;
     if (platform !== "win32") {
       return binaryPath;
     }

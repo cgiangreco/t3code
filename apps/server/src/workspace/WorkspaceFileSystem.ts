@@ -3,13 +3,10 @@
  * WorkspaceFileSystem - Effect service contract for workspace file mutations.
  *
  * Owns workspace-root-relative file read/write operations and their associated
- * safety checks and cache invalidation hooks. Reads also accept absolute host
- * paths so clients can show files an agent left outside the workspace; writes
- * never leave the root.
+ * safety checks and cache invalidation hooks.
  *
  * @module WorkspaceFileSystem
  */
-import * as NodeFS from "node:fs";
 import * as NodeFSP from "node:fs/promises";
 
 import type {
@@ -30,7 +27,7 @@ import * as WorkspacePaths from "./WorkspacePaths.ts";
 
 const PROJECT_READ_FILE_MAX_BYTES = 1024 * 1024;
 
-export class WorkspaceFileSystemOperationError extends Schema.TaggedError<WorkspaceFileSystemOperationError>()(
+export class WorkspaceFileSystemOperationError extends Schema.TaggedErrorClass<WorkspaceFileSystemOperationError>()(
   "WorkspaceFileSystemOperationError",
   {
     workspaceRoot: Schema.String,
@@ -55,7 +52,7 @@ export class WorkspaceFileSystemOperationError extends Schema.TaggedError<Worksp
   }
 }
 
-export class WorkspaceFilePathEscapeError extends Schema.TaggedError<WorkspaceFilePathEscapeError>()(
+export class WorkspaceFilePathEscapeError extends Schema.TaggedErrorClass<WorkspaceFilePathEscapeError>()(
   "WorkspaceFilePathEscapeError",
   {
     workspaceRoot: Schema.String,
@@ -69,7 +66,7 @@ export class WorkspaceFilePathEscapeError extends Schema.TaggedError<WorkspaceFi
   }
 }
 
-export class WorkspacePathNotFileError extends Schema.TaggedError<WorkspacePathNotFileError>()(
+export class WorkspacePathNotFileError extends Schema.TaggedErrorClass<WorkspacePathNotFileError>()(
   "WorkspacePathNotFileError",
   {
     workspaceRoot: Schema.String,
@@ -82,7 +79,7 @@ export class WorkspacePathNotFileError extends Schema.TaggedError<WorkspacePathN
   }
 }
 
-export class WorkspaceBinaryFileError extends Schema.TaggedError<WorkspaceBinaryFileError>()(
+export class WorkspaceBinaryFileError extends Schema.TaggedErrorClass<WorkspaceBinaryFileError>()(
   "WorkspaceBinaryFileError",
   {
     workspaceRoot: Schema.String,
@@ -107,10 +104,7 @@ export type WorkspaceFileSystemError = typeof WorkspaceFileSystemError.Type;
 export class WorkspaceFileSystem extends Context.Service<
   WorkspaceFileSystem,
   {
-    /**
-     * Read a UTF-8 text file relative to the workspace root, or any host file by
-     * absolute path.
-     */
+    /** Read a UTF-8 text file relative to the workspace root. */
     readonly readFile: (
       input: ProjectReadFileInput,
     ) => Effect.Effect<
@@ -132,38 +126,15 @@ export class WorkspaceFileSystem extends Context.Service<
   }
 >()("t3/workspace/WorkspaceFileSystem") {}
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
   const fileSystem = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const workspacePaths = yield* WorkspacePaths.WorkspacePaths;
   const workspaceEntries = yield* WorkspaceEntries.WorkspaceEntries;
 
-  /**
-   * Resolves the file a read targets. Workspace-relative paths must stay inside the
-   * root, symlinks included. An absolute path reads a host file in place, such as a
-   * report an agent wrote to a temp directory; it gets no root check.
-   */
-  const resolveReadTarget = Effect.fn("WorkspaceFileSystem.resolveReadTarget")(function* (
-    input: ProjectReadFileInput,
-  ) {
-    const requestedPath = input.relativePath.trim();
-    if (path.isAbsolute(requestedPath)) {
-      const realTargetPath = yield* Effect.tryPromise({
-        try: () => NodeFSP.realpath(requestedPath),
-        catch: (cause) =>
-          new WorkspaceFileSystemOperationError({
-            workspaceRoot: input.cwd,
-            relativePath: input.relativePath,
-            resolvedPath: requestedPath,
-            operationPath: requestedPath,
-            operation: "realpath-target",
-            cause,
-          }),
-      });
-      return { relativePath: requestedPath, realTargetPath };
-    }
-
+  const readFile: WorkspaceFileSystem["Service"]["readFile"] = Effect.fn(
+    "WorkspaceFileSystem.readFile",
+  )(function* (input) {
     const target = yield* workspacePaths.resolveRelativePathWithinRoot({
       workspaceRoot: input.cwd,
       relativePath: input.relativePath,
@@ -206,24 +177,10 @@ export const make = Effect.gen(function* () {
         resolvedPath: realTargetPath,
       });
     }
-    return { relativePath: target.relativePath, realTargetPath };
-  });
-
-  const readFile: WorkspaceFileSystem["Service"]["readFile"] = Effect.fn(
-    "WorkspaceFileSystem.readFile",
-  )(function* (input) {
-    const target = yield* resolveReadTarget(input);
-    const realTargetPath = target.realTargetPath;
 
     return yield* Effect.acquireUseRelease(
       Effect.tryPromise({
-        // Non-blocking so a FIFO cannot hang the open; the stat below rejects
-        // it. Regular files ignore the flag. Windows lacks it.
-        try: () =>
-          NodeFSP.open(
-            realTargetPath,
-            NodeFS.constants.O_RDONLY | (NodeFS.constants.O_NONBLOCK ?? 0),
-          ),
+        try: () => NodeFSP.open(realTargetPath, "r"),
         catch: (cause) =>
           new WorkspaceFileSystemOperationError({
             workspaceRoot: input.cwd,

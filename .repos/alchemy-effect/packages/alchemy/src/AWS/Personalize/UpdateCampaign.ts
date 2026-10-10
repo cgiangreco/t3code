@@ -8,16 +8,15 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.UpdateCampaignHttp)`.
  *
- * ### Retraining Loop
- * **Example:** Deploy a New Model Version
+ * @binding
+ * @section Retraining Loop
+ * @example Deploy a New Model Version
  * ```typescript
  * // init
  * const updateCampaign = yield* Personalize.UpdateCampaign();
  *
  * yield* updateCampaign({ campaignArn, solutionVersionArn });
  * ```
- *
- * @binding
  */
 export interface UpdateCampaign extends Binding.Service<
   UpdateCampaign,

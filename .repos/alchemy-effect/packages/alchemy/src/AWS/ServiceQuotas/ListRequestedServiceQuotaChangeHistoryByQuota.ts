@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * `servicequotas:ListRequestedServiceQuotaChangeHistoryByQuota` — list quota
  * increase requests for one specific quota from inside a Function.
  *
- * ### Quota Increase Requests
- * **Example:** List requests for the Lambda concurrency quota
+ * @binding
+ * @section Quota Increase Requests
+ * @example List requests for the Lambda concurrency quota
  * ```typescript
  * // init
  * const listRequestedServiceQuotaChangeHistoryByQuota =
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *     QuotaCode: "L-B99A9384",
  *   });
  * ```
- *
- * @binding
  */
 export interface ListRequestedServiceQuotaChangeHistoryByQuota extends Binding.Service<
   ListRequestedServiceQuotaChangeHistoryByQuota,

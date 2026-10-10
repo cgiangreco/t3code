@@ -22,8 +22,9 @@ export interface ChangeResourceRecordSetsRequest extends Omit<
  * {@link GetChange} to wait until the change is `INSYNC`. Provide the
  * implementation with
  * `Effect.provide(AWS.Route53.ChangeResourceRecordSetsHttp)`.
- * ### Managing Records at Runtime
- * **Example:** Upsert a TXT record
+ * @binding
+ * @section Managing Records at Runtime
+ * @example Upsert a TXT record
  * ```typescript
  * const changeRecordSets = yield* AWS.Route53.ChangeResourceRecordSets(zone);
  *
@@ -41,8 +42,6 @@ export interface ChangeResourceRecordSetsRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface ChangeResourceRecordSets extends Binding.Service<
   ChangeResourceRecordSets,

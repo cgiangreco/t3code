@@ -11,8 +11,9 @@ export interface ExecuteStatementRequest
  *
  * This binding scopes IAM to a specific table, but the statement text is still
  * user-provided. Statements must only reference the bound table or its indexes.
- * ### PartiQL
- * **Example:** Execute a Statement Against One Table
+ * @binding
+ * @section PartiQL
+ * @example Execute a Statement Against One Table
  * ```typescript
  * const executeStatement = yield* AWS.DynamoDB.ExecuteStatement(table);
  *
@@ -21,8 +22,6 @@ export interface ExecuteStatementRequest
  *   Parameters: [{ S: "user#1" }],
  * });
  * ```
- *
- * @binding
  */
 export interface ExecuteStatement extends Binding.Service<
   ExecuteStatement,

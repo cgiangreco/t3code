@@ -18,8 +18,9 @@ export interface BatchGetSecretValueRequest extends Omit<
  * (BatchGetSecretValue authorizes per-secret through GetSecretValue).
  * Provide the implementation with
  * `Effect.provide(AWS.SecretsManager.BatchGetSecretValueHttp)`.
- * ### Reading Secret Values
- * **Example:** Read Several Secrets at Once
+ * @binding
+ * @section Reading Secret Values
+ * @example Read Several Secrets at Once
  * ```typescript
  * // init — bind the operation to the secrets
  * const batchGet = yield* AWS.SecretsManager.BatchGetSecretValue([
@@ -33,8 +34,6 @@ export interface BatchGetSecretValueRequest extends Omit<
  *   console.log(entry.Name);
  * }
  * ```
- *
- * @binding
  */
 export interface BatchGetSecretValue extends Binding.Service<
   BatchGetSecretValue,

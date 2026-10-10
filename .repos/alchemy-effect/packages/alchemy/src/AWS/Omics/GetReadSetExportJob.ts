@@ -15,16 +15,15 @@ export interface GetReadSetExportJobRequest extends Omit<
  * store/workflow id is injected automatically and the action is granted on the
  * bound resource. Provide the implementation with
  * `Effect.provide(AWS.Omics.GetReadSetExportJobHttp)`.
- * ### Read Sets
- * **Example:** Bind GetReadSetExportJob to a SequenceStore
+ * @binding
+ * @section Read Sets
+ * @example Bind GetReadSetExportJob to a SequenceStore
  * ```typescript
  * // init
  * const getReadSetExportJob = yield* AWS.Omics.GetReadSetExportJob(store);
  * // runtime
  * const result = yield* getReadSetExportJob({});
  * ```
- *
- * @binding
  */
 export interface GetReadSetExportJob extends Binding.Service<
   GetReadSetExportJob,

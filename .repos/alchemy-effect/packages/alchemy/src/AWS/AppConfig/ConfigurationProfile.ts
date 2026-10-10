@@ -97,8 +97,9 @@ export interface ConfigurationProfile extends Resource<
  * data lives (the AppConfig hosted store, S3, SSM, Secrets Manager, or
  * CodePipeline) and how to validate it.
  *
- * ### Creating a Configuration Profile
- * **Example:** Hosted Configuration Profile
+ * @resource
+ * @section Creating a Configuration Profile
+ * @example Hosted Configuration Profile
  * ```typescript
  * const profile = yield* AppConfig.ConfigurationProfile("Settings", {
  *   applicationId: app.applicationId,
@@ -106,7 +107,7 @@ export interface ConfigurationProfile extends Resource<
  * });
  * ```
  *
- * **Example:** S3-sourced Profile with a JSON Schema Validator
+ * @example S3-sourced Profile with a JSON Schema Validator
  * ```typescript
  * const profile = yield* AppConfig.ConfigurationProfile("Settings", {
  *   applicationId: app.applicationId,
@@ -115,8 +116,6 @@ export interface ConfigurationProfile extends Resource<
  *   validators: [{ type: "JSON_SCHEMA", content: schemaJson }],
  * });
  * ```
- *
- * @resource
  */
 export const ConfigurationProfile = Resource<ConfigurationProfile>(
   "AWS.AppConfig.ConfigurationProfile",

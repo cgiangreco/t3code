@@ -110,8 +110,9 @@ export interface ScalableTarget extends Resource<
  * any part of the triple replaces the target. Deregistering a scalable
  * target deletes the scaling policies and scheduled actions associated
  * with it.
- * ### Creating Scalable Targets
- * **Example:** Scale an ECS Service
+ * @resource
+ * @section Creating Scalable Targets
+ * @example Scale an ECS Service
  * ```typescript
  * const target = yield* ScalableTarget("ApiScaling", {
  *   serviceNamespace: "ecs",
@@ -122,7 +123,7 @@ export interface ScalableTarget extends Resource<
  * });
  * ```
  *
- * **Example:** Scale DynamoDB Read Capacity
+ * @example Scale DynamoDB Read Capacity
  * ```typescript
  * const target = yield* ScalableTarget("TableReadScaling", {
  *   serviceNamespace: "dynamodb",
@@ -133,8 +134,8 @@ export interface ScalableTarget extends Resource<
  * });
  * ```
  *
- * ### Suspending Scaling
- * **Example:** Suspend Dynamic Scale-In
+ * @section Suspending Scaling
+ * @example Suspend Dynamic Scale-In
  * ```typescript
  * yield* ScalableTarget("ApiScaling", {
  *   serviceNamespace: "ecs",
@@ -145,8 +146,6 @@ export interface ScalableTarget extends Resource<
  *   suspendedState: { DynamicScalingInSuspended: true },
  * });
  * ```
- *
- * @resource
  */
 export const ScalableTarget = Resource<ScalableTarget>(
   "AWS.ApplicationAutoScaling.ScalableTarget",

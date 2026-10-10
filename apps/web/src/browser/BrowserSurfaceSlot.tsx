@@ -3,13 +3,11 @@
 import { useLayoutEffect, useRef } from "react";
 
 import { acquireBrowserSurface } from "./browserSurfaceStore";
-import { observeResize } from "../lib/observeResize";
 
 export function BrowserSurfaceSlot(props: {
   readonly tabId: string;
   readonly visible: boolean;
   readonly cornerRadius?: number;
-  readonly zIndex?: number;
   readonly layoutVersion?: string | number;
   readonly className?: string;
   readonly fitSourceContent?: boolean;
@@ -18,13 +16,12 @@ export function BrowserSurfaceSlot(props: {
     tabId,
     visible,
     cornerRadius = 0,
-    zIndex = 30,
     layoutVersion,
     className,
     fitSourceContent = false,
   } = props;
   const elementRef = useRef<HTMLDivElement | null>(null);
-  const presentationRef = useRef({ visible, cornerRadius, zIndex });
+  const presentationRef = useRef({ visible, cornerRadius });
   const updateRef = useRef<(() => void) | null>(null);
 
   useLayoutEffect(() => {
@@ -43,7 +40,6 @@ export function BrowserSurfaceSlot(props: {
         },
         presentation.visible && rect.width > 0 && rect.height > 0,
         presentation.cornerRadius,
-        presentation.zIndex,
       );
       if (presentation.visible && !presented) {
         lease.release();
@@ -57,26 +53,17 @@ export function BrowserSurfaceSlot(props: {
           },
           rect.width > 0 && rect.height > 0,
           presentation.cornerRadius,
-          presentation.zIndex,
         );
       }
     };
     updateRef.current = update;
     update();
-    const observed: Element[] = [element];
-    // Inline panels animate their outer width while keeping the content at
-    // full width. The slot moves without resizing, so measure on shell resizes too.
-    const panel = element.closest('[data-preview-panel-mode="inline"]');
-    if (panel) observed.push(panel);
-    // A sidebar opening or closing shifts the whole column, so a slot that keeps
-    // its size and its offset inside the column (the mini player on the left)
-    // still moves on screen. The gap element carries the sidebar's width.
-    observed.push(...document.querySelectorAll('[data-slot="sidebar-gap"]'));
-    const stopObserving = observeResize(observed, update);
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
     return () => {
-      stopObserving();
+      observer.disconnect();
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
       if (updateRef.current === update) updateRef.current = null;
@@ -85,9 +72,9 @@ export function BrowserSurfaceSlot(props: {
   }, [fitSourceContent, tabId]);
 
   useLayoutEffect(() => {
-    presentationRef.current = { visible, cornerRadius, zIndex };
+    presentationRef.current = { visible, cornerRadius };
     updateRef.current?.();
-  }, [cornerRadius, layoutVersion, visible, zIndex]);
+  }, [cornerRadius, layoutVersion, visible]);
 
   return <div ref={elementRef} className={className} data-browser-surface-slot={tabId} />;
 }

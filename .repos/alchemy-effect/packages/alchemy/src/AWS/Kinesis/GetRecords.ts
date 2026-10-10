@@ -16,8 +16,9 @@ export interface GetRecordsRequest extends Omit<
  * implementation with `Effect.provide(AWS.Kinesis.GetRecordsHttp)`. For
  * push-based processing, prefer `consumeStreamRecords` (a Lambda event
  * source) over manual polling.
- * ### Reading Records
- * **Example:** Read Records from a Shard
+ * @binding
+ * @section Reading Records
+ * @example Read Records from a Shard
  * ```typescript
  * // init — bind the operations to the stream
  * const getShardIterator = yield* AWS.Kinesis.GetShardIterator(stream);
@@ -35,8 +36,6 @@ export interface GetRecordsRequest extends Omit<
  *   yield* Effect.log(record.PartitionKey);
  * }
  * ```
- *
- * @binding
  */
 export interface GetRecords extends Binding.Service<
   GetRecords,

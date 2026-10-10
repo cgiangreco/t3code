@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * translation jobs submitted in the account and region, optionally filtered
  * by name, status, or submission time.
  *
- * ### Batch Translation Jobs
- * **Example:** List batch translation jobs
+ * @binding
+ * @section Batch Translation Jobs
+ * @example List batch translation jobs
  * ```typescript
  * // init
  * const listJobs = yield* AWS.Translate.ListTextTranslationJobs();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.TextTranslationJobPropertiesList -> [{ JobId, JobStatus, … }, …]
  * ```
- *
- * @binding
  */
 export interface ListTextTranslationJobs extends Binding.Service<
   ListTextTranslationJobs,

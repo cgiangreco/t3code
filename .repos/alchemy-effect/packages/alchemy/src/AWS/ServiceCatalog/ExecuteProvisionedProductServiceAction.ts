@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.ExecuteProvisionedProductServiceActionHttp)`.
- * ### Service Actions
- * **Example:** Execute a Self-Service Action
+ * @binding
+ * @section Service Actions
+ * @example Execute a Self-Service Action
  * ```typescript
  * // init — account-level binding, no resource argument
  * const executeProvisionedProductServiceAction = yield* AWS.ServiceCatalog.ExecuteProvisionedProductServiceAction();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *     ExecuteToken: crypto.randomUUID(),
  *   });
  * ```
- *
- * @binding
  */
 export interface ExecuteProvisionedProductServiceAction extends Binding.Service<
   ExecuteProvisionedProductServiceAction,

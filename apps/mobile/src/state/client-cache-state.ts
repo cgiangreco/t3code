@@ -1,16 +1,15 @@
 import type { EnvironmentId } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
-import { Atom } from "effect/reactivity";
+import { Atom } from "effect/unstable/reactivity";
 
-import * as MobileDatabase from "../persistence/mobile-database";
-import { projectFaviconDatabaseCache } from "../lib/projectFaviconDatabaseCache";
+import { type ClientCacheKind, MobileDatabase } from "../persistence/mobile-database";
 import * as Runtime from "../lib/runtime";
 
 export interface EnvironmentClientCacheSummary {
   readonly environmentId: EnvironmentId;
   readonly recordCount: number;
   readonly payloadBytes: number;
-  readonly kinds: Readonly<Partial<Record<MobileDatabase.ClientCacheKind, number>>>;
+  readonly kinds: Readonly<Partial<Record<ClientCacheKind, number>>>;
 }
 
 export interface ClientCacheSummary {
@@ -26,7 +25,7 @@ export type ClientCacheClearScope =
 function aggregateCacheSummary(
   rows: ReadonlyArray<{
     readonly environmentId: EnvironmentId;
-    readonly kind: MobileDatabase.ClientCacheKind;
+    readonly kind: ClientCacheKind;
     readonly recordCount: number;
     readonly payloadBytes: number;
   }>,
@@ -59,11 +58,11 @@ function aggregateCacheSummary(
   };
 }
 
-const clientCacheRuntime = Atom.runtime(Runtime.layer);
+const clientCacheRuntime = Atom.runtime(Runtime.runtimeContextLayer);
 
 export const clientCacheSummaryAtom = clientCacheRuntime
   .atom(
-    MobileDatabase.MobileDatabase.pipe(
+    MobileDatabase.pipe(
       Effect.flatMap((database) => database.inspectCaches),
       Effect.map(aggregateCacheSummary),
     ),
@@ -72,12 +71,7 @@ export const clientCacheSummaryAtom = clientCacheRuntime
 
 export const clearClientCacheAtom = clientCacheRuntime
   .fn((scope: ClientCacheClearScope, get) =>
-    Effect.promise(() =>
-      scope.type === "all"
-        ? projectFaviconDatabaseCache.clearAll()
-        : projectFaviconDatabaseCache.clearEnvironment(scope.environmentId),
-    ).pipe(
-      Effect.andThen(MobileDatabase.MobileDatabase),
+    MobileDatabase.pipe(
       Effect.flatMap((database) =>
         scope.type === "all"
           ? database.clearAllCaches

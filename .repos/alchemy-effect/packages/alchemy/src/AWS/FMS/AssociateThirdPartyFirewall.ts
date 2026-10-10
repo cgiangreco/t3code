@@ -14,8 +14,9 @@ export interface AssociateThirdPartyFirewallRequest
  * Sets the Firewall Manager policy administrator as a tenant administrator of a third-party firewall service (Palo Alto Networks Cloud NGFW or
  * Fortigate Cloud Native Firewall). Requires an active AWS Marketplace subscription to the vendor. Provide the implementation with
  * `Effect.provide(AWS.FMS.AssociateThirdPartyFirewallHttp)`.
- * ### Third-Party Firewalls
- * **Example:** Onboard a Third-Party Firewall Vendor
+ * @binding
+ * @section Third-Party Firewalls
+ * @example Onboard a Third-Party Firewall Vendor
  * ```typescript
  * // init — account-level binding takes no resource
  * const associateThirdPartyFirewall = yield* AWS.FMS.AssociateThirdPartyFirewall();
@@ -26,8 +27,6 @@ export interface AssociateThirdPartyFirewallRequest
  * });
  * console.log(result.ThirdPartyFirewallStatus);
  * ```
- *
- * @binding
  */
 export interface AssociateThirdPartyFirewall extends Binding.Service<
   AssociateThirdPartyFirewall,

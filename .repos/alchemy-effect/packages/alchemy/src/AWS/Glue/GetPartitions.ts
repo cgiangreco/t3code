@@ -16,8 +16,9 @@ export interface GetPartitionsRequest extends Omit<
  * via `NextToken`. The database/table names and catalog id are injected from
  * the binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.GetPartitionsHttp)`.
- * ### Managing Partitions
- * **Example:** List Recent Partitions
+ * @binding
+ * @section Managing Partitions
+ * @example List Recent Partitions
  * ```typescript
  * // init
  * const getPartitions = yield* AWS.Glue.GetPartitions(table);
@@ -27,8 +28,6 @@ export interface GetPartitionsRequest extends Omit<
  *   Expression: "dt >= '2026-01-01'",
  * });
  * ```
- *
- * @binding
  */
 export interface GetPartitions extends Binding.Service<
   GetPartitions,

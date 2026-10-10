@@ -26,6 +26,7 @@ test.provider(
         envVersion: string;
         alias?: {
           aliasName: string;
+          functionVersion: string;
           description?: string;
           routingConfig?: Lambda.AliasRoutingConfiguration;
         };
@@ -35,30 +36,30 @@ test.provider(
             main: timeoutHandlerPath,
             handler: "handler",
             isExternal: true,
-            functionUrl: false,
+            url: false,
             env: {
               VERSION: envVersion,
             },
           });
 
-          const version = yield* AWS.Lambda.Version("AliasVersion", {
-            function: fn,
-          });
-
           const live = alias
             ? yield* AWS.Lambda.Alias("LiveAlias", {
-                version,
+                functionName: fn.functionName,
+                functionVersion: alias.functionVersion,
                 aliasName: alias.aliasName,
                 description: alias.description,
                 routingConfig: alias.routingConfig,
               })
             : undefined;
 
-          return { fn, version, live };
+          return { fn, live };
         });
 
       const initial = yield* stack.deploy(program({ envVersion: "1" }));
-      const version1 = initial.version.version;
+      const version1 = yield* publishVersion(
+        initial.fn.functionName,
+        "version 1",
+      );
 
       // --- create ---
       const created = yield* stack.deploy(
@@ -66,6 +67,7 @@ test.provider(
           envVersion: "1",
           alias: {
             aliasName: "live",
+            functionVersion: version1,
             description: "live v1",
           },
         }),
@@ -88,11 +90,27 @@ test.provider(
       expect(liveV1!.RoutingConfig?.AdditionalVersionWeights ?? {}).toEqual({});
 
       // --- update (function version + weighted routing + description) ---
+      const updatedFunction = yield* stack.deploy(
+        program({
+          envVersion: "2",
+          alias: {
+            aliasName: "live",
+            functionVersion: version1,
+            description: "live v1",
+          },
+        }),
+      );
+      const version2 = yield* publishVersion(
+        updatedFunction.fn.functionName,
+        "version 2",
+      );
+
       const updated = yield* stack.deploy(
         program({
           envVersion: "2",
           alias: {
             aliasName: "live",
+            functionVersion: version2,
             description: "weighted live",
             routingConfig: {
               AdditionalVersionWeights: {
@@ -102,7 +120,6 @@ test.provider(
           },
         }),
       );
-      const version2 = updated.version.version;
       const updatedAlias = updated.live!;
 
       // Updating in place must keep the same ARN (not a replacement).
@@ -134,6 +151,7 @@ test.provider(
           envVersion: "2",
           alias: {
             aliasName: "live",
+            functionVersion: version2,
           },
         }),
       );
@@ -163,6 +181,7 @@ test.provider(
           envVersion: "2",
           alias: {
             aliasName: "stable",
+            functionVersion: version2,
             description: "renamed",
           },
         }),
@@ -234,7 +253,7 @@ test.provider(
       Effect.tap(() => stack.destroy()),
       Effect.onError(() => stack.destroy().pipe(Effect.ignore)),
     ),
-  { tags: ["provider:aws", "provider:aws:lambda", "live"], timeout: 360_000 },
+  { timeout: 360_000 },
 );
 
 const getAliasOrUndefined = Effect.fn(function* (
@@ -249,4 +268,24 @@ const getAliasOrUndefined = Effect.fn(function* (
       Effect.succeed(undefined),
     ),
   );
+});
+
+const publishVersion = Effect.fn(function* (
+  functionName: string,
+  description: string,
+) {
+  const config = yield* Lambda.publishVersion({
+    FunctionName: functionName,
+    Description: description,
+  }).pipe(
+    Effect.retry({
+      while: (e) => e._tag === "ResourceConflictException",
+      schedule: Schedule.max([Schedule.exponential(500), Schedule.recurs(10)]),
+    }),
+    Effect.filterOrFail(
+      (config) => config.Version !== undefined,
+      () => new Error("Published Lambda version was missing Version."),
+    ),
+  );
+  return config.Version!;
 });

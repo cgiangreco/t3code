@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.DeclineInvitationsHttp)`.
- * ### Administrator & Invitations
- * **Example:** Decline Invitations
+ * @binding
+ * @section Administrator & Invitations
+ * @example Decline Invitations
  * ```typescript
  * // init
  * // init — account-level binding, no resource argument
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* declineInvitations({ AccountIds: ["111122223333"] });
  * ```
- *
- * @binding
  */
 export interface DeclineInvitations extends Binding.Service<
   DeclineInvitations,

@@ -20,8 +20,9 @@ export interface BatchCheckLayerAvailabilityRequest extends Omit<
  * the implementation with
  * `Effect.provide(AWS.ECRPublic.BatchCheckLayerAvailabilityHttp)`.
  *
- * ### Pushing Images
- * **Example:** Check Layer Availability Before Uploading
+ * @binding
+ * @section Pushing Images
+ * @example Check Layer Availability Before Uploading
  * ```typescript
  * // init
  * const checkLayers = yield* AWS.ECRPublic.BatchCheckLayerAvailability(repository);
@@ -30,8 +31,6 @@ export interface BatchCheckLayerAvailabilityRequest extends Omit<
  * const result = yield* checkLayers({ layerDigests: ["sha256:abc..."] });
  * const missing = (result.failures ?? []).map((f) => f.layerDigest);
  * ```
- *
- * @binding
  */
 export interface BatchCheckLayerAvailability extends Binding.Service<
   BatchCheckLayerAvailability,

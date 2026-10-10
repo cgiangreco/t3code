@@ -16,8 +16,9 @@ export interface ListFindingsV2Request extends Omit<
  * Lists the analyzer's findings (external-access and unused-access), with
  * optional filter and sort criteria. Provide the implementation with
  * `Effect.provide(AWS.AccessAnalyzer.ListFindingsV2Http)`.
- * ### Reading Findings
- * **Example:** List Active Findings
+ * @binding
+ * @section Reading Findings
+ * @example List Active Findings
  * ```typescript
  * // init — bind the operation to the analyzer
  * const listFindings = yield* AWS.AccessAnalyzer.ListFindingsV2(analyzer);
@@ -28,8 +29,6 @@ export interface ListFindingsV2Request extends Omit<
  *   maxResults: 50,
  * });
  * ```
- *
- * @binding
  */
 export interface ListFindingsV2 extends Binding.Service<
   ListFindingsV2,

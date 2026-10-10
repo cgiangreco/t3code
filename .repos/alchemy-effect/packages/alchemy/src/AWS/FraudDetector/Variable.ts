@@ -69,8 +69,9 @@ export interface Variable extends Resource<
  * and rules, typed and sourced from event data or model scores. Variables are
  * cheap metadata objects.
  *
- * ### Creating a Variable
- * **Example:** Event Variable
+ * @resource
+ * @section Creating a Variable
+ * @example Event Variable
  * ```typescript
  * const email = yield* FraudDetector.Variable("email", {
  *   dataType: "STRING",
@@ -79,8 +80,6 @@ export interface Variable extends Resource<
  *   variableType: "EMAIL_ADDRESS",
  * });
  * ```
- *
- * @resource
  */
 export const Variable = Resource<Variable>("AWS.FraudDetector.Variable");
 

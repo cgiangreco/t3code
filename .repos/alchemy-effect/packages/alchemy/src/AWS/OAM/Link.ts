@@ -98,8 +98,9 @@ export interface Link extends Resource<
  * The sink must live in a **different** account and its sink policy must
  * authorize this account to link.
  *
- * ### Creating a Link
- * **Example:** Share metrics and logs with a monitoring account
+ * @resource
+ * @section Creating a Link
+ * @example Share metrics and logs with a monitoring account
  * ```typescript
  * import * as OAM from "alchemy/AWS/OAM";
  *
@@ -111,7 +112,7 @@ export interface Link extends Resource<
  * });
  * ```
  *
- * **Example:** Filter what is shared
+ * @example Filter what is shared
  * ```typescript
  * const link = yield* OAM.Link("FilteredLink", {
  *   labelTemplate: "$AccountName",
@@ -123,8 +124,6 @@ export interface Link extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Link = Resource<Link>("AWS.OAM.Link");
 

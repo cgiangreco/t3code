@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * snapshot name — e.g. verifying a backup completed before a migration.
  * Provide the implementation with
  * `Effect.provide(AWS.MemoryDB.DescribeSnapshotsHttp)`.
- * ### Managing Snapshots
- * **Example:** List a Cluster's Snapshots
+ * @binding
+ * @section Managing Snapshots
+ * @example List a Cluster's Snapshots
  * ```typescript
  * const describeSnapshots = yield* MemoryDB.DescribeSnapshots();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.logInfo(`${snapshot.Name}: ${snapshot.Status}`);
  * }
  * ```
- *
- * @binding
  */
 export interface DescribeSnapshots extends Binding.Service<
   DescribeSnapshots,

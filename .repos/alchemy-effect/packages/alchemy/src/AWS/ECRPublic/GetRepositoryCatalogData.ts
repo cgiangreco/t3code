@@ -20,8 +20,9 @@ export interface GetRepositoryCatalogDataRequest extends Omit<
  * implementation with
  * `Effect.provide(AWS.ECRPublic.GetRepositoryCatalogDataHttp)`.
  *
- * ### Catalog Metadata
- * **Example:** Read A Repository's Gallery Metadata
+ * @binding
+ * @section Catalog Metadata
+ * @example Read A Repository's Gallery Metadata
  * ```typescript
  * // init
  * const getCatalogData = yield* AWS.ECRPublic.GetRepositoryCatalogData(repository);
@@ -30,8 +31,6 @@ export interface GetRepositoryCatalogDataRequest extends Omit<
  * const result = yield* getCatalogData();
  * const description = result.catalogData?.description;
  * ```
- *
- * @binding
  */
 export interface GetRepositoryCatalogData extends Binding.Service<
   GetRepositoryCatalogData,

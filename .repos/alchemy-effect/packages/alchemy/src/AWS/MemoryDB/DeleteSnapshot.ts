@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * Deletes a snapshot by name — e.g. pruning old on-demand backups from a
  * scheduled cleanup Lambda. Provide the implementation with
  * `Effect.provide(AWS.MemoryDB.DeleteSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Delete an Old Snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Delete an Old Snapshot
  * ```typescript
  * const deleteSnapshot = yield* MemoryDB.DeleteSnapshot();
  *
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   Effect.catchTag("SnapshotNotFoundFault", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteSnapshot extends Binding.Service<
   DeleteSnapshot,

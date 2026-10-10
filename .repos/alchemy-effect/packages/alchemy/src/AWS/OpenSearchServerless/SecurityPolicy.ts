@@ -89,8 +89,9 @@ export interface SecurityPolicy extends Resource<
  * OpenSearch Dashboards endpoints are reachable from public networks or only
  * from specific VPC endpoints.
  *
- * ### Encryption Policies
- * **Example:** AWS-Owned-Key Encryption Policy
+ * @resource
+ * @section Encryption Policies
+ * @example AWS-Owned-Key Encryption Policy
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -104,8 +105,8 @@ export interface SecurityPolicy extends Resource<
  * });
  * ```
  *
- * ### Network Policies
- * **Example:** Public Network Access Policy
+ * @section Network Policies
+ * @example Public Network Access Policy
  * ```typescript
  * const network = yield* AWS.OpenSearchServerless.SecurityPolicy("Network", {
  *   policyName: "my-collection-net",
@@ -121,8 +122,6 @@ export interface SecurityPolicy extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const SecurityPolicy = Resource<SecurityPolicy>(
   "AWS.OpenSearchServerless.SecurityPolicy",

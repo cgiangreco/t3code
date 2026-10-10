@@ -25,8 +25,9 @@ export interface RetrieveDomainAuthCodeRequest
  * Provide the implementation with
  * `Effect.provide(AWS.Route53Domains.RetrieveDomainAuthCodeHttp)`.
  *
- * ### Transferring Domains Out
- * **Example:** Retrieve the Transfer Authorization Code
+ * @binding
+ * @section Transferring Domains Out
+ * @example Retrieve the Transfer Authorization Code
  * ```typescript
  * import * as Redacted from "effect/Redacted";
  *
@@ -41,8 +42,6 @@ export interface RetrieveDomainAuthCodeRequest
  *     ? Redacted.value(result.AuthCode)
  *     : result.AuthCode;
  * ```
- *
- * @binding
  */
 export interface RetrieveDomainAuthCode extends Binding.Service<
   RetrieveDomainAuthCode,

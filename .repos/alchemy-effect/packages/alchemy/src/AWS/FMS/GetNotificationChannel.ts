@@ -13,8 +13,9 @@ export interface GetNotificationChannelRequest
  *
  * Returns the SNS topic that is used to record Firewall Manager SNS logs. Provide the
  * implementation with `Effect.provide(AWS.FMS.GetNotificationChannelHttp)`.
- * ### Notification Channel
- * **Example:** Read the Notification Channel
+ * @binding
+ * @section Notification Channel
+ * @example Read the Notification Channel
  * ```typescript
  * // init — account-level binding takes no resource
  * const getNotificationChannel = yield* AWS.FMS.GetNotificationChannel();
@@ -23,8 +24,6 @@ export interface GetNotificationChannelRequest
  * const result = yield* getNotificationChannel();
  * console.log(result.SnsTopicArn);
  * ```
- *
- * @binding
  */
 export interface GetNotificationChannel extends Binding.Service<
   GetNotificationChannel,

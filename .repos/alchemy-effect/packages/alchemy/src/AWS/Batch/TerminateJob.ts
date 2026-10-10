@@ -8,14 +8,13 @@ export interface TerminateJobRequest extends batch.TerminateJobRequest {}
 /**
  * Terminate a running (or cancel a queued) AWS Batch job from runtime code.
  *
- * ### Terminating Jobs
- * **Example:** Terminate a job
+ * @binding
+ * @section Terminating Jobs
+ * @example Terminate a job
  * ```typescript
  * const terminateJob = yield* Batch.TerminateJob(queue);
  * yield* terminateJob({ jobId, reason: "superseded" });
  * ```
- *
- * @binding
  */
 export interface TerminateJob extends Binding.Service<
   TerminateJob,

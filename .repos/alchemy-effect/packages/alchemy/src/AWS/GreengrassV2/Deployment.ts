@@ -99,8 +99,9 @@ export interface Deployment extends Resource<
  * revision for the target (the `deploymentId` attribute changes); the
  * previous revision is canceled and deleted.
  *
- * ### Creating Deployments
- * **Example:** Deploy a component to a thing
+ * @resource
+ * @section Creating Deployments
+ * @example Deploy a component to a thing
  * ```typescript
  * import * as GreengrassV2 from "alchemy/AWS/GreengrassV2";
  * import * as IoT from "alchemy/AWS/IoT";
@@ -118,7 +119,7 @@ export interface Deployment extends Resource<
  * });
  * ```
  *
- * **Example:** Deployment with a configuration update
+ * @example Deployment with a configuration update
  * ```typescript
  * const deployment = yield* GreengrassV2.Deployment("Rollout", {
  *   targetArn: core.thingArn,
@@ -130,8 +131,6 @@ export interface Deployment extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Deployment = Resource<Deployment>("AWS.GreengrassV2.Deployment");
 

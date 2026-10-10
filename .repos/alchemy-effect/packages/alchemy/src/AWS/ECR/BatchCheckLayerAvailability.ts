@@ -17,16 +17,15 @@ export interface BatchCheckLayerAvailabilityRequest extends Omit<
  *
  * Checks whether image layers already exist in the bound repository — pushed clients call this before uploading to skip blobs the registry already has. Provide the implementation with
  * `Effect.provide(AWS.ECR.BatchCheckLayerAvailabilityHttp)`.
- * ### Pushing Images
- * **Example:** Skip Already-Pushed Layers
+ * @binding
+ * @section Pushing Images
+ * @example Skip Already-Pushed Layers
  * ```typescript
  * const checkLayers = yield* AWS.ECR.BatchCheckLayerAvailability(repository);
  *
  * const res = yield* checkLayers({ layerDigests: ["sha256:…"] });
  * const missing = res.layers?.filter((l) => l.layerAvailability === "UNAVAILABLE");
  * ```
- *
- * @binding
  */
 export interface BatchCheckLayerAvailability extends Binding.Service<
   BatchCheckLayerAvailability,

@@ -9,16 +9,17 @@ It's important to understand the architecture of the Effect MCP server.
 Here is an example of a MCP server implementation:
 
 ```typescript
-import { NodeRuntime, NodeStdio } from "@effect/platform-node"
-import { Effect, Layer, Logger, Schema } from "effect"
-import { McpProtocol, McpServer, Tool, Toolkit } from "effect/ai"
+import { NodeRuntime, NodeSink, NodeStream } from "@effect/platform-node"
+import { Effect, Layer, Logger } from "effect"
+import { Schema } from "effect/schema"
+import { McpServer, Tool, Toolkit } from "effect/unstable/ai"
 
 // Define a simple tool
 const DemoTool = Tool.make("DemoTool", {
   description: "A demo tool that echoes back the input",
-  parameters: Schema.Struct({
+  parameters: {
     message: Schema.String
-  }),
+  },
   success: Schema.String
 })
 
@@ -57,12 +58,11 @@ const ServerLayer = Layer.mergeAll(
     McpServer.layerStdio({
       name: "Demo MCP Server",
       version: "1.0.0",
-      protocols: [McpProtocol.v2025_06_18]
+      stdin: NodeStream.stdin,
+      stdout: NodeSink.stdout
     })
   ),
-  Layer.provide(NodeStdio.layer),
-  Layer.provide(Logger.layer([Logger.consolePretty()])),
-  Layer.provideMerge(Layer.succeed(Logger.LogToStderr, true))
+  Layer.provide(Logger.layer([Logger.consolePretty({ stderr: true })]))
 )
 
 Layer.launch(ServerLayer).pipe(NodeRuntime.runMain)
@@ -78,14 +78,8 @@ The server exposes three main parts:
 
 The part layers are merged into one layer that has a MCP server implementation as dependency.
 `McpServer.layerStdio` is used to create a standard I/O–based MCP server identified by its name and
-version. Its ordered, non-empty `protocols` declaration names implemented protocol adapters rather
-than arbitrary version strings. This release supports `McpProtocol.v2024_11_05`,
-`McpProtocol.v2025_03_26`, and `McpProtocol.v2025_06_18`. The `v2024_11_05` adapter implements that
-revision's RPC schemas and stdio framing, including its batch policy. It does not implement the
-historical two-endpoint HTTP+SSE transport. `McpServer.layerHttp` instead offers the 2024 RPC schema
-through the same single-endpoint HTTP compatibility transport used by the 2025 adapters. Because of
-the layer architecture the server implementation can be easily exchanged with this HTTP-based
-implementation. Finally, a logging layer is added with
+version. Because of the layer architecture the server implementation can be easily exchanged with an
+HTTP based implementation with `McpServer.layerHttp`. Finally, a logging layer is added with
 `Logger.layer([Logger.consolePretty({ stderr: true })])`, ensuring logs are written to `stderr`.
 This is essential when using stdio, as any output to `stdout` would interfere with the protocol
 communication.
@@ -98,8 +92,9 @@ resource is defined as a template that specifies its location, behavior, and met
 parameters, completions, and content generation.
 
 ```typescript
-import { Effect, Schema } from "effect"
-import { McpSchema, McpServer } from "effect/ai"
+import { Effect } from "effect"
+import { Schema } from "effect/schema"
+import { McpSchema, McpServer } from "effect/unstable/ai"
 
 const SimpleResource = McpServer.resource({
   uri: "file:///demo.txt",
@@ -139,8 +134,9 @@ structured, parameterized instructions or messages that the client can send to t
 generation logic in a declarative way.
 
 ```typescript
-import { Effect, Schema } from "effect"
-import { McpServer } from "effect/ai"
+import { Effect } from "effect"
+import { Schema } from "effect/schema"
+import { McpServer } from "effect/unstable/ai"
 
 const DemoPrompt = McpServer.prompt({
   name: "Demo Prompt",
@@ -166,23 +162,24 @@ contract while the actual logic is provided separately through an implementation
 grouped into toolkits, which can be combined and converted into layers.
 
 ```typescript
-import { Effect, Layer, Schema } from "effect"
-import { McpServer, Tool, Toolkit } from "effect/ai"
+import { Effect, Layer } from "effect"
+import { Schema } from "effect/schema"
+import { McpServer, Tool, Toolkit } from "effect/unstable/ai"
 
 const DemoTool = Tool.make("DemoTool", {
   description: "This is a demo tool for the documentation",
-  parameters: Schema.Struct({
+  parameters: {
     demoId: Schema.Number,
     demoName: Schema.String
-  }),
+  },
   success: Schema.String
 })
 
 const OtherDemoTool = Tool.make("OtherDemoTool", {
   description: "Another demo tool",
-  parameters: Schema.Struct({
+  parameters: {
     value: Schema.Number
-  }),
+  },
   success: Schema.String
 })
 
@@ -213,8 +210,9 @@ defines both the message shown to the user and the expected response schema, ens
 validated user input.
 
 ```typescript
-import { Effect, Schema } from "effect"
-import { McpServer } from "effect/ai"
+import { Effect } from "effect"
+import { Schema } from "effect/schema"
+import { McpServer } from "effect/unstable/ai"
 
 const DemoElicitation = McpServer.elicit({
   message: `Please answer the question ("yes" | "no") (default "no"):`,
@@ -240,7 +238,7 @@ Here's a complete, copy/pastable MCP server example that combines all the concep
 ```typescript
 import { NodeRuntime, NodeStdio } from "@effect/platform-node"
 import { Effect, Layer, Logger, Schema } from "effect"
-import { McpProtocol, McpSchema, McpServer, Tool, Toolkit } from "effect/ai"
+import { McpSchema, McpServer, Tool, Toolkit } from "effect/unstable/ai"
 
 // Define tools
 const GreetTool = Tool.make("GreetTool", {
@@ -359,12 +357,11 @@ const ServerLayer = Layer.mergeAll(
   Layer.provide(
     McpServer.layerStdio({
       name: "Demo MCP Server",
-      version: "1.0.0",
-      protocols: [McpProtocol.v2025_06_18]
+      version: "1.0.0"
     })
   ),
   Layer.provide(NodeStdio.layer),
-  Layer.provideMerge(Layer.succeed(Logger.LogToStderr, true))
+  Layer.provide(Layer.succeed(Logger.LogToStderr)(true))
 )
 
 // Run the server

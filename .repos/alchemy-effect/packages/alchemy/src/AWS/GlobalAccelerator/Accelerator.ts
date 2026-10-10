@@ -108,23 +108,24 @@ export interface Accelerator extends Resource<
  * us-west-2 regardless of your deployment region — alchemy pins it
  * automatically). Attach `Listener`s to accept traffic and `EndpointGroup`s
  * to route it to ALBs, NLBs, EC2 instances, or Elastic IPs per region.
- * ### Creating Accelerators
- * **Example:** Basic Accelerator
+ * @resource
+ * @section Creating Accelerators
+ * @example Basic Accelerator
  * ```typescript
  * import * as GlobalAccelerator from "alchemy/AWS/GlobalAccelerator";
  *
  * const accelerator = yield* GlobalAccelerator.Accelerator("Edge");
  * ```
  *
- * **Example:** Dual-Stack Accelerator
+ * @example Dual-Stack Accelerator
  * ```typescript
  * const accelerator = yield* GlobalAccelerator.Accelerator("Edge", {
  *   ipAddressType: "DUAL_STACK",
  * });
  * ```
  *
- * ### Flow Logs
- * **Example:** Publish Flow Logs to S3
+ * @section Flow Logs
+ * @example Publish Flow Logs to S3
  * ```typescript
  * // the bucket policy must grant delivery.logs.amazonaws.com
  * // s3:PutObject + s3:GetBucketAcl
@@ -133,8 +134,8 @@ export interface Accelerator extends Resource<
  * });
  * ```
  *
- * ### Routing Traffic
- * **Example:** Accelerator with Listener and Endpoint Group
+ * @section Routing Traffic
+ * @example Accelerator with Listener and Endpoint Group
  * ```typescript
  * const accelerator = yield* GlobalAccelerator.Accelerator("Edge");
  * const listener = yield* GlobalAccelerator.Listener("Web", {
@@ -148,8 +149,6 @@ export interface Accelerator extends Resource<
  *   endpoints: [{ endpointId: alb.loadBalancerArn }],
  * });
  * ```
- *
- * @resource
  */
 export const Accelerator = Resource<Accelerator>(
   "AWS.GlobalAccelerator.Accelerator",

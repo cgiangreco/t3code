@@ -21,8 +21,9 @@ export interface RevokeSecurityGroupIngressRequest extends Omit<
  * dynamic IP-allowlisting pattern (see
  * {@link AuthorizeSecurityGroupIngress}). Provide the implementation with
  * `Effect.provide(AWS.EC2.RevokeSecurityGroupIngressHttp)`.
- * ### Dynamic Security Group Rules
- * **Example:** Remove a previously allowlisted address
+ * @binding
+ * @section Dynamic Security Group Rules
+ * @example Remove a previously allowlisted address
  * ```typescript
  * // init — bind the operation to the security group
  * const revokeIngress = yield* AWS.EC2.RevokeSecurityGroupIngress(group);
@@ -35,8 +36,6 @@ export interface RevokeSecurityGroupIngressRequest extends Omit<
  *   CidrIp: "203.0.113.7/32",
  * });
  * ```
- *
- * @binding
  */
 export interface RevokeSecurityGroupIngress extends Binding.Service<
   RevokeSecurityGroupIngress,

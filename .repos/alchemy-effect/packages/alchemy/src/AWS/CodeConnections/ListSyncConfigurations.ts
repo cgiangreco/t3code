@@ -19,8 +19,9 @@ export interface ListSyncConfigurationsRequest extends Omit<
  * configurations attached to the link — which AWS resources Git sync keeps
  * converged from the linked repository. Provide the implementation with
  * `Effect.provide(AWS.CodeConnections.ListSyncConfigurationsHttp)`.
- * ### Monitoring Git Sync
- * **Example:** List the Link's Sync Configurations
+ * @binding
+ * @section Monitoring Git Sync
+ * @example List the Link's Sync Configurations
  * ```typescript
  * // init — bind the operation to the repository link
  * const listSyncConfigurations =
@@ -30,8 +31,6 @@ export interface ListSyncConfigurationsRequest extends Omit<
  * const { SyncConfigurations } =
  *   yield* listSyncConfigurations({ SyncType: "CFN_STACK_SYNC" });
  * ```
- *
- * @binding
  */
 export interface ListSyncConfigurations extends Binding.Service<
   ListSyncConfigurations,

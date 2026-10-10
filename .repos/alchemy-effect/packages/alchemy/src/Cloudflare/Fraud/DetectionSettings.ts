@@ -118,8 +118,11 @@ export type DetectionSettings = Resource<
  * Fields that were never set by this resource are not touched.
  * `authenticationSettings` that did not exist before the first write
  * cannot be cleared and are left as-is.
- * ### Fraud User Profiles
- * **Example:** Enable user profiles with a username expression
+ * @resource
+ * @product Fraud Detection
+ * @category Application Security
+ * @section Fraud User Profiles
+ * @example Enable user profiles with a username expression
  * ```typescript
  * yield* Cloudflare.Fraud.DetectionSettings("Fraud", {
  *   zoneId: zone.zoneId,
@@ -130,8 +133,8 @@ export type DetectionSettings = Resource<
  * });
  * ```
  *
- * ### Authentication outcome classification
- * **Example:** Classify login success and failure by origin status code
+ * @section Authentication outcome classification
+ * @example Classify login success and failure by origin status code
  * ```typescript
  * yield* Cloudflare.Fraud.DetectionSettings("Fraud", {
  *   zoneId: zone.zoneId,
@@ -143,8 +146,8 @@ export type DetectionSettings = Resource<
  * });
  * ```
  *
- * ### Username expressions only
- * **Example:** Clear all username expressions
+ * @section Username expressions only
+ * @example Clear all username expressions
  * ```typescript
  * yield* Cloudflare.Fraud.DetectionSettings("Fraud", {
  *   zoneId: zone.zoneId,
@@ -153,10 +156,6 @@ export type DetectionSettings = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/bots/additional-configurations/fraud-detection/
- *
- * @resource
- * @product Fraud Detection
- * @category Application Security
  */
 export const DetectionSettings = Resource<DetectionSettings>(TypeId, {
   aliases: ["Cloudflare.FraudDetectionSettings"],

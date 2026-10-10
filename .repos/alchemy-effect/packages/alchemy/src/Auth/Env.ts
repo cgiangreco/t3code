@@ -1,61 +1,37 @@
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
-import * as Option from "effect/Option";
-import * as Interaction from "../Interaction.ts";
+import * as Clank from "../Util/Clank.ts";
 import { AuthError } from "./AuthProvider.ts";
 
 export const getEnv = (key: string) =>
-  Config.option(Config.String(key)).pipe(
-    Effect.map(Option.getOrUndefined),
-    Effect.mapError(
-      (cause) =>
-        new AuthError({
-          message: `Could not read optional env: ${key}`,
-          cause,
-        }),
-    ),
-  );
+  Config.string(key).pipe(Effect.orElseSucceed(() => undefined));
 
 export const getEnvRequired = (key: string) =>
-  Config.String(key).pipe(
-    Effect.mapError(
-      (cause) =>
-        new AuthError({ message: `Missing required env: ${key}`, cause }),
+  Config.string(key).pipe(
+    Effect.catch(() =>
+      Effect.fail(new AuthError({ message: `Missing required env: ${key}` })),
     ),
   );
 
 export const getEnvRedacted = (key: string) =>
-  Config.option(Config.Redacted(key)).pipe(
-    Effect.map(Option.getOrUndefined),
-    Effect.mapError(
-      (cause) =>
-        new AuthError({
-          message: `Could not read optional env: ${key}`,
-          cause,
-        }),
-    ),
-  );
+  Config.redacted(key).pipe(Effect.orElseSucceed(() => undefined));
 
 export const getEnvRedactedRequired = (key: string) =>
-  Config.Redacted(key).pipe(
-    Effect.mapError(
-      (cause) =>
-        new AuthError({ message: `Missing required env: ${key}`, cause }),
+  Config.redacted(key).pipe(
+    Effect.catch(() =>
+      Effect.fail(new AuthError({ message: `Missing required env: ${key}` })),
     ),
   );
 
-export const mapPromptCancellation = <A, R>(
-  self: Effect.Effect<A, Interaction.InteractionError, R>,
+export const retryOnce = <A, R>(
+  self: Effect.Effect<A, Clank.PromptCancelled, R>,
 ) =>
   self.pipe(
+    Effect.retry({
+      times: 1,
+      while: (e) => e instanceof Clank.PromptCancelled,
+    }),
     Effect.mapError(
-      (cause) =>
-        new AuthError({
-          message:
-            cause._tag === "TerminalCancelled"
-              ? "User cancelled prompt"
-              : cause.message,
-          cause,
-        }),
+      (e) => new AuthError({ message: "User cancelled prompt", cause: e }),
     ),
   );

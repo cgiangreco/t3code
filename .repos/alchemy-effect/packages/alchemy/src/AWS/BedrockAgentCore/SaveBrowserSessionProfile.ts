@@ -15,8 +15,9 @@ export interface SaveBrowserSessionProfileRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.SaveBrowserSessionProfileHttp`
  * on the Function effect to implement the binding.
  *
- * ### Browser Profiles
- * **Example:** Save a Session Profile
+ * @binding
+ * @section Browser Profiles
+ * @example Save a Session Profile
  * ```typescript
  * // init
  * const saveBrowserSessionProfile = yield* AgentCore.SaveBrowserSessionProfile(browser);
@@ -32,8 +33,6 @@ export interface SaveBrowserSessionProfileRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface SaveBrowserSessionProfile extends Binding.Service<
   SaveBrowserSessionProfile,

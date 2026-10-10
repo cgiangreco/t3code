@@ -107,8 +107,9 @@ export interface Extension extends Resource<
  * Associate the extension with an application, environment, or configuration
  * profile using {@link ExtensionAssociation}.
  *
- * ### Creating an Extension
- * **Example:** Notify a Lambda when a deployment completes
+ * @resource
+ * @section Creating an Extension
+ * @example Notify a Lambda when a deployment completes
  * ```typescript
  * const extension = yield* AppConfig.Extension("DeployHook", {
  *   actions: {
@@ -123,7 +124,7 @@ export interface Extension extends Resource<
  * });
  * ```
  *
- * **Example:** Validate content before a deployment starts
+ * @example Validate content before a deployment starts
  * ```typescript
  * const extension = yield* AppConfig.Extension("PreflightCheck", {
  *   description: "Reject deployments outside business hours",
@@ -134,8 +135,6 @@ export interface Extension extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Extension = Resource<Extension>("AWS.AppConfig.Extension");
 

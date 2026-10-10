@@ -100,8 +100,11 @@ export type GoogleTagGateway = Resource<
  * idempotent upsert. Destroy restores the configuration the zone had before
  * Alchemy first managed it (or disables the gateway when the zone had never
  * configured it).
- * ### Managing the gateway
- * **Example:** Enable Google Tag Gateway on a zone
+ * @resource
+ * @product Google Tag Gateway
+ * @category Performance & Reliability
+ * @section Managing the gateway
+ * @example Enable Google Tag Gateway on a zone
  * ```typescript
  * const gateway = yield* Cloudflare.GoogleTagGateway.GoogleTagGateway("Analytics", {
  *   zone: "example.com",
@@ -112,7 +115,7 @@ export type GoogleTagGateway = Resource<
  * });
  * ```
  *
- * **Example:** Proxy a Google Tag Manager container without auto-installing the tag
+ * @example Proxy a Google Tag Manager container without auto-installing the tag
  * ```typescript
  * const gateway = yield* Cloudflare.GoogleTagGateway.GoogleTagGateway("Gtm", {
  *   zone: zone.zoneId,
@@ -125,10 +128,6 @@ export type GoogleTagGateway = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/google-tag-gateway/
- *
- * @resource
- * @product Google Tag Gateway
- * @category Performance & Reliability
  */
 export const GoogleTagGateway = Resource<GoogleTagGateway>(TypeId, {
   aliases: ["Cloudflare.GoogleTagGateway"],

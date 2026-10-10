@@ -103,21 +103,22 @@ export interface FHIRDatastore extends Resource<
  * Data stores take roughly 15-30 minutes to provision (`CREATING` →
  * `ACTIVE`) and are billed while they exist; deletion is also asynchronous
  * (`DELETING` → gone). Destroy data stores you are not using.
- * ### Creating a Data Store
- * **Example:** Basic FHIR R4 Data Store
+ * @resource
+ * @section Creating a Data Store
+ * @example Basic FHIR R4 Data Store
  * ```typescript
  * const datastore = yield* FHIRDatastore("Records", {});
  * ```
  *
- * **Example:** Data Store Preloaded with Synthetic Data
+ * @example Data Store Preloaded with Synthetic Data
  * ```typescript
  * const datastore = yield* FHIRDatastore("Sandbox", {
  *   preloadDataType: "SYNTHEA",
  * });
  * ```
  *
- * ### Encryption
- * **Example:** Data Store Encrypted with a Customer-Managed KMS Key
+ * @section Encryption
+ * @example Data Store Encrypted with a Customer-Managed KMS Key
  * ```typescript
  * const key = yield* KMS.Key("RecordsKey", {
  *   description: "healthlake data store key",
@@ -126,8 +127,6 @@ export interface FHIRDatastore extends Resource<
  *   kmsKeyId: key.keyArn,
  * });
  * ```
- *
- * @resource
  */
 export const FHIRDatastore = Resource<FHIRDatastore>(
   "AWS.HealthLake.FHIRDatastore",

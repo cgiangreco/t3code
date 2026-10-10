@@ -76,8 +76,8 @@ export interface AttackEventSourceProps extends EventRouteProps {
  * host-specific implementation layer (e.g. `AWS.Lambda.EventSource`) on the
  * Function effect.
  *
- * ### Consuming Attack Events
- * **Example:** Page on Detected DDoS Attacks
+ * @section Consuming Attack Events
+ * @example Page on Detected DDoS Attacks
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

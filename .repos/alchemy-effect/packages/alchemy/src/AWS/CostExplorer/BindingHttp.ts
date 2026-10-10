@@ -32,9 +32,7 @@ import type { CostCategory } from "./CostCategory.ts";
 export const makeCostExplorerHttpBinding = <
   I extends object,
   A,
-  // `{ _tag: string }` bound so `pinCe` (whose throttle retry inspects
-  // `_tag`) applies without collapsing the inferred error union.
-  E extends { _tag: string },
+  E,
   R,
 >(options: {
   /**
@@ -70,10 +68,7 @@ export const makeCostExplorerHttpBinding = <
       return Effect.fn(`AWS.CostExplorer.${options.capability}`)(function* (
         request?: I,
       ) {
-        // The region must also be pinned at the call site: the yield-time
-        // snapshot is only a fallback — the calling fiber's ambient Region
-        // (the host Function's own region) wins over it.
-        return yield* pinCe(op((request ?? {}) as I));
+        return yield* op((request ?? {}) as I);
       });
     });
   });
@@ -87,8 +82,7 @@ export const makeCostExplorerHttpBinding = <
 export const makeAnomalyMonitorHttpBinding = <
   I extends { MonitorArn?: string },
   A,
-  // See makeCostExplorerHttpBinding.
-  E extends { _tag: string },
+  E,
   R,
 >(options: {
   /**
@@ -125,13 +119,10 @@ export const makeAnomalyMonitorHttpBinding = <
       return Effect.fn(
         `AWS.CostExplorer.${options.capability}(${monitor.LogicalId})`,
       )(function* (request: Omit<I, "MonitorArn">) {
-        // Call-site region pin — see makeCostExplorerHttpBinding above.
-        return yield* pinCe(
-          op({
-            ...request,
-            MonitorArn: yield* MonitorArn,
-          } as I),
-        );
+        return yield* op({
+          ...request,
+          MonitorArn: yield* MonitorArn,
+        } as I);
       });
     });
   });
@@ -147,8 +138,7 @@ export const makeAnomalyMonitorHttpBinding = <
 export const makeCostCategoryHttpBinding = <
   I extends { CostCategoryArn?: string },
   A,
-  // See makeCostExplorerHttpBinding.
-  E extends { _tag: string },
+  E,
   R,
 >(options: {
   /**
@@ -185,13 +175,10 @@ export const makeCostCategoryHttpBinding = <
       return Effect.fn(
         `AWS.CostExplorer.${options.capability}(${category.LogicalId})`,
       )(function* (request?: Omit<I, "CostCategoryArn">) {
-        // Call-site region pin — see makeCostExplorerHttpBinding above.
-        return yield* pinCe(
-          op({
-            ...request,
-            CostCategoryArn: yield* CostCategoryArn,
-          } as I),
-        );
+        return yield* op({
+          ...request,
+          CostCategoryArn: yield* CostCategoryArn,
+        } as I);
       });
     });
   });

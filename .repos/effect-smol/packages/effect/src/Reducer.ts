@@ -37,12 +37,13 @@ import type * as Combiner from "./Combiner.ts"
  *
  * **Example** (String concatenation reducer)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Reducer } from "effect"
  *
  * const Concat = Reducer.make<string>((a, b) => a + b, "")
  *
- * Concat.combineAll(["hello", " ", "world"]) // => "hello world"
+ * console.log(Concat.combineAll(["hello", " ", "world"]))
+ * // Output: "hello world"
  * ```
  *
  * @see {@link make} – create a `Reducer` from a function and initial value
@@ -88,7 +89,7 @@ export interface Reducer<A> extends Combiner.Combiner<A> {
  *
  * **Example** (Multiplying with short-circuit)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Reducer } from "effect"
  *
  * const Product = Reducer.make<number>(
@@ -104,8 +105,11 @@ export interface Reducer<A> extends Combiner.Combiner<A> {
  *   }
  * )
  *
- * Product.combineAll([2, 3, 4]) // => 24
- * Product.combineAll([2, 0, 4]) // => 0
+ * console.log(Product.combineAll([2, 3, 4]))
+ * // Output: 24
+ *
+ * console.log(Product.combineAll([2, 0, 4]))
+ * // Output: 0
  * ```
  *
  * @see {@link Reducer} – the interface this creates
@@ -151,13 +155,16 @@ export function make<A>(
  *
  * **Example** (Reversing string concatenation)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Reducer, String } from "effect"
  *
  * const Prepend = Reducer.flip(String.ReducerConcat)
  *
- * Prepend.combine("a", "b") // => "ba"
- * Prepend.combineAll(["a", "b", "c"]) // => "cba"
+ * console.log(Prepend.combine("a", "b"))
+ * // Output: "ba"
+ *
+ * console.log(Prepend.combineAll(["a", "b", "c"]))
+ * // Output: "cba"
  * ```
  *
  * @see {@link make}

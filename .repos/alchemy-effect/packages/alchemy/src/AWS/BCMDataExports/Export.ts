@@ -151,8 +151,9 @@ export interface Export extends Resource<
  * The destination bucket must grant the Data Exports service principals
  * write access via its bucket policy (see the example below).
  *
- * ### Creating an Export
- * **Example:** CUR 2.0 export to an S3 bucket
+ * @resource
+ * @section Creating an Export
+ * @example CUR 2.0 export to an S3 bucket
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -188,8 +189,6 @@ export interface Export extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Export = Resource<Export>("AWS.BCMDataExports.Export");
 

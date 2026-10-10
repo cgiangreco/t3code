@@ -73,8 +73,9 @@ export interface ServiceNetworkVpcAssociation extends Resource<
  * VPC reach every service in the network (subject to auth policies). The most
  * common VPC Lattice wiring step.
  *
- * ### Associating a VPC
- * **Example:** Basic Association
+ * @resource
+ * @section Associating a VPC
+ * @example Basic Association
  * ```typescript
  * const assoc = yield* ServiceNetworkVpcAssociation("AppVpcLink", {
  *   serviceNetworkIdentifier: network.serviceNetworkId,
@@ -82,8 +83,6 @@ export interface ServiceNetworkVpcAssociation extends Resource<
  *   securityGroupIds: [sg.groupId],
  * });
  * ```
- *
- * @resource
  */
 export const ServiceNetworkVpcAssociation =
   Resource<ServiceNetworkVpcAssociation>(

@@ -70,11 +70,12 @@ export interface Variable extends Resource<
  * by `GitHub.providers()` (which uses the Alchemy AuthProvider — env,
  * stored PAT, `gh` CLI, or OAuth). The token needs `repo` scope for
  * private repositories or `public_repo` for public ones.
- * ### Repository Variables
+ * @resource
+ * @section Repository Variables
  * Store variables accessible to all GitHub Actions workflows in the
  * repository.
  *
- * **Example:** Create a Repository Variable
+ * @example Create a Repository Variable
  * ```typescript
  * yield* GitHub.Variable("aws-region", {
  *   owner: "my-org",
@@ -84,12 +85,12 @@ export interface Variable extends Resource<
  * });
  * ```
  *
- * ### Environment Variables
+ * @section Environment Variables
  * Scope a variable to a specific GitHub Actions environment (e.g.
  * `production`, `staging`). Use `GitHub.Environment` to manage the
  * environment itself.
  *
- * **Example:** Create an Environment Variable
+ * @example Create an Environment Variable
  * ```typescript
  * yield* GitHub.Variable("region", {
  *   owner: "my-org",
@@ -100,11 +101,11 @@ export interface Variable extends Resource<
  * });
  * ```
  *
- * ### Wiring with Other Resources
+ * @section Wiring with Other Resources
  * Pass output attributes from other resources into GitHub variables so
  * that CI workflows can reference them.
  *
- * **Example:** Store a Worker URL for CI
+ * @example Store a Worker URL for CI
  * ```typescript
  * const worker = yield* Cloudflare.Worker("Api", { ... });
  *
@@ -116,7 +117,7 @@ export interface Variable extends Resource<
  * });
  * ```
  *
- * **Example:** Multiple Variables
+ * @example Multiple Variables
  * ```typescript
  * yield* GitHub.Variable("region", {
  *   owner: "my-org",
@@ -132,9 +133,6 @@ export interface Variable extends Resource<
  *   value: "production",
  * });
  * ```
- *
- * @resource
- * @product Actions
  */
 export const Variable = Resource<Variable>("GitHub.Variable");
 

@@ -19,16 +19,15 @@ export interface BatchGetDevicePositionRequest extends Omit<
  * `geo:BatchGetDevicePosition`), scoped to one {@link Tracker}. Provide the implementation with
  * `Effect.provide(AWS.Location.BatchGetDevicePositionHttp)`.
  *
- * ### Reading Device Positions
- * **Example:** Read Several Devices at Once
+ * @binding
+ * @section Reading Device Positions
+ * @example Read Several Devices at Once
  * ```typescript
  * const batchGet = yield* Location.BatchGetDevicePosition(tracker);
  *
  * const result = yield* batchGet({ DeviceIds: ["vehicle-1", "vehicle-2"] });
  * // result.DevicePositions → found positions, result.Errors → per-device failures
  * ```
- *
- * @binding
  */
 export interface BatchGetDevicePosition extends Binding.Service<
   BatchGetDevicePosition,

@@ -7,20 +7,17 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 
 // Deterministic bucket for EDI input/output. B2BI accesses the bucket as the
 // service principal, authorized by the bucket policy below.
-const stageSuffix = process.env.ALCHEMY_TEST_STAGE
-  ? `-${process.env.ALCHEMY_TEST_STAGE.toLowerCase().replaceAll("_", "-")}`
-  : "";
-export const BUCKET = `alchemy-test-b2bi-bindings${stageSuffix}`;
+export const BUCKET = "alchemy-test-b2bi-bindings";
 const BUCKET_ARN = `arn:aws:s3:::${BUCKET}`;
 
 // Deterministic queue name so the test can look up the queue URL out-of-band
 // (sqs.getQueueUrl) and observe delivered transformation events.
-export const EVENTS_QUEUE = `alchemy-b2bi-bindings-events${stageSuffix}`;
+export const EVENTS_QUEUE = "alchemy-b2bi-bindings-events";
 
 // A minimal, valid X12 850 (purchase order), version 4010 — checked in as a
 // constant fixture, never generated at test time.
@@ -83,7 +80,7 @@ export const B2biFixturesLive = Layer.effect(
       policy: b2biBucketPolicy,
     });
     const transformer = yield* AWS.B2BI.Transformer("BindingsTransformer", {
-      name: `alchemy-b2bi-bindings-transformer${stageSuffix}`,
+      name: "alchemy-b2bi-bindings-transformer",
       status: "active",
       inputConversion: {
         fromFormat: "X12",
@@ -106,12 +103,11 @@ export const B2biFixturesLive = Layer.effect(
 export default B2biTestFunction.make(
   {
     main: import.meta.url,
-    functionUrl: true,
+    url: true,
     timeout: Duration.minutes(2),
   },
   Effect.gen(function* () {
     const { bucket, transformer, eventsQueue } = yield* B2biFixtures;
-    const BucketName = yield* bucket.bucketName;
 
     // --- data-plane bindings under test ---
     const putObject = yield* AWS.S3.PutObject(bucket);
@@ -162,10 +158,9 @@ export default B2biTestFunction.make(
 
     const parseSampleEdi = (key: string) =>
       uploadSampleEdi(key).pipe(
-        Effect.andThen(BucketName),
-        Effect.flatMap((bucketName) =>
+        Effect.flatMap(() =>
           testParsing({
-            inputFile: { bucketName, key },
+            inputFile: { bucketName: BUCKET, key },
             fileFormat: "JSON",
             ediType: {
               x12Details: {
@@ -279,11 +274,10 @@ export default B2biTestFunction.make(
         }
 
         if (request.method === "POST" && pathname === "/transformer-job") {
-          const bucketName = yield* BucketName;
           yield* uploadSampleEdi("job-input/sample-850.edi");
           const started = yield* startTransformerJob({
-            inputFile: { bucketName, key: "job-input/sample-850.edi" },
-            outputLocation: { bucketName, key: "job-output/" },
+            inputFile: { bucketName: BUCKET, key: "job-input/sample-850.edi" },
+            outputLocation: { bucketName: BUCKET, key: "job-output/" },
           });
           // A freshly started job can briefly 404; retry the typed tag, then
           // poll (bounded) until the job leaves `running`.

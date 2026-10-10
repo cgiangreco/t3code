@@ -23,8 +23,9 @@ export interface GenerateDataKeyRequest extends Omit<
  * never leaks into logs — unwrap with `Redacted.value(...)` at the point of
  * use and discard it as soon as the envelope operation is done.
  *
- * ### Envelope Encryption
- * **Example:** Generate a Data Key
+ * @binding
+ * @section Envelope Encryption
+ * @example Generate a Data Key
  * ```typescript
  * import * as Redacted from "effect/Redacted";
  *
@@ -37,25 +38,25 @@ export interface GenerateDataKeyRequest extends Omit<
  * const stored = response.CiphertextBlob; // persist next to the data
  * ```
  *
- * **Example:** Recover the Data Key Later
+ * @example Recover the Data Key Later
  * ```typescript
  * const decrypt = yield* AWS.KMS.Decrypt(key);
  * const recovered = yield* decrypt({ CiphertextBlob: stored });
  * ```
  *
- * ### Pre-Existing Keys
- * **Example:** Bind by Alias Name
+ * @section Pre-Existing Keys
+ * @example Bind by Alias Name
  * ```typescript
  * const generateDataKey = yield* AWS.KMS.GenerateDataKey("alias/app-key");
  * ```
  *
- * ### Wiring
- * **Example:** Provide the Implementation on a Lambda Function
+ * @section Wiring
+ * @example Provide the Implementation on a Lambda Function
  * ```typescript
  * // Envelope encryption pairs GenerateDataKey with Decrypt — provide
  * // both HTTP layers on the Function's init Effect.
  * export default EnvelopeFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     const key = yield* AWS.KMS.Key("DataKey");
  *     const generateDataKey = yield* AWS.KMS.GenerateDataKey(key);
@@ -69,8 +70,6 @@ export interface GenerateDataKeyRequest extends Omit<
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GenerateDataKey extends Binding.Service<
   GenerateDataKey,

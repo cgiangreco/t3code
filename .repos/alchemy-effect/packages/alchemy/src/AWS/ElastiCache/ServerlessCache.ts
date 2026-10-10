@@ -157,8 +157,9 @@ export interface ServerlessCache extends Resource<
  * reachable from inside a VPC. They are metered while they exist (with a
  * monthly minimum), so set `cacheUsageLimits` and destroy caches you are
  * not using.
- * ### Creating a Serverless Cache
- * **Example:** Valkey Cache with Cost-Control Limits
+ * @resource
+ * @section Creating a Serverless Cache
+ * @example Valkey Cache with Cost-Control Limits
  * ```typescript
  * const cache = yield* ServerlessCache("SessionCache", {
  *   engine: "valkey",
@@ -169,7 +170,7 @@ export interface ServerlessCache extends Resource<
  * });
  * ```
  *
- * **Example:** Redis Cache in Specific Subnets
+ * @example Redis Cache in Specific Subnets
  * ```typescript
  * const cache = yield* ServerlessCache("Cache", {
  *   engine: "redis",
@@ -179,15 +180,13 @@ export interface ServerlessCache extends Resource<
  * });
  * ```
  *
- * ### Connecting from a Lambda Function
- * **Example:** Bind Connection Info into a Function
+ * @section Connecting from a Lambda Function
+ * @example Bind Connection Info into a Function
  * ```typescript
  * const connect = yield* ElastiCache.Connect(cache);
  * // inside a handler:
  * const { host, port, tls } = yield* connect;
  * ```
- *
- * @resource
  */
 export const ServerlessCache = Resource<ServerlessCache>(
   "AWS.ElastiCache.ServerlessCache",

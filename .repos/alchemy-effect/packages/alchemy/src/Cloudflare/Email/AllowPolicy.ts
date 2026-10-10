@@ -106,8 +106,11 @@ export type AllowPolicy = Resource<
  * All fields are mutable in place. Requires the Email Security enterprise
  * add-on; accounts without the entitlement receive the typed
  * `EmailSecurityNotEntitled` error.
- * ### Creating an Allow Policy
- * **Example:** Acceptable sender by email address
+ * @resource
+ * @product Email Security
+ * @category Email
+ * @section Creating an Allow Policy
+ * @example Acceptable sender by email address
  * ```typescript
  * yield* Cloudflare.Email.AllowPolicy("NewsletterSender", {
  *   pattern: "news@partner.example.com",
@@ -116,7 +119,7 @@ export type AllowPolicy = Resource<
  * });
  * ```
  *
- * **Example:** Trusted sender domain (bypasses all detections)
+ * @example Trusted sender domain (bypasses all detections)
  * ```typescript
  * yield* Cloudflare.Email.AllowPolicy("TrustedPartner", {
  *   pattern: "partner.example.com",
@@ -126,7 +129,7 @@ export type AllowPolicy = Resource<
  * });
  * ```
  *
- * **Example:** Exempt recipient
+ * @example Exempt recipient
  * ```typescript
  * // Messages delivered to the abuse mailbox must never be filtered.
  * yield* Cloudflare.Email.AllowPolicy("AbuseMailbox", {
@@ -138,10 +141,6 @@ export type AllowPolicy = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/email-security/
- *
- * @resource
- * @product Email Security
- * @category Email
  */
 export const AllowPolicy = Resource<AllowPolicy>(
   EmailSecurityAllowPolicyTypeId,
@@ -172,15 +171,9 @@ export const AllowPolicyProvider = () =>
               ),
             ),
           ),
-          // Email Security is a paid add-on gated by both account
-          // entitlement and token scope: an unentitled account answers
-          // `EmailSecurityNotEntitled`, while a credential lacking the
-          // Email Security scope (e.g. Cloudflare OAuth) answers a bare
-          // `Forbidden`. Neither can enumerate, so both mean "none
-          // visible" — matching `Domain.list()`. Returning `[]` is the
-          // safe direction for the callers of `list` (orphan detection
-          // never deletes what it cannot see).
-          Effect.catchTag(["EmailSecurityNotEntitled", "Forbidden"], () =>
+          // Email Security is a paid add-on; accounts without the
+          // entitlement can't enumerate policies — treat as empty.
+          Effect.catchTag("EmailSecurityNotEntitled", () =>
             Effect.succeed([] as AllowPolicyAttributes[]),
           ),
         );

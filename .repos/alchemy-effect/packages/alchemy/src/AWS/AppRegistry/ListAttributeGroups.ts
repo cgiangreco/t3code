@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * useful in discovery/governance functions that inventory application
  * metadata. Account-level: no resource argument. Provide the implementation
  * with `Effect.provide(AWS.AppRegistry.ListAttributeGroupsHttp)`.
- * ### Discovering Attribute Groups
- * **Example:** List the Account's Attribute Groups
+ * @binding
+ * @section Discovering Attribute Groups
+ * @example List the Account's Attribute Groups
  * ```typescript
  * // init — account-level, no resource argument
  * const listAttributeGroups = yield* AWS.AppRegistry.ListAttributeGroups();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   console.log(group.name, group.id);
  * }
  * ```
- *
- * @binding
  */
 export interface ListAttributeGroups extends Binding.Service<
   ListAttributeGroups,

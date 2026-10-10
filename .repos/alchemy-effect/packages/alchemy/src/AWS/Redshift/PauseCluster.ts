@@ -12,8 +12,9 @@ import type { Cluster } from "./Cluster.ts";
  * overnight to save cost. The cluster identifier is injected from the
  * binding. Provide the implementation with
  * `Effect.provide(AWS.Redshift.PauseClusterHttp)`.
- * ### Operating a Cluster
- * **Example:** Pause the Warehouse Overnight
+ * @binding
+ * @section Operating a Cluster
+ * @example Pause the Warehouse Overnight
  * ```typescript
  * // init — bind the operation to the cluster
  * const pauseCluster = yield* AWS.Redshift.PauseCluster(cluster);
@@ -21,8 +22,6 @@ import type { Cluster } from "./Cluster.ts";
  * // runtime
  * yield* pauseCluster();
  * ```
- *
- * @binding
  */
 export interface PauseCluster extends Binding.Service<
   PauseCluster,

@@ -13,16 +13,15 @@ import type { HealthCheck } from "./HealthCheck.ts";
  * checks only (not `CALCULATED` / `RECOVERY_CONTROL`). Provide the
  * implementation with
  * `Effect.provide(AWS.Route53.GetHealthCheckLastFailureReasonHttp)`.
- * ### Observing Health Checks
- * **Example:** Read the last failure reasons
+ * @binding
+ * @section Observing Health Checks
+ * @example Read the last failure reasons
  * ```typescript
  * const getLastFailureReason =
  *   yield* AWS.Route53.GetHealthCheckLastFailureReason(check);
  *
  * const { HealthCheckObservations } = yield* getLastFailureReason();
  * ```
- *
- * @binding
  */
 export interface GetHealthCheckLastFailureReason extends Binding.Service<
   GetHealthCheckLastFailureReason,

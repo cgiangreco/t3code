@@ -44,13 +44,16 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * the entry module (each section below includes the async variant). Pass
  * `crons: []` to remove all Cron Triggers from a Worker.
  *
+ * @binding
+ * @product Workers
+ * @category Workers & Compute
  *
- * ### Declare a schedule
- * **Example:** Effect-native Worker (recommended)
+ * @section Declare a schedule
+ * @example Effect-native Worker (recommended)
  * ```typescript
  * import * as Cloudflare from "alchemy/Cloudflare";
  * import * as Effect from "effect/Effect";
- * import * as HttpServerResponse from "effect/http/HttpServerResponse";
+ * import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
  *
  * export default Cloudflare.Worker(
  *   "Worker",
@@ -67,7 +70,7 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * );
  * ```
  *
- * **Example:** Async Worker — `crons` prop + exported `scheduled` handler
+ * @example Async Worker — `crons` prop + exported `scheduled` handler
  * ```typescript
  * // alchemy.run.ts — attach the cron expressions at deploy time
  * export const Worker = Cloudflare.Worker("Worker", {
@@ -83,8 +86,8 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * };
  * ```
  *
- * ### `controller.scheduledTime` — the fire time
- * **Example:** Effect: record each fire on a Durable Object
+ * @section `controller.scheduledTime` — the fire time
+ * @example Effect: record each fire on a Durable Object
  * ```typescript
  * export default class Worker extends Cloudflare.Worker<Worker>()(
  *   "Worker",
@@ -106,7 +109,7 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * ) {}
  * ```
  *
- * **Example:** Async: use the fire time as an idempotency key
+ * @example Async: use the fire time as an idempotency key
  * ```typescript
  * // scheduledTime is the time the fire was *scheduled* for (not when it
  * // ran), so it is stable across retries of the same fire — a natural
@@ -121,8 +124,8 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * };
  * ```
  *
- * ### `controller.cron` — dispatch multiple schedules
- * **Example:** Effect: one handler per expression
+ * @section `controller.cron` — dispatch multiple schedules
+ * @example Effect: one handler per expression
  * ```typescript
  * // Each handler only runs for fires of its own expression — the listener
  * // checks controller.cron, so a midnight fire never runs the hourly handler.
@@ -130,7 +133,7 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * yield* Cloudflare.Workers.cron("0 0 * * *", () => purgeExpired);
  * ```
  *
- * **Example:** Async: switch on `controller.cron`
+ * @example Async: switch on `controller.cron`
  * ```typescript
  * export const Worker = Cloudflare.Worker("Worker", {
  *   main: "./src/worker.ts",
@@ -152,8 +155,8 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * };
  * ```
  *
- * ### `controller.noRetry()` — failure & retry control
- * **Example:** Effect: bound retries with `Effect.retry`
+ * @section `controller.noRetry()` — failure & retry control
+ * @example Effect: bound retries with `Effect.retry`
  * ```typescript
  * import * as Schedule from "effect/Schedule";
  *
@@ -175,7 +178,7 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * );
  * ```
  *
- * **Example:** Async: suppress retry for permanent failures
+ * @example Async: suppress retry for permanent failures
  * ```typescript
  * // src/worker.ts — a thrown error marks the invocation failed and
  * // Cloudflare may retry it; noRetry() opts this fire out of that.
@@ -194,10 +197,6 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * ```
  *
  * @see https://developers.cloudflare.com/workers/configuration/cron-triggers/
- *
- * @binding
- * @product Workers
- * @category Workers & Compute
  */
 export const cron = <Req = never>(
   expression: string,

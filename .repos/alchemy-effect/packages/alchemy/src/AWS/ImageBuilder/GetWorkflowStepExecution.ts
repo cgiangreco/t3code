@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * from `ListWorkflowStepExecutions` or `ListWaitingWorkflowSteps`. Provide
  * the implementation with
  * `Effect.provide(AWS.ImageBuilder.GetWorkflowStepExecutionHttp)`.
- * ### Workflow Monitoring
- * **Example:** Read a Workflow Step's State
+ * @binding
+ * @section Workflow Monitoring
+ * @example Read a Workflow Step's State
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getWorkflowStepExecution =
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * const step = yield* getWorkflowStepExecution({ stepExecutionId });
  * yield* Effect.log(`step ${step.name} is ${step.status}`);
  * ```
- *
- * @binding
  */
 export interface GetWorkflowStepExecution extends Binding.Service<
   GetWorkflowStepExecution,

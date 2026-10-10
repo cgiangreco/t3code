@@ -6,44 +6,38 @@ export function connectionTone(state: RemoteClientConnectionState): StatusTone {
     case "connected":
       return {
         label: "Connected",
-        pillClassName: "bg-adaptive-emerald-500-a12-a16",
-        textClassName: "text-adaptive-emerald-700-300",
+        pillClassName: "bg-emerald-500/12 dark:bg-emerald-500/16",
+        textClassName: "text-emerald-700 dark:text-emerald-300",
       };
     case "reconnecting":
       return {
         label: "Reconnecting",
-        pillClassName: "bg-warning",
-        textClassName: "text-warning-foreground",
+        pillClassName: "bg-amber-500/12 dark:bg-amber-500/16",
+        textClassName: "text-amber-700 dark:text-amber-300",
       };
     case "connecting":
       return {
         label: "Connecting",
-        pillClassName: "bg-update",
-        textClassName: "text-update-foreground",
-      };
-    case "unsupported":
-      return {
-        label: "Client not supported",
-        pillClassName: "bg-subtle",
-        textClassName: "text-foreground-secondary",
+        pillClassName: "bg-sky-500/12 dark:bg-sky-500/16",
+        textClassName: "text-sky-700 dark:text-sky-300",
       };
     case "error":
       return {
         label: "Connection failed",
-        pillClassName: "bg-danger",
-        textClassName: "text-danger-foreground",
+        pillClassName: "bg-rose-500/12 dark:bg-rose-500/16",
+        textClassName: "text-rose-700 dark:text-rose-300",
       };
     case "offline":
       return {
         label: "Offline",
-        pillClassName: "bg-danger",
-        textClassName: "text-danger-foreground",
+        pillClassName: "bg-rose-500/12 dark:bg-rose-500/16",
+        textClassName: "text-rose-700 dark:text-rose-300",
       };
     case "available":
       return {
         label: "Available",
-        pillClassName: "bg-subtle",
-        textClassName: "text-foreground-secondary",
+        pillClassName: "bg-neutral-500/10 dark:bg-neutral-500/16",
+        textClassName: "text-neutral-600 dark:text-neutral-300",
       };
   }
 }

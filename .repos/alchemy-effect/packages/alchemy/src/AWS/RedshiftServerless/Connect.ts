@@ -72,15 +72,16 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * workgroup `publiclyAccessible`). Provide the implementation with
  * `Effect.provide(AWS.RedshiftServerless.ConnectHttp)`.
  *
- * ### Connecting to a Workgroup
- * **Example:** Resolve Connection Info inside a Function
+ * @binding
+ * @section Connecting to a Workgroup
+ * @example Resolve Connection Info inside a Function
  * ```typescript
  * const connect = yield* RedshiftServerless.Connect(workgroup);
  * // inside a handler — mints fresh temporary credentials:
  * const { host, port, username, password, url } = yield* connect;
  * ```
  *
- * **Example:** Drizzle over the Connection URL
+ * @example Drizzle over the Connection URL
  * ```typescript
  * const connect = yield* RedshiftServerless.Connect(workgroup, {
  *   database: "analytics",
@@ -90,8 +91,6 @@ export const connectEnvPrefix = (logicalId: string): string =>
  *   { prepare: false },
  * );
  * ```
- *
- * @binding
  */
 export interface Connect extends Binding.Service<
   Connect,

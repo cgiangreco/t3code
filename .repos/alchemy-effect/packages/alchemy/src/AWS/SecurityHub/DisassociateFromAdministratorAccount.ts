@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.DisassociateFromAdministratorAccountHttp)`.
- * ### Members & Organization
- * **Example:** Leave the Administrator
+ * @binding
+ * @section Members & Organization
+ * @example Leave the Administrator
  * ```typescript
  * // init — account-level binding, no resource argument
  * const disassociateFromAdministratorAccount = yield* AWS.SecurityHub.DisassociateFromAdministratorAccount();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* disassociateFromAdministratorAccount();
  * ```
- *
- * @binding
  */
 export interface DisassociateFromAdministratorAccount extends Binding.Service<
   DisassociateFromAdministratorAccount,

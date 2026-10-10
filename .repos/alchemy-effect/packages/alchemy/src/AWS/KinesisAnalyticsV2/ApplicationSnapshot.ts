@@ -56,8 +56,9 @@ export interface ApplicationSnapshot extends Resource<
  * Snapshots are immutable — every prop change replaces the snapshot. The
  * source application must be `RUNNING` with `snapshotsEnabled: true` when
  * the snapshot is created.
- * ### Creating Snapshots
- * **Example:** Snapshot a running application
+ * @resource
+ * @section Creating Snapshots
+ * @example Snapshot a running application
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -72,8 +73,6 @@ export interface ApplicationSnapshot extends Resource<
  *   { applicationName: app.applicationName },
  * );
  * ```
- *
- * @resource
  */
 export const ApplicationSnapshot = Resource<ApplicationSnapshot>(
   "AWS.KinesisAnalyticsV2.ApplicationSnapshot",

@@ -30,7 +30,7 @@ const decodeManagedRelayAccessTokenCache = Schema.decodeUnknownEffect(
 );
 const encodeManagedRelayAccessTokenCache = Schema.encodeEffect(ManagedRelayAccessTokenCacheSchema);
 
-export class ManagedRelayTokenStoreError extends Schema.TaggedError<ManagedRelayTokenStoreError>()(
+export class ManagedRelayTokenStoreError extends Schema.TaggedErrorClass<ManagedRelayTokenStoreError>()(
   "ManagedRelayTokenStoreError",
   {
     operation: Schema.Literals(["read", "decode", "encode", "write", "clear"]),

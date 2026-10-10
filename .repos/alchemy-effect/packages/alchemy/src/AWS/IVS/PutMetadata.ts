@@ -18,8 +18,9 @@ export interface PutMetadataRequest extends Omit<
  * requests per second per channel. The channel ARN is injected from the
  * binding. Provide the implementation with
  * `Effect.provide(AWS.IVS.PutMetadataHttp)`.
- * ### Embedding Timed Metadata
- * **Example:** Push a Poll Question to Viewers
+ * @binding
+ * @section Embedding Timed Metadata
+ * @example Push a Poll Question to Viewers
  * ```typescript
  * // init — bind the operation to the channel
  * const putMetadata = yield* AWS.IVS.PutMetadata(channel);
@@ -29,8 +30,6 @@ export interface PutMetadataRequest extends Omit<
  *   metadata: JSON.stringify({ question: "Who wins?", options: ["A", "B"] }),
  * });
  * ```
- *
- * @binding
  */
 export interface PutMetadata extends Binding.Service<
   PutMetadata,

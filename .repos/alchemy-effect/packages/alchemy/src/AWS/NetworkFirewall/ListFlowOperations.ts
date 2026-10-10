@@ -15,8 +15,9 @@ export interface ListFlowOperationsRequest extends Omit<
  *
  * Provide `NetworkFirewall.ListFlowOperationsHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Flow Operations
- * **Example:** List Recent Flow Captures
+ * @binding
+ * @section Flow Operations
+ * @example List Recent Flow Captures
  * ```typescript
  * // init — grants network-firewall:ListFlowOperations on the firewall
  * const listFlowOperations =
@@ -27,8 +28,6 @@ export interface ListFlowOperationsRequest extends Omit<
  *   FlowOperationType: "FLOW_CAPTURE",
  * });
  * ```
- *
- * @binding
  */
 export interface ListFlowOperations extends Binding.Service<
   ListFlowOperations,

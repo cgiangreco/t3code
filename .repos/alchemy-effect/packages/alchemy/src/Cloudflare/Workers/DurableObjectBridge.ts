@@ -2,21 +2,13 @@ import type * as cf from "@cloudflare/workers-types";
 import type { DurableObject as DurableObjectClass } from "cloudflare:workers";
 
 import * as Cause from "effect/Cause";
-import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as Layer from "effect/Layer";
 import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
 
-import { HttpServerResponse } from "effect/http";
-import {
-  dispatchAlarmCallbacks,
-  initializeAlarmCallbacks,
-  makeDurableObjectCallbackFactory,
-} from "./AlarmCallback.ts";
-import { RuntimeContext } from "../../RuntimeContext.ts";
-import { buildEventTelemetry } from "../../TelemetryRuntime.ts";
+import { HttpServerResponse } from "effect/unstable/http";
 import type {
   DurableObjectExport,
   DurableObjectShape,
@@ -70,12 +62,8 @@ export const makeDurableObjectBridge =
 
         this.#instance = state.blockConcurrencyWhile(() =>
           build((promise) => void (state as any).waitUntil?.(promise)).then(
-            ({ context, runtimeContext, export: exported, telemetry }) => {
+            ({ context, export: exported }) => {
               const { constructor, services } = exported;
-              const instanceRuntimeContext = {
-                ...runtimeContext,
-                makeCallback: makeDurableObjectCallbackFactory(this.#state),
-              };
               const doContext = Layer.succeed(
                 DurableObjectState,
                 fromDurableObjectState(this.#state),
@@ -86,28 +74,9 @@ export const makeDurableObjectBridge =
               return constructor.pipe(
                 Effect.provide(doContext),
                 Effect.flatMap((instance) =>
-                  Effect.suspend(() => {
-                    const seal = initializeAlarmCallbacks(this.#state);
-                    const instanceContext = Layer.succeed(
-                      RuntimeContext,
-                      instanceRuntimeContext,
-                    ).pipe(Layer.provideMerge(doContext));
-                    return instance.pipe(
-                      Effect.provide(instanceContext),
-                      Effect.ensuring(Effect.sync(seal)),
-                    );
-                  }),
+                  instance.pipe(Effect.provide(doContext)),
                 ),
-                Effect.map((instance) => ({
-                  instance,
-                  services: Context.add(
-                    services,
-                    RuntimeContext,
-                    instanceRuntimeContext,
-                  ),
-                  context,
-                  telemetry,
-                })),
+                Effect.map((instance) => ({ instance, services, context })),
                 Effect.runPromise,
               );
             },
@@ -155,25 +124,16 @@ export const makeDurableObjectBridge =
       ) {
         const scope = Scope.makeUnsafe();
 
-        const { instance, services, context, telemetry } = await this.#instance;
+        const { instance, services, context } = await this.#instance;
 
         return fn(instance)
           .pipe(
             Effect.provide(
-              Layer.mergeAll(
-                Layer.succeed(
-                  DurableObjectState,
-                  fromDurableObjectState(this.#state),
-                ),
-                Layer.succeed(Scope.Scope, scope),
-                // The configured telemetry exporters, attached to the *call*
-                // scope by `buildEventTelemetry` so buffered telemetry
-                // flushes when the scope closes into `waitUntil` below (the
-                // isolate scope never finalizes on workerd).
-                Layer.effectContext(
-                  buildEventTelemetry(context, scope, telemetry()),
-                ),
+              Layer.succeed(
+                DurableObjectState,
+                fromDurableObjectState(this.#state),
               ).pipe(
+                Layer.provideMerge(Layer.succeed(Scope.Scope, scope)),
                 Layer.provideMerge(Layer.succeedContext(services)),
                 Layer.provideMerge(Layer.succeedContext(context)),
               ),
@@ -190,13 +150,9 @@ export const makeDurableObjectBridge =
           .finally(() =>
             isScopeEjected(scope)
               ? undefined
-              : this.ctx.waitUntil(
-                  // Match WorkerBridge: yield one macrotask so the
-                  // HttpMiddleware tracer's late span-end reaches the
-                  // telemetry exporter before the scope's flush finalizer.
-                  new Promise((resolve) => setTimeout(resolve, 0)).then(() =>
-                    Effect.runPromise(Scope.close(scope, Exit.void)),
-                  ),
+              : Scope.close(scope, Exit.void).pipe(
+                  Effect.runPromise,
+                  (promise) => this.ctx.waitUntil(promise),
                 ),
           );
       }
@@ -214,14 +170,7 @@ export const makeDurableObjectBridge =
       }
 
       async alarm(alarmInfo?: cf.AlarmInvocationInfo) {
-        return this.#execute((instance) =>
-          dispatchAlarmCallbacks(
-            this.#state,
-            instance.alarm !== undefined,
-          ).pipe(
-            Effect.andThen(() => instance.alarm?.(alarmInfo) ?? Effect.void),
-          ),
-        );
+        return this.#execute((instance) => instance.alarm!(alarmInfo));
       }
 
       async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
@@ -246,14 +195,6 @@ export const makeDurableObjectBridge =
               reason,
               wasClean,
             ) ?? Effect.void,
-        );
-      }
-
-      async webSocketError(ws: WebSocket, error: unknown) {
-        return this.#execute(
-          (instance) =>
-            instance.webSocketError?.(fromWebSocket(ws as any), error) ??
-            Effect.void,
         );
       }
     } as any;

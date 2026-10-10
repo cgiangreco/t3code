@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.BatchGetCustomDataIdentifiersHttp)`.
- * ### Custom Data Identifiers & Lists
- * **Example:** Hydrate Custom Data Identifiers
+ * @binding
+ * @section Custom Data Identifiers & Lists
+ * @example Hydrate Custom Data Identifiers
  * ```typescript
  * // init — account-level binding, no resource argument
  * const batchGetCustomDataIdentifiers = yield* AWS.Macie2.BatchGetCustomDataIdentifiers();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { customDataIdentifiers } = yield* batchGetCustomDataIdentifiers({ ids });
  * ```
- *
- * @binding
  */
 export interface BatchGetCustomDataIdentifiers extends Binding.Service<
   BatchGetCustomDataIdentifiers,

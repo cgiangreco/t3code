@@ -6,15 +6,14 @@ import type { Project } from "./Project.ts";
 /**
  * Runtime binding for `codebuild:BatchGetSandboxes` — reads the status of
  * one or more sandboxes of the bound project by sandbox id.
- * ### Sandboxes
- * **Example:** Poll a Sandbox
+ * @binding
+ * @section Sandboxes
+ * @example Poll a Sandbox
  * ```typescript
  * const batchGetSandboxes = yield* AWS.CodeBuild.BatchGetSandboxes(project);
  *
  * const { sandboxes } = yield* batchGetSandboxes({ ids: [sandboxId] });
  * ```
- *
- * @binding
  */
 export interface BatchGetSandboxes extends Binding.Service<
   BatchGetSandboxes,

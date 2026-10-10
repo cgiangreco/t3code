@@ -10,16 +10,15 @@ import * as Binding from "../../Binding.ts";
  * a `workspaceId` — the versions an existing workspace can be upgraded to.
  * Provide the implementation with
  * `Effect.provide(AWS.Grafana.ListVersionsHttp)`.
- * ### Managing Configuration
- * **Example:** List the Available Grafana Versions
+ * @binding
+ * @section Managing Configuration
+ * @example List the Available Grafana Versions
  * ```typescript
  * const listVersions = yield* Grafana.ListVersions();
  *
  * const { grafanaVersions } = yield* listVersions();
  * // grafanaVersions → ["10.4", "9.4", ...]
  * ```
- *
- * @binding
  */
 export interface ListVersions extends Binding.Service<
   ListVersions,

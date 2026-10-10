@@ -15,8 +15,9 @@ export interface GetEventRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.GetEventHttp`
  * on the Function effect to implement the binding.
  *
- * ### Reading Events
- * **Example:** Fetch an Event by Id
+ * @binding
+ * @section Reading Events
+ * @example Fetch an Event by Id
  * ```typescript
  * // init
  * const getEvent = yield* AgentCore.GetEvent(memory);
@@ -33,8 +34,6 @@ export interface GetEventRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface GetEvent extends Binding.Service<
   GetEvent,

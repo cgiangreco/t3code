@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.GetRemainingFreeTrialDaysHttp)`.
- * ### Usage & Coverage
- * **Example:** Check Free-Trial Days
+ * @binding
+ * @section Usage & Coverage
+ * @example Check Free-Trial Days
  * ```typescript
  * // init
  * const getRemainingFreeTrialDays = yield* AWS.GuardDuty.GetRemainingFreeTrialDays(detector);
@@ -21,8 +22,6 @@ import type { Detector } from "./Detector.ts";
  *   AccountIds: ["111122223333"],
  * });
  * ```
- *
- * @binding
  */
 export interface GetRemainingFreeTrialDays extends Binding.Service<
   GetRemainingFreeTrialDays,

@@ -5,16 +5,15 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:RemoveManagedScalingPolicy` — detaches the bound cluster's managed scaling policy.
- * ### Scaling the Cluster
- * **Example:** Disable Managed Scaling
+ * @binding
+ * @section Scaling the Cluster
+ * @example Disable Managed Scaling
  * ```typescript
  * const removeScalingPolicy =
  *   yield* AWS.EMR.RemoveManagedScalingPolicy(cluster);
  *
  * yield* removeScalingPolicy();
  * ```
- *
- * @binding
  */
 export interface RemoveManagedScalingPolicy extends Binding.Service<
   RemoveManagedScalingPolicy,

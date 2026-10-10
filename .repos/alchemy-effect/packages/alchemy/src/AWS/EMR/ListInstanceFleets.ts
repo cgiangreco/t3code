@@ -5,15 +5,14 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:ListInstanceFleets` — lists the bound cluster's instance fleets (instance-fleet clusters only) with target and provisioned capacities.
- * ### Inspecting the Cluster
- * **Example:** Read Fleet Capacities
+ * @binding
+ * @section Inspecting the Cluster
+ * @example Read Fleet Capacities
  * ```typescript
  * const listInstanceFleets = yield* AWS.EMR.ListInstanceFleets(cluster);
  *
  * const { InstanceFleets } = yield* listInstanceFleets();
  * ```
- *
- * @binding
  */
 export interface ListInstanceFleets extends Binding.Service<
   ListInstanceFleets,

@@ -10,8 +10,9 @@ import type { EventDataStore } from "./EventDataStore.ts";
  * against the bound {@link EventDataStore} (the store list is injected from
  * the binding). Provide the implementation with
  * `Effect.provide(AWS.CloudTrail.GenerateQueryHttp)`.
- * ### Querying CloudTrail Lake
- * **Example:** Generate SQL from a Prompt
+ * @binding
+ * @section Querying CloudTrail Lake
+ * @example Generate SQL from a Prompt
  * ```typescript
  * // init — bind the operation to the event data store
  * const generateQuery = yield* AWS.CloudTrail.GenerateQuery(store);
@@ -22,8 +23,6 @@ import type { EventDataStore } from "./EventDataStore.ts";
  * });
  * console.log(result.QueryStatement);
  * ```
- *
- * @binding
  */
 export interface GenerateQuery extends Binding.Service<
   GenerateQuery,

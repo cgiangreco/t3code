@@ -35,8 +35,9 @@ export interface InvokeEndpointRequest extends Omit<
  * endpoint ARNs. Pass the request/response bodies as raw bytes — the
  * container behind the endpoint owns the payload shape, no marshalling.
  *
- * ### Invoking an Endpoint
- * **Example:** Invoke a Real-Time Endpoint
+ * @binding
+ * @section Invoking an Endpoint
+ * @example Invoke a Real-Time Endpoint
  * ```typescript
  * // init
  * const invokeEndpoint = yield* AWS.SageMakerRuntime.InvokeEndpoint(
@@ -51,8 +52,6 @@ export interface InvokeEndpointRequest extends Omit<
  * });
  * const raw = new TextDecoder().decode(result.Body);
  * ```
- *
- * @binding
  */
 export interface InvokeEndpoint extends Binding.Service<
   InvokeEndpoint,

@@ -11,8 +11,9 @@ import type { Workspace } from "./Workspace.ts";
  * Lists the API tokens of a Grafana service account (metadata only — the
  * secret key is only returned at mint time). Provide the implementation with
  * `Effect.provide(AWS.Grafana.ListWorkspaceServiceAccountTokensHttp)`.
- * ### Managing Service Accounts
- * **Example:** Find Expired Tokens to Revoke
+ * @binding
+ * @section Managing Service Accounts
+ * @example Find Expired Tokens to Revoke
  * ```typescript
  * const listTokens =
  *   yield* Grafana.ListWorkspaceServiceAccountTokens(workspace);
@@ -24,8 +25,6 @@ import type { Workspace } from "./Workspace.ts";
  *   (token) => token.expiresAt.getTime() < Date.now(),
  * );
  * ```
- *
- * @binding
  */
 export interface ListWorkspaceServiceAccountTokens extends Binding.Service<
   ListWorkspaceServiceAccountTokens,

@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.StartResourceEvaluationHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Proactive Resource Evaluation
- * **Example:** Evaluate a Resource Before Deploying
+ * @binding
+ * @section Proactive Resource Evaluation
+ * @example Evaluate a Resource Before Deploying
  * ```typescript
  * // init — grants config:StartResourceEvaluation
  * const startResourceEvaluation = yield* AWS.Config.StartResourceEvaluation();
@@ -29,8 +30,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.ResourceEvaluationId);
  * ```
- *
- * @binding
  */
 export interface StartResourceEvaluation extends Binding.Service<
   StartResourceEvaluation,

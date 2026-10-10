@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * and grants `forecast:QueryForecast` on `*`. Provide the implementation
  * with `Effect.provide(AWS.Forecast.QueryForecastHttp)`.
  *
- * ### Querying Forecasts
- * **Example:** Serve a Prediction
+ * @binding
+ * @section Querying Forecasts
+ * @example Serve a Prediction
  * ```typescript
  * // init
  * const queryForecast = yield* AWS.Forecast.QueryForecast();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const p50 = Forecast?.Predictions?.p50 ?? [];
  * ```
- *
- * @binding
  */
 export interface QueryForecast extends Binding.Service<
   QueryForecast,

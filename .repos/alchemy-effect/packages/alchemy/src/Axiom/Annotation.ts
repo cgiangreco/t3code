@@ -4,12 +4,12 @@ import * as Provider from "../Provider.ts";
 import { Resource } from "../Resource.ts";
 import type { Providers } from "./Providers.ts";
 
-export type AnnotationProps = Axiom.CreateAnnotationRequest;
+export type AnnotationProps = Axiom.CreateAnnotationInput;
 
 export type Annotation = Resource<
   "Axiom.Annotation",
   AnnotationProps,
-  Axiom.Annotation,
+  Axiom.CreateAnnotationOutput,
   never,
   Providers
 >;
@@ -26,10 +26,11 @@ export type Annotation = Resource<
  * Although typically created at deploy/release time (out-of-band of
  * regular IaC), modelling them as resources makes per-environment
  * annotation history reproducible.
+ * @resource
  * @see https://axiom.co/docs/query-data/annotate-charts
  *
- * ### Creating an Annotation
- * **Example:** Point-in-time deploy marker
+ * @section Creating an Annotation
+ * @example Point-in-time deploy marker
  * ```typescript
  * yield* Axiom.Annotation("deploy-1.2.3", {
  *   type: "deploy",
@@ -41,7 +42,7 @@ export type Annotation = Resource<
  * });
  * ```
  *
- * **Example:** Incident time-range
+ * @example Incident time-range
  * ```typescript
  * yield* Axiom.Annotation("inc-2026-04-27", {
  *   type: "incident",
@@ -52,9 +53,6 @@ export type Annotation = Resource<
  *   url: "https://incident.io/incidents/abc123",
  * });
  * ```
- *
- * @resource
- * @product Dataset
  */
 export const Annotation = Resource<Annotation>("Axiom.Annotation");
 

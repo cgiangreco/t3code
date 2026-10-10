@@ -12,8 +12,9 @@ import type { Task } from "./Task.ts";
  * Returns the new execution's ARN for use with `DescribeTaskExecution` /
  * `CancelTaskExecution`. Provide the implementation with
  * `Effect.provide(AWS.DataSync.StartTaskExecutionHttp)`.
- * ### Running Transfers
- * **Example:** Kick Off A Transfer
+ * @binding
+ * @section Running Transfers
+ * @example Kick Off A Transfer
  * ```typescript
  * // init — bind the operation to the task
  * const startTaskExecution = yield* AWS.DataSync.StartTaskExecution(task);
@@ -22,8 +23,6 @@ import type { Task } from "./Task.ts";
  * const { TaskExecutionArn } = yield* startTaskExecution();
  * yield* Effect.log(`transfer started: ${TaskExecutionArn}`);
  * ```
- *
- * @binding
  */
 export interface StartTaskExecution extends Binding.Service<
   StartTaskExecution,

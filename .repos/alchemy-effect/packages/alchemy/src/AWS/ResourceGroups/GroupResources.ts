@@ -24,8 +24,9 @@ export type GroupResourcesRequest = Omit<
  * additionally require their own `TagResource` permission on the caller).
  * Provide the implementation with
  * `Effect.provide(AWS.ResourceGroups.GroupResourcesHttp)`.
- * ### Managing Group Membership
- * **Example:** Add A Resource To An Application Group
+ * @binding
+ * @section Managing Group Membership
+ * @example Add A Resource To An Application Group
  * ```typescript
  * // init — bind the operation to the group
  * const groupResources = yield* AWS.ResourceGroups.GroupResources(group);
@@ -35,8 +36,6 @@ export type GroupResourcesRequest = Omit<
  *   ResourceArns: [resourceArn],
  * });
  * ```
- *
- * @binding
  */
 export interface GroupResources extends Binding.Service<
   GroupResources,

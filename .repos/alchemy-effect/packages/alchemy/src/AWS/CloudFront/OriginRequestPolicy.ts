@@ -75,8 +75,9 @@ export interface OriginRequestPolicy extends Resource<
  * addition to those used in the cache key) CloudFront includes when sending
  * a request to the origin. They are referenced by ID on a Distribution's
  * default behavior or per-path cache behaviors.
- * ### Creating Origin Request Policies
- * **Example:** Forward all viewer headers and cookies
+ * @resource
+ * @section Creating Origin Request Policies
+ * @example Forward all viewer headers and cookies
  * ```typescript
  * const originRequestPolicy = yield* OriginRequestPolicy("AppOriginRequest", {
  *   comment: "Forward auth + locale",
@@ -88,8 +89,6 @@ export interface OriginRequestPolicy extends Resource<
  *   queryStringsConfig: { QueryStringBehavior: "all" },
  * });
  * ```
- *
- * @resource
  */
 export const OriginRequestPolicy = Resource<OriginRequestPolicy>(
   "AWS.CloudFront.OriginRequestPolicy",

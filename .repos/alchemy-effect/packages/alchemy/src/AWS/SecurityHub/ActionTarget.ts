@@ -52,8 +52,8 @@ export interface ActionTarget extends Resource<
  * `Security Hub Findings - Custom Action` event to EventBridge, which a
  * Function can consume via {@link consumeCustomActions}.
  *
- * ### Creating a Custom Action
- * **Example:** Send Findings to a Triage Function
+ * @section Creating a Custom Action
+ * @example Send Findings to a Triage Function
  * ```typescript
  * const action = yield* AWS.SecurityHub.ActionTarget("Escalate", {
  *   name: "Escalate",
@@ -61,7 +61,7 @@ export interface ActionTarget extends Resource<
  * });
  * ```
  *
- * **Example:** Consume Custom Action Events
+ * @example Consume Custom Action Events
  * ```typescript
  * yield* AWS.SecurityHub.consumeCustomActions(
  *   { actionArns: [action.actionTargetArn] },

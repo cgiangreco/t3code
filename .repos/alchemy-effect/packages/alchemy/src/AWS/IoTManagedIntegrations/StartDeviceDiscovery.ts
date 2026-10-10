@@ -17,8 +17,9 @@ export interface StartDeviceDiscoveryRequest
  * protocol. Provide the implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.StartDeviceDiscoveryHttp)`.
  *
- * ### Discovering Devices
- * **Example:** Start a Zigbee Discovery Scan
+ * @binding
+ * @section Discovering Devices
+ * @example Start a Zigbee Discovery Scan
  * ```typescript
  * // init — account-level binding takes no resource
  * const startDiscovery = yield* IoTManagedIntegrations.StartDeviceDiscovery();
@@ -29,8 +30,6 @@ export interface StartDeviceDiscoveryRequest
  *   ControllerIdentifier: controllerManagedThingId,
  * });
  * ```
- *
- * @binding
  */
 export interface StartDeviceDiscovery extends Binding.Service<
   StartDeviceDiscovery,

@@ -10,22 +10,26 @@ import * as Crypto from "effect/Crypto";
 import * as Deferred from "effect/Deferred";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
-import * as Base64Url from "effect/encoding/Base64Url";
+import * as Encoding from "effect/Encoding";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Queue from "effect/Queue";
 import * as Schema from "effect/Schema";
 import * as Semaphore from "effect/Semaphore";
 import * as Terminal from "effect/Terminal";
-import * as HttpClient from "effect/http/HttpClient";
-import * as HttpClientError from "effect/http/HttpClientError";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
-import * as HttpClientResponse from "effect/http/HttpClientResponse";
-import * as HttpRouter from "effect/http/HttpRouter";
-import * as HttpServerRequest from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import * as HttpClientResponse from "effect/unstable/http/HttpClientResponse";
+import * as HttpRouter from "effect/unstable/http/HttpRouter";
+import * as HttpServerRequest from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 
-import { buildConnectAuthorizeRequestUrl } from "@t3tools/shared/connectAuth";
+import {
+  buildConnectAuthorizeRequestUrl,
+  buildConnectClerkAuthorizeUrl,
+  checkConnectAuthCode,
+  connectCallbackUrl,
+} from "@t3tools/shared/connectAuth";
 
 import * as ServerSecretStore from "../auth/ServerSecretStore.ts";
 import * as ExternalLauncher from "../process/externalLauncher.ts";
@@ -39,14 +43,9 @@ import { renderLoopbackAuthorizationCompleteHtml } from "./cliAuthHtml.ts";
 const CLOUD_CLI_OAUTH_TOKEN_SECRET = "cloud-cli-oauth-token";
 const CLOUD_CLI_OAUTH_CALLBACK_TIMEOUT = Duration.minutes(10);
 const CLOUD_CLI_OAUTH_REFRESH_EARLY_MS = Duration.toMillis(Duration.minutes(5));
-const DEVICE_CODE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
-// RFC 8628 defaults, used only when Clerk omits the field.
-const DEVICE_AUTHORIZATION_DEFAULT_INTERVAL = Duration.seconds(5);
-// RFC 8628 §3.5: a slow_down response means "add 5 seconds to the interval".
-const DEVICE_AUTHORIZATION_SLOW_DOWN_INCREMENT = Duration.seconds(5);
 const boldTerminalText = (value: string): string => `\u001b[1m${value}\u001b[22m`;
 
-function formatLoopbackAuthorizationPrompt(authorizationUrl: string): string {
+export function formatLoopbackAuthorizationPrompt(authorizationUrl: string): string {
   return [
     "Open this URL to authorize T3 Connect:",
     `  ${authorizationUrl}`,
@@ -91,10 +90,9 @@ export const waitForLoopbackAuthorization = Effect.fn(
       while (true) {
         const result = yield* Effect.raceFirst(
           input.callback.pipe(
-            Effect.map((code): LoopbackAuthorizationResult => ({
-              _tag: "AuthorizationCode",
-              code,
-            })),
+            Effect.map(
+              (code): LoopbackAuthorizationResult => ({ _tag: "AuthorizationCode", code }),
+            ),
           ),
           readLoopbackAuthorizationAction(terminalInput),
         );
@@ -138,20 +136,6 @@ const OAuthTokenResponse = Schema.Struct({
   token_type: Schema.String,
 });
 
-const OAuthErrorResponse = Schema.Struct({
-  error: Schema.String,
-  error_description: Schema.optional(Schema.String),
-});
-
-const DeviceAuthorizationResponse = Schema.Struct({
-  device_code: Schema.String,
-  user_code: Schema.String,
-  verification_uri: Schema.String,
-  verification_uri_complete: Schema.optional(Schema.String),
-  expires_in: Schema.Number,
-  interval: Schema.optional(Schema.Number),
-});
-
 const OidcIdentityClaimsJson = Schema.fromJsonString(
   Schema.Struct({
     email: Schema.optional(Schema.String),
@@ -170,7 +154,7 @@ function idTokenIdentity(idToken: string | undefined): string | null {
   if (!idToken) return null;
   const payload = idToken.split(".")[1];
   if (!payload) return null;
-  const decoded = Base64Url.decodeString(payload);
+  const decoded = Encoding.decodeBase64UrlString(payload);
   if (decoded._tag !== "Success") return null;
   const claims = decodeOidcIdentityClaimsJson(decoded.success);
   if (Option.isNone(claims)) return null;
@@ -180,7 +164,7 @@ function idTokenIdentity(idToken: string | undefined): string | null {
   return null;
 }
 
-export class CloudCliCredentialRemovalError extends Schema.TaggedError<CloudCliCredentialRemovalError>()(
+export class CloudCliCredentialRemovalError extends Schema.TaggedErrorClass<CloudCliCredentialRemovalError>()(
   "CloudCliCredentialRemovalError",
   { cause: Schema.Defect() },
 ) {
@@ -189,7 +173,7 @@ export class CloudCliCredentialRemovalError extends Schema.TaggedError<CloudCliC
   }
 }
 
-export class CloudCliCredentialRefreshError extends Schema.TaggedError<CloudCliCredentialRefreshError>()(
+export class CloudCliCredentialRefreshError extends Schema.TaggedErrorClass<CloudCliCredentialRefreshError>()(
   "CloudCliCredentialRefreshError",
   { cause: Schema.Defect() },
 ) {
@@ -198,7 +182,7 @@ export class CloudCliCredentialRefreshError extends Schema.TaggedError<CloudCliC
   }
 }
 
-export class CloudCliCredentialReadError extends Schema.TaggedError<CloudCliCredentialReadError>()(
+export class CloudCliCredentialReadError extends Schema.TaggedErrorClass<CloudCliCredentialReadError>()(
   "CloudCliCredentialReadError",
   { cause: Schema.Defect() },
 ) {
@@ -207,7 +191,7 @@ export class CloudCliCredentialReadError extends Schema.TaggedError<CloudCliCred
   }
 }
 
-export class CloudCliAuthorizationError extends Schema.TaggedError<CloudCliAuthorizationError>()(
+export class CloudCliAuthorizationError extends Schema.TaggedErrorClass<CloudCliAuthorizationError>()(
   "CloudCliAuthorizationError",
   { cause: Schema.Defect() },
 ) {
@@ -216,21 +200,12 @@ export class CloudCliAuthorizationError extends Schema.TaggedError<CloudCliAutho
   }
 }
 
-export class CloudCliAuthorizationTimeoutError extends Schema.TaggedError<CloudCliAuthorizationTimeoutError>()(
+export class CloudCliAuthorizationTimeoutError extends Schema.TaggedErrorClass<CloudCliAuthorizationTimeoutError>()(
   "CloudCliAuthorizationTimeoutError",
   { cause: Schema.Defect() },
 ) {
   override get message(): string {
     return "Timed out waiting for T3 Connect authorization.";
-  }
-}
-
-export class CloudCliAuthorizationDeniedError extends Schema.TaggedError<CloudCliAuthorizationDeniedError>()(
-  "CloudCliAuthorizationDeniedError",
-  {},
-) {
-  override get message(): string {
-    return "T3 Connect authorization was denied in the browser.";
   }
 }
 
@@ -240,7 +215,6 @@ export const CloudCliTokenManagerError = Schema.Union([
   CloudCliCredentialReadError,
   CloudCliAuthorizationError,
   CloudCliAuthorizationTimeoutError,
-  CloudCliAuthorizationDeniedError,
 ]);
 export type CloudCliTokenManagerError = typeof CloudCliTokenManagerError.Type;
 
@@ -267,24 +241,6 @@ function bytesToString(value: Uint8Array): string {
   return new TextDecoder().decode(value);
 }
 
-const readTokenResponse = Effect.fn("cloud.cli_token.read_token_response")(function* (
-  response: HttpClientResponse.HttpClientResponse,
-  params: Record<string, string>,
-) {
-  const body = yield* HttpClientResponse.schemaBodyJson(OAuthTokenResponse)(response);
-  const now = yield* Clock.currentTimeMillis;
-  const identity = idTokenIdentity(body.id_token);
-  return {
-    token: {
-      accessToken: body.access_token,
-      refreshToken: body.refresh_token ?? params.refresh_token ?? "",
-      expiresAtEpochMs: now + body.expires_in * 1_000,
-      ...(identity === null ? {} : { identity }),
-    } satisfies PersistedToken,
-    identity,
-  };
-});
-
 const exchangeToken = Effect.fn("cloud.cli_token.exchange")(function* (
   metadata: Pick<CloudCliOAuthConfig, "tokenEndpoint">,
   params: Record<string, string>,
@@ -293,132 +249,85 @@ const exchangeToken = Effect.fn("cloud.cli_token.exchange")(function* (
   const response = yield* HttpClientRequest.post(metadata.tokenEndpoint).pipe(
     HttpClientRequest.bodyUrlParams(params),
     httpClient.execute,
+    Effect.flatMap(HttpClientResponse.schemaBodyJson(OAuthTokenResponse)),
   );
-  return yield* readTokenResponse(response, params);
+  const now = yield* Clock.currentTimeMillis;
+  const identity = idTokenIdentity(response.id_token);
+  return {
+    token: {
+      accessToken: response.access_token,
+      refreshToken: response.refresh_token ?? params.refresh_token ?? "",
+      expiresAtEpochMs: now + response.expires_in * 1_000,
+      ...(identity === null ? {} : { identity }),
+    } satisfies PersistedToken,
+    identity,
+  };
 });
 
 const makePkceRequest = Effect.gen(function* () {
   const crypto = yield* Crypto.Crypto;
-  const verifier = Base64Url.encode(yield* crypto.randomBytes(32));
-  const challenge = Base64Url.encode(
+  const verifier = Encoding.encodeBase64Url(yield* crypto.randomBytes(32));
+  const challenge = Encoding.encodeBase64Url(
     yield* crypto.digest("SHA-256", new TextEncoder().encode(verifier)),
   );
-  const state = Base64Url.encode(yield* crypto.randomBytes(16));
+  const state = Encoding.encodeBase64Url(yield* crypto.randomBytes(16));
   return { verifier, challenge, state };
 });
 
-export interface DeviceAuthorizationPrompt {
-  readonly verificationUri: string;
-  readonly verificationUriComplete: string | undefined;
-  readonly userCode: string;
-  readonly expiresIn: Duration.Duration;
+export interface OutOfBandOAuthPromptInput {
+  readonly authorizeUrl: string;
+  readonly validate: (value: string) => Effect.Effect<string, string>;
 }
 
-const isTransportError = (error: unknown) =>
-  HttpClientError.isHttpClientError(error) && error.reason._tag === "TransportError";
-
 /**
- * Polls Clerk's token endpoint until the user approves or denies the device
- * request in the browser (RFC 8628 §3.4/3.5). `authorization_pending` keeps
- * waiting, while `slow_down` and transient failures widen the interval before
- * the next tick; the caller bounds the whole loop with the device code's
- * lifetime.
+ * Out-of-band OAuth for machines without a local browser (SSH). The user
+ * opens the hosted /connect URL elsewhere, signs in, and enters the displayed
+ * code in this terminal. The PKCE verifier never leaves this process, so the
+ * authorization code is useless to an observer, and the state bundled into
+ * the blob preserves the loopback flow's CSRF check.
  */
-const pollDeviceToken = Effect.fn("cloud.cli_token.poll_device_token")(function* (
-  metadata: Pick<CloudCliOAuthConfig, "tokenEndpoint" | "clientId">,
-  deviceCode: string,
-  initialInterval: Duration.Duration,
-) {
-  const httpClient = yield* HttpClient.HttpClient;
-  const params = {
-    grant_type: DEVICE_CODE_GRANT_TYPE,
-    device_code: deviceCode,
-    client_id: metadata.clientId,
-  };
-  let interval = initialInterval;
-  while (true) {
-    yield* Effect.sleep(interval);
-    const response = yield* HttpClientRequest.post(metadata.tokenEndpoint).pipe(
-      HttpClientRequest.bodyUrlParams(params),
-      httpClient.execute,
-      Effect.asSome,
-      Effect.catchIf(isTransportError, () => Effect.succeedNone),
-    );
-    // Transport failures and upstream 5xx are transient while the device code
-    // is still valid. RFC 8628 §3.5 asks clients to back off before retrying,
-    // so widen the interval like slow_down; drain the body so the connection
-    // returns to the pool for the next poll.
-    if (Option.isNone(response) || response.value.status >= 500) {
-      if (Option.isSome(response)) yield* Effect.ignore(response.value.text);
-      interval = Duration.sum(interval, DEVICE_AUTHORIZATION_SLOW_DOWN_INCREMENT);
-      continue;
-    }
-    if (response.value.status >= 200 && response.value.status < 300) {
-      return yield* readTokenResponse(response.value, params);
-    }
-    const failure = yield* HttpClientResponse.schemaBodyJson(OAuthErrorResponse)(response.value);
-    switch (failure.error) {
-      case "authorization_pending":
-        continue;
-      case "slow_down":
-        interval = Duration.sum(interval, DEVICE_AUTHORIZATION_SLOW_DOWN_INCREMENT);
-        continue;
-      case "expired_token":
-        return yield* new CloudCliAuthorizationTimeoutError({ cause: failure });
-      case "access_denied":
-        return yield* new CloudCliAuthorizationDeniedError();
-      default:
-        return yield* new CloudCliAuthorizationError({
-          cause: failure.error_description ?? failure.error,
-        });
-    }
+export const outOfBandOAuthLogin = Effect.fn("cloud.cli_token.out_of_band_oauth_login")(function* <
+  E,
+  R,
+>(promptForCode: (input: OutOfBandOAuthPromptInput) => Effect.Effect<string, E, R>) {
+  const metadata = yield* cloudCliOAuthConfig;
+  const hostedAppUrl = yield* hostedAppUrlConfig;
+  const { verifier, challenge, state } = yield* makePkceRequest;
+
+  const authorizationCode = yield* promptForCode({
+    authorizeUrl: buildConnectAuthorizeRequestUrl({ hostedAppUrl, state, challenge }),
+    validate: (value) => {
+      const checked = checkConnectAuthCode(value, state);
+      return typeof checked === "string" ? Effect.fail(checked) : Effect.succeed(value);
+    },
+  }).pipe(
+    // Clerk authorization codes expire on this horizon anyway; matching the
+    // loopback flow's timeout turns an abandoned prompt into a clear error.
+    Effect.timeout(CLOUD_CLI_OAUTH_CALLBACK_TIMEOUT),
+    Effect.catchTag("TimeoutError", (cause) =>
+      Effect.fail(new CloudCliAuthorizationTimeoutError({ cause })),
+    ),
+  );
+  // promptForCode is caller-supplied, so re-check the returned value rather
+  // than trusting that the prompt ran validate.
+  const authCode = checkConnectAuthCode(authorizationCode, state);
+  if (typeof authCode === "string") {
+    return yield* new CloudCliAuthorizationError({ cause: authCode });
   }
+
+  return yield* exchangeToken(metadata, {
+    grant_type: "authorization_code",
+    code: authCode.code,
+    redirect_uri: connectCallbackUrl(hostedAppUrl),
+    client_id: metadata.clientId,
+    code_verifier: verifier,
+  });
 });
 
-/**
- * OAuth device authorization grant for machines without a local browser
- * (SSH). Clerk issues a short user code; the user approves it on Clerk's
- * hosted device page from any browser while this process polls the token
- * endpoint. Nothing is typed into the terminal and no redirect URI is
- * involved, so the hosted app plays no part in this flow.
- */
-export const deviceAuthorizationLogin = Effect.fn("cloud.cli_token.device_authorization_login")(
-  function* <E, R>(showPrompt: (prompt: DeviceAuthorizationPrompt) => Effect.Effect<void, E, R>) {
-    const metadata = yield* cloudCliOAuthConfig;
-    const httpClient = (yield* HttpClient.HttpClient).pipe(HttpClient.filterStatusOk);
-    const authorization = yield* HttpClientRequest.post(metadata.deviceAuthorizationEndpoint).pipe(
-      HttpClientRequest.bodyUrlParams({
-        client_id: metadata.clientId,
-        scope: metadata.scopes.join(" "),
-      }),
-      httpClient.execute,
-      Effect.flatMap(HttpClientResponse.schemaBodyJson(DeviceAuthorizationResponse)),
-    );
-    // Clerk's advertised lifetime and interval are authoritative.
-    const expiresIn = Duration.seconds(authorization.expires_in);
-    const interval =
-      authorization.interval === undefined
-        ? DEVICE_AUTHORIZATION_DEFAULT_INTERVAL
-        : Duration.seconds(authorization.interval);
-    yield* showPrompt({
-      verificationUri: authorization.verification_uri,
-      verificationUriComplete: authorization.verification_uri_complete,
-      userCode: authorization.user_code,
-      expiresIn,
-    });
-    return yield* pollDeviceToken(metadata, authorization.device_code, interval).pipe(
-      Effect.timeout(expiresIn),
-      Effect.catchTags({
-        TimeoutError: (cause) => Effect.fail(new CloudCliAuthorizationTimeoutError({ cause })),
-      }),
-    );
-  },
-);
-
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
-  // Capture exactly the services the login/refresh flows need at build time,
-  // not the whole ambient context.
+  // Capture exactly the services the login/refresh flows need at build time
+  // (matching the behavior before the out-of-band flow captured the instances), not
+  // the whole ambient context.
   const crypto = yield* Crypto.Crypto;
   const httpClient = yield* HttpClient.HttpClient;
   const services = Context.make(Crypto.Crypto, crypto).pipe(
@@ -458,10 +367,9 @@ export const make = Effect.gen(function* () {
 
   const login = Effect.fn("cloud.cli_token.login")(function* () {
     const metadata = yield* cloudCliOAuthConfig;
-    const hostedAppUrl = yield* hostedAppUrlConfig;
     const { verifier, challenge, state } = yield* makePkceRequest;
     const callback = yield* Deferred.make<string>();
-    const layerCallbackRoute = HttpRouter.add(
+    const callbackRoute = HttpRouter.add(
       "GET",
       "/callback",
       Effect.gen(function* () {
@@ -477,37 +385,35 @@ export const make = Effect.gen(function* () {
         return HttpServerResponse.html(renderLoopbackAuthorizationCompleteHtml());
       }),
     );
-    yield* HttpRouter.serve(layerCallbackRoute, {
+    yield* HttpRouter.serve(callbackRoute, {
       disableListenLog: true,
       disableLogger: true,
     }).pipe(
       Layer.provide(
         NodeHttpServer.layer(NodeHttp.createServer, {
           host: "127.0.0.1",
-          port: metadata.loopbackPort,
+          port: 34338,
           disablePreemptiveShutdown: true,
         }),
       ),
       Layer.build,
     );
-    // The hosted /connect page establishes a Clerk session before forwarding
-    // the request to /oauth/authorize with the loopback redirect URI. Sending
-    // a signed-out browser to /oauth/authorize directly loses the authorize
-    // parameters across Clerk's sign-in redirect (#5051).
-    const authorizationUrl = buildConnectAuthorizeRequestUrl({
-      hostedAppUrl,
+    const authorizationUrl = buildConnectClerkAuthorizeUrl({
+      authorizationEndpoint: metadata.authorizationEndpoint,
+      clientId: metadata.clientId,
+      redirectUri: metadata.redirectUri,
+      scopes: metadata.scopes,
       state,
       challenge,
-      loopbackPort: metadata.loopbackPort,
     });
     yield* Console.log(formatLoopbackAuthorizationPrompt(authorizationUrl));
     const authorization = yield* waitForLoopbackAuthorization({
       authorizationUrl,
       callback: Deferred.await(callback).pipe(
         Effect.timeout(CLOUD_CLI_OAUTH_CALLBACK_TIMEOUT),
-        Effect.catchTags({
-          TimeoutError: (cause) => Effect.fail(new CloudCliAuthorizationTimeoutError({ cause })),
-        }),
+        Effect.catchTag("TimeoutError", (cause) =>
+          Effect.fail(new CloudCliAuthorizationTimeoutError({ cause })),
+        ),
       ),
       terminal,
       launchBrowser: externalLauncher.launchBrowser,
@@ -551,7 +457,7 @@ export const make = Effect.gen(function* () {
     Effect.gen(function* () {
       // A stored credential that can't be read or refreshed (corrupt, revoked,
       // expired grant) must fall through to a fresh login rather than dead-end
-      // the command — authorizeCli applies the same fallback to device
+      // the command — authorizeCli applies the same fallback to out-of-band
       // authorization.
       const token = yield* getExistingNoLock().pipe(
         Effect.orElseSucceed(() => Option.none<PersistedToken>()),

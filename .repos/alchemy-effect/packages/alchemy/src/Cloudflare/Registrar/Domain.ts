@@ -125,8 +125,11 @@ export type Domain = Resource<
  * Note: updating registrar settings requires an API token with Registrar
  * write permission; without it the update fails with the typed
  * `RegistrarUpdateNotAllowed` error.
- * ### Managing a registered domain
- * **Example:** Pin auto-renew and the transfer lock
+ * @resource
+ * @product Registrar
+ * @category Domains & DNS
+ * @section Managing a registered domain
+ * @example Pin auto-renew and the transfer lock
  * ```typescript
  * yield* Cloudflare.Registrar.Domain("ApexDomain", {
  *   domainName: "example.com",
@@ -135,7 +138,7 @@ export type Domain = Resource<
  * });
  * ```
  *
- * **Example:** Enable WHOIS privacy only
+ * @example Enable WHOIS privacy only
  * ```typescript
  * // autoRenew and locked are omitted, so they are left untouched.
  * yield* Cloudflare.Registrar.Domain("ApexDomain", {
@@ -144,8 +147,8 @@ export type Domain = Resource<
  * });
  * ```
  *
- * ### Reading registration state
- * **Example:** Use the registration expiry downstream
+ * @section Reading registration state
+ * @example Use the registration expiry downstream
  * ```typescript
  * const domain = yield* Cloudflare.Registrar.Domain("ApexDomain", {
  *   domainName: "example.com",
@@ -155,10 +158,6 @@ export type Domain = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/registrar/
- *
- * @resource
- * @product Registrar
- * @category Domains & DNS
  */
 export const Domain = Resource<Domain>(TypeId);
 

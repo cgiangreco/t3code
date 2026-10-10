@@ -9,16 +9,15 @@ export interface ListRunsRequest extends omics.ListRunsRequest {}
  *
  * An account-level run-control operation (no resource argument) that lists the workflow runs in the account.
  * Provide the implementation with `Effect.provide(AWS.Omics.ListRunsHttp)`.
- * ### Runs
- * **Example:** Call ListRuns
+ * @binding
+ * @section Runs
+ * @example Call ListRuns
  * ```typescript
  * // init — account-level binding takes no resource
  * const listRuns = yield* AWS.Omics.ListRuns();
  * // runtime
  * const result = yield* listRuns({ id: runId });
  * ```
- *
- * @binding
  */
 export interface ListRuns extends Binding.Service<
   ListRuns,

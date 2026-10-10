@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * implementation with
  * `Effect.provide(AWS.Forecast.DescribeForecastExportJobHttp)`.
  *
- * ### Exporting Forecasts
- * **Example:** Poll an Export Job
+ * @binding
+ * @section Exporting Forecasts
+ * @example Poll an Export Job
  * ```typescript
  * // init
  * const describeForecastExportJob =
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   ForecastExportJobArn: exportJobArn,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeForecastExportJob extends Binding.Service<
   DescribeForecastExportJob,

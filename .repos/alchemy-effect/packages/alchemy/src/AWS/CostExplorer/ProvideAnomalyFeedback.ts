@@ -16,8 +16,9 @@ export interface ProvideAnomalyFeedbackRequest
  * addressed by id; per the `ce` service authorization reference the action
  * supports no resource types, so this is an account-level binding. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.ProvideAnomalyFeedbackHttp)`.
- * ### Anomaly Detection at Runtime
- * **Example:** Mark an Anomaly as Expected
+ * @binding
+ * @section Anomaly Detection at Runtime
+ * @example Mark an Anomaly as Expected
  * ```typescript
  * // init — account-level binding takes no resource
  * const provideAnomalyFeedback = yield* AWS.CostExplorer.ProvideAnomalyFeedback();
@@ -28,8 +29,6 @@ export interface ProvideAnomalyFeedbackRequest
  *   Feedback: "PLANNED_ACTIVITY",
  * });
  * ```
- *
- * @binding
  */
 export interface ProvideAnomalyFeedback extends Binding.Service<
   ProvideAnomalyFeedback,

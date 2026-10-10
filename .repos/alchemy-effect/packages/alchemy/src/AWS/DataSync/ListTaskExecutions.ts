@@ -11,8 +11,9 @@ import type { Task } from "./Task.ts";
  * ARN is injected from the binding; pass `MaxResults`/`NextToken` to page.
  * Provide the implementation with
  * `Effect.provide(AWS.DataSync.ListTaskExecutionsHttp)`.
- * ### Monitoring Tasks
- * **Example:** List The Task's Runs
+ * @binding
+ * @section Monitoring Tasks
+ * @example List The Task's Runs
  * ```typescript
  * // init — bind the operation to the task
  * const listTaskExecutions = yield* AWS.DataSync.ListTaskExecutions(task);
@@ -23,8 +24,6 @@ import type { Task } from "./Task.ts";
  *   yield* Effect.log(`${execution.TaskExecutionArn}: ${execution.Status}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListTaskExecutions extends Binding.Service<
   ListTaskExecutions,

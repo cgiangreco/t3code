@@ -182,7 +182,7 @@ export default function ServiceLayerSwap() {
   const active = IMPLS[idx]!;
 
   return (
-    <div ref={wrapRef} className="service-swap-grid" data-nosnippet="">
+    <div ref={wrapRef} className="service-swap-grid">
       {/* LEFT — code: Worker that consumes Sessions, Layer name swaps */}
       <div className="alc-code-block">
         <div className="alc-code-block__header">

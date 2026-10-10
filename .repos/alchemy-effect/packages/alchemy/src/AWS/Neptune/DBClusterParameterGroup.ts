@@ -63,8 +63,9 @@ export interface DBClusterParameterGroup extends Resource<
  * An Amazon Neptune DB cluster parameter group — a named set of engine
  * configuration parameters (query timeout, audit logging, ...) that can be
  * attached to one or more Neptune {@link DBCluster}s.
- * ### Creating a Parameter Group
- * **Example:** Parameter group with a custom query timeout
+ * @resource
+ * @section Creating a Parameter Group
+ * @example Parameter group with a custom query timeout
  * ```typescript
  * const params = yield* DBClusterParameterGroup("Params", {
  *   family: "neptune1.4",
@@ -74,16 +75,14 @@ export interface DBClusterParameterGroup extends Resource<
  * });
  * ```
  *
- * ### Attaching to a Cluster
- * **Example:** Cluster using the parameter group
+ * @section Attaching to a Cluster
+ * @example Cluster using the parameter group
  * ```typescript
  * const cluster = yield* DBCluster("Graph", {
  *   dbSubnetGroupName: subnetGroup.dbSubnetGroupName,
  *   dbClusterParameterGroupName: params.dbClusterParameterGroupName,
  * });
  * ```
- *
- * @resource
  */
 export const DBClusterParameterGroup = Resource<DBClusterParameterGroup>(
   "AWS.Neptune.DBClusterParameterGroup",

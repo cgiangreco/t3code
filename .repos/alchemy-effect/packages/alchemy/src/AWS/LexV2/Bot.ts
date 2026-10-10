@@ -1,7 +1,6 @@
 import * as lexm from "@distilled.cloud/aws/lex-models-v2";
 import type * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
-import * as Predicate from "effect/Predicate";
 import * as Stream from "effect/Stream";
 import { Unowned } from "../../AdoptPolicy.ts";
 import { createPhysicalName } from "../../PhysicalName.ts";
@@ -85,8 +84,9 @@ export interface Bot extends Resource<
  * intents, and slot types; conversations run against an alias of a built
  * version.
  *
- * ### Creating a Bot
- * **Example:** Basic Bot
+ * @resource
+ * @section Creating a Bot
+ * @example Basic Bot
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -108,7 +108,7 @@ export interface Bot extends Resource<
  * });
  * ```
  *
- * **Example:** Bot with Session and Privacy Settings
+ * @example Bot with Session and Privacy Settings
  * ```typescript
  * const bot = yield* AWS.LexV2.Bot("KidsBot", {
  *   roleArn: role.roleArn,
@@ -118,8 +118,8 @@ export interface Bot extends Resource<
  * });
  * ```
  *
- * ### Building the Conversation Graph
- * **Example:** Locale, Intent, and Alias
+ * @section Building the Conversation Graph
+ * @example Locale, Intent, and Alias
  * ```typescript
  * const locale = yield* AWS.LexV2.BotLocale("En", {
  *   botId: bot.botId,
@@ -139,8 +139,6 @@ export interface Bot extends Resource<
  *   botVersion: version.botVersion,
  * });
  * ```
- *
- * @resource
  */
 export const Bot = Resource<Bot>("AWS.LexV2.Bot");
 
@@ -217,7 +215,9 @@ export const BotProvider = () =>
                 ),
               { concurrency: 5 },
             );
-            return hydrated.filter(Predicate.isNotUndefined);
+            return hydrated.filter(
+              (attrs): attrs is Bot["Attributes"] => attrs !== undefined,
+            );
           }),
 
         read: Effect.fn(function* ({ id, olds, output }) {

@@ -29,13 +29,14 @@ export interface CreateChatTokenRequest extends Omit<
  * data (display name, icon, …) to every message the user sends. The returned
  * `token` is sensitive and surfaces as a `Redacted` value.
  *
- * ### Minting Chat Tokens
+ * @binding
+ * @section Minting Chat Tokens
  * Provide the `CreateChatTokenHttp` implementation layer on the Function
  * effect, bind the room in the init phase, then call the returned client at
  * runtime. The binding grants `ivschat:CreateChatToken` on the room and
  * injects its ARN as the `roomIdentifier` automatically.
  *
- * **Example:** Mint a token from a Lambda
+ * @example Mint a token from a Lambda
  * ```typescript
  * // init
  * const room = yield* IVSChat.Room("LiveChat");
@@ -59,8 +60,6 @@ export interface CreateChatTokenRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(IVSChat.CreateChatTokenHttp))
  * ```
- *
- * @binding
  */
 export interface CreateChatToken extends Binding.Service<
   CreateChatToken,

@@ -107,8 +107,9 @@ export interface Graph extends Resource<
  * `deletionProtection`) are reconciled in place; immutable fields
  * (`replicaCount`, `kmsKeyIdentifier`, `vectorSearchConfiguration`) force a
  * replacement.
- * ### Creating a Graph
- * **Example:** Publicly reachable analytics graph
+ * @resource
+ * @section Creating a Graph
+ * @example Publicly reachable analytics graph
  * ```typescript
  * const graph = yield* Graph("Knowledge", {
  *   provisionedMemory: 16,
@@ -118,8 +119,8 @@ export interface Graph extends Resource<
  * });
  * ```
  *
- * ### Vector Search
- * **Example:** Graph with vector search enabled
+ * @section Vector Search
+ * @example Graph with vector search enabled
  * ```typescript
  * const graph = yield* Graph("Embeddings", {
  *   provisionedMemory: 16,
@@ -127,8 +128,8 @@ export interface Graph extends Resource<
  * });
  * ```
  *
- * ### Querying
- * **Example:** Query from a Lambda function via the ExecuteQuery binding
+ * @section Querying
+ * @example Query from a Lambda function via the ExecuteQuery binding
  * ```typescript
  * const executeQuery = yield* AWS.NeptuneGraph.ExecuteQuery(graph);
  * const result = yield* executeQuery({
@@ -136,8 +137,6 @@ export interface Graph extends Resource<
  *   language: "OPEN_CYPHER",
  * });
  * ```
- *
- * @resource
  */
 export const Graph = Resource<Graph>("AWS.NeptuneGraph.Graph");
 

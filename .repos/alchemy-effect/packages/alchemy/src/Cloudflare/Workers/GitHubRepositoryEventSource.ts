@@ -27,7 +27,6 @@ import { isWorkerEvent, Worker } from "./Worker.ts";
  * repository's delivery path, verifies the `HMAC-SHA256` signature against the
  * bound secret, and forwards each delivery to the subscriber. Requests on any
  * other path fall through to the Worker's own `fetch` handler.
- *
  * @binding
  * @product Workers
  * @category Workers & Compute

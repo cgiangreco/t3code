@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
 
-import type { ScopedPlanStatusSession } from "../../Report.ts";
+import type { ScopedPlanStatusSession } from "../../Cli/Cli.ts";
 import { deepEqual, isResolved } from "../../Diff.ts";
 import { createPhysicalName } from "../../PhysicalName.ts";
 import * as Provider from "../../Provider.ts";
@@ -126,8 +126,9 @@ export interface NetworkConnector extends Resource<
  * reaches `ACTIVE`. The connector name is immutable, so renaming it replaces the
  * connector; the VPC configuration and operator role can be updated in place.
  *
- * ### Creating a Network Connector
- * **Example:** VPC Egress Connector
+ * @resource
+ * @section Creating a Network Connector
+ * @example VPC Egress Connector
  * ```typescript
  * const connector = yield* AWS.Lambda.NetworkConnector("Egress", {
  *   subnetIds: [subnetA.subnetId, subnetB.subnetId],
@@ -136,8 +137,8 @@ export interface NetworkConnector extends Resource<
  * });
  * ```
  *
- * ### Dual-Stack Networking
- * **Example:** IPv4 + IPv6 Egress
+ * @section Dual-Stack Networking
+ * @example IPv4 + IPv6 Egress
  * ```typescript
  * const connector = yield* AWS.Lambda.NetworkConnector("DualStack", {
  *   subnetIds: [subnet.subnetId],
@@ -146,11 +147,11 @@ export interface NetworkConnector extends Resource<
  * });
  * ```
  *
- * ### Using a Connector with MicroVMs
+ * @section Using a Connector with MicroVMs
  * A connector is the producer; a {@link MicrovmImage} (or a per-run
  * `RunMicrovm` call) is the consumer. Reference it by ARN in
  * `egressNetworkConnectors`.
- * **Example:** Image-level Egress
+ * @example Image-level Egress
  * ```typescript
  * const image = yield* AWS.Lambda.MicrovmImage("Sandbox", {
  *   main: import.meta.filename,
@@ -158,8 +159,6 @@ export interface NetworkConnector extends Resource<
  *   egressNetworkConnectors: [connector.networkConnectorArn],
  * });
  * ```
- *
- * @resource
  */
 export const NetworkConnector = Resource<NetworkConnector>(
   "AWS.Lambda.NetworkConnector",

@@ -189,11 +189,12 @@ export interface Route extends Resource<
  * Changing the `routeTableId` or the destination replaces the route, whereas
  * changing only the target is applied in place via `ReplaceRoute`.
  *
- * ### IPv4 Routing
+ * @resource
+ * @section IPv4 Routing
  * Use an IPv4 `destinationCidrBlock` — most commonly `0.0.0.0/0` for the
  * default route, or a narrower CIDR to route specific traffic.
  *
- * **Example:** Default Route to an Internet Gateway
+ * @example Default Route to an Internet Gateway
  * ```typescript
  * const internetRoute = yield* AWS.EC2.Route("InternetRoute", {
  *   routeTableId: publicRouteTable.routeTableId,
@@ -205,7 +206,7 @@ export interface Route extends Resource<
  * a subnet "public". Attach this route table to any subnet that needs inbound
  * and outbound internet connectivity.
  *
- * **Example:** Default Route to a NAT Gateway
+ * @example Default Route to a NAT Gateway
  * ```typescript
  * const natRoute = yield* AWS.EC2.Route("NatRoute", {
  *   routeTableId: privateRouteTable.routeTableId,
@@ -217,7 +218,7 @@ export interface Route extends Resource<
  * updates, API calls) while blocking unsolicited inbound connections. The NAT
  * gateway itself lives in a public subnet.
  *
- * **Example:** Route to a VPC Peering Connection
+ * @example Route to a VPC Peering Connection
  * ```typescript
  * const peeringRoute = yield* AWS.EC2.Route("PeeringRoute", {
  *   routeTableId: routeTable.routeTableId,
@@ -229,7 +230,7 @@ export interface Route extends Resource<
  * connection. Use a narrow destination matching the remote VPC rather than
  * `0.0.0.0/0` so only cross-VPC traffic is affected.
  *
- * **Example:** Route to a Transit Gateway
+ * @example Route to a Transit Gateway
  * ```typescript
  * const transitRoute = yield* AWS.EC2.Route("TransitRoute", {
  *   routeTableId: routeTable.routeTableId,
@@ -241,7 +242,7 @@ export interface Route extends Resource<
  * on-premises networks. The destination CIDR should cover the address space
  * reachable through the transit gateway.
  *
- * **Example:** Route to a Network Interface or NAT Instance
+ * @example Route to a Network Interface or NAT Instance
  * ```typescript
  * const applianceRoute = yield* AWS.EC2.Route("ApplianceRoute", {
  *   routeTableId: routeTable.routeTableId,
@@ -253,12 +254,12 @@ export interface Route extends Resource<
  * firewall or NAT instance appliance. Use `instanceId` instead when targeting
  * a NAT instance that has exactly one network interface attached.
  *
- * ### IPv6 Routing
+ * @section IPv6 Routing
  * IPv6 routes use `destinationIpv6CidrBlock` (e.g. `::/0` for the IPv6 default
  * route). For outbound-only IPv6 access from private subnets, target an
  * {@link EgressOnlyInternetGateway}.
  *
- * **Example:** IPv6 Egress Route to an Egress-Only Internet Gateway
+ * @example IPv6 Egress Route to an Egress-Only Internet Gateway
  * ```typescript
  * const ipv6EgressRoute = yield* AWS.EC2.Route("Ipv6EgressRoute", {
  *   routeTableId: privateRouteTable.routeTableId,
@@ -270,7 +271,7 @@ export interface Route extends Resource<
  * inbound connections — the IPv6 equivalent of routing IPv4 through a NAT
  * gateway.
  *
- * **Example:** IPv6 Internet Route to an Internet Gateway
+ * @example IPv6 Internet Route to an Internet Gateway
  * ```typescript
  * const ipv6InternetRoute = yield* AWS.EC2.Route("Ipv6InternetRoute", {
  *   routeTableId: publicRouteTable.routeTableId,
@@ -281,12 +282,12 @@ export interface Route extends Resource<
  * Provides full bidirectional IPv6 connectivity for a public subnet, since an
  * internet gateway (unlike an egress-only gateway) allows inbound IPv6 traffic.
  *
- * ### Routing to AWS Services via Prefix Lists
+ * @section Routing to AWS Services via Prefix Lists
  * Instead of a raw CIDR, a route can match a managed prefix list — useful for
  * AWS service ranges (e.g. an S3 gateway endpoint) where the underlying CIDRs
  * change over time.
  *
- * **Example:** Prefix List Route to a Gateway VPC Endpoint
+ * @example Prefix List Route to a Gateway VPC Endpoint
  * ```typescript
  * const prefixListRoute = yield* AWS.EC2.Route("S3PrefixRoute", {
  *   routeTableId: privateRouteTable.routeTableId,
@@ -297,8 +298,6 @@ export interface Route extends Resource<
  * Routes traffic for every CIDR in the prefix list to a Gateway Load Balancer
  * VPC endpoint. AWS keeps the prefix list current, so you don't have to update
  * the route when the service's address ranges change.
- *
- * @resource
  */
 export const Route = Resource<Route>("AWS.EC2.Route");
 

@@ -23,10 +23,7 @@ export type DirectoryServiceType = "tcp" | "http";
 /**
  * Application protocol hint for `tcp` services.
  */
-export type DirectoryServiceAppProtocol =
-  | "postgresql"
-  | "mysql"
-  | (string & {});
+export type DirectoryServiceAppProtocol = "postgresql" | "mysql";
 
 export declare namespace DirectoryService {
   /**
@@ -237,8 +234,11 @@ export type DirectoryService = Resource<
  * Names are unique within the account. All properties — including the host
  * and even the protocol type — are mutable in place via a full PUT; nothing
  * forces a replacement except moving accounts.
- * ### Creating a Directory Service
- * **Example:** TCP database service through a tunnel
+ * @resource
+ * @product Connectivity
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a Directory Service
+ * @example TCP database service through a tunnel
  * ```typescript
  * const tunnel = yield* Cloudflare.Tunnel.Tunnel("DbTunnel", {
  *   ingress: [{ service: "tcp://localhost:5432" }],
@@ -251,7 +251,7 @@ export type DirectoryService = Resource<
  * });
  * ```
  *
- * **Example:** HTTP service on a private hostname
+ * @example HTTP service on a private hostname
  * ```typescript
  * const api = yield* Cloudflare.Connectivity.DirectoryService("InternalApi", {
  *   type: "http",
@@ -264,8 +264,8 @@ export type DirectoryService = Resource<
  * });
  * ```
  *
- * ### Updating
- * **Example:** Changing the host in place
+ * @section Updating
+ * @example Changing the host in place
  * ```typescript
  * // Host, ports, name, and TLS settings are all mutable — the service
  * // keeps its serviceId across updates.
@@ -280,10 +280,6 @@ export type DirectoryService = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/
- *
- * @resource
- * @product Connectivity
- * @category Cloudflare One (Zero Trust)
  */
 export const DirectoryService = Resource<DirectoryService>(TypeId);
 
@@ -445,24 +441,19 @@ const findByName = (accountId: string, name: string) =>
  */
 const toRequestBody = (news: DirectoryServiceProps) => {
   const host = news.host;
-  const requestHost =
-    "hostname" in host
-      ? {
-          hostname: host.hostname,
-          resolverNetwork: {
-            tunnelId: host.resolverNetwork.tunnelId,
-            resolverIps: host.resolverNetwork.resolverIps,
-          },
-        }
-      : "ipv4" in host && "ipv6" in host
-        ? {
-            ipv4: host.ipv4,
-            ipv6: host.ipv6,
-            network: { tunnelId: host.network.tunnelId },
-          }
-        : "ipv4" in host
-          ? { ipv4: host.ipv4, network: { tunnelId: host.network.tunnelId } }
-          : { ipv6: host.ipv6, network: { tunnelId: host.network.tunnelId } };
+  const requestHost = Predicate.hasProperty(host, "hostname")
+    ? {
+        hostname: host.hostname,
+        resolverNetwork: {
+          tunnelId: host.resolverNetwork.tunnelId as string,
+          resolverIps: host.resolverNetwork.resolverIps,
+        },
+      }
+    : {
+        ...(Predicate.hasProperty(host, "ipv4") ? { ipv4: host.ipv4 } : {}),
+        ...(Predicate.hasProperty(host, "ipv6") ? { ipv6: host.ipv6 } : {}),
+        network: { tunnelId: host.network.tunnelId as string },
+      };
   return {
     type: news.type,
     host: requestHost,

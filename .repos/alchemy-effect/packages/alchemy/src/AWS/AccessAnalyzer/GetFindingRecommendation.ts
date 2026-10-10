@@ -15,15 +15,14 @@ export interface GetFindingRecommendationRequest extends Omit<
  * Retrieves the generated remediation recommendation for an unused-permissions
  * finding. Provide the implementation with
  * `Effect.provide(AWS.AccessAnalyzer.GetFindingRecommendationHttp)`.
- * ### Finding Recommendations
- * **Example:** Read a Recommendation
+ * @binding
+ * @section Finding Recommendations
+ * @example Read a Recommendation
  * ```typescript
  * const getRecommendation =
  *   yield* AWS.AccessAnalyzer.GetFindingRecommendation(analyzer);
  * const recommendation = yield* getRecommendation({ id: findingId });
  * ```
- *
- * @binding
  */
 export interface GetFindingRecommendation extends Binding.Service<
   GetFindingRecommendation,

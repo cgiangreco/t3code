@@ -14,8 +14,9 @@ export interface VerifyMacRequest extends Omit<kms.VerifyMacRequest, "KeyId"> {}
  * `KeyId`. A mismatched MAC surfaces as the typed
  * `KMSInvalidMacException` — a valid MAC returns `MacValid: true`.
  *
- * ### Message Authentication
- * **Example:** Verify an HMAC
+ * @binding
+ * @section Message Authentication
+ * @example Verify an HMAC
  * ```typescript
  * const verifyMac = yield* AWS.KMS.VerifyMac(hmacKey);
  *
@@ -26,15 +27,13 @@ export interface VerifyMacRequest extends Omit<kms.VerifyMacRequest, "KeyId"> {}
  * });
  * ```
  *
- * **Example:** Treat a Bad MAC as a Value
+ * @example Treat a Bad MAC as a Value
  * ```typescript
  * const valid = yield* verifyMac({ Message, Mac, MacAlgorithm }).pipe(
  *   Effect.map(() => true),
  *   Effect.catchTag("KMSInvalidMacException", () => Effect.succeed(false)),
  * );
  * ```
- *
- * @binding
  */
 export interface VerifyMac extends Binding.Service<
   VerifyMac,

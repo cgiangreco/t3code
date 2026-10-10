@@ -36,7 +36,8 @@ export interface VariablesProps {
  * Plural counterpart of {@link import("./Secrets.ts").Secrets}, for
  * non-sensitive values like region names, role ARNs, environment labels,
  * or feature flags.
- * **Example:** Example
+ * @resource
+ * @example
  * ```ts
  * yield* GitHub.Variables({
  *   owner: "my-org",
@@ -47,9 +48,6 @@ export interface VariablesProps {
  *   },
  * });
  * ```
- *
- * @resource
- * @product Actions
  */
 export const Variables = ({
   owner,

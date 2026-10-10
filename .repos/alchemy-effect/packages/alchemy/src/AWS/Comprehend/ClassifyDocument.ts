@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * are addressed per-request via `EndpointArn`, so the grant cannot be
  * scoped tighter at deploy time.
  *
- * ### Real-Time Analysis
- * **Example:** Classify a Document Against a Custom Endpoint
+ * @binding
+ * @section Real-Time Analysis
+ * @example Classify a Document Against a Custom Endpoint
  * ```typescript
  * // init
  * const classifyDocument = yield* AWS.Comprehend.ClassifyDocument();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.Classes: [{ Name: "INVOICE", Score: 0.98 }, …]
  * ```
- *
- * @binding
  */
 export interface ClassifyDocument extends Binding.Service<
   ClassifyDocument,

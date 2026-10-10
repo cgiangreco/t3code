@@ -83,8 +83,9 @@ export interface Transformer extends Resource<
  * transformer, including a status-only deactivation, so changing the
  * configuration, name, or status of an active transformer replaces it
  * (delete-first). Deletion works regardless of status.
- * ### Creating a Transformer
- * **Example:** Inbound X12 to JSON
+ * @resource
+ * @section Creating a Transformer
+ * @example Inbound X12 to JSON
  * ```typescript
  * const transformer = yield* B2BI.Transformer("X12ToJson", {
  *   name: "x12-to-json",
@@ -99,8 +100,6 @@ export interface Transformer extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Transformer = Resource<Transformer>("AWS.B2BI.Transformer");
 

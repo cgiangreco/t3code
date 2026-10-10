@@ -153,8 +153,11 @@ export type MagicSiteLan = Resource<
  *
  * `siteId` and `haLink` are create-only — changing either triggers a
  * replacement. Everything else is updated in place.
- * ### Creating a LAN
- * **Example:** Untagged LAN with DHCP
+ * @resource
+ * @product Magic Transit
+ * @category Network
+ * @section Creating a LAN
+ * @example Untagged LAN with DHCP
  * ```typescript
  * const lan = yield* Cloudflare.MagicTransit.MagicSiteLan("hq-lan", {
  *   siteId: site.siteId,
@@ -163,7 +166,7 @@ export type MagicSiteLan = Resource<
  * });
  * ```
  *
- * **Example:** LAN with static addressing and a routed subnet
+ * @example LAN with static addressing and a routed subnet
  * ```typescript
  * const lan = yield* Cloudflare.MagicTransit.MagicSiteLan("hq-lan", {
  *   siteId: site.siteId,
@@ -177,10 +180,6 @@ export type MagicSiteLan = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/magic-wan/configuration/connector/
- *
- * @resource
- * @product Magic Transit
- * @category Network
  */
 export const MagicSiteLan = Resource<MagicSiteLan>(TypeId);
 

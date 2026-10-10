@@ -16,8 +16,9 @@ export interface GetMediaRequest extends Omit<
  * callable that resolves the per-stream data endpoint (`GetDataEndpoint`)
  * and opens a media stream starting at the requested selector. The
  * response `Payload` is a streaming body of MKV-packaged media.
- * ### Reading Media
- * **Example:** Read Media from the Earliest Fragment
+ * @binding
+ * @section Reading Media
+ * @example Read Media from the Earliest Fragment
  * ```typescript
  * // init
  * const getMedia = yield* AWS.KinesisVideo.GetMedia(stream);
@@ -28,12 +29,12 @@ export interface GetMediaRequest extends Omit<
  * });
  * ```
  *
- * **Example:** Wire into a Lambda Function
+ * @example Wire into a Lambda Function
  * ```typescript
  * // Provide the GetMediaHttp layer on the Function's init Effect; merge
  * // with the other KinesisVideo layers when using several bindings.
  * export default MediaFunction.make(
- *   { main: import.meta.url, functionUrl: true, timeout: Duration.seconds(30) },
+ *   { main: import.meta.url, url: true, timeout: Duration.seconds(30) },
  *   Effect.gen(function* () {
  *     const stream = yield* AWS.KinesisVideo.Stream("Camera", {
  *       mediaType: "video/h264",
@@ -45,8 +46,6 @@ export interface GetMediaRequest extends Omit<
  *   }).pipe(Effect.provide(AWS.KinesisVideo.GetMediaHttp)),
  * );
  * ```
- *
- * @binding
  */
 export interface GetMedia extends Binding.Service<
   GetMedia,

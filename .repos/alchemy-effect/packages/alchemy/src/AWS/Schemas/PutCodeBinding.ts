@@ -13,8 +13,9 @@ import type { Schema } from "./Schema.ts";
  * {@link GetCodeBindingSource}. The registry and schema names are injected
  * from the binding. Provide the implementation with
  * `Effect.provide(AWS.Schemas.PutCodeBindingHttp)`.
- * ### Code Bindings
- * **Example:** Generate Python Bindings
+ * @binding
+ * @section Code Bindings
+ * @example Generate Python Bindings
  * ```typescript
  * // init — bind the operation to the schema
  * const putCodeBinding = yield* AWS.Schemas.PutCodeBinding(schema);
@@ -23,8 +24,6 @@ import type { Schema } from "./Schema.ts";
  * const { Status } = yield* putCodeBinding({ Language: "Python36" });
  * // Status is "CREATE_IN_PROGRESS" until generation finishes
  * ```
- *
- * @binding
  */
 export interface PutCodeBinding extends Binding.Service<
   PutCodeBinding,

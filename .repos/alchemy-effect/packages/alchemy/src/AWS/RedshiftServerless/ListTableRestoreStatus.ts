@@ -9,16 +9,15 @@ import * as Binding from "../../Binding.ts";
  * Lists table-restore requests, optionally filtered by namespace or
  * workgroup. Provide the implementation with
  * `Effect.provide(AWS.RedshiftServerless.ListTableRestoreStatusHttp)`.
- * ### Restoring Data
- * **Example:** List Table Restores for a Namespace
+ * @binding
+ * @section Restoring Data
+ * @example List Table Restores for a Namespace
  * ```typescript
  * // init — resolve the runtime client
  * const listTableRestoreStatus = yield* AWS.RedshiftServerless.ListTableRestoreStatus();
  *
  * const { tableRestoreStatuses } = yield* listTableRestoreStatus({ namespaceName });
  * ```
- *
- * @binding
  */
 export interface ListTableRestoreStatus extends Binding.Service<
   ListTableRestoreStatus,

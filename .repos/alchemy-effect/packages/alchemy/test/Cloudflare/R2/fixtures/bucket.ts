@@ -7,6 +7,4 @@ import * as Cloudflare from "@/Cloudflare/index.ts";
  * bucket, a value written through a Write worker is observable by a
  * Read worker — which is what the test asserts.
  */
-export const TestBucket = Cloudflare.R2.Bucket("R2BindingTestBucket", {
-  forceDestroy: true,
-});
+export const TestBucket = Cloudflare.R2.Bucket("R2BindingTestBucket");

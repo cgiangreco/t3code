@@ -16,8 +16,9 @@ export interface GetThingShadowRequest extends Omit<
  * name is injected automatically. The response `payload` is a byte Stream;
  * decode it with `Stream.decodeText` + `Stream.mkString`. Provide the
  * implementation with `Effect.provide(AWS.IoT.GetThingShadowHttp)`.
- * ### Device Shadows
- * **Example:** Read the Classic Shadow
+ * @binding
+ * @section Device Shadows
+ * @example Read the Classic Shadow
  * ```typescript
  * const getShadow = yield* AWS.IoT.GetThingShadow(thing);
  *
@@ -28,12 +29,10 @@ export interface GetThingShadowRequest extends Omit<
  * );
  * ```
  *
- * **Example:** Read a Named Shadow
+ * @example Read a Named Shadow
  * ```typescript
  * const result = yield* getShadow({ shadowName: "telemetry" });
  * ```
- *
- * @binding
  */
 export interface GetThingShadow extends Binding.Service<
   GetThingShadow,

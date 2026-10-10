@@ -10,8 +10,9 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * ID is injected from the binding; pass the job run `id` returned by
  * `StartJobRun`. Provide the implementation with
  * `Effect.provide(AWS.EMRContainers.CancelJobRunHttp)`.
- * ### Running Jobs
- * **Example:** Cancel A Runaway Job
+ * @binding
+ * @section Running Jobs
+ * @example Cancel A Runaway Job
  * ```typescript
  * // init
  * const cancelJobRun = yield* AWS.EMRContainers.CancelJobRun(virtualCluster);
@@ -19,8 +20,6 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * // runtime
  * yield* cancelJobRun({ id: jobRunId });
  * ```
- *
- * @binding
  */
 export interface CancelJobRun extends Binding.Service<
   CancelJobRun,

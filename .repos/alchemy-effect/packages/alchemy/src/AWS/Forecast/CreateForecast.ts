@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * and grants `forecast:CreateForecast` on `*`. Provide the implementation
  * with `Effect.provide(AWS.Forecast.CreateForecastHttp)`.
  *
- * ### Generating Forecasts
- * **Example:** Regenerate the Forecast
+ * @binding
+ * @section Generating Forecasts
+ * @example Regenerate the Forecast
  * ```typescript
  * // init
  * const createForecast = yield* AWS.Forecast.CreateForecast();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   PredictorArn: predictorArn,
  * });
  * ```
- *
- * @binding
  */
 export interface CreateForecast extends Binding.Service<
   CreateForecast,

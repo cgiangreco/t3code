@@ -14,8 +14,9 @@ export interface ListInvalidationsRequest extends Omit<
  * Lists the cache invalidations of the bound distribution (paginated via
  * `Marker`/`MaxItems`). Provide the implementation with
  * `Effect.provide(AWS.CloudFront.ListInvalidationsHttp)`.
- * ### Inspecting Invalidations
- * **Example:** List Recent Invalidations
+ * @binding
+ * @section Inspecting Invalidations
+ * @example List Recent Invalidations
  * ```typescript
  * // init — bind the operation to the distribution
  * const listInvalidations = yield* CloudFront.ListInvalidations(distribution);
@@ -24,8 +25,6 @@ export interface ListInvalidationsRequest extends Omit<
  * const res = yield* listInvalidations({ MaxItems: 10 });
  * console.log(res.InvalidationList?.Items?.map((i) => i.Id));
  * ```
- *
- * @binding
  */
 export interface ListInvalidations extends Binding.Service<
   ListInvalidations,

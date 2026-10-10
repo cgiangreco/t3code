@@ -21,16 +21,15 @@ export interface ListManagedThingSchemasRequest extends Omit<
  * endpoint or capability id. Provide the implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.ListManagedThingSchemasHttp)`.
  *
- * ### Reading Device State
- * **Example:** List Device Schemas
+ * @binding
+ * @section Reading Device State
+ * @example List Device Schemas
  * ```typescript
  * const listSchemas =
  *   yield* IoTManagedIntegrations.ListManagedThingSchemas(thing);
  *
  * const { Items } = yield* listSchemas({ EndpointIdFilter: "1" });
  * ```
- *
- * @binding
  */
 export interface ListManagedThingSchemas extends Binding.Service<
   ListManagedThingSchemas,

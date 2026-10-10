@@ -110,8 +110,9 @@ export interface SamplingRule extends Resource<
  * X-Ray evaluates sampling rules in ascending priority order for each
  * request. The first matching rule borrows from its reservoir, then applies
  * the fixed rate.
- * ### Creating Sampling Rules
- * **Example:** Sample all requests to a service
+ * @resource
+ * @section Creating Sampling Rules
+ * @example Sample all requests to a service
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -123,7 +124,7 @@ export interface SamplingRule extends Resource<
  * });
  * ```
  *
- * **Example:** Low-rate sampling for a noisy endpoint
+ * @example Low-rate sampling for a noisy endpoint
  * ```typescript
  * const rule = yield* XRay.SamplingRule("HealthChecks", {
  *   priority: 10,
@@ -133,7 +134,7 @@ export interface SamplingRule extends Resource<
  * });
  * ```
  *
- * **Example:** Match on segment attributes
+ * @example Match on segment attributes
  * ```typescript
  * const rule = yield* XRay.SamplingRule("PremiumTenants", {
  *   priority: 50,
@@ -142,8 +143,6 @@ export interface SamplingRule extends Resource<
  *   attributes: { tier: "premium" },
  * });
  * ```
- *
- * @resource
  */
 export const SamplingRule = Resource<SamplingRule>("AWS.XRay.SamplingRule");
 

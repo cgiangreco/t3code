@@ -16,8 +16,9 @@ export interface ListTagsForResourceRequest extends Omit<
  * grants the host function `sns:ListTagsForResource` on the topic. Provide
  * the `ListTagsForResourceHttp` layer on the Function to implement the
  * binding.
- * ### Tagging Topics
- * **Example:** List a Topic's Tags
+ * @binding
+ * @section Tagging Topics
+ * @example List a Topic's Tags
  * ```typescript
  * // init (provide SNS.ListTagsForResourceHttp on the Function)
  * const listTagsForResource = yield* SNS.ListTagsForResource(topic);
@@ -26,8 +27,6 @@ export interface ListTagsForResourceRequest extends Omit<
  * const response = yield* listTagsForResource();
  * // response.Tags
  * ```
- *
- * @binding
  */
 export interface ListTagsForResource extends Binding.Service<
   ListTagsForResource,

@@ -11,8 +11,9 @@ export interface ListEventIntegrationsRequest
  *
  * An account-level operation — bind it with no resource argument. Provide the
  * `ListEventIntegrationsHttp` layer on the Function to satisfy the binding.
- * ### Listing Event Integrations
- * **Example:** List All Event Integrations
+ * @binding
+ * @section Listing Event Integrations
+ * @example List All Event Integrations
  * ```typescript
  * // init — no resource argument (provide AWS.AppIntegrations.ListEventIntegrationsHttp on the Function)
  * const listEventIntegrations = yield* AWS.AppIntegrations.ListEventIntegrations();
@@ -20,8 +21,6 @@ export interface ListEventIntegrationsRequest
  * // runtime — page through the event integrations in the account
  * const { EventIntegrations } = yield* listEventIntegrations({});
  * ```
- *
- * @binding
  */
 export interface ListEventIntegrations extends Binding.Service<
   ListEventIntegrations,

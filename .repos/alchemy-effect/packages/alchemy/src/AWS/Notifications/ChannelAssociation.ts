@@ -51,8 +51,9 @@ export interface ChannelAssociation extends Resource<
  * The association is existence-only (there is nothing mutable): changing
  * either ARN replaces it.
  *
- * ### Associating a Channel
- * **Example:** Deliver notifications to an email contact
+ * @resource
+ * @section Associating a Channel
+ * @example Deliver notifications to an email contact
  * ```typescript
  * import * as Notifications from "alchemy/AWS/Notifications";
  * import * as NotificationsContacts from "alchemy/AWS/NotificationsContacts";
@@ -68,8 +69,6 @@ export interface ChannelAssociation extends Resource<
  *   channelArn: contact.emailContactArn,
  * });
  * ```
- *
- * @resource
  */
 export const ChannelAssociation = Resource<ChannelAssociation>(
   "AWS.Notifications.ChannelAssociation",

@@ -72,8 +72,9 @@ export interface EventRule extends Resource<
  * in place. User Notifications materializes a managed EventBridge rule in
  * every listed region.
  *
- * ### Creating an Event Rule
- * **Example:** Notify on S3 object creation
+ * @resource
+ * @section Creating an Event Rule
+ * @example Notify on S3 object creation
  * ```typescript
  * import * as Notifications from "alchemy/AWS/Notifications";
  *
@@ -86,7 +87,7 @@ export interface EventRule extends Resource<
  * });
  * ```
  *
- * **Example:** Restrict matches with an event pattern
+ * @example Restrict matches with an event pattern
  * ```typescript
  * const rule = yield* Notifications.EventRule("BucketRule", {
  *   notificationConfigurationArn: config.notificationConfigurationArn,
@@ -96,8 +97,6 @@ export interface EventRule extends Resource<
  *   regions: ["us-west-2", "us-east-2"],
  * });
  * ```
- *
- * @resource
  */
 export const EventRule = Resource<EventRule>("AWS.Notifications.EventRule");
 

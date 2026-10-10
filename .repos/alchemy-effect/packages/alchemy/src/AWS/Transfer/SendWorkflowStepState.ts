@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * inside the step event, so the grant is on `*`. Provide the
  * implementation with
  * `Effect.provide(AWS.Transfer.SendWorkflowStepStateHttp)`.
- * ### Custom Workflow Steps
- * **Example:** Complete a Custom Step
+ * @binding
+ * @section Custom Workflow Steps
+ * @example Complete a Custom Step
  * ```typescript
  * // init — account-level binding, no resource argument
  * const sendWorkflowStepState = yield* AWS.Transfer.SendWorkflowStepState();
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  *   Status: "SUCCESS",
  * });
  * ```
- *
- * @binding
  */
 export interface SendWorkflowStepState extends Binding.Service<
   SendWorkflowStepState,

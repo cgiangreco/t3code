@@ -18,9 +18,9 @@ export const IngestToken = Axiom.ApiToken(
         metrics.name,
       ).pipe(
         Output.map(([t, l, m]) => ({
-          [t]: { ingest: ["create"] },
-          [l]: { ingest: ["create"] },
-          [m]: { ingest: ["create"] },
+          [t]: { ingest: ["create"] as const },
+          [l]: { ingest: ["create"] as const },
+          [m]: { ingest: ["create"] as const },
         })),
       ),
     })),

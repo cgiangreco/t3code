@@ -1,15 +1,10 @@
-import { Toolbar } from "@base-ui/react/toolbar";
 import { type ProviderInstanceId } from "@t3tools/contracts";
-import { memo, useLayoutEffect, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SparklesIcon, StarIcon } from "lucide-react";
 import { ProviderInstanceIcon } from "./ProviderInstanceIcon";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "~/lib/utils";
-import {
-  isProviderInstancePickerReady,
-  shouldShowInstanceBadge,
-  type ProviderInstanceEntry,
-} from "../../providerInstances";
+import { isProviderInstancePickerReady, type ProviderInstanceEntry } from "../../providerInstances";
 
 /**
  * Build the hover tooltip for an instance button. Mirrors the old
@@ -34,16 +29,16 @@ const SELECTED_INDICATOR_CLASS =
   "pointer-events-none absolute -right-1 top-1/2 z-10 h-5 w-0.75 -translate-y-1/2 rounded-l-full bg-primary";
 const BADGE_BASE_CLASS =
   "pointer-events-none absolute -right-0.5 top-0.5 z-10 flex size-3.5 items-center justify-center rounded-full bg-transparent shadow-sm ";
-const NEW_BADGE_CLASS = `${BADGE_BASE_CLASS} text-update-foreground `;
+const NEW_BADGE_CLASS = `${BADGE_BASE_CLASS} text-update `;
 
 /** Opens toward the rail so the list stays readable (not over the model names). */
 const PICKER_TOOLTIP_SIDE = "left" as const;
 const PICKER_TOOLTIP_SIDE_OFFSET = 8;
+const PICKER_TOOLTIP_CLASS = "max-w-64 text-balance font-normal leading-snug";
 
 export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   selectedInstanceId: ProviderInstanceId | "favorites";
   onSelectInstance: (instanceId: ProviderInstanceId | "favorites") => void;
-  onFocusSearch: () => void;
   /**
    * Instance entries to render as rail buttons. Each entry becomes one icon
    * keyed by `instanceId`, so the default built-in Codex and a user-authored
@@ -55,8 +50,6 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   showFavorites?: boolean;
   /** Instance ids shown in the rail but unavailable for the current picker context. */
   disabledInstanceIds?: ReadonlySet<ProviderInstanceId>;
-  /** Non-ready instances whose selected unavailable model remains reachable. */
-  selectableUnavailableInstanceIds?: ReadonlySet<ProviderInstanceId>;
   getDisabledInstanceTooltip?: (entry: ProviderInstanceEntry) => string;
   /**
    * Instance id values that should render the "new" sparkle badge. Callers
@@ -72,6 +65,14 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   const [hoveredInstanceId, setHoveredInstanceId] = useState<ProviderInstanceId | null>(null);
   const sidebarContentRef = useRef<HTMLDivElement>(null);
   const [selectedIndicatorTop, setSelectedIndicatorTop] = useState<number | null>(null);
+  const duplicateDriverCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const entry of props.instanceEntries) {
+      counts.set(entry.driverKind, (counts.get(entry.driverKind) ?? 0) + 1);
+    }
+    return counts;
+  }, [props.instanceEntries]);
+
   useLayoutEffect(() => {
     const content = sidebarContentRef.current;
     if (!content) {
@@ -88,20 +89,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   }, [props.instanceEntries, props.selectedInstanceId, showFavorites]);
 
   return (
-    <Toolbar.Root
-      className="w-11 shrink-0 overflow-hidden bg-muted/30"
-      data-model-picker-sidebar="true"
-      aria-label="Providers"
-      orientation="vertical"
-      onKeyDown={(event) => {
-        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-        if (event.key === "ArrowRight") {
-          event.preventDefault();
-          props.onFocusSearch();
-          return;
-        }
-      }}
-    >
+    <div className="w-11 shrink-0 overflow-hidden bg-muted/30" data-model-picker-sidebar="true">
       <div className="h-full overflow-y-auto overscroll-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div ref={sidebarContentRef} className="relative flex min-h-full flex-col gap-1 p-1">
           {selectedIndicatorTop !== null ? (
@@ -121,23 +109,23 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <Toolbar.Button
+                      <button
                         className={cn(
-                          "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-none",
+                          "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-[color-mix(in_srgb,var(--popover)_90%,var(--foreground))] focus-visible:bg-[color-mix(in_srgb,var(--popover)_90%,var(--foreground))] focus-visible:outline-none",
                         )}
                         onClick={() => handleSelect("favorites")}
                         type="button"
                         aria-label="Favorites"
-                        aria-pressed={props.selectedInstanceId === "favorites"}
                       >
                         <StarIcon className="size-5 fill-current shrink-0" aria-hidden />
-                      </Toolbar.Button>
+                      </button>
                     }
                   />
                   <TooltipPopup
                     side={PICKER_TOOLTIP_SIDE}
                     sideOffset={PICKER_TOOLTIP_SIDE_OFFSET}
                     align="center"
+                    className={PICKER_TOOLTIP_CLASS}
                   >
                     Favorites
                   </TooltipPopup>
@@ -151,14 +139,12 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
           {props.instanceEntries.map((entry) => {
             const isUnavailable = !isProviderInstancePickerReady(entry);
             const isContextDisabled = props.disabledInstanceIds?.has(entry.instanceId) ?? false;
-            const unavailableSelectionIsReachable =
-              props.selectableUnavailableInstanceIds?.has(entry.instanceId) ?? false;
-            const isDisabled =
-              (isUnavailable && !unavailableSelectionIsReachable) || isContextDisabled;
+            const isDisabled = isUnavailable || isContextDisabled;
             const isSelected = props.selectedInstanceId === entry.instanceId;
             const isHovered = hoveredInstanceId === entry.instanceId;
             const showNewBadge = props.newBadgeInstanceIds?.has(entry.instanceId) ?? false;
-            const showInstanceBadge = shouldShowInstanceBadge(entry, props.instanceEntries);
+            const showInstanceBadge =
+              Boolean(entry.accentColor) || (duplicateDriverCounts.get(entry.driverKind) ?? 0) > 1;
 
             const tooltip = isUnavailable
               ? describeUnavailableInstance(entry)
@@ -169,9 +155,9 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   : entry.displayName;
 
             const button = (
-              <Toolbar.Button
+              <button
                 className={cn(
-                  "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-foreground/10 focus-visible:bg-foreground/10 focus-visible:outline-none",
+                  "relative isolate flex w-full cursor-pointer aspect-square items-center justify-center rounded-md transition-colors hover:bg-[color-mix(in_srgb,var(--popover)_90%,var(--foreground))] focus-visible:bg-[color-mix(in_srgb,var(--popover)_90%,var(--foreground))] focus-visible:outline-none",
                   isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent",
                 )}
                 data-provider-accent-color={entry.accentColor}
@@ -185,11 +171,9 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   setHoveredInstanceId((current) => (current === entry.instanceId ? null : current))
                 }
                 disabled={isDisabled}
-                focusableWhenDisabled={!isDisabled}
-                aria-pressed={isSelected}
                 type="button"
                 aria-label={
-                  isUnavailable || isContextDisabled
+                  isDisabled
                     ? tooltip
                     : showNewBadge
                       ? `${entry.displayName}, new`
@@ -200,10 +184,8 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   driverKind={entry.driverKind}
                   displayName={entry.displayName}
                   accentColor={entry.accentColor}
-                  acpRegistryAgentId={entry.acpRegistryAgentId}
-                  acpRegistryIconUrl={entry.acpRegistryIconUrl}
                   showBadge={showInstanceBadge}
-                  className="size-6 z-30"
+                  className="size-6"
                   iconClassName="size-5"
                   indicatorBackground={
                     isHovered && !isDisabled
@@ -212,14 +194,16 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                         ? "var(--background)"
                         : "color-mix(in oklab, var(--muted) 30%, transparent)"
                   }
-                  {...(entry.accentColor ? { badgeClassName: "h-3 min-w-3 px-0.5 text-5xs" } : {})}
+                  {...(entry.accentColor
+                    ? { badgeClassName: "h-3 min-w-3 px-0.5 text-[7px]" }
+                    : {})}
                 />
                 {showNewBadge ? (
                   <span className={NEW_BADGE_CLASS} aria-hidden>
                     <SparklesIcon className="size-2" />
                   </span>
                 ) : null}
-              </Toolbar.Button>
+              </button>
             );
 
             const trigger = isDisabled ? (
@@ -240,6 +224,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                     side={PICKER_TOOLTIP_SIDE}
                     sideOffset={PICKER_TOOLTIP_SIDE_OFFSET}
                     align="center"
+                    className={PICKER_TOOLTIP_CLASS}
                   >
                     {tooltip}
                   </TooltipPopup>
@@ -249,6 +234,6 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
           })}
         </div>
       </div>
-    </Toolbar.Root>
+    </div>
   );
 });

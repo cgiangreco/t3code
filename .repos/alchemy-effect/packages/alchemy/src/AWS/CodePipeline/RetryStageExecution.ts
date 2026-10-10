@@ -12,8 +12,9 @@ export interface RetryStageExecutionRequest extends Omit<
  * Runtime binding for `codepipeline:RetryStageExecution` — re-runs a failed
  * stage, either just the failed actions (`FAILED_ACTIONS`) or the whole
  * stage from its first action (`ALL_ACTIONS`).
- * ### Operating Stages
- * **Example:** Retry the Failed Actions of a Stage
+ * @binding
+ * @section Operating Stages
+ * @example Retry the Failed Actions of a Stage
  * ```typescript
  * const retryStage = yield* AWS.CodePipeline.RetryStageExecution(pipeline);
  *
@@ -23,8 +24,6 @@ export interface RetryStageExecutionRequest extends Omit<
  *   retryMode: "FAILED_ACTIONS",
  * });
  * ```
- *
- * @binding
  */
 export interface RetryStageExecution extends Binding.Service<
   RetryStageExecution,

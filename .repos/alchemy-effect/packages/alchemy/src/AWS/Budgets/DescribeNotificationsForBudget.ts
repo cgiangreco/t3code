@@ -21,8 +21,9 @@ export interface DescribeNotificationsForBudgetRequest extends Omit<
  * crossed) — e.g. to gate expensive work on whether any budget alert has
  * fired. Provide the implementation with
  * `Effect.provide(AWS.Budgets.DescribeNotificationsForBudgetHttp)`.
- * ### Reading Budget Alerts
- * **Example:** Check Whether Any Alert Is in Alarm
+ * @binding
+ * @section Reading Budget Alerts
+ * @example Check Whether Any Alert Is in Alarm
  * ```typescript
  * // init — bind the operation to the budget
  * const notifications = yield* AWS.Budgets.DescribeNotificationsForBudget(budget);
@@ -33,8 +34,6 @@ export interface DescribeNotificationsForBudgetRequest extends Omit<
  *   (n) => n.NotificationState === "ALARM",
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeNotificationsForBudget extends Binding.Service<
   DescribeNotificationsForBudget,

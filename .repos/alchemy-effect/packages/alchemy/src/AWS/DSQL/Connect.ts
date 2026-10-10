@@ -1,4 +1,4 @@
-import type { PresignError } from "@distilled.cloud/aws/Presign";
+import type { CredentialsError } from "@distilled.cloud/aws/Credentials";
 import type * as Effect from "effect/Effect";
 import * as Binding from "../../Binding.ts";
 import type { RuntimeContext } from "../../RuntimeContext.ts";
@@ -53,15 +53,15 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * re-mints the token, and execution-scoped pools (`Drizzle.Postgres`)
  * rebuild per execution — a ~15-minute token can never outlive its pool.
  *
- * ### Connecting to a Cluster
- * **Example:** Resolve Connection Info inside a Function
+ * @section Connecting to a Cluster
+ * @example Resolve Connection Info inside a Function
  * ```typescript
  * const conn = yield* DSQL.Connect(cluster, { admin: true });
  * // inside a handler — each yield mints a fresh auth token:
  * const { host, port, username, password, url } = yield* conn;
  * ```
  *
- * **Example:** Drizzle over DSQL
+ * @example Drizzle over DSQL
  * ```typescript
  * const conn = yield* DSQL.Connect(cluster, { admin: true });
  * const db = yield* Drizzle.Postgres(conn.pipe(Effect.map((info) => info.url)));
@@ -69,14 +69,13 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * const rows = yield* db.select().from(Widgets);
  * ```
  *
- * **Example:** Connect as a Custom Database Role
+ * @example Connect as a Custom Database Role
  * ```typescript
  * const conn = yield* DSQL.Connect(cluster, {
  *   username: "app",
  *   database: "postgres",
  * });
  * ```
- *
  * @binding
  */
 export interface Connect extends Binding.Service<
@@ -86,7 +85,7 @@ export interface Connect extends Binding.Service<
     cluster: Cluster,
     options?: ConnectOptions,
   ) => Effect.Effect<
-    Effect.Effect<SqlConnectionInfo, PresignError, RuntimeContext>
+    Effect.Effect<SqlConnectionInfo, CredentialsError, RuntimeContext>
   >
 > {}
 export const Connect = Binding.Service<Connect>("AWS.DSQL.Connect");

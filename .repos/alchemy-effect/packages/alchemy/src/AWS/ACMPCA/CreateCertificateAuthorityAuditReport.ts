@@ -19,8 +19,9 @@ export interface CreateCertificateAuthorityAuditReportRequest extends Omit<
  * `ACMPCA.CreateCertificateAuthorityAuditReportHttp` on the Function effect
  * to implement the binding.
  *
- * ### Audit Reports
- * **Example:** Generate an Audit Report
+ * @binding
+ * @section Audit Reports
+ * @example Generate an Audit Report
  * ```typescript
  * // init
  * const createAuditReport =
@@ -33,8 +34,6 @@ export interface CreateCertificateAuthorityAuditReportRequest extends Omit<
  * });
  * // report.AuditReportId / report.S3Key
  * ```
- *
- * @binding
  */
 export interface CreateCertificateAuthorityAuditReport extends Binding.Service<
   CreateCertificateAuthorityAuditReport,

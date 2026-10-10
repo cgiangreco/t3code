@@ -12,8 +12,9 @@ import type { Queue } from "./Queue.ts";
  * (a second call fails with the typed `PurgeQueueInProgress` error). The
  * binding grants the host function `sqs:PurgeQueue` on the queue. Provide
  * the `PurgeQueueHttp` layer on the Function to implement the binding.
- * ### Purging a Queue
- * **Example:** Purge All Messages
+ * @binding
+ * @section Purging a Queue
+ * @example Purge All Messages
  * ```typescript
  * // init (provide SQS.PurgeQueueHttp on the Function)
  * const purgeQueue = yield* SQS.PurgeQueue(queue);
@@ -21,8 +22,6 @@ import type { Queue } from "./Queue.ts";
  * // runtime: drop everything currently in the queue
  * yield* purgeQueue();
  * ```
- *
- * @binding
  */
 export interface PurgeQueue extends Binding.Service<
   PurgeQueue,

@@ -38,8 +38,8 @@ import * as Schema from "effect/Schema";
 import * as Semaphore from "effect/Semaphore";
 import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
-import { HttpClient } from "effect/http";
-import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { HttpClient } from "effect/unstable/http";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 import {
   DesktopBackendBootstrap,
@@ -52,8 +52,6 @@ import { waitForHttpReady as waitForHttpReadyShared } from "@t3tools/shared/http
 
 import * as DesktopObservability from "../app/DesktopObservability.ts";
 import * as DesktopTelemetryPublisher from "../telemetry/DesktopTelemetryPublisher.ts";
-import * as DesktopBrowserHost from "../preview/DesktopBrowserHost.ts";
-import * as DesktopWslEnvironment from "../wsl/DesktopWslEnvironment.ts";
 
 const INITIAL_RESTART_DELAY = Duration.millis(500);
 const MAX_RESTART_DELAY = Duration.seconds(10);
@@ -101,10 +99,6 @@ export interface DesktopBackendStartConfig extends BackendProcessContext {
   // Present for a WSL run after the configured/default distro has been
   // resolved to the concrete distro passed to wsl.exe.
   readonly runningDistro?: string;
-  // Present only when this run launched from a staged WSL-local runtime.
-  // Once HTTP readiness succeeds, the manager uses it to retain this cache
-  // plus the newest previous cache and prune older versions.
-  readonly wslRuntimeId?: string;
 }
 
 // A preflight failure records whether it is fatal. Transient failures (WSL
@@ -130,7 +124,7 @@ const backendProcessContextSchema = {
   httpBaseUrl: Schema.URL,
 };
 
-export class BackendReadinessTimeoutError extends Schema.TaggedError<BackendReadinessTimeoutError>()(
+export class BackendReadinessTimeoutError extends Schema.TaggedErrorClass<BackendReadinessTimeoutError>()(
   "BackendReadinessTimeoutError",
   {
     ...backendProcessContextSchema,
@@ -144,7 +138,7 @@ export class BackendReadinessTimeoutError extends Schema.TaggedError<BackendRead
   }
 }
 
-export class BackendProcessBootstrapEncodeError extends Schema.TaggedError<BackendProcessBootstrapEncodeError>()(
+export class BackendProcessBootstrapEncodeError extends Schema.TaggedErrorClass<BackendProcessBootstrapEncodeError>()(
   "BackendProcessBootstrapEncodeError",
   {
     ...backendProcessContextSchema,
@@ -156,7 +150,7 @@ export class BackendProcessBootstrapEncodeError extends Schema.TaggedError<Backe
   }
 }
 
-export class BackendProcessSpawnError extends Schema.TaggedError<BackendProcessSpawnError>()(
+export class BackendProcessSpawnError extends Schema.TaggedErrorClass<BackendProcessSpawnError>()(
   "BackendProcessSpawnError",
   {
     ...backendProcessContextSchema,
@@ -168,7 +162,7 @@ export class BackendProcessSpawnError extends Schema.TaggedError<BackendProcessS
   }
 }
 
-export class BackendProcessOutputReadError extends Schema.TaggedError<BackendProcessOutputReadError>()(
+export class BackendProcessOutputReadError extends Schema.TaggedErrorClass<BackendProcessOutputReadError>()(
   "BackendProcessOutputReadError",
   {
     ...backendProcessContextSchema,
@@ -182,7 +176,7 @@ export class BackendProcessOutputReadError extends Schema.TaggedError<BackendPro
   }
 }
 
-export class BackendProcessOutputHandlingError extends Schema.TaggedError<BackendProcessOutputHandlingError>()(
+export class BackendProcessOutputHandlingError extends Schema.TaggedErrorClass<BackendProcessOutputHandlingError>()(
   "BackendProcessOutputHandlingError",
   {
     ...backendProcessContextSchema,
@@ -201,7 +195,7 @@ export type BackendProcessOutputError =
   | BackendProcessOutputReadError
   | BackendProcessOutputHandlingError;
 
-export class BackendProcessExitStatusError extends Schema.TaggedError<BackendProcessExitStatusError>()(
+export class BackendProcessExitStatusError extends Schema.TaggedErrorClass<BackendProcessExitStatusError>()(
   "BackendProcessExitStatusError",
   {
     ...backendProcessContextSchema,
@@ -223,10 +217,6 @@ export type BackendProcessError = typeof BackendProcessError.Type;
 
 interface RunBackendProcessOptions extends DesktopBackendStartConfig {
   readonly desktopTelemetryStream: Stream.Stream<Uint8Array>;
-  /** Events for the desktop's browser tabs, written to `desktopBrowserFd`. */
-  readonly desktopBrowserStream?: Stream.Stream<Uint8Array>;
-  /** Each line the backend writes to `desktopBrowserControlFd`. */
-  readonly onDesktopBrowserCommand?: (line: string) => Effect.Effect<void>;
   readonly onDesktopTelemetryControl?: (
     message: DesktopTelemetryControlMessageValue,
   ) => Effect.Effect<void>;
@@ -428,7 +418,7 @@ function drainBackendOutput(
               cause,
             }),
         ),
-        Effect.catchTags({ BackendProcessOutputHandlingError: onOutputFailure }),
+        Effect.catchTag("BackendProcessOutputHandlingError", onOutputFailure),
       ),
     ),
     Effect.catchTags({
@@ -476,18 +466,6 @@ export const runBackendProcess = Effect.fn("runBackendProcess")(function* (
       additionalFds[`fd${options.bootstrap.desktopTelemetryControlFd}`] = {
         type: "output",
       };
-    }
-    if (
-      options.bootstrap.desktopBrowserFd !== undefined &&
-      options.desktopBrowserStream !== undefined
-    ) {
-      additionalFds[`fd${options.bootstrap.desktopBrowserFd}`] = {
-        type: "input",
-        stream: options.desktopBrowserStream,
-      };
-    }
-    if (options.bootstrap.desktopBrowserControlFd !== undefined) {
-      additionalFds[`fd${options.bootstrap.desktopBrowserControlFd}`] = { type: "output" };
     }
   }
   const command = ChildProcess.make(options.executablePath, options.args, {
@@ -559,26 +537,6 @@ export const runBackendProcess = Effect.fn("runBackendProcess")(function* (
       Effect.forkScoped,
     );
   }
-  if (
-    options.bootstrap.desktopBrowserControlFd !== undefined &&
-    options.onDesktopBrowserCommand !== undefined
-  ) {
-    const browserFd = options.bootstrap.desktopBrowserControlFd;
-    const handleCommand = options.onDesktopBrowserCommand;
-    yield* handle.getOutputFd(browserFd).pipe(
-      Stream.decodeText(),
-      Stream.splitLines,
-      Stream.filter((line) => line.length > 0),
-      Stream.runForEach(handleCommand),
-      Effect.catchCause((cause) =>
-        logBackendProcessWarning("desktop browser command stream stopped", {
-          fd: browserFd,
-          cause: Cause.pretty(cause),
-        }),
-      ),
-      Effect.forkScoped,
-    );
-  }
   if (options.captureOutput) {
     const outputContext = {
       executablePath: options.executablePath,
@@ -605,32 +563,19 @@ export const runBackendProcess = Effect.fn("runBackendProcess")(function* (
       ).pipe(Effect.forkScoped),
     );
   }
-  // Probe readiness in a loop while the backend process is still alive
-  // instead of giving up after the first budget. A slow cold boot (the
-  // WSL bundle loading across /mnt/c, or a first launch right after an
-  // update) can exceed the initial readiness budget while the backend is
-  // about to come up moments later; a one-shot probe left the app stuck
-  // on "Connecting to WSL…" forever even though the backend kept running
-  // and became healthy. Each round gets a fresh budget, and the forked
-  // loop is torn down with the run scope once the child exits.
-  const probeReadiness = Effect.fn("desktop.backendProcess.probeReadiness")(() =>
-    waitForHttpReady({
-      executablePath: options.executablePath,
-      entryPath: options.entryPath,
-      cwd: options.cwd,
-      httpBaseUrl: options.httpBaseUrl,
-      timeout: options.readinessTimeout ?? DEFAULT_BACKEND_READINESS_TIMEOUT,
-    }).pipe(
-      Effect.flatMap(() => options.onReady?.() ?? Effect.void),
-      Effect.as(true),
-      Effect.catchTags({
-        BackendReadinessTimeoutError: (error) =>
-          (options.onReadinessFailure?.(error) ?? Effect.void).pipe(Effect.as(false)),
-      }),
-    ),
+  yield* waitForHttpReady({
+    executablePath: options.executablePath,
+    entryPath: options.entryPath,
+    cwd: options.cwd,
+    httpBaseUrl: options.httpBaseUrl,
+    timeout: options.readinessTimeout ?? DEFAULT_BACKEND_READINESS_TIMEOUT,
+  }).pipe(
+    Effect.tap(() => options.onReady?.() ?? Effect.void),
+    Effect.catchTags({
+      BackendReadinessTimeoutError: (error) => options.onReadinessFailure?.(error) ?? Effect.void,
+    }),
+    Effect.forkScoped,
   );
-
-  yield* probeReadiness().pipe(Effect.repeat({ while: (ready) => !ready }), Effect.forkScoped);
 
   const exit = yield* handle.exitCode.pipe(
     Effect.mapError(
@@ -679,8 +624,6 @@ export const makeBackendInstance = Effect.fn("makeBackendInstance")(function* (
   | HttpClient.HttpClient
   | DesktopObservability.DesktopBackendOutputLogFactory
   | DesktopTelemetryPublisher.DesktopTelemetryPublisher
-  | DesktopBrowserHost.DesktopBrowserHost
-  | DesktopWslEnvironment.DesktopWslEnvironment
   | Scope.Scope
 > {
   const parentScope = yield* Scope.Scope;
@@ -688,8 +631,6 @@ export const makeBackendInstance = Effect.fn("makeBackendInstance")(function* (
   const backendOutputLogFactory = yield* DesktopObservability.DesktopBackendOutputLogFactory;
   const backendOutputLog = yield* backendOutputLogFactory.forInstance(spec.id);
   const desktopTelemetryPublisher = yield* DesktopTelemetryPublisher.DesktopTelemetryPublisher;
-  const desktopBrowserHost = yield* DesktopBrowserHost.DesktopBrowserHost;
-  const wslEnvironment = yield* DesktopWslEnvironment.DesktopWslEnvironment;
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
   const httpClient = yield* HttpClient.HttpClient;
   const state = yield* Ref.make(initialState);
@@ -702,13 +643,15 @@ export const makeBackendInstance = Effect.fn("makeBackendInstance")(function* (
     Ref.update(state, withActiveRun(runId, f));
 
   const snapshot = Ref.get(state).pipe(
-    Effect.map((current): DesktopBackendSnapshot => ({
-      desiredRunning: current.desiredRunning,
-      ready: current.ready,
-      activePid: activePid(current.active),
-      restartAttempt: current.restartAttempt,
-      restartScheduled: Option.isSome(current.restartFiber),
-    })),
+    Effect.map(
+      (current): DesktopBackendSnapshot => ({
+        desiredRunning: current.desiredRunning,
+        ready: current.ready,
+        activePid: activePid(current.active),
+        restartAttempt: current.restartAttempt,
+        restartScheduled: Option.isSome(current.restartFiber),
+      }),
+    ),
   );
   const currentConfig = Ref.get(state).pipe(Effect.map((current) => current.config));
 
@@ -946,9 +889,6 @@ export const makeBackendInstance = Effect.fn("makeBackendInstance")(function* (
         const program = runBackendProcess({
           ...config.value,
           desktopTelemetryStream: desktopTelemetryPublisher.encoded,
-          // Only a bootstrap that names the browser fds (the local primary) gets them.
-          desktopBrowserStream: desktopBrowserHost.events,
-          onDesktopBrowserCommand: desktopBrowserHost.handleCommandLine,
           onDesktopTelemetryControl: (message) =>
             desktopTelemetryPublisher.handleControlForSource(spec.id, message),
           onStarted: Effect.fn("desktop.backendInstance.onStarted")(function* (pid) {
@@ -986,15 +926,6 @@ export const makeBackendInstance = Effect.fn("makeBackendInstance")(function* (
             }
 
             yield* spec.onReady?.(config.value.httpBaseUrl) ?? Effect.void;
-            if (
-              config.value.runningDistro !== undefined &&
-              config.value.wslRuntimeId !== undefined
-            ) {
-              yield* wslEnvironment.pruneRuntimes(
-                config.value.runningDistro,
-                config.value.wslRuntimeId,
-              );
-            }
           }),
           onReadinessFailure: Effect.fn("desktop.backendInstance.onReadinessFailure")(
             function* (error) {

@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * previous response to continue. Account-level: the deploy-time grant is
  * `mediaconnect:ListEntitlements` on `*`. Provide the implementation with
  * `Effect.provide(AWS.MediaConnect.ListEntitlementsHttp)`.
- * ### Managing Entitlements
- * **Example:** Discover Entitlements Granted to This Account
+ * @binding
+ * @section Managing Entitlements
+ * @example Discover Entitlements Granted to This Account
  * ```typescript
  * // init — bind the account-level operation
  * const listEntitlements = yield* AWS.MediaConnect.ListEntitlements();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { Entitlements } = yield* listEntitlements();
  * ```
- *
- * @binding
  */
 export interface ListEntitlements extends Binding.Service<
   ListEntitlements,

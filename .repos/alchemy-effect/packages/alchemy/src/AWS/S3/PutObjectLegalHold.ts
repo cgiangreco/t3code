@@ -17,8 +17,9 @@ export interface PutObjectLegalHoldRequest extends Omit<
  * `s3:PutObjectLegalHold` is granted on the bucket's objects. Requires a
  * bucket created with `objectLockEnabled: true`. Provide the implementation
  * with `Effect.provide(AWS.S3.PutObjectLegalHoldHttp)`.
- * ### Object Lock
- * **Example:** Place and Release a Legal Hold
+ * @binding
+ * @section Object Lock
+ * @example Place and Release a Legal Hold
  * ```typescript
  * const putObjectLegalHold = yield* AWS.S3.PutObjectLegalHold(bucket);
  *
@@ -32,8 +33,6 @@ export interface PutObjectLegalHoldRequest extends Omit<
  *   LegalHold: { Status: "OFF" },
  * });
  * ```
- *
- * @binding
  */
 export interface PutObjectLegalHold extends Binding.Service<
   PutObjectLegalHold,

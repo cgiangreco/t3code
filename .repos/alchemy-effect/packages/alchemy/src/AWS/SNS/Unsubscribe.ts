@@ -10,14 +10,13 @@ export interface UnsubscribeRequest extends sns.UnsubscribeInput {}
  * An account-scoped operation — deletes a subscription by ARN, e.g. one
  * created at runtime with the `Subscribe` binding.
  * Provide the `UnsubscribeHttp` layer on the Function to implement the binding.
- * ### Unsubscribing
- * **Example:** Unsubscribe by ARN
+ * @binding
+ * @section Unsubscribing
+ * @example Unsubscribe by ARN
  * ```typescript
  * const unsubscribe = yield* SNS.Unsubscribe();
  * yield* unsubscribe({ SubscriptionArn: subscriptionArn });
  * ```
- *
- * @binding
  */
 export interface Unsubscribe extends Binding.Service<
   Unsubscribe,

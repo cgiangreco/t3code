@@ -11,8 +11,9 @@ import type { Collection } from "./Collection.ts";
  * key — from inside a function runtime. Useful for discovering the data-plane
  * `collectionEndpoint` at runtime. Provide the implementation with
  * `Effect.provide(AWS.OpenSearchServerless.GetCollectionHttp)`.
- * ### Inspecting Collections
- * **Example:** Read the collection's endpoint and status
+ * @binding
+ * @section Inspecting Collections
+ * @example Read the collection's endpoint and status
  * ```typescript
  * // init — bind the operation to the collection
  * const getCollection = yield* AWS.OpenSearchServerless.GetCollection(collection);
@@ -21,8 +22,6 @@ import type { Collection } from "./Collection.ts";
  * const detail = yield* getCollection();
  * yield* Effect.log(`${detail?.status}: ${detail?.collectionEndpoint}`);
  * ```
- *
- * @binding
  */
 export interface GetCollection extends Binding.Service<
   GetCollection,

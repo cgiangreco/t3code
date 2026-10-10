@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * outside FIS's view fires. The account's lever has the well-known id
  * `default`. Provide the implementation with
  * `Effect.provide(AWS.FIS.UpdateSafetyLeverStateHttp)`.
- * ### The Safety Lever
- * **Example:** Halt All Experiments
+ * @binding
+ * @section The Safety Lever
+ * @example Halt All Experiments
  * ```typescript
  * // init — account-level binding, no resource argument
  * const updateSafetyLeverState = yield* AWS.FIS.UpdateSafetyLeverState();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   state: { status: "engaged", reason: "elevated error budget burn" },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateSafetyLeverState extends Binding.Service<
   UpdateSafetyLeverState,

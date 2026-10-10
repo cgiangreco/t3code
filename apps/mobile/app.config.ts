@@ -13,17 +13,11 @@ const EXPO_OWNER = repoEnv.EXPO_OWNER ?? "pingdotgg";
 const EXPO_PROJECT_ID = repoEnv.EXPO_PROJECT_ID ?? "d763fcb8-d37c-41ea-a773-b54a0ab4a454";
 const EXPO_UPDATES_URL = repoEnv.EXPO_UPDATES_URL ?? `https://u.expo.dev/${EXPO_PROJECT_ID}`;
 const isIosPersonalTeamBuild = repoEnv.T3CODE_IOS_PERSONAL_TEAM === "1";
-const runtimeVersionPolicy =
-  process.env.MOBILE_VERSION_POLICY ??
-  (APP_VARIANT === "development" ? "appVersion" : "fingerprint");
 
 const personalTeamBundleIdentifier = repoEnv.T3CODE_IOS_PERSONAL_TEAM_BUNDLE_ID?.trim();
 const IOS_BUNDLE_IDENTIFIER_PATTERN = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/;
 
 const fromRepoRoot = (relativePath: string) => `../../${relativePath}`;
-// Android layers are rendered by scripts/export-android-icons.ts from the Icon Composer sources.
-// The wordmark sits inside the adaptive safe zone; the variant artwork is a full-bleed background.
-const androidAdaptiveForeground = "./assets/android-icon-foreground.png";
 
 if (
   isIosPersonalTeamBuild &&
@@ -39,10 +33,8 @@ const DEVELOPMENT_ASSETS = {
   appIcon: fromRepoRoot(BRAND_ASSET_PATHS.developmentIosIconPng),
   iosIcon: fromRepoRoot(BRAND_ASSET_PATHS.developmentIconComposerProject),
   splashIcon: fromRepoRoot(BRAND_ASSET_PATHS.developmentIosIconPng),
-  androidAdaptiveForeground,
-  androidAdaptiveBackgroundColor: "#347FF8",
-  androidAdaptiveBackgroundImage: "./assets/android-icon-background-dev.png",
-  androidSplashIcon: "./assets/android-splash-icon-dev.png",
+  androidAdaptiveForeground: fromRepoRoot(BRAND_ASSET_PATHS.developmentUniversalIconPng),
+  androidAdaptiveBackgroundColor: "#00639B",
   androidMonochromeIcon: "./assets/android-icon-mark.png",
   androidNotificationIcon: "./assets/android-notification-icon.png",
   androidNotificationColor: "#00639B",
@@ -52,10 +44,8 @@ const PREVIEW_ASSETS = {
   appIcon: fromRepoRoot(BRAND_ASSET_PATHS.nightlyIosIconPng),
   iosIcon: fromRepoRoot(BRAND_ASSET_PATHS.nightlyIconComposerProject),
   splashIcon: fromRepoRoot(BRAND_ASSET_PATHS.nightlyIosIconPng),
-  androidAdaptiveForeground,
+  androidAdaptiveForeground: fromRepoRoot(BRAND_ASSET_PATHS.nightlyLinuxIconPng),
   androidAdaptiveBackgroundColor: "#111533",
-  androidAdaptiveBackgroundImage: "./assets/android-icon-background-nightly.png",
-  androidSplashIcon: "./assets/android-splash-icon-nightly.png",
   androidMonochromeIcon: "./assets/android-icon-mark.png",
   androidNotificationIcon: "./assets/android-notification-icon.png",
   androidNotificationColor: "#7565C7",
@@ -65,10 +55,8 @@ const RELEASE_ASSETS = {
   appIcon: fromRepoRoot(BRAND_ASSET_PATHS.productionIosIconPng),
   iosIcon: fromRepoRoot(BRAND_ASSET_PATHS.productionIconComposerProject),
   splashIcon: fromRepoRoot(BRAND_ASSET_PATHS.productionIosIconPng),
-  androidAdaptiveForeground,
+  androidAdaptiveForeground: "./assets/android-icon-mark.png",
   androidAdaptiveBackgroundColor: "#000000",
-  androidAdaptiveBackgroundImage: undefined,
-  androidSplashIcon: "./assets/android-splash-icon-prod.png",
   androidMonochromeIcon: "./assets/android-icon-mark.png",
   androidNotificationIcon: "./assets/android-notification-icon.png",
   androidNotificationColor: "#FFFFFF",
@@ -132,66 +120,12 @@ const widgetsPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
     // Agent activity can update many times an hour; without the
     // frequent-updates entitlement iOS throttles the update budget sooner.
     frequentUpdates: true,
-    enableAndroid: true,
     widgets: [
-      {
-        name: "SubscriptionUsage",
-        displayName: "Subscription usage",
-        description: "Subscription quotas from your connected T3 Code environments.",
-        ios: {
-          configuration: {
-            title: "Subscription usage",
-            description:
-              "Both shows Session and Weekly when available. The Lock Screen shows the tightest selected limit.",
-            parameters: {
-              codexPeriod: {
-                title: "Codex limits",
-                type: "enum",
-                default: "auto",
-                values: [
-                  { name: "Both", value: "auto" },
-                  { name: "Session", value: "session" },
-                  { name: "Weekly", value: "weekly" },
-                ],
-              },
-              claudePeriod: {
-                title: "Claude limits",
-                type: "enum",
-                default: "auto",
-                values: [
-                  { name: "Both", value: "auto" },
-                  { name: "Session", value: "session" },
-                  { name: "Weekly", value: "weekly" },
-                ],
-              },
-            },
-          },
-          supportedFamilies: [
-            "systemSmall",
-            "systemMedium",
-            "systemLarge",
-            "systemExtraLarge",
-            "accessoryRectangular",
-          ],
-        },
-        android: {
-          minWidth: 250,
-          minHeight: 180,
-          targetCellWidth: 4,
-          targetCellHeight: 3,
-          resizeMode: "both",
-          // Embeds the layout in the APK so the widget renders before the app
-          // has run once; the app replaces it with stored props on publish.
-          initialLayout: "./src/widgets/SubscriptionUsage.android.tsx",
-        },
-      },
       {
         name: "AgentActivity",
         displayName: "Agent Activity",
         description: "Shows the current state of active T3 Code agents.",
-        // Live Activity companion; there is no Android presentation for it.
-        android: null,
-        ios: { supportedFamilies: ["systemSmall", "systemMedium", "accessoryRectangular"] },
+        supportedFamilies: ["systemSmall", "systemMedium", "accessoryRectangular"],
       },
     ],
   },
@@ -211,14 +145,12 @@ const sharingPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
         supportsText: true,
         supportsWebUrlWithMaxCount: 1,
         supportsImageWithMaxCount: 8,
-        supportsMovieWithMaxCount: 8,
-        supportsFileWithMaxCount: 8,
       },
     },
     android: {
       enabled: true,
-      singleShareMimeTypes: ["*/*"],
-      multipleShareMimeTypes: ["*/*"],
+      singleShareMimeTypes: ["text/plain", "image/*"],
+      multipleShareMimeTypes: ["image/*"],
     },
   },
 ];
@@ -232,18 +164,19 @@ const config: ExpoConfig = {
   slug: "t3-code",
   platforms: ["ios", "android"],
   scheme: variant.scheme,
-  version: "2.0.0",
+  version: "1.0.2",
   runtimeVersion: {
-    // Development manifests resolve on every launch, so avoid fingerprint's
-    // expensive native-project calculation there. Preview and production stay
-    // fingerprinted so OTAs only reach binaries with matching native projects.
-    policy: runtimeVersionPolicy,
+    // Fingerprint (not appVersion) so an OTA only reaches binaries whose native
+    // project — native deps, config plugins, AND patches/ — matches the update.
+    // With appVersion, every 0.1.0 build shares a runtime version, so a JS update
+    // could land on a binary missing the native changes it needs and crash.
+    policy: process.env.MOBILE_VERSION_POLICY ?? "fingerprint",
   },
   orientation: "portrait",
   icon: variant.assets.appIcon,
   userInterfaceStyle: "automatic",
   updates: {
-    enabled: repoEnv.T3CODE_MOBILE_UPDATES_ENABLED !== "0",
+    enabled: true,
     url: EXPO_UPDATES_URL,
     checkAutomatically: "ON_LOAD",
     fallbackToCacheTimeout: 0,
@@ -263,24 +196,12 @@ const config: ExpoConfig = {
       `applinks:${variant.relyingParty}`,
       `webcredentials:${variant.relyingParty}`,
     ],
-    entitlements: {
-      "keychain-access-groups": [`$(AppIdentifierPrefix)${variant.iosBundleIdentifier}`],
-    },
     infoPlist: {
-      UISupportedInterfaceOrientations: [
-        "UIInterfaceOrientationPortrait",
-        "UIInterfaceOrientationLandscapeLeft",
-        "UIInterfaceOrientationLandscapeRight",
-      ],
       NSAppTransportSecurity: {
         NSAllowsArbitraryLoads: true,
       },
       NSLocalNetworkUsageDescription:
         "Allow T3 Code to connect to T3 Code servers on your local network or tailnet.",
-      NSPhotoLibraryAddUsageDescription: "Allow T3 Code to save images to your photo library.",
-      // "Audio, AirPlay, and Picture in Picture": the browser screen's system
-      // picture in picture needs it to start and to stay up outside the app.
-      UIBackgroundModes: ["audio"],
       ITSAppUsesNonExemptEncryption: false,
       // The App Store screenshot harness rotates the iPad interface from
       // inside the app (CI denies osascript the Accessibility access that
@@ -302,14 +223,8 @@ const config: ExpoConfig = {
   android: {
     icon: variant.assets.appIcon,
     package: variant.androidPackage,
-    ...(repoEnv.T3CODE_ANDROID_GOOGLE_SERVICES_FILE
-      ? { googleServicesFile: repoEnv.T3CODE_ANDROID_GOOGLE_SERVICES_FILE }
-      : {}),
     adaptiveIcon: {
       backgroundColor: variant.assets.androidAdaptiveBackgroundColor,
-      ...(variant.assets.androidAdaptiveBackgroundImage
-        ? { backgroundImage: variant.assets.androidAdaptiveBackgroundImage }
-        : {}),
       foregroundImage: variant.assets.androidAdaptiveForeground,
       monochromeImage: variant.assets.androidMonochromeIcon,
     },
@@ -317,8 +232,6 @@ const config: ExpoConfig = {
     // JS back handling survives it via react-native's Android 16 shim plus
     // withAndroidPredictiveBackCompat on Android 13-15.
     predictiveBackGestureEnabled: true,
-    // expo-sensors declares this for its pedometer, which the app does not use.
-    blockedPermissions: ["android.permission.ACTIVITY_RECOGNITION"],
   },
   web: {
     favicon: variant.assets.appIcon,
@@ -375,20 +288,8 @@ const config: ExpoConfig = {
           shortcut_icon: {
             foregroundImage: variant.assets.androidAdaptiveForeground,
             backgroundColor: variant.assets.androidAdaptiveBackgroundColor,
-            ...(variant.assets.androidAdaptiveBackgroundImage
-              ? { backgroundImage: variant.assets.androidAdaptiveBackgroundImage }
-              : {}),
           },
         },
-      },
-    ],
-    [
-      "expo-audio",
-      {
-        microphonePermission: "Allow T3 Code to use your microphone for voice input.",
-        recordAudioAndroid: false,
-        enableBackgroundPlayback: false,
-        enableBackgroundRecording: false,
       },
     ],
     [
@@ -412,36 +313,11 @@ const config: ExpoConfig = {
           image: variant.assets.splashIcon,
           backgroundColor: "#0a0a0a",
         },
-        android: {
-          // Android 12+ masks the splash icon to a circle over the central two thirds of
-          // its 288dp canvas, so the iOS export's corners get cut. A full-canvas image of
-          // the composed adaptive layers puts the wordmark in the same frame the launcher
-          // icon uses.
-          image: variant.assets.androidSplashIcon,
-          imageWidth: 288,
-          dark: { image: variant.assets.androidSplashIcon },
-        },
       },
     ],
     [
       "expo-build-properties",
       {
-        android: {
-          // Keep the supported floor explicit and covered by native notification tests.
-          minSdkVersion: 24,
-          // kotlinx-io uses Kotlin 2.3's return-value checker annotation, while
-          // SDK 58 builds with Kotlin 2.2. It has no runtime behavior.
-          //
-          // WorkManager 2.9 keeps InputMerger classes but not their constructors,
-          // and R8 full mode no longer keeps a default constructor implicitly.
-          // Without it no work request can start, so the Glance session behind
-          // the widget never renders and it stays on "Loading widget". WorkManager
-          // 2.10 ships this rule itself; drop it once the resolved version gets there.
-          extraProguardRules: [
-            "-dontwarn kotlin.MustUseReturnValues",
-            "-keep class * extends androidx.work.InputMerger { <init>(); }",
-          ].join("\n"),
-        },
         ios: {
           deploymentTarget: "18.0",
           // AppCheckCore 11.3+ includes Swift and needs module maps for these Objective-C dependencies.
@@ -453,22 +329,18 @@ const config: ExpoConfig = {
       },
     ],
     "./plugins/withIosCocoaPodsUuidCache.cjs",
-    // Only the accelerometer is used (device viewer shake). Compile out the
-    // pedometer so iOS needs no motion purpose string.
-    ["expo-sensors", { motionPermission: false }],
     // Must be listed BEFORE expo-widgets: same-type mods run last-registered-
     // first, so registering earlier makes this plugin's mods run AFTER
     // expo-widgets' — its dangerous mod wipes ios/ExpoWidgetsTarget/ (which
     // would delete the asset catalog) and its xcodeproj mod creates the widget
     // target (which must exist before the compile phase can be attached).
     ...(!isIosPersonalTeamBuild ? ["./plugins/withWidgetLogoAsset.cjs", widgetsPlugin] : []),
+    "./plugins/withIosSceneLifecycle.cjs",
     "./plugins/withAndroidCleartextTraffic.cjs",
     "./plugins/withAndroidGradleHeap.cjs",
-    "./plugins/withAndroidInputBackground.cjs",
     "./plugins/withAndroidModernPopupMenu.cjs",
     "./plugins/withAndroidModernAlertDialog.cjs",
     "./plugins/withAndroidPredictiveBackCompat.cjs",
-    "./plugins/withAndroidTabletOrientation.cjs",
     ...(isIosPersonalTeamBuild ? ["./plugins/withoutIosPersonalTeamCapabilities.cjs"] : []),
   ],
   extra: {

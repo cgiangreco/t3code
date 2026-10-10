@@ -12,8 +12,9 @@ export interface PutApprovalResultRequest extends Omit<
  * Runtime binding for `codepipeline:PutApprovalResult` — answers a manual
  * approval action with `Approved` or `Rejected`. The approval `token` comes
  * from the action's `latestExecution` in {@link GetPipelineState}.
- * ### Approvals
- * **Example:** Approve a Manual Approval Action
+ * @binding
+ * @section Approvals
+ * @example Approve a Manual Approval Action
  * ```typescript
  * const putApproval = yield* AWS.CodePipeline.PutApprovalResult(pipeline);
  *
@@ -24,8 +25,6 @@ export interface PutApprovalResultRequest extends Omit<
  *   result: { status: "Approved", summary: "LGTM" },
  * });
  * ```
- *
- * @binding
  */
 export interface PutApprovalResult extends Binding.Service<
   PutApprovalResult,

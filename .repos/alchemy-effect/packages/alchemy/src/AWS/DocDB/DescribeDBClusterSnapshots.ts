@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * pairs with `CreateDBClusterSnapshot`/`DeleteDBClusterSnapshot` for backup
  * automation. Provide the implementation with
  * `Effect.provide(AWS.DocDB.DescribeDBClusterSnapshotsHttp)`.
- * ### Managing Snapshots
- * **Example:** Poll a Snapshot until Available
+ * @binding
+ * @section Managing Snapshots
+ * @example Poll a Snapshot until Available
  * ```typescript
  * const describeSnapshots = yield* DocDB.DescribeDBClusterSnapshots();
  *
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const status = page.DBClusterSnapshots?.[0]?.Status;
  * ```
- *
- * @binding
  */
 export interface DescribeDBClusterSnapshots extends Binding.Service<
   DescribeDBClusterSnapshots,

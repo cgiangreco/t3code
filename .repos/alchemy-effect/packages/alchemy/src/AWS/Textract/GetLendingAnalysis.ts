@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * per-page extraction results of an asynchronous lending-analysis job
  * started with `StartLendingAnalysis`.
  *
- * ### Asynchronous Lending Analysis
- * **Example:** Poll a Lending Analysis Job
+ * @binding
+ * @section Asynchronous Lending Analysis
+ * @example Poll a Lending Analysis Job
  * ```typescript
  * // init
  * const getLendingAnalysis = yield* AWS.Textract.GetLendingAnalysis();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* getLendingAnalysis({ JobId: jobId });
  * const pages = result.Results;
  * ```
- *
- * @binding
  */
 export interface GetLendingAnalysis extends Binding.Service<
   GetLendingAnalysis,

@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * use. Provide the implementation with
  * `Effect.provide(AWS.ECRPublic.GetAuthorizationTokenHttp)`.
  *
- * ### Registry Access
- * **Example:** Mint A Registry Auth Token
+ * @binding
+ * @section Registry Access
+ * @example Mint A Registry Auth Token
  * ```typescript
  * // init — registry-level binding takes no resource
  * const getAuthorizationToken = yield* AWS.ECRPublic.GetAuthorizationToken();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* getAuthorizationToken();
  * const token = result.authorizationData?.authorizationToken; // Redacted<string>
  * ```
- *
- * @binding
  */
 export interface GetAuthorizationToken extends Binding.Service<
   GetAuthorizationToken,

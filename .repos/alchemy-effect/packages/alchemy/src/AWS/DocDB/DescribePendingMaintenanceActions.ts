@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * pairs with `ApplyPendingMaintenanceAction` for maintenance automation.
  * Provide the implementation with
  * `Effect.provide(AWS.DocDB.DescribePendingMaintenanceActionsHttp)`.
- * ### Maintenance
- * **Example:** List Pending Maintenance across the Account
+ * @binding
+ * @section Maintenance
+ * @example List Pending Maintenance across the Account
  * ```typescript
  * const describePending = yield* DocDB.DescribePendingMaintenanceActions();
  *
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   );
  * }
  * ```
- *
- * @binding
  */
 export interface DescribePendingMaintenanceActions extends Binding.Service<
   DescribePendingMaintenanceActions,

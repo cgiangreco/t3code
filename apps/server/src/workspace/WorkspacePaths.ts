@@ -6,6 +6,7 @@
  *
  * @module WorkspacePaths
  */
+import * as NodeOS from "node:os";
 
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
@@ -14,10 +15,7 @@ import * as Layer from "effect/Layer";
 import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 
-import { expandHomePath } from "@t3tools/provider-core/server/pathExpansion";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-
-export class WorkspaceRootNotExistsError extends Schema.TaggedError<WorkspaceRootNotExistsError>()(
+export class WorkspaceRootNotExistsError extends Schema.TaggedErrorClass<WorkspaceRootNotExistsError>()(
   "WorkspaceRootNotExistsError",
   {
     workspaceRoot: Schema.String,
@@ -29,7 +27,7 @@ export class WorkspaceRootNotExistsError extends Schema.TaggedError<WorkspaceRoo
   }
 }
 
-export class WorkspaceRootCreateFailedError extends Schema.TaggedError<WorkspaceRootCreateFailedError>()(
+export class WorkspaceRootCreateFailedError extends Schema.TaggedErrorClass<WorkspaceRootCreateFailedError>()(
   "WorkspaceRootCreateFailedError",
   {
     workspaceRoot: Schema.String,
@@ -42,7 +40,7 @@ export class WorkspaceRootCreateFailedError extends Schema.TaggedError<Workspace
   }
 }
 
-export class WorkspaceRootStatFailedError extends Schema.TaggedError<WorkspaceRootStatFailedError>()(
+export class WorkspaceRootStatFailedError extends Schema.TaggedErrorClass<WorkspaceRootStatFailedError>()(
   "WorkspaceRootStatFailedError",
   {
     workspaceRoot: Schema.String,
@@ -56,7 +54,7 @@ export class WorkspaceRootStatFailedError extends Schema.TaggedError<WorkspaceRo
   }
 }
 
-export class WorkspaceRootNotDirectoryError extends Schema.TaggedError<WorkspaceRootNotDirectoryError>()(
+export class WorkspaceRootNotDirectoryError extends Schema.TaggedErrorClass<WorkspaceRootNotDirectoryError>()(
   "WorkspaceRootNotDirectoryError",
   {
     workspaceRoot: Schema.String,
@@ -68,7 +66,7 @@ export class WorkspaceRootNotDirectoryError extends Schema.TaggedError<Workspace
   }
 }
 
-export class WorkspacePathOutsideRootError extends Schema.TaggedError<WorkspacePathOutsideRootError>()(
+export class WorkspacePathOutsideRootError extends Schema.TaggedErrorClass<WorkspacePathOutsideRootError>()(
   "WorkspacePathOutsideRootError",
   {
     workspaceRoot: Schema.String,
@@ -123,6 +121,16 @@ function toPosixRelativePath(input: string): string {
   return input.replaceAll("\\", "/");
 }
 
+function expandHomePath(input: string, path: Path.Path): string {
+  if (input === "~") {
+    return NodeOS.homedir();
+  }
+  if (input.startsWith("~/") || input.startsWith("~\\")) {
+    return path.join(NodeOS.homedir(), input.slice(2));
+  }
+  return input;
+}
+
 export const make = Effect.gen(function* () {
   const fileSystem = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
@@ -153,9 +161,7 @@ export const make = Effect.gen(function* () {
   const normalizeWorkspaceRoot: WorkspacePaths["Service"]["normalizeWorkspaceRoot"] = Effect.fn(
     "WorkspacePaths.normalizeWorkspaceRoot",
   )(function* (workspaceRoot, options) {
-    const normalizedWorkspaceRoot = path.resolve(
-      expandHomePath(workspaceRoot.trim(), yield* HostProcess.HomeDirectory),
-    );
+    const normalizedWorkspaceRoot = path.resolve(expandHomePath(workspaceRoot.trim(), path));
     let workspaceStat = yield* statWorkspaceRoot(
       workspaceRoot,
       normalizedWorkspaceRoot,

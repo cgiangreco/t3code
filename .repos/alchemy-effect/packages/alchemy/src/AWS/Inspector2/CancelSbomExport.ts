@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.CancelSbomExportHttp)`.
- * ### Findings Reports & SBOM Exports
- * **Example:** Cancel an SBOM Export
+ * @binding
+ * @section Findings Reports & SBOM Exports
+ * @example Cancel an SBOM Export
  * ```typescript
  * // init
  * const cancelSbomExport = yield* AWS.Inspector2.CancelSbomExport();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* cancelSbomExport({ reportId });
  * ```
- *
- * @binding
  */
 export interface CancelSbomExport extends Binding.Service<
   CancelSbomExport,

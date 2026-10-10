@@ -71,8 +71,9 @@ export interface IdentityProvider extends Resource<
  * A third-party identity provider (SAML, OIDC, or social) attached to an
  * Amazon Cognito user pool, enabling federated sign-in through managed
  * login.
- * ### Creating Identity Providers
- * **Example:** OIDC Provider
+ * @resource
+ * @section Creating Identity Providers
+ * @example OIDC Provider
  * ```typescript
  * import * as Cognito from "alchemy/AWS/Cognito";
  *
@@ -91,15 +92,13 @@ export interface IdentityProvider extends Resource<
  * });
  * ```
  *
- * **Example:** Wire the IdP to an App Client
+ * @example Wire the IdP to an App Client
  * ```typescript
  * const client = yield* Cognito.UserPoolClient("Web", {
  *   userPoolId: pool.userPoolId,
  *   supportedIdentityProviders: ["COGNITO", oidc.providerName],
  * });
  * ```
- *
- * @resource
  */
 export const IdentityProvider = Resource<IdentityProvider>(
   "AWS.Cognito.IdentityProvider",

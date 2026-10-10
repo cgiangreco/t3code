@@ -83,15 +83,16 @@ export interface ServiceLinkedRole extends Resource<
  * Some services auto-create their service-linked role on first use; deploying
  * this resource over an existing role adopts it (the create API reports the
  * collision and the provider converges on the existing role).
- * ### Creating Service-Linked Roles
- * **Example:** Auto Scaling Service-Linked Role
+ * @resource
+ * @section Creating Service-Linked Roles
+ * @example Auto Scaling Service-Linked Role
  * ```typescript
  * const role = yield* ServiceLinkedRole("AutoScalingRole", {
  *   awsServiceName: "autoscaling.amazonaws.com",
  * });
  * ```
  *
- * **Example:** Suffixed Role for a Dedicated Workload
+ * @example Suffixed Role for a Dedicated Workload
  * ```typescript
  * const role = yield* ServiceLinkedRole("WorkloadRole", {
  *   awsServiceName: "autoscaling.amazonaws.com",
@@ -99,8 +100,6 @@ export interface ServiceLinkedRole extends Resource<
  *   description: "Auto Scaling role scoped to the analytics workload",
  * });
  * ```
- *
- * @resource
  */
 export const ServiceLinkedRole = Resource<ServiceLinkedRole>(
   "AWS.IAM.ServiceLinkedRole",

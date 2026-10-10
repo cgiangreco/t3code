@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from "vite-plus/test";
 import { EnvironmentId, ThreadId } from "@t3tools/contracts";
 
 import {
+  cacheTerminalFontSize,
   cacheTerminalGridSize,
+  getCachedTerminalFontSize,
   getCachedTerminalGridSize,
   resetTerminalUiStateCaches,
 } from "./terminalUiState";
@@ -10,6 +12,14 @@ import {
 describe("terminalUiState", () => {
   beforeEach(() => {
     resetTerminalUiStateCaches();
+  });
+
+  it("caches terminal font size using the shared normalization rules", () => {
+    expect(getCachedTerminalFontSize()).toBeNull();
+    expect(cacheTerminalFontSize(8.5)).toBe(8.5);
+    expect(getCachedTerminalFontSize()).toBe(8.5);
+    expect(cacheTerminalFontSize(100)).toBe(14);
+    expect(getCachedTerminalFontSize()).toBe(14);
   });
 
   it("stores terminal grid sizes per terminal target", () => {

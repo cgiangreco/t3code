@@ -15,15 +15,16 @@ export interface SendMessageRequest extends Omit<
  * callable that automatically injects the `QueueUrl`. The binding grants the
  * host function `sqs:SendMessage` on the queue. Provide the `SendMessageHttp`
  * layer on the Function to implement the binding.
- * ### Sending Messages
- * **Example:** Send a Message from a Lambda Function
+ * @binding
+ * @section Sending Messages
+ * @example Send a Message from a Lambda Function
  * ```typescript
  * export class ApiFunction extends Lambda.Function<Lambda.Function>()(
  *   "ApiFunction",
  * ) {}
  *
  * export default ApiFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     const queue = yield* SQS.Queue("Jobs");
  *
@@ -43,12 +44,10 @@ export interface SendMessageRequest extends Omit<
  * );
  * ```
  *
- * **Example:** Delay Delivery
+ * @example Delay Delivery
  * ```typescript
  * yield* sendMessage({ MessageBody: "process later", DelaySeconds: 60 });
  * ```
- *
- * @binding
  */
 export interface SendMessage extends Binding.Service<
   SendMessage,

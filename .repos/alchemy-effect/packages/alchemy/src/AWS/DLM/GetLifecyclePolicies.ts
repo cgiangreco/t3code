@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * verify a fleet's tags are actually covered by an `ENABLED` policy.
  * Provide the implementation with
  * `Effect.provide(AWS.DLM.GetLifecyclePoliciesHttp)`.
- * ### Monitoring Lifecycle Policies
- * **Example:** Find Failed Policies
+ * @binding
+ * @section Monitoring Lifecycle Policies
+ * @example Find Failed Policies
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getLifecyclePolicies = yield* AWS.DLM.GetLifecyclePolicies();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.logError(`DLM policy in ERROR: ${policy.PolicyId}`);
  * }
  * ```
- *
- * @binding
  */
 export interface GetLifecyclePolicies extends Binding.Service<
   GetLifecyclePolicies,

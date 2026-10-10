@@ -115,8 +115,9 @@ export interface QApp extends Resource<
  * `instanceId`), which itself requires IAM Identity Center. The calling
  * identity must be a user of that Q Business application.
  * :::
- * ### Creating Q Apps
- * **Example:** Prompt-Driven Q App
+ * @resource
+ * @section Creating Q Apps
+ * @example Prompt-Driven Q App
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -145,7 +146,7 @@ export interface QApp extends Resource<
  * });
  * ```
  *
- * **Example:** File Upload Q App
+ * @example File Upload Q App
  * ```typescript
  * const analyzer = yield* AWS.QApps.QApp("DocAnalyzer", {
  *   instanceId: qbusinessApp.applicationId,
@@ -171,8 +172,6 @@ export interface QApp extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const QApp = Resource<QApp>("AWS.QApps.QApp");
 

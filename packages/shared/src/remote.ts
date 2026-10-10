@@ -8,7 +8,7 @@ const SUPPORTED_REMOTE_BACKEND_PROTOCOLS = new Set(["http:", "https:", "ws:", "w
 export const readHashParams = (url: URL): URLSearchParams =>
   new URLSearchParams(url.hash.startsWith("#") ? url.hash.slice(1) : url.hash);
 
-export class RemoteBackendUrlMissingError extends Schema.TaggedError<RemoteBackendUrlMissingError>()(
+export class RemoteBackendUrlMissingError extends Schema.TaggedErrorClass<RemoteBackendUrlMissingError>()(
   "RemoteBackendUrlMissingError",
   {},
 ) {
@@ -17,7 +17,7 @@ export class RemoteBackendUrlMissingError extends Schema.TaggedError<RemoteBacke
   }
 }
 
-export class RemotePairingUrlInvalidError extends Schema.TaggedError<RemotePairingUrlInvalidError>()(
+export class RemotePairingUrlInvalidError extends Schema.TaggedErrorClass<RemotePairingUrlInvalidError>()(
   "RemotePairingUrlInvalidError",
   {
     cause: Schema.optional(Schema.Defect()),
@@ -29,7 +29,7 @@ export class RemotePairingUrlInvalidError extends Schema.TaggedError<RemotePairi
   }
 }
 
-export class RemoteBackendUrlInvalidError extends Schema.TaggedError<RemoteBackendUrlInvalidError>()(
+export class RemoteBackendUrlInvalidError extends Schema.TaggedErrorClass<RemoteBackendUrlInvalidError>()(
   "RemoteBackendUrlInvalidError",
   {
     source: Schema.Literals(["direct-host", "hosted-pairing-host"]),
@@ -42,7 +42,7 @@ export class RemoteBackendUrlInvalidError extends Schema.TaggedError<RemoteBacke
   }
 }
 
-export class RemotePairingTokenMissingError extends Schema.TaggedError<RemotePairingTokenMissingError>()(
+export class RemotePairingTokenMissingError extends Schema.TaggedErrorClass<RemotePairingTokenMissingError>()(
   "RemotePairingTokenMissingError",
   { host: Schema.String },
 ) {
@@ -51,7 +51,7 @@ export class RemotePairingTokenMissingError extends Schema.TaggedError<RemotePai
   }
 }
 
-export class RemotePairingCodeMissingError extends Schema.TaggedError<RemotePairingCodeMissingError>()(
+export class RemotePairingCodeMissingError extends Schema.TaggedErrorClass<RemotePairingCodeMissingError>()(
   "RemotePairingCodeMissingError",
   { host: Schema.String },
 ) {

@@ -10,15 +10,14 @@ import * as Binding from "../../Binding.ts";
  * grants `mediatailor:StartChannel` on `*`. Provide the implementation with
  * `Effect.provide(AWS.MediaTailor.StartChannelHttp)`.
  *
- * ### Channel Assembly
- * **Example:** Start a channel
+ * @binding
+ * @section Channel Assembly
+ * @example Start a channel
  * ```typescript
  * const startChannel = yield* AWS.MediaTailor.StartChannel();
  *
  * yield* startChannel({ ChannelName: "my-channel" });
  * ```
- *
- * @binding
  */
 export interface StartChannel extends Binding.Service<
   StartChannel,

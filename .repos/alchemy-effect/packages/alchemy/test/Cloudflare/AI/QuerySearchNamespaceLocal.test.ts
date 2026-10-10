@@ -5,7 +5,7 @@ import { expect } from "alchemy-test";
 import * as Effect from "effect/Effect";
 import { MinimumLogLevel } from "effect/References";
 import * as Schedule from "effect/Schedule";
-import * as HttpClient from "effect/http/HttpClient";
+import * as HttpClient from "effect/unstable/http/HttpClient";
 import AiSearchCrawlTargetWorker from "./fixtures/crawl-target-worker.ts";
 
 const { test } = Test.make({ providers: Cloudflare.providers() });
@@ -57,10 +57,8 @@ test.provider(
             namespace: namespace.name,
             sourceParams: {
               webCrawler: {
-                // Cloudflare renamed `crawl` → `discover` and removed
-                // `crawlOptions` from the API. The fixture serves a
-                // sitemap, so discovery always finds content.
-                parseType: "discover",
+                parseType: "crawl",
+                crawlOptions: { source: "links" },
               },
             },
           });
@@ -110,13 +108,5 @@ test.provider(
 
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:ai",
-      "provider:cloudflare:worker",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );

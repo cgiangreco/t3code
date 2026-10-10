@@ -114,8 +114,9 @@ export interface Group extends Resource<
  * Deleting a group never deletes its member resources; it only deletes the
  * group structure.
  *
- * ### Creating Groups
- * **Example:** Tag-based Group
+ * @resource
+ * @section Creating Groups
+ * @example Tag-based Group
  * ```typescript
  * import * as ResourceGroups from "alchemy/AWS/ResourceGroups";
  *
@@ -131,7 +132,7 @@ export interface Group extends Resource<
  * });
  * ```
  *
- * **Example:** CloudFormation Stack Group
+ * @example CloudFormation Stack Group
  * ```typescript
  * const group = yield* ResourceGroups.Group("StackGroup", {
  *   resourceQuery: {
@@ -144,8 +145,8 @@ export interface Group extends Resource<
  * });
  * ```
  *
- * ### Service Configurations
- * **Example:** Capacity Reservation Pool Group
+ * @section Service Configurations
+ * @example Capacity Reservation Pool Group
  * ```typescript
  * const pool = yield* ResourceGroups.Group("ReservationPool", {
  *   configuration: [
@@ -163,8 +164,8 @@ export interface Group extends Resource<
  * });
  * ```
  *
- * ### Tagging
- * **Example:** Group with Tags
+ * @section Tagging
+ * @example Group with Tags
  * ```typescript
  * const group = yield* ResourceGroups.Group("TaggedGroup", {
  *   resourceQuery: {
@@ -177,8 +178,6 @@ export interface Group extends Resource<
  *   tags: { team: "platform" },
  * });
  * ```
- *
- * @resource
  */
 export const Group = Resource<Group>("AWS.ResourceGroups.Group");
 
@@ -243,11 +242,7 @@ export const GroupProvider = () =>
     Group,
     Effect.gen(function* () {
       const createName = Effect.fn(function* (id: string, props: GroupProps) {
-        // Group names must not start with 'AWS' (reserved by the service).
-        return (
-          props.groupName ??
-          (yield* createPhysicalName({ id, forbiddenPrefixes: ["aws"] }))
-        );
+        return props.groupName ?? (yield* createPhysicalName({ id }));
       });
 
       const readGroupTags = (groupArn: string) =>

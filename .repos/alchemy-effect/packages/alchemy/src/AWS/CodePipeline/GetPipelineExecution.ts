@@ -11,8 +11,9 @@ export interface GetPipelineExecutionRequest extends Omit<
 /**
  * Runtime binding for `codepipeline:GetPipelineExecution` — returns the
  * status, source revisions, and trigger of one execution.
- * ### Observing Pipelines
- * **Example:** Get an Execution
+ * @binding
+ * @section Observing Pipelines
+ * @example Get an Execution
  * ```typescript
  * const getExecution = yield* AWS.CodePipeline.GetPipelineExecution(pipeline);
  *
@@ -20,8 +21,6 @@ export interface GetPipelineExecutionRequest extends Omit<
  *   pipelineExecutionId: executionId,
  * });
  * ```
- *
- * @binding
  */
 export interface GetPipelineExecution extends Binding.Service<
   GetPipelineExecution,

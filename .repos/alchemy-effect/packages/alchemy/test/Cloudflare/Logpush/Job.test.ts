@@ -79,9 +79,7 @@ interface JobOpts {
 // the engine orders job-after-bucket on deploy (and the reverse on destroy).
 const program = (creds: R2Creds, opts: JobOpts) =>
   Effect.gen(function* () {
-    const bucket = yield* Cloudflare.R2.Bucket("LogpushBucket", {
-      forceDestroy: true,
-    });
+    const bucket = yield* Cloudflare.R2.Bucket("LogpushBucket", {});
     const job = yield* Cloudflare.Logpush.Job("Job", {
       dataset: opts.dataset,
       destinationConf: Output.interpolate`r2://${bucket.bucketName}/alchemy/{DATE}?account-id=${creds.accountId}&access-key-id=${creds.accessKeyId}&secret-access-key=${creds.secretAccessKey}`,
@@ -188,15 +186,7 @@ test.provider(
       // Destroy again — delete must be idempotent (the job is already gone).
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:logpush",
-      "provider:cloudflare:r2",
-      "live",
-    ],
-    timeout: 180_000,
-  },
+  { timeout: 180_000 },
 );
 
 test.provider(
@@ -234,15 +224,7 @@ test.provider(
 
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:logpush",
-      "provider:cloudflare:r2",
-      "live",
-    ],
-    timeout: 180_000,
-  },
+  { timeout: 180_000 },
 );
 
 // Requires entitlement for a second account-scoped dataset. On the testing
@@ -286,13 +268,5 @@ test.provider.skip(
 
       yield* waitForDelete(accountId, replaced.job.jobId);
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:logpush",
-      "provider:cloudflare:r2",
-      "live",
-    ],
-    timeout: 180_000,
-  },
+  { timeout: 180_000 },
 );

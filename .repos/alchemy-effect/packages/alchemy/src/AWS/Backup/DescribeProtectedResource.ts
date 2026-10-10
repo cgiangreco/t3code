@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Returns backup metadata for a protected resource by its ARN — last backup
  * time, resource type, and latest recovery point. Provide the implementation
  * with `Effect.provide(AWS.Backup.DescribeProtectedResourceHttp)`.
- * ### Protected Resources
- * **Example:** Look Up A Resource's Backup Status
+ * @binding
+ * @section Protected Resources
+ * @example Look Up A Resource's Backup Status
  * ```typescript
  * const describeProtectedResource =
  *   yield* AWS.Backup.DescribeProtectedResource();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * yield* Effect.log(`last backup: ${info.LastBackupTime}`);
  * ```
- *
- * @binding
  */
 export interface DescribeProtectedResource extends Binding.Service<
   DescribeProtectedResource,

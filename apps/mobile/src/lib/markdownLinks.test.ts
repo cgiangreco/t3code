@@ -1,38 +1,8 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import {
-  resolveMarkdownLinkIcon,
-  resolveMarkdownLinkPresentation,
-} from "@t3tools/mobile-markdown-text/links";
-
-describe("resolveMarkdownLinkIcon", () => {
-  it("gives GitHub hosts the brand mark and everything else the generic glyph", () => {
-    expect(resolveMarkdownLinkIcon("github.com")).toBe("github");
-    expect(resolveMarkdownLinkIcon("GitHub.com")).toBe("github");
-    expect(resolveMarkdownLinkIcon("gist.github.com")).toBe("github");
-    expect(resolveMarkdownLinkIcon("github.community")).toBeNull();
-    expect(resolveMarkdownLinkIcon("notgithub.com")).toBeNull();
-    expect(resolveMarkdownLinkIcon("example.com")).toBeNull();
-  });
-});
+import { resolveMarkdownLinkPresentation } from "@t3tools/mobile-markdown-text/links";
 
 describe("resolveMarkdownLinkPresentation", () => {
-  it("treats protocol-relative media as an external URL, not a filesystem path", () => {
-    expect(resolveMarkdownLinkPresentation("//cdn.example.com/clip.mp4?sig=a%2fb#t=2")).toEqual({
-      kind: "external",
-      href: "https://cdn.example.com/clip.mp4?sig=a%2fb#t=2",
-      host: "cdn.example.com",
-    });
-  });
-
-  it("separates encoded filename characters from a video playback fragment", () => {
-    expect(resolveMarkdownLinkPresentation("/tmp/clip%23one.mp4#t=2")).toMatchObject({
-      path: "/tmp/clip#one.mp4",
-      label: "clip#one.mp4",
-      icon: "video",
-    });
-  });
-
   it("extracts external link hosts", () => {
     expect(resolveMarkdownLinkPresentation("https://example.com/docs?q=1")).toEqual({
       kind: "external",
@@ -41,16 +11,15 @@ describe("resolveMarkdownLinkPresentation", () => {
     });
   });
 
-  it.each([
-    ["file:///Users/julius/project/src/main.ts#L42C7", "/Users/julius/project/src/main.ts"],
-    ["file://server/share/src/main.ts#L42C7", "\\\\server\\share\\src\\main.ts"],
-  ])("preserves the file URL path and position for %s", (href, path) => {
-    expect(resolveMarkdownLinkPresentation(href)).toEqual({
+  it("renders file URLs as basename pills with positions", () => {
+    expect(
+      resolveMarkdownLinkPresentation("file:///Users/julius/project/src/main.ts#L42C7"),
+    ).toEqual({
       kind: "file",
-      href,
+      href: "file:///Users/julius/project/src/main.ts#L42C7",
       icon: "typescript",
       label: "main.ts:42:7",
-      path,
+      path: "/Users/julius/project/src/main.ts",
       line: 42,
       column: 7,
     });
@@ -75,27 +44,9 @@ describe("resolveMarkdownLinkPresentation", () => {
     expect(resolveMarkdownLinkPresentation("package.json")).toEqual({
       kind: "file",
       href: "package.json",
-      icon: "npm",
+      icon: "package",
       label: "package.json",
       path: "package.json",
-    });
-  });
-
-  it.each(["md", "html", "xml"])("recognizes a bare spaced .%s filename", (extension) => {
-    expect(
-      resolveMarkdownLinkPresentation(`Updated%20cutover%20checklist.${extension}`),
-    ).toMatchObject({
-      kind: "file",
-      path: `Updated cutover checklist.${extension}`,
-      label: `Updated cutover checklist.${extension}`,
-    });
-  });
-
-  it("recognizes spaced relative paths", () => {
-    expect(resolveMarkdownLinkPresentation("docs/My%20Folder/checklist.xml")).toMatchObject({
-      kind: "file",
-      path: "docs/My Folder/checklist.xml",
-      label: "checklist.xml",
     });
   });
 

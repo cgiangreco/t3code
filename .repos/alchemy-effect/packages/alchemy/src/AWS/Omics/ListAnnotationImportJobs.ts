@@ -11,16 +11,15 @@ export interface ListAnnotationImportJobsRequest
  * An account-level operation (no resource argument) that lists annotation
  * import jobs, optionally filtered by store name or status. Provide the
  * implementation with `Effect.provide(AWS.Omics.ListAnnotationImportJobsHttp)`.
- * ### Annotation Imports
- * **Example:** Call ListAnnotationImportJobs
+ * @binding
+ * @section Annotation Imports
+ * @example Call ListAnnotationImportJobs
  * ```typescript
  * // init — account-level binding takes no resource
  * const listImports = yield* AWS.Omics.ListAnnotationImportJobs();
  * // runtime
  * const result = yield* listImports({});
  * ```
- *
- * @binding
  */
 export interface ListAnnotationImportJobs extends Binding.Service<
   ListAnnotationImportJobs,

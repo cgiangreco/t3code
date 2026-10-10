@@ -1,5 +1,4 @@
 import type * as Credentials from "@distilled.cloud/aws/Credentials";
-import type * as SigV4 from "@distilled.cloud/aws/SigV4";
 import type * as Effect from "effect/Effect";
 import * as Binding from "../../Binding.ts";
 import type {
@@ -23,14 +22,14 @@ export interface ReadDomainClient {
     request?: SearchRequest,
   ): Effect.Effect<
     SearchResponse<TDoc>,
-    OpenSearchApiError | Credentials.CredentialsError | SigV4.SigningError
+    OpenSearchApiError | Credentials.CredentialsError
   >;
   /** Count documents matching a Query-DSL body (`GET …/_count`). */
   count(
     request?: CountRequest,
   ): Effect.Effect<
     CountResponse,
-    OpenSearchApiError | Credentials.CredentialsError | SigV4.SigningError
+    OpenSearchApiError | Credentials.CredentialsError
   >;
   /**
    * Fetch one document by id (`GET /{index}/_doc/{id}`). A missing document
@@ -41,16 +40,13 @@ export interface ReadDomainClient {
     id: string,
   ): Effect.Effect<
     GetDocumentResponse<TDoc>,
-    OpenSearchApiError | Credentials.CredentialsError | SigV4.SigningError
+    OpenSearchApiError | Credentials.CredentialsError
   >;
   /** Check whether a document exists (`HEAD /{index}/_doc/{id}`). */
   existsDocument(
     index: string,
     id: string,
-  ): Effect.Effect<
-    boolean,
-    OpenSearchApiError | Credentials.CredentialsError | SigV4.SigningError
-  >;
+  ): Effect.Effect<boolean, OpenSearchApiError | Credentials.CredentialsError>;
   /**
    * Raw read-only escape hatch — a SigV4-signed `GET` against any data-plane
    * path (e.g. `_cluster/health`, `_cat/indices?format=json`).
@@ -58,10 +54,7 @@ export interface ReadDomainClient {
   get(
     path: string,
     query?: Record<string, string | undefined>,
-  ): Effect.Effect<
-    unknown,
-    OpenSearchApiError | Credentials.CredentialsError | SigV4.SigningError
-  >;
+  ): Effect.Effect<unknown, OpenSearchApiError | Credentials.CredentialsError>;
 }
 
 /**
@@ -73,8 +66,9 @@ export interface ReadDomainClient {
  * domain's endpoint, made with the host Function's own credentials — the
  * domain's access policy must allow the function's role. Provide the
  * implementation with `Effect.provide(AWS.OpenSearch.DomainReadHttp)`.
- * ### Searching a Domain
- * **Example:** Search Documents
+ * @binding
+ * @section Searching a Domain
+ * @example Search Documents
  * ```typescript
  * // init — grants es:ESHttpGet/es:ESHttpHead on the domain
  * const search = yield* AWS.OpenSearch.DomainRead(domain);
@@ -87,13 +81,11 @@ export interface ReadDomainClient {
  * const titles = result.hits.hits.map((hit) => hit._source.title);
  * ```
  *
- * **Example:** Fetch One Document
+ * @example Fetch One Document
  * ```typescript
  * const doc = yield* search.getDocument<{ title: string }>("songs", "1");
  * if (doc.found) yield* Effect.log(doc._source?.title);
  * ```
- *
- * @binding
  */
 export interface DomainRead extends Binding.Service<
   DomainRead,

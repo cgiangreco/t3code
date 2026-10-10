@@ -15,14 +15,13 @@ export interface ListFindingsRequest extends Omit<
  * Lists the analyzer's external-access findings (V1 API — prefer {@link
  * ListFindingsV2}, which also returns unused-access findings). Provide the
  * implementation with `Effect.provide(AWS.AccessAnalyzer.ListFindingsHttp)`.
- * ### Reading Findings
- * **Example:** List Findings (V1)
+ * @binding
+ * @section Reading Findings
+ * @example List Findings (V1)
  * ```typescript
  * const listFindings = yield* AWS.AccessAnalyzer.ListFindings(analyzer);
  * const page = yield* listFindings({ maxResults: 50 });
  * ```
- *
- * @binding
  */
 export interface ListFindings extends Binding.Service<
   ListFindings,

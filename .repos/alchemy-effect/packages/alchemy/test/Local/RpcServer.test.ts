@@ -7,7 +7,7 @@ import * as Clock from "effect/Clock";
 import * as Effect from "effect/Effect";
 import * as Sink from "effect/Sink";
 import * as Stream from "effect/Stream";
-import * as ChildProcess from "effect/process/ChildProcess";
+import * as ChildProcess from "effect/unstable/process/ChildProcess";
 import { fileURLToPath } from "node:url";
 import { openWebSocket, waitForExit } from "./fixtures/process-effect.ts";
 import { runtimes } from "./fixtures/runtimes.ts";
@@ -31,13 +31,10 @@ const sampleEnv = () =>
     stack: { name: "test", stage: "dev" },
   });
 
-// Concurrent at both levels: every test spawns its own isolated child
-// process, and two of them deliberately wait out the sidecar's ~10s
-// parent-connect self-termination. Run serially (the file default) those
-// two waits alone would stack to ~20s of wall clock.
-describe.concurrent("Local.RpcServer", { tags: ["local"] }, () => {
-  for (const runtime of runtimes()) {
-    describe.concurrent.skipIf(!runtime.available)(runtime.name, () => {
+for (const runtime of runtimes()) {
+  describe.skipIf(!runtime.available)(
+    `Local.RpcServer (${runtime.name})`,
+    () => {
       const [bin, ...args] = runtime.argv(FIXTURE_TS);
       const launch = ChildProcess.make(bin, args, {
         env: {
@@ -88,10 +85,7 @@ describe.concurrent("Local.RpcServer", { tags: ["local"] }, () => {
               url,
             ) as RpcStub<RpcProxyApi>;
             const result = yield* Effect.promise(async () => {
-              const provider = await stub.getProvider(
-                "Test.Echo",
-                new URL("./fixtures/rpc-server-entry.ts", import.meta.url).href,
-              );
+              const provider = await stub.getProvider("Test.Echo");
               const handlers = unwrapRpcHandlers(provider as any) as {
                 echo: (msg: string) => Effect.Effect<string>;
               };
@@ -122,6 +116,6 @@ describe.concurrent("Local.RpcServer", { tags: ["local"] }, () => {
           }).pipe(Effect.scoped, Effect.provide(PlatformServices)),
         { timeout: 30_000 },
       );
-    });
-  }
-});
+    },
+  );
+}

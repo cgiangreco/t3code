@@ -25,7 +25,7 @@ import { hasProperty, type Predicate, type Refinement } from "./Predicate.ts"
 import * as TxRef from "./TxRef.ts"
 import type { NoInfer } from "./Types.ts"
 
-const TypeId = "~effect/TxHashSet"
+const TypeId = "~effect/transactions/TxHashSet"
 
 const TxHashSetProto = {
   [TypeId]: TypeId,
@@ -55,7 +55,7 @@ const TxHashSetProto = {
  *
  * **Example** (Using transactional hash sets)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -64,7 +64,8 @@ const TxHashSetProto = {
  *
  *   // Single operations are automatically transactional
  *   yield* TxHashSet.add(txSet, "grape")
- *   yield* TxHashSet.has(txSet, "apple") // => true
+ *   const hasApple = yield* TxHashSet.has(txSet, "apple")
+ *   console.log(hasApple) // true
  *
  *   // Multi-step atomic operations
  *   yield* Effect.tx(
@@ -77,10 +78,9 @@ const TxHashSetProto = {
  *     })
  *   )
  *
- *   yield* TxHashSet.size(txSet) // => 4
+ *   const size = yield* TxHashSet.size(txSet)
+ *   console.log(size) // 4
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category models
@@ -97,7 +97,7 @@ export interface TxHashSet<in out V> extends Inspectable, Pipeable {
  *
  * **Example** (Extracting value types inside transactions)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -111,10 +111,7 @@ export interface TxHashSet<in out V> extends Inspectable, Pipeable {
  *   const addColor = (color: Color) => TxHashSet.add(colors, color)
  *
  *   yield* addColor("yellow")
- *   yield* TxHashSet.has(colors, "yellow") // => true
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @since 4.0.0
@@ -125,7 +122,7 @@ export declare namespace TxHashSet {
    *
    * **Example** (Extracting a TxHashSet value type)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import type { TxHashSet } from "effect"
    *
    * type FruitSet = TxHashSet.TxHashSet<"apple" | "banana" | "cherry">
@@ -137,7 +134,7 @@ export declare namespace TxHashSet {
    *   return `Processing ${fruit}`
    * }
    *
-   * processFruit("apple") // => "Processing apple"
+   * console.log(processFruit("apple")) // Processing apple
    * ```
    *
    * @category utility types
@@ -157,22 +154,20 @@ const makeTxHashSet = <V>(ref: TxRef.TxRef<HashSet.HashSet<V>>): TxHashSet<V> =>
  *
  * **Example** (Creating an empty transactional hash set)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const txSet = yield* TxHashSet.empty<string>()
  *
- *   yield* TxHashSet.size(txSet) // => 0
- *   yield* TxHashSet.isEmpty(txSet) // => true
+ *   console.log(yield* TxHashSet.size(txSet)) // 0
+ *   console.log(yield* TxHashSet.isEmpty(txSet)) // true
  *
  *   // Add some values
  *   yield* TxHashSet.add(txSet, "hello")
  *   yield* TxHashSet.add(txSet, "world")
- *   yield* TxHashSet.size(txSet) // => 2
+ *   console.log(yield* TxHashSet.size(txSet)) // 2
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category constructors
@@ -189,21 +184,19 @@ export const empty = <V = never>(): Effect.Effect<TxHashSet<V>> =>
  *
  * **Example** (Creating transactional hash sets from values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const fruits = yield* TxHashSet.make("apple", "banana", "cherry")
- *   yield* TxHashSet.size(fruits) // => 3
+ *   console.log(yield* TxHashSet.size(fruits)) // 3
  *
  *   const numbers = yield* TxHashSet.make(1, 2, 3, 2, 1) // Duplicates ignored
- *   yield* TxHashSet.size(numbers) // => 3
+ *   console.log(yield* TxHashSet.size(numbers)) // 3
  *
  *   const mixed = yield* TxHashSet.make("hello", 42, true)
- *   yield* TxHashSet.size(mixed) // => 3
+ *   console.log(yield* TxHashSet.size(mixed)) // 3
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category constructors
@@ -223,21 +216,20 @@ export const make = <Values extends ReadonlyArray<any>>(
  *
  * **Example** (Creating a transactional hash set from an iterable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const fromArray = yield* TxHashSet.fromIterable(["a", "b", "c", "b", "a"])
- *   yield* TxHashSet.size(fromArray) // => 3
+ *   console.log(yield* TxHashSet.size(fromArray)) // 3
  *
  *   const fromSet = yield* TxHashSet.fromIterable(new Set([1, 2, 3]))
- *   yield* TxHashSet.size(fromSet) // => 3
+ *   console.log(yield* TxHashSet.size(fromSet)) // 3
  *
  *   const fromString = yield* TxHashSet.fromIterable("hello")
- *   Array.from(yield* TxHashSet.toHashSet(fromString)).sort() // => ["e", "h", "l", "o"]
+ *   const values = yield* TxHashSet.toHashSet(fromString)
+ *   console.log(Array.from(values).sort()) // ["e", "h", "l", "o"]
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category constructors
@@ -255,23 +247,21 @@ export const fromIterable = <V>(values: Iterable<V>): Effect.Effect<TxHashSet<V>
  *
  * **Example** (Creating a transactional hash set from a HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, HashSet, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const hashSet = HashSet.make("x", "y", "z")
  *   const txSet = yield* TxHashSet.fromHashSet(hashSet)
  *
- *   yield* TxHashSet.size(txSet) // => 3
- *   yield* TxHashSet.has(txSet, "y") // => true
+ *   console.log(yield* TxHashSet.size(txSet)) // 3
+ *   console.log(yield* TxHashSet.has(txSet, "y")) // true
  *
  *   // Original hashSet is unchanged when txSet is modified
  *   yield* TxHashSet.add(txSet, "w")
- *   HashSet.size(hashSet) // => 3
- *   yield* TxHashSet.size(txSet) // => 4
+ *   console.log(HashSet.size(hashSet)) // 3 (original unchanged)
+ *   console.log(yield* TxHashSet.size(txSet)) // 4
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category constructors
@@ -288,7 +278,7 @@ export const fromHashSet = <V>(hashSet: HashSet.HashSet<V>): Effect.Effect<TxHas
  *
  * **Example** (Checking for a TxHashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, HashSet, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -296,13 +286,11 @@ export const fromHashSet = <V>(hashSet: HashSet.HashSet<V>): Effect.Effect<TxHas
  *   const hashSet = HashSet.make(1, 2, 3)
  *   const array = [1, 2, 3]
  *
- *   TxHashSet.isTxHashSet(txSet) // => true
- *   TxHashSet.isTxHashSet(hashSet) // => false
- *   TxHashSet.isTxHashSet(array) // => false
- *   TxHashSet.isTxHashSet(null) // => false
+ *   console.log(TxHashSet.isTxHashSet(txSet)) // true
+ *   console.log(TxHashSet.isTxHashSet(hashSet)) // false
+ *   console.log(TxHashSet.isTxHashSet(array)) // false
+ *   console.log(TxHashSet.isTxHashSet(null)) // false
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category guards
@@ -319,22 +307,20 @@ export const isTxHashSet = (u: unknown): u is TxHashSet<unknown> => hasProperty(
  *
  * **Example** (Adding values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const txSet = yield* TxHashSet.make("a", "b")
  *
  *   yield* TxHashSet.add(txSet, "c")
- *   yield* TxHashSet.size(txSet) // => 3
- *   yield* TxHashSet.has(txSet, "c") // => true
+ *   console.log(yield* TxHashSet.size(txSet)) // 3
+ *   console.log(yield* TxHashSet.has(txSet, "c")) // true
  *
  *   // Adding existing value has no effect
  *   yield* TxHashSet.add(txSet, "a")
- *   yield* TxHashSet.size(txSet) // => 3
+ *   console.log(yield* TxHashSet.size(txSet)) // 3 (unchanged)
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category mutations
@@ -357,21 +343,21 @@ export const add: {
  *
  * **Example** (Removing values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const txSet = yield* TxHashSet.make("a", "b", "c")
  *
- *   yield* TxHashSet.remove(txSet, "b") // => true
- *   yield* TxHashSet.size(txSet) // => 2
- *   yield* TxHashSet.has(txSet, "b") // => false
+ *   const removed = yield* TxHashSet.remove(txSet, "b")
+ *   console.log(removed) // true (value existed and was removed)
+ *   console.log(yield* TxHashSet.size(txSet)) // 2
+ *   console.log(yield* TxHashSet.has(txSet, "b")) // false
  *
  *   // Removing non-existent value returns false
- *   yield* TxHashSet.remove(txSet, "d") // => false
+ *   const notRemoved = yield* TxHashSet.remove(txSet, "d")
+ *   console.log(notRemoved) // false
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category mutations
@@ -398,14 +384,14 @@ export const remove: {
  *
  * **Example** (Checking membership)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Equal, Hash, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const txSet = yield* TxHashSet.make("apple", "banana", "cherry")
  *
- *   yield* TxHashSet.has(txSet, "apple") // => true
- *   yield* TxHashSet.has(txSet, "grape") // => false
+ *   console.log(yield* TxHashSet.has(txSet, "apple")) // true
+ *   console.log(yield* TxHashSet.has(txSet, "grape")) // false
  *
  *   // Works with any type that implements Equal
  *   class Person implements Equal.Equal {
@@ -421,13 +407,11 @@ export const remove: {
  *   }
  *
  *   const people = yield* TxHashSet.make(new Person("Alice"), new Person("Bob"))
- *   yield* TxHashSet.has(people, new Person("Alice")) // => true
+ *   console.log(yield* TxHashSet.has(people, new Person("Alice"))) // true
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 2.0.0
  */
 export const has: {
@@ -447,21 +431,19 @@ export const has: {
  *
  * **Example** (Getting the set size)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const empty = yield* TxHashSet.empty<string>()
- *   yield* TxHashSet.size(empty) // => 0
+ *   console.log(yield* TxHashSet.size(empty)) // 0
  *
  *   const small = yield* TxHashSet.make("a", "b")
- *   yield* TxHashSet.size(small) // => 2
+ *   console.log(yield* TxHashSet.size(small)) // 2
  *
  *   const fromIterable = yield* TxHashSet.fromIterable(["x", "y", "z", "x", "y"])
- *   yield* TxHashSet.size(fromIterable) // => 3
+ *   console.log(yield* TxHashSet.size(fromIterable)) // 3 (duplicates ignored)
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category getters
@@ -478,21 +460,19 @@ export const size = <V>(self: TxHashSet<V>): Effect.Effect<number> =>
  *
  * **Example** (Checking whether a set is empty)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const empty = yield* TxHashSet.empty<string>()
- *   yield* TxHashSet.isEmpty(empty) // => true
+ *   console.log(yield* TxHashSet.isEmpty(empty)) // true
  *
  *   const nonEmpty = yield* TxHashSet.make("a")
- *   yield* TxHashSet.isEmpty(nonEmpty) // => false
+ *   console.log(yield* TxHashSet.isEmpty(nonEmpty)) // false
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
- * @category predicates
+ * @category getters
  * @since 2.0.0
  */
 export const isEmpty = <V>(self: TxHashSet<V>): Effect.Effect<boolean> =>
@@ -500,32 +480,6 @@ export const isEmpty = <V>(self: TxHashSet<V>): Effect.Effect<boolean> =>
     const set = yield* TxRef.get(self.ref)
     return HashSet.isEmpty(set)
   })
-
-/**
- * Checks whether the TxHashSet is non-empty.
- *
- * **Example** (Checking whether a set is non-empty)
- *
- * ```ts import.meta.vitest
- * import { Effect, TxHashSet } from "effect"
- *
- * const program = Effect.gen(function*() {
- *   const empty = yield* TxHashSet.empty<string>()
- *   const emptyResult = yield* TxHashSet.isNonEmpty(empty)
- *
- *   const nonEmpty = yield* TxHashSet.make("a")
- *   const nonEmptyResult = yield* TxHashSet.isNonEmpty(nonEmpty)
- *   return [emptyResult, nonEmptyResult] as const
- * })
- *
- * await Effect.runPromise(program) // => [false, true]
- * ```
- *
- * @category predicates
- * @since 4.0.0
- */
-export const isNonEmpty = <V>(self: TxHashSet<V>): Effect.Effect<boolean> =>
-  Effect.map(isEmpty(self), (empty) => !empty)
 
 /**
  * Removes all values from the TxHashSet.
@@ -536,19 +490,17 @@ export const isNonEmpty = <V>(self: TxHashSet<V>): Effect.Effect<boolean> =>
  *
  * **Example** (Clearing all values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const txSet = yield* TxHashSet.make("a", "b", "c")
- *   yield* TxHashSet.size(txSet) // => 3
+ *   console.log(yield* TxHashSet.size(txSet)) // 3
  *
  *   yield* TxHashSet.clear(txSet)
- *   yield* TxHashSet.size(txSet) // => 0
- *   yield* TxHashSet.isEmpty(txSet) // => true
+ *   console.log(yield* TxHashSet.size(txSet)) // 0
+ *   console.log(yield* TxHashSet.isEmpty(txSet)) // true
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category mutations
@@ -561,7 +513,7 @@ export const clear = <V>(self: TxHashSet<V>): Effect.Effect<void> => TxRef.set(s
  *
  * **Example** (Combining sets with union)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -569,11 +521,10 @@ export const clear = <V>(self: TxHashSet<V>): Effect.Effect<void> => TxRef.set(s
  *   const set2 = yield* TxHashSet.make("b", "c")
  *   const combined = yield* TxHashSet.union(set1, set2)
  *
- *   Array.from(yield* TxHashSet.toHashSet(combined)).sort() // => ["a", "b", "c"]
- *   yield* TxHashSet.size(combined) // => 3
+ *   const values = yield* TxHashSet.toHashSet(combined)
+ *   console.log(Array.from(values).sort()) // ["a", "b", "c"]
+ *   console.log(yield* TxHashSet.size(combined)) // 3
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category combinators
@@ -603,7 +554,7 @@ export const union: {
  *
  * **Example** (Finding common values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -611,11 +562,10 @@ export const union: {
  *   const set2 = yield* TxHashSet.make("b", "c", "d")
  *   const common = yield* TxHashSet.intersection(set1, set2)
  *
- *   Array.from(yield* TxHashSet.toHashSet(common)).sort() // => ["b", "c"]
- *   yield* TxHashSet.size(common) // => 2
+ *   const values = yield* TxHashSet.toHashSet(common)
+ *   console.log(Array.from(values).sort()) // ["b", "c"]
+ *   console.log(yield* TxHashSet.size(common)) // 2
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category combinators
@@ -645,7 +595,7 @@ export const intersection: {
  *
  * **Example** (Finding values absent from another set)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -653,11 +603,10 @@ export const intersection: {
  *   const set2 = yield* TxHashSet.make("b", "d")
  *   const diff = yield* TxHashSet.difference(set1, set2)
  *
- *   Array.from(yield* TxHashSet.toHashSet(diff)).sort() // => ["a", "c"]
- *   yield* TxHashSet.size(diff) // => 2
+ *   const values = yield* TxHashSet.toHashSet(diff)
+ *   console.log(Array.from(values).sort()) // ["a", "c"]
+ *   console.log(yield* TxHashSet.size(diff)) // 2
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category combinators
@@ -687,7 +636,7 @@ export const difference: {
  *
  * **Example** (Checking subset relationships)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -695,16 +644,14 @@ export const difference: {
  *   const large = yield* TxHashSet.make("a", "b", "c", "d")
  *   const other = yield* TxHashSet.make("x", "y")
  *
- *   yield* TxHashSet.isSubset(small, large) // => true
- *   yield* TxHashSet.isSubset(large, small) // => false
- *   yield* TxHashSet.isSubset(small, other) // => false
- *   yield* TxHashSet.isSubset(small, small) // => true
+ *   console.log(yield* TxHashSet.isSubset(small, large)) // true
+ *   console.log(yield* TxHashSet.isSubset(large, small)) // false
+ *   console.log(yield* TxHashSet.isSubset(small, other)) // false
+ *   console.log(yield* TxHashSet.isSubset(small, small)) // true
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 4.0.0
  */
 export const isSubset: {
@@ -725,23 +672,21 @@ export const isSubset: {
  *
  * **Example** (Testing whether some values match)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const numbers = yield* TxHashSet.make(1, 2, 3, 4, 5)
  *
- *   yield* TxHashSet.some(numbers, (n) => n > 3) // => true
- *   yield* TxHashSet.some(numbers, (n) => n > 10) // => false
+ *   console.log(yield* TxHashSet.some(numbers, (n) => n > 3)) // true
+ *   console.log(yield* TxHashSet.some(numbers, (n) => n > 10)) // false
  *
  *   const empty = yield* TxHashSet.empty<number>()
- *   yield* TxHashSet.some(empty, (n) => n > 0) // => false
+ *   console.log(yield* TxHashSet.some(empty, (n) => n > 0)) // false
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 4.0.0
  */
 export const some: {
@@ -761,23 +706,21 @@ export const some: {
  *
  * **Example** (Testing whether every value matches)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const numbers = yield* TxHashSet.make(2, 4, 6, 8)
  *
- *   yield* TxHashSet.every(numbers, (n) => n % 2 === 0) // => true
- *   yield* TxHashSet.every(numbers, (n) => n > 5) // => false
+ *   console.log(yield* TxHashSet.every(numbers, (n) => n % 2 === 0)) // true
+ *   console.log(yield* TxHashSet.every(numbers, (n) => n > 5)) // false
  *
  *   const empty = yield* TxHashSet.empty<number>()
- *   yield* TxHashSet.every(empty, (n) => n > 0) // => true
+ *   console.log(yield* TxHashSet.every(empty, (n) => n > 0)) // true (vacuously true)
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 4.0.0
  */
 export const every: {
@@ -797,23 +740,23 @@ export const every: {
  *
  * **Example** (Mapping values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const numbers = yield* TxHashSet.make(1, 2, 3)
  *   const doubled = yield* TxHashSet.map(numbers, (n) => n * 2)
  *
- *   Array.from(yield* TxHashSet.toHashSet(doubled)).sort() // => [2, 4, 6]
- *   yield* TxHashSet.size(doubled) // => 3
+ *   const values = yield* TxHashSet.toHashSet(doubled)
+ *   console.log(Array.from(values).sort()) // [2, 4, 6]
+ *   console.log(yield* TxHashSet.size(doubled)) // 3
  *
  *   // Mapping can reduce size if function produces duplicates
  *   const strings = yield* TxHashSet.make("apple", "banana", "cherry")
  *   const lengths = yield* TxHashSet.map(strings, (s) => s.length)
- *   Array.from(yield* TxHashSet.toHashSet(lengths)).sort() // => [5, 6]
+ *   const lengthValues = yield* TxHashSet.toHashSet(lengths)
+ *   console.log(Array.from(lengthValues).sort()) // [5, 6] (apple=5, banana=6, cherry=6)
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category mapping
@@ -837,18 +780,17 @@ export const map: {
  *
  * **Example** (Filtering values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const numbers = yield* TxHashSet.make(1, 2, 3, 4, 5, 6)
  *   const evens = yield* TxHashSet.filter(numbers, (n) => n % 2 === 0)
  *
- *   Array.from(yield* TxHashSet.toHashSet(evens)).sort() // => [2, 4, 6]
- *   yield* TxHashSet.size(evens) // => 3
+ *   const values = yield* TxHashSet.toHashSet(evens)
+ *   console.log(Array.from(values).sort()) // [2, 4, 6]
+ *   console.log(yield* TxHashSet.size(evens)) // 3
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category filtering
@@ -894,18 +836,19 @@ export const filter: {
  *
  * **Example** (Reducing values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const numbers = yield* TxHashSet.make(1, 2, 3, 4, 5)
- *   yield* TxHashSet.reduce(numbers, 0, (acc, n) => acc + n) // => 15
+ *   const sum = yield* TxHashSet.reduce(numbers, 0, (acc, n) => acc + n)
+ *
+ *   console.log(sum) // 15
  *
  *   const strings = yield* TxHashSet.make("a", "b", "c")
- *   String(yield* TxHashSet.reduce(strings, "", (acc, s) => acc + s)).split("").sort().join("") // => "abc"
+ *   const concatenated = yield* TxHashSet.reduce(strings, "", (acc, s) => acc + s)
+ *   console.log(concatenated) // Order may vary: "abc", "bac", etc.
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category folding
@@ -942,23 +885,21 @@ export const reduce: {
  *
  * **Example** (Taking a HashSet snapshot)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, HashSet, TxHashSet } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const txSet = yield* TxHashSet.make("x", "y", "z")
  *   const hashSet = yield* TxHashSet.toHashSet(txSet)
  *
- *   HashSet.size(hashSet) // => 3
- *   HashSet.has(hashSet, "y") // => true
+ *   console.log(HashSet.size(hashSet)) // 3
+ *   console.log(HashSet.has(hashSet, "y")) // true
  *
  *   // hashSet is a snapshot - modifications to txSet don't affect it
  *   yield* TxHashSet.add(txSet, "w")
- *   HashSet.size(hashSet) // => 3
- *   yield* TxHashSet.size(txSet) // => 4
+ *   console.log(HashSet.size(hashSet)) // 3 (unchanged)
+ *   console.log(yield* TxHashSet.size(txSet)) // 4
  * })
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @category converting

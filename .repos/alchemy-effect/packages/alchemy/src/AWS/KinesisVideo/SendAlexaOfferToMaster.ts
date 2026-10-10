@@ -23,8 +23,9 @@ export interface SendAlexaOfferToMasterRequest extends Omit<
  * If no master is connected the service holds the offer for redelivery
  * until the message TTL expires — bound the call with a timeout when the
  * master may be offline.
- * ### WebRTC Connectivity
- * **Example:** Send an Alexa SDP Offer
+ * @binding
+ * @section WebRTC Connectivity
+ * @example Send an Alexa SDP Offer
  * ```typescript
  * // init
  * const sendOffer = yield* AWS.KinesisVideo.SendAlexaOfferToMaster(channel);
@@ -35,8 +36,6 @@ export interface SendAlexaOfferToMasterRequest extends Omit<
  *   MessagePayload: base64SdpOffer,
  * });
  * ```
- *
- * @binding
  */
 export interface SendAlexaOfferToMaster extends Binding.Service<
   SendAlexaOfferToMaster,

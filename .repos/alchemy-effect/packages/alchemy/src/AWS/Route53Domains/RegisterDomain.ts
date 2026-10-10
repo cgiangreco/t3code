@@ -27,8 +27,9 @@ export interface RegisterDomainRequest
  * Provide the implementation with
  * `Effect.provide(AWS.Route53Domains.RegisterDomainHttp)`.
  *
- * ### Registering Domains
- * **Example:** Register a Domain for a Customer
+ * @binding
+ * @section Registering Domains
+ * @example Register a Domain for a Customer
  * ```typescript
  * // init
  * const registerDomain = yield* AWS.Route53Domains.RegisterDomain();
@@ -44,8 +45,6 @@ export interface RegisterDomainRequest
  * });
  * // poll result.OperationId with GetOperationDetail until SUCCESSFUL
  * ```
- *
- * @binding
  */
 export interface RegisterDomain extends Binding.Service<
   RegisterDomain,

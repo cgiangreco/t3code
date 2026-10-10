@@ -71,8 +71,11 @@ export type TcpFlowProtectionFilter = Resource<
  * state, `read` scans for an existing filter with the same expression and
  * reports it as `Unowned`, so the engine refuses to take it over unless
  * `--adopt` (or `adopt(true)`) is set.
- * ### Creating a filter
- * **Example:** Scope flow mitigation to HTTPS traffic
+ * @resource
+ * @product DDoS Protection
+ * @category Network
+ * @section Creating a filter
+ * @example Scope flow mitigation to HTTPS traffic
  * ```typescript
  * const filter = yield* Cloudflare.DdosProtection.TcpFlowProtectionFilter("HttpsOnly", {
  *   expression: "tcp.dstport in {443}",
@@ -80,7 +83,7 @@ export type TcpFlowProtectionFilter = Resource<
  * });
  * ```
  *
- * **Example:** Exclude a trusted source port
+ * @example Exclude a trusted source port
  * ```typescript
  * yield* Cloudflare.DdosProtection.TcpFlowProtectionFilter("SkipBgp", {
  *   expression: "tcp.srcport in {179}",
@@ -89,10 +92,6 @@ export type TcpFlowProtectionFilter = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ddos-protection/advanced-ddos-systems/overview/advanced-tcp-protection/
- *
- * @resource
- * @product DDoS Protection
- * @category Network
  */
 export const TcpFlowProtectionFilter =
   Resource<TcpFlowProtectionFilter>(TypeId);

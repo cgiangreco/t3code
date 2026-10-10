@@ -10,8 +10,9 @@ import type { AccessPoint } from "./AccessPoint.ts";
  * access point without a policy fails with the typed
  * `NoSuchAccessPointPolicy` tag. Provide the implementation with
  * `Effect.provide(AWS.S3Control.GetAccessPointPolicyHttp)`.
- * ### Observing an Access Point
- * **Example:** Read the Access Point's Policy
+ * @binding
+ * @section Observing an Access Point
+ * @example Read the Access Point's Policy
  * ```typescript
  * // init — bind the operation to the access point
  * const getPolicy = yield* AWS.S3Control.GetAccessPointPolicy(accessPoint);
@@ -23,8 +24,6 @@ import type { AccessPoint } from "./AccessPoint.ts";
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GetAccessPointPolicy extends Binding.Service<
   GetAccessPointPolicy,

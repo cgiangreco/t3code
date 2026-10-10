@@ -63,22 +63,22 @@ export interface ResourceCollection extends Resource<
  * capture-and-restore singleton: adopting a collection that Alchemy did not
  * configure requires `--adopt`.
  *
- * ### Defining Coverage
- * **Example:** Analyze specific CloudFormation stacks
+ * @section Defining Coverage
+ * @example Analyze specific CloudFormation stacks
  * ```typescript
  * const collection = yield* DevOpsGuru.ResourceCollection("Coverage", {
  *   cloudFormation: { stackNames: ["my-app-prod"] },
  * });
  * ```
  *
- * **Example:** Analyze every stack in the account
+ * @example Analyze every stack in the account
  * ```typescript
  * const collection = yield* DevOpsGuru.ResourceCollection("Coverage", {
  *   cloudFormation: { stackNames: ["*"] },
  * });
  * ```
  *
- * **Example:** Analyze resources by app-boundary tag
+ * @example Analyze resources by app-boundary tag
  * ```typescript
  * const collection = yield* DevOpsGuru.ResourceCollection("Coverage", {
  *   tags: [
@@ -86,7 +86,6 @@ export interface ResourceCollection extends Resource<
  *   ],
  * });
  * ```
- *
  * @resource
  */
 export const ResourceCollection = Resource<ResourceCollection>(

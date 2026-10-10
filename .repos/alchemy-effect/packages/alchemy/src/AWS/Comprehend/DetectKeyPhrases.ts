@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * The binding takes no arguments and grants the action on `*` (the action
  * has no resource-level IAM).
  *
- * ### Real-Time Analysis
- * **Example:** Extract Key Phrases
+ * @binding
+ * @section Real-Time Analysis
+ * @example Extract Key Phrases
  * ```typescript
  * // init
  * const detectKeyPhrases = yield* AWS.Comprehend.DetectKeyPhrases();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.KeyPhrases: [{ Text: "The quarterly earnings report" }, …]
  * ```
- *
- * @binding
  */
 export interface DetectKeyPhrases extends Binding.Service<
   DetectKeyPhrases,

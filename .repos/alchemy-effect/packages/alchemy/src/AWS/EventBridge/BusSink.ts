@@ -30,8 +30,9 @@ export type BusSinkError =
  *
  * Omit the bus argument to publish to the account's default event bus.
  *
- * ### Streaming Events
- * **Example:** Run a Stream of Entries into the Bus
+ * @binding
+ * @section Streaming Events
+ * @example Run a Stream of Entries into the Bus
  * ```typescript
  * // init — bind the sink (provide AWS.EventBridge.BusSinkHttp on the Function)
  * const sink = yield* AWS.EventBridge.BusSink(bus);
@@ -49,8 +50,6 @@ export type BusSinkError =
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface BusSink extends Binding.Service<
   BusSink,

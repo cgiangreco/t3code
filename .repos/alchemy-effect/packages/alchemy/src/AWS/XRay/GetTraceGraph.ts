@@ -12,8 +12,9 @@ export interface GetTraceGraphRequest extends xray.GetTraceGraphRequest {}
  * provide the implementation with `Effect.provide(XRay.GetTraceGraphHttp)`.
  * The action is account-scoped: X-Ray does not support resource-level
  * permissions for `xray:GetTraceGraph`, so the binding grants it on `*`.
- * ### Service Graphs & Statistics
- * **Example:** Graph the services one trace touched
+ * @binding
+ * @section Service Graphs & Statistics
+ * @example Graph the services one trace touched
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -26,8 +27,6 @@ export interface GetTraceGraphRequest extends xray.GetTraceGraphRequest {}
  * });
  * const services = graph.Services ?? [];
  * ```
- *
- * @binding
  */
 export interface GetTraceGraph extends Binding.Service<
   GetTraceGraph,

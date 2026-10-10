@@ -1,14 +1,12 @@
 import * as s3 from "@distilled.cloud/aws/s3";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
-import * as FileSystem from "effect/FileSystem";
-import * as Path from "effect/Path";
 import * as Schedule from "effect/Schedule";
-import * as Stream from "effect/Stream";
 import { createHash } from "node:crypto";
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import * as Provider from "../../Provider.ts";
 import { Resource } from "../../Resource.ts";
-import { initialCwd } from "../../Util/Node.ts";
 import type { Providers } from "../Providers.ts";
 import type { WebsiteTextEncoding } from "./shared.ts";
 
@@ -84,13 +82,6 @@ export interface AssetDeployment extends Resource<
      * Number of files uploaded in this deployment.
      */
     fileCount: number;
-    /**
-     * POSIX-relative paths of every uploaded file (before the `prefix` is
-     * applied), sorted. Downstream consumers derive routing manifests from
-     * this list (e.g. `StaticSite`'s CloudFront KV file manifest), so the
-     * manifest always reflects exactly what was uploaded.
-     */
-    files: string[];
   },
   never,
   Providers
@@ -105,8 +96,9 @@ export interface AssetDeployment extends Resource<
  * purge stale files under a prefix. `StaticSite` and `SsrSite` use it
  * internally — reach for it directly when you manage the bucket and CDN
  * yourself.
- * ### Deploying Files
- * **Example:** Upload A Build Directory
+ * @resource
+ * @section Deploying Files
+ * @example Upload A Build Directory
  * ```typescript
  * const bucket = yield* AWS.S3.Bucket("SiteBucket", {});
  *
@@ -117,7 +109,7 @@ export interface AssetDeployment extends Resource<
  * });
  * ```
  *
- * **Example:** Purge Stale Files And Override Caching
+ * @example Purge Stale Files And Override Caching
  * ```typescript
  * const files = yield* AssetDeployment("WebsiteFiles", {
  *   bucket,
@@ -132,8 +124,8 @@ export interface AssetDeployment extends Resource<
  * });
  * ```
  *
- * ### Invalidation
- * **Example:** Invalidate CloudFront On Content Change
+ * @section Invalidation
+ * @example Invalidate CloudFront On Content Change
  * ```typescript
  * const files = yield* AssetDeployment("WebsiteFiles", {
  *   bucket,
@@ -148,8 +140,6 @@ export interface AssetDeployment extends Resource<
  *   paths: ["/*"],
  * });
  * ```
- *
- * @resource
  */
 export const AssetDeployment = Resource<AssetDeployment>(
   "AWS.Website.AssetDeployment",
@@ -163,88 +153,74 @@ export const AssetDeploymentProvider = () =>
     AssetDeployment,
     Effect.gen(function* () {
       const reconcileSync = Effect.fn(function* (news: AssetDeploymentProps) {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
         const bucketName = news.bucket.bucketName;
         const prefix = normalizePrefix(news.prefix);
-        // Resolve against the process's INITIAL cwd, never the live cwd:
-        // Server persists build dirs relative to initialCwd, and a sibling
-        // framework build may transiently chdir this shared process while
-        // the upload walks the tree.
-        const root = path.resolve(initialCwd, news.sourcePath);
-        const files = yield* walkFiles(root);
+        const root = news.sourcePath;
+        const files = yield* Effect.tryPromise(() => walk(root));
+        const hash = createHash("sha256");
+        const desiredKeys = new Set<string>();
+
+        // Observe — list every key already under the prefix and capture
+        // its ETag (S3 ETag for non-multipart PUTs is the hex MD5 of the
+        // body) so we can skip re-uploads when the content already matches.
         const observed = yield* listObjects(
           bucketName,
           prefix ? `${prefix}/` : prefix,
         );
-        const prepared = yield* Effect.all(
-          files.map((relativePath) =>
-            Effect.gen(function* () {
-              const body = yield* fs.readFile(path.join(root, relativePath));
-              const normalizedRelativePath = toPosix(relativePath);
-              const key = prefix
-                ? `${prefix}/${normalizedRelativePath}`
-                : normalizedRelativePath;
-              const options = getFileOptions(
-                normalizedRelativePath,
-                news.fileOptions,
-                news.textEncoding,
-              );
-              return {
-                relative: normalizedRelativePath,
-                key,
-                body,
-                contentType: options.contentType,
-                cacheControl: options.cacheControl,
-              };
-            }),
-          ),
-          { concurrency: "unbounded" },
-        );
-        const version = yield* Effect.sync(() => {
-          const hash = createHash("sha256");
-          for (const file of prepared) {
-            hash.update(file.relative);
-            hash.update(file.body);
-            hash.update(file.contentType);
-            hash.update(file.cacheControl);
-          }
-          return hash.digest("hex");
-        });
-        const desiredKeys = new Set(prepared.map((file) => file.key));
-        yield* Effect.all(
-          prepared.flatMap((file) => {
-            const expectedETag = createHash("md5")
-              .update(file.body)
-              .digest("hex");
-            const observedETag = observed.get(file.key)?.replace(/^"|"$/g, "");
-            if (observedETag === expectedETag) return [];
-            return [
-              s3.putObject({
-                Bucket: bucketName,
-                Key: file.key,
-                Body: file.body,
-                ContentType: file.contentType,
-                CacheControl: file.cacheControl,
-              }),
-            ];
-          }),
-          { concurrency: 16 },
-        );
 
-        if (news.purge ?? false) {
-          yield* deleteKeys(
-            bucketName,
-            [...observed.keys()].filter((key) => !desiredKeys.has(key)),
+        for (const relativePath of files.sort((a, b) => a.localeCompare(b))) {
+          const body = yield* Effect.tryPromise(() =>
+            readFile(path.join(root, relativePath)),
           );
+          const normalizedRelativePath = toPosix(relativePath);
+          const key = prefix
+            ? `${prefix}/${normalizedRelativePath}`
+            : normalizedRelativePath;
+          const options = getFileOptions(
+            normalizedRelativePath,
+            news.fileOptions,
+            news.textEncoding,
+          );
+
+          hash.update(normalizedRelativePath);
+          hash.update(body);
+          hash.update(options.contentType);
+          hash.update(options.cacheControl);
+
+          desiredKeys.add(key);
+
+          // Sync — diff observed object hash against desired body hash,
+          // and only PUT when the content has changed. ETag is wrapped in
+          // quotes by S3 and is lower-case hex.
+          const expectedETag = createHash("md5").update(body).digest("hex");
+          const observedETag = observed.get(key)?.replace(/^"|"$/g, "");
+          if (observedETag === expectedETag) {
+            continue;
+          }
+
+          yield* s3.putObject({
+            Bucket: bucketName,
+            Key: key,
+            Body: body,
+            ContentType: options.contentType,
+            CacheControl: options.cacheControl,
+          });
+        }
+
+        // Sync purge — delete observed keys that aren't in the desired
+        // set. Reuses the same observation rather than re-listing.
+        if (news.purge ?? false) {
+          const staleKeys = [...observed.keys()].filter(
+            (key) => !desiredKeys.has(key),
+          );
+          yield* deleteKeys(bucketName, staleKeys);
         }
 
         return {
           bucketName,
           prefix,
-          version,
+          version: hash.digest("hex"),
           fileCount: files.length,
-          files: prepared.map((file) => file.relative),
         };
       });
 
@@ -284,13 +260,7 @@ export const AssetDeploymentProvider = () =>
 const normalizePrefix = (prefix: string | undefined) =>
   prefix ? prefix.replace(/^\/+|\/+$/g, "") : "";
 
-const toPosix = (value: string) => value.replaceAll("\\", "/");
-
-const extname = (file: string) => {
-  const base = toPosix(file).split("/").pop() ?? file;
-  const dot = base.lastIndexOf(".");
-  return dot > 0 ? base.slice(dot).toLowerCase() : "";
-};
+const toPosix = (value: string) => value.split(path.sep).join("/");
 
 const withCharset = (mimeType: string, textEncoding: WebsiteTextEncoding) =>
   textEncoding === "none" ? mimeType : `${mimeType}; charset=${textEncoding}`;
@@ -299,7 +269,7 @@ const inferContentType = (
   file: string,
   textEncoding: WebsiteTextEncoding = "utf-8",
 ) => {
-  const ext = extname(file);
+  const ext = path.extname(file).toLowerCase();
   switch (ext) {
     case ".html":
       return withCharset("text/html", textEncoding);
@@ -337,7 +307,7 @@ const inferContentType = (
 };
 
 const defaultCacheControlFor = (file: string) =>
-  extname(file) === ".html"
+  path.extname(file).toLowerCase() === ".html"
     ? defaultHtmlCacheControl
     : defaultAssetCacheControl;
 
@@ -380,56 +350,63 @@ const getFileOptions = (
   };
 };
 
-const walkFiles = Effect.fn(function* (root: string) {
-  const fs = yield* FileSystem.FileSystem;
-  const path = yield* Path.Path;
-  if (!(yield* fs.exists(root))) return [] as string[];
-  const names = yield* fs.readDirectory(root, { recursive: true });
-  const files = yield* Effect.all(
-    names.map((name) =>
-      Effect.gen(function* () {
-        const full = path.join(root, name);
-        const stat = yield* fs.stat(full);
-        return stat.type === "File" ? toPosix(name) : undefined;
-      }),
-    ),
-    { concurrency: "unbounded" },
+const walk = async (root: string, dir = ""): Promise<string[]> => {
+  const entries = await readdir(path.join(root, dir), { withFileTypes: true });
+  const files = await Promise.all(
+    entries.map(async (entry) => {
+      const relative = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        return walk(root, relative);
+      }
+      return [relative];
+    }),
   );
-  return files
-    .filter((name): name is string => name !== undefined)
-    .sort((a, b) => a.localeCompare(b));
-});
+  return files.flat();
+};
 
-const listObjectPages = (bucketName: string, prefix: string) =>
-  s3.listObjectsV2
-    .pages({
+const listKeys = Effect.fn(function* (bucketName: string, prefix: string) {
+  let continuationToken: string | undefined;
+  const keys: string[] = [];
+
+  do {
+    const response = yield* s3.listObjectsV2({
       Bucket: bucketName,
       Prefix: prefix || undefined,
-    })
-    .pipe(Stream.flatMap((page) => Stream.fromIterable(page.Contents ?? [])));
+      ContinuationToken: continuationToken,
+    });
+    keys.push(
+      ...(response.Contents ?? []).flatMap((item) =>
+        item.Key ? [item.Key] : [],
+      ),
+    );
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
 
-const listKeys = (bucketName: string, prefix: string) =>
-  listObjectPages(bucketName, prefix).pipe(
-    Stream.map((object) => object.Key),
-    Stream.filter((key): key is string => key !== undefined),
-    Stream.runCollect,
-    Effect.map((keys) => Array.from(keys)),
-  );
+  return keys;
+});
 
 /** List `{key -> ETag}` pairs under `prefix`. ETag from S3 is wrapped in
  * quotes; for non-multipart uploads it is the hex MD5 of the object body. */
-const listObjects = (bucketName: string, prefix: string) =>
-  listObjectPages(bucketName, prefix).pipe(
-    Stream.runFold(
-      () => new Map<string, string>(),
-      (out, item) => {
-        if (item.Key && item.ETag) {
-          out.set(item.Key, item.ETag);
-        }
-        return out;
-      },
-    ),
-  );
+const listObjects = Effect.fn(function* (bucketName: string, prefix: string) {
+  let continuationToken: string | undefined;
+  const out = new Map<string, string>();
+
+  do {
+    const response = yield* s3.listObjectsV2({
+      Bucket: bucketName,
+      Prefix: prefix || undefined,
+      ContinuationToken: continuationToken,
+    });
+    for (const item of response.Contents ?? []) {
+      if (item.Key && item.ETag) {
+        out.set(item.Key, item.ETag);
+      }
+    }
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
+
+  return out;
+});
 
 const deleteKeys = Effect.fn(function* (bucketName: string, keys: string[]) {
   for (let i = 0; i < keys.length; i += 1000) {

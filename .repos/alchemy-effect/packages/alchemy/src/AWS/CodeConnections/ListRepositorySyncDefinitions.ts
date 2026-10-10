@@ -19,8 +19,9 @@ export interface ListRepositorySyncDefinitionsRequest extends Omit<
  * definitions Git sync tracks for the link — branch, directory, and target
  * per definition. Provide the implementation with
  * `Effect.provide(AWS.CodeConnections.ListRepositorySyncDefinitionsHttp)`.
- * ### Monitoring Git Sync
- * **Example:** List the Link's Sync Definitions
+ * @binding
+ * @section Monitoring Git Sync
+ * @example List the Link's Sync Definitions
  * ```typescript
  * // init — bind the operation to the repository link
  * const listRepositorySyncDefinitions =
@@ -30,8 +31,6 @@ export interface ListRepositorySyncDefinitionsRequest extends Omit<
  * const { RepositorySyncDefinitions } =
  *   yield* listRepositorySyncDefinitions({ SyncType: "CFN_STACK_SYNC" });
  * ```
- *
- * @binding
  */
 export interface ListRepositorySyncDefinitions extends Binding.Service<
   ListRepositorySyncDefinitions,

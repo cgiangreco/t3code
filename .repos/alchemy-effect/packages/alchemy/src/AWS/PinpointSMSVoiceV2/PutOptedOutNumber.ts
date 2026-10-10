@@ -22,8 +22,9 @@ export interface PutOptedOutNumberRequest extends Omit<
  * grants `sms-voice:PutOptedOutNumber` on the list. Provide the
  * implementation with
  * `Effect.provide(AWS.PinpointSMSVoiceV2.PutOptedOutNumberHttp)`.
- * ### Managing Opt-Outs
- * **Example:** Opt a Number Out from a Lambda
+ * @binding
+ * @section Managing Opt-Outs
+ * @example Opt a Number Out from a Lambda
  * ```typescript
  * // init
  * const optOuts = yield* AWS.PinpointSMSVoiceV2.OptOutList("OptOuts");
@@ -32,8 +33,6 @@ export interface PutOptedOutNumberRequest extends Omit<
  * // runtime
  * yield* putOptedOut({ OptedOutNumber: "+12065550100" });
  * ```
- *
- * @binding
  */
 export interface PutOptedOutNumber extends Binding.Service<
   PutOptedOutNumber,

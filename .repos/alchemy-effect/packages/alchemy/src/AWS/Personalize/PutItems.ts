@@ -19,8 +19,9 @@ export interface PutItemsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.PutItemsHttp)`.
  *
- * ### Incremental Imports
- * **Example:** Upsert an Item
+ * @binding
+ * @section Incremental Imports
+ * @example Upsert an Item
  * ```typescript
  * // init
  * const putItems = yield* Personalize.PutItems(itemsDataset);
@@ -32,8 +33,6 @@ export interface PutItemsRequest extends Omit<
  *   }],
  * });
  * ```
- *
- * @binding
  */
 export interface PutItems extends Binding.Service<
   PutItems,

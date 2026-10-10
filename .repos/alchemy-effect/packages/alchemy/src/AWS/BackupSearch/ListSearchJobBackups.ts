@@ -17,8 +17,9 @@ export interface ListSearchJobBackupsRequest extends Omit<
  * index is not `ACTIVE` or a permissions issue marked them `FAILED`. Provide
  * the implementation with
  * `Effect.provide(AWS.BackupSearch.ListSearchJobBackupsHttp)`.
- * ### Reading Searched Backups
- * **Example:** List the Search Job's Backups
+ * @binding
+ * @section Reading Searched Backups
+ * @example List the Search Job's Backups
  * ```typescript
  * // init — bind the operation to the search job
  * const listSearchJobBackups =
@@ -30,8 +31,6 @@ export interface ListSearchJobBackupsRequest extends Omit<
  *   console.log(backup.BackupResourceArn, backup.Status);
  * }
  * ```
- *
- * @binding
  */
 export interface ListSearchJobBackups extends Binding.Service<
   ListSearchJobBackups,

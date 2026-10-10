@@ -1,5 +1,5 @@
 import { expect, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessEnvironment } from "@t3tools/shared/hostProcess";
 import * as Effect from "effect/Effect";
 import * as Fiber from "effect/Fiber";
 
@@ -45,7 +45,7 @@ class FakeLauncherProcess {
 const makeClient = (host: FakeLauncherProcess, currentVersion: string) =>
   ServiceLauncherClient.make({ currentVersion }).pipe(
     Effect.provideService(ServiceLauncherClient.ServiceLauncherHostProcess, host),
-    Effect.provideService(HostProcess.Environment, host.env),
+    Effect.provideService(HostProcessEnvironment, host.env),
   );
 
 it.effect("waits for the launcher to durably commit the trial update ID", () =>

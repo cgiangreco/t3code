@@ -12,8 +12,9 @@ export interface EncryptDataRequest extends Omit<
  * Runtime binding for `payment-cryptography:EncryptData` — encrypts
  * hex-encoded plaintext under a {@link Key}. Provide `EncryptDataHttp` on
  * the Function to satisfy this service.
- * ### Encrypting Data
- * **Example:** Encrypt hex-encoded plaintext
+ * @binding
+ * @section Encrypting Data
+ * @example Encrypt hex-encoded plaintext
  * ```typescript
  * // init
  * const encrypt = yield* PaymentCryptography.EncryptData(key);
@@ -26,8 +27,6 @@ export interface EncryptDataRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface EncryptData extends Binding.Service<
   EncryptData,

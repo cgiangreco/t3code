@@ -164,8 +164,9 @@ export interface DbInstance extends Resource<
  * :::caution
  * Provisioning a DB instance takes ~15–20 minutes and incurs EC2-backed cost.
  * :::
- * ### Creating DB Instances
- * **Example:** Basic InfluxDB Instance
+ * @resource
+ * @section Creating DB Instances
+ * @example Basic InfluxDB Instance
  * ```typescript
  * import * as Timestream from "alchemy/AWS/Timestream";
  *
@@ -178,8 +179,6 @@ export interface DbInstance extends Resource<
  *   password: Redacted.make("super-secret-password"),
  * });
  * ```
- *
- * @resource
  */
 export const DbInstance = Resource<DbInstance>("AWS.Timestream.DbInstance");
 

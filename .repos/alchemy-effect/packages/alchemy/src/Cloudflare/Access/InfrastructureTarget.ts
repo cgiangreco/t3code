@@ -88,8 +88,11 @@ export type InfrastructureTarget = Resource<
  * Targets are referenced by infrastructure Access applications, which
  * attach SSH access policies to them. Hostname and IP are both mutable
  * in place; the target's identity is its Cloudflare-assigned UUID.
- * ### Creating a Target
- * **Example:** Basic IPv4 target
+ * @resource
+ * @product Access
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a Target
+ * @example Basic IPv4 target
  * ```typescript
  * const target = yield* Cloudflare.Access.InfrastructureTarget("Bastion", {
  *   hostname: "bastion.internal",
@@ -97,7 +100,7 @@ export type InfrastructureTarget = Resource<
  * });
  * ```
  *
- * **Example:** Target scoped to a virtual network
+ * @example Target scoped to a virtual network
  * ```typescript
  * const vnet = yield* Cloudflare.Tunnel.VirtualNetwork("Staging", {});
  * const target = yield* Cloudflare.Access.InfrastructureTarget("DbHost", {
@@ -111,8 +114,8 @@ export type InfrastructureTarget = Resource<
  * });
  * ```
  *
- * ### Updating
- * **Example:** Re-point the target at a new address
+ * @section Updating
+ * @example Re-point the target at a new address
  * ```typescript
  * // Hostname and IP update in place — same targetId, no replacement.
  * const target = yield* Cloudflare.Access.InfrastructureTarget("Bastion", {
@@ -122,10 +125,6 @@ export type InfrastructureTarget = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/applications/non-http/infrastructure-apps/
- *
- * @resource
- * @product Access
- * @category Cloudflare One (Zero Trust)
  */
 export const InfrastructureTarget = Resource<InfrastructureTarget>(TypeId);
 

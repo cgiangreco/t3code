@@ -23,8 +23,9 @@ export interface GetAgentMemoryRequest extends Omit<
  * memory enabled (see `Agent`'s `memoryConfiguration` prop); summaries are
  * generated asynchronously after a session ends.
  *
- * ### Reading Agent Memory
- * **Example:** List Session Summaries for a Memory Id
+ * @binding
+ * @section Reading Agent Memory
+ * @example List Session Summaries for a Memory Id
  * ```typescript
  * // init
  * const getAgentMemory = yield* Bedrock.GetAgentMemory(alias);
@@ -39,8 +40,6 @@ export interface GetAgentMemoryRequest extends Omit<
  *   (memory) => memory.sessionSummary?.summaryText,
  * );
  * ```
- *
- * @binding
  */
 export interface GetAgentMemory extends Binding.Service<
   GetAgentMemory,

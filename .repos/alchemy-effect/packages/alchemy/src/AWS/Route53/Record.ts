@@ -8,7 +8,6 @@ import type { Input } from "../../Input.ts";
 import * as Provider from "../../Provider.ts";
 import { Resource } from "../../Resource.ts";
 import { durationToSeconds } from "../IAM/common.ts";
-import { resolveHostedZoneId } from "./HostedZoneLookup.ts";
 import type { Providers } from "../Providers.ts";
 
 export interface RecordAliasTarget {
@@ -90,13 +89,9 @@ export interface RecordCidrRoutingConfig {
 
 export interface RecordProps {
   /**
-   * Hosted zone that owns the record. When omitted, the most specific
-   * PUBLIC hosted zone in the account containing `name` is inferred by
-   * walking the name's parent domains (`svc.api.example.com` →
-   * `api.example.com` → `example.com`); the deploy fails actionably when
-   * no zone matches.
+   * Hosted zone that owns the record.
    */
-  hostedZoneId?: string;
+  hostedZoneId: string;
   /**
    * Record name.
    */
@@ -234,8 +229,9 @@ export interface Record extends Resource<
  * `Record` manages a single Route 53 record set using `UPSERT` for create and
  * update operations, and waits for Route 53 change propagation before
  * returning.
- * ### Creating Records
- * **Example:** A Record Alias To CloudFront
+ * @resource
+ * @section Creating Records
+ * @example A Record Alias To CloudFront
  * ```typescript
  * const record = yield* Record("WebsiteAlias", {
  *   hostedZoneId: "Z1234567890",
@@ -248,7 +244,7 @@ export interface Record extends Resource<
  * });
  * ```
  *
- * **Example:** TXT Record
+ * @example TXT Record
  * ```typescript
  * const record = yield* Record("VerificationRecord", {
  *   hostedZoneId: "Z1234567890",
@@ -259,8 +255,8 @@ export interface Record extends Resource<
  * });
  * ```
  *
- * ### Routing Policies
- * **Example:** Weighted Routing
+ * @section Routing Policies
+ * @example Weighted Routing
  * ```typescript
  * const blue = yield* Record("Blue", {
  *   hostedZoneId: zone.id,
@@ -282,7 +278,7 @@ export interface Record extends Resource<
  * });
  * ```
  *
- * **Example:** Failover Routing With Health Check
+ * @example Failover Routing With Health Check
  * ```typescript
  * const primary = yield* Record("Primary", {
  *   hostedZoneId: zone.id,
@@ -305,7 +301,7 @@ export interface Record extends Resource<
  * });
  * ```
  *
- * **Example:** Latency Routing
+ * @example Latency Routing
  * ```typescript
  * const record = yield* Record("UsEast", {
  *   hostedZoneId: zone.id,
@@ -318,7 +314,7 @@ export interface Record extends Resource<
  * });
  * ```
  *
- * **Example:** Geolocation Routing
+ * @example Geolocation Routing
  * ```typescript
  * const record = yield* Record("Default", {
  *   hostedZoneId: zone.id,
@@ -330,21 +326,16 @@ export interface Record extends Resource<
  *   geoLocation: { countryCode: "*" },
  * });
  * ```
- *
- * @resource
  */
 export const Record = Resource<Record>("AWS.Route53.Record");
 
-/** @internal shared with `Records.ts` — not exported from the barrel. */
-export const normalizeHostedZoneId = (hostedZoneId: string) =>
+const normalizeHostedZoneId = (hostedZoneId: string) =>
   hostedZoneId.replace(/^\/hostedzone\//, "");
 
-/** @internal shared with `Records.ts` — not exported from the barrel. */
-export const normalizeName = (name: string) =>
+const normalizeName = (name: string) =>
   name.endsWith(".") ? name : `${name}.`;
 
-/** @internal shared with `Records.ts` — not exported from the barrel. */
-export const toAliasTarget = (
+const toAliasTarget = (
   aliasTarget: route53.AliasTarget | undefined,
 ): ResolvedRecordAliasTarget | undefined =>
   aliasTarget
@@ -429,9 +420,8 @@ const fromCidrRouting = (
  * Build the full `ResourceRecordSet` wire shape from props. Used for both the
  * UPSERT change batch and the DELETE change batch — DELETE requires an exact
  * match of every policy field, so this must round-trip the entire surface.
- * @internal shared with `Records.ts` — not exported from the barrel.
  */
-export const toRecordSet = (
+const toRecordSet = (
   props: Pick<
     RecordProps,
     | "name"
@@ -550,12 +540,9 @@ export const RecordProvider = () =>
         );
       });
 
-      const upsertRecord = Effect.fn(function* (
-        hostedZoneId: string,
-        props: RecordProps,
-      ) {
+      const upsertRecord = Effect.fn(function* (props: RecordProps) {
         const response = yield* route53.changeResourceRecordSets({
-          HostedZoneId: normalizeHostedZoneId(hostedZoneId),
+          HostedZoneId: normalizeHostedZoneId(props.hostedZoneId),
           ChangeBatch: {
             Comment: "Alchemy Route53 record upsert",
             Changes: [
@@ -636,11 +623,7 @@ export const RecordProvider = () =>
           // (they deserialize as `undefined`), and an unknown old identity
           // must fall through to the create/update recovery path.
           if (
-            // An undefined side means "inferred" — reconcile resolves it
-            // against the live account, so only two explicit, differing
-            // zones are a replacement.
             (olds.hostedZoneId !== undefined &&
-              news.hostedZoneId !== undefined &&
               normalizeHostedZoneId(olds.hostedZoneId) !==
                 normalizeHostedZoneId(news.hostedZoneId)) ||
             (olds.name !== undefined &&
@@ -678,24 +661,16 @@ export const RecordProvider = () =>
 
           return toAttrs(recordSet, hostedZoneId);
         }),
-        reconcile: Effect.fn(function* ({ news, output, session }) {
-          // Resolve the zone: explicit prop, else the zone this resource
-          // already resolved to (stable across reconciles), else infer the
-          // most specific public zone containing the record name.
-          const hostedZoneId = yield* resolveHostedZoneId(
-            news.hostedZoneId ?? output?.hostedZoneId,
-            news.name,
-          );
-
+        reconcile: Effect.fn(function* ({ news, session }) {
           // Route 53 `changeResourceRecordSets` with `UPSERT` is naturally
           // reconciler-friendly: it creates the record if missing and
           // overwrites it if present. There's no separate ensure/sync split
           // — one call converges to the desired record set.
-          yield* upsertRecord(hostedZoneId, news);
+          yield* upsertRecord(news);
 
           // Re-read so the returned attributes reflect the actual current
           // record (including server-applied defaults).
-          const recordSet = yield* findRecord(hostedZoneId, news);
+          const recordSet = yield* findRecord(news.hostedZoneId, news);
 
           if (!recordSet) {
             return yield* Effect.die(
@@ -704,7 +679,7 @@ export const RecordProvider = () =>
           }
 
           yield* session.note(`${news.type} ${normalizeName(news.name)}`);
-          return toAttrs(recordSet, hostedZoneId);
+          return toAttrs(recordSet, news.hostedZoneId);
         }),
         delete: Effect.fn(function* ({ output }) {
           yield* route53

@@ -17,8 +17,9 @@ export interface UpdatePartitionRequest extends Omit<
  * The database/table names and catalog id are injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.Glue.UpdatePartitionHttp)`.
- * ### Managing Partitions
- * **Example:** Move a Partition's Location
+ * @binding
+ * @section Managing Partitions
+ * @example Move a Partition's Location
  * ```typescript
  * // init
  * const updatePartition = yield* AWS.Glue.UpdatePartition(table);
@@ -32,8 +33,6 @@ export interface UpdatePartitionRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdatePartition extends Binding.Service<
   UpdatePartition,

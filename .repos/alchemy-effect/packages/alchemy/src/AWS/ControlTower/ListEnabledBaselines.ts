@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * identifiers. Useful for compliance dashboards that report which OUs are
  * registered with Control Tower. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ListEnabledBaselinesHttp)`.
- * ### Auditing Enablements
- * **Example:** List Baselines Enabled on an OU
+ * @binding
+ * @section Auditing Enablements
+ * @example List Baselines Enabled on an OU
  * ```typescript
  * // init — account-level binding takes no resource
  * const listEnabledBaselines = yield* AWS.ControlTower.ListEnabledBaselines();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   (b) => b.statusSummary.status,
  * );
  * ```
- *
- * @binding
  */
 export interface ListEnabledBaselines extends Binding.Service<
   ListEnabledBaselines,

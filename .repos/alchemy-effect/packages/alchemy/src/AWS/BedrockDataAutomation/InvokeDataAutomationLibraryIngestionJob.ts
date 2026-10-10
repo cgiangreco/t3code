@@ -22,8 +22,9 @@ export interface InvokeDataAutomationLibraryIngestionJobRequest extends Omit<
  * an S3 object; results are written to `outputConfiguration.s3Uri` with the
  * caller's S3 permissions. Provide the implementation with
  * `Effect.provide(AWS.BedrockDataAutomation.InvokeDataAutomationLibraryIngestionJobHttp)`.
- * ### Library Ingestion
- * **Example:** Upsert A Vocabulary Entity Inline
+ * @binding
+ * @section Library Ingestion
+ * @example Upsert A Vocabulary Entity Inline
  * ```typescript
  * // deploy time — bind the library
  * const ingest =
@@ -48,8 +49,6 @@ export interface InvokeDataAutomationLibraryIngestionJobRequest extends Omit<
  *   outputConfiguration: { s3Uri: `s3://${bucket}/library-results/` },
  * });
  * ```
- *
- * @binding
  */
 export interface InvokeDataAutomationLibraryIngestionJob extends Binding.Service<
   InvokeDataAutomationLibraryIngestionJob,

@@ -105,8 +105,9 @@ export interface WebExperience extends Resource<
  * An Amazon Q Business web experience — the hosted chat UI end users open
  * to converse with an application.
  *
- * ### Creating Web Experiences
- * **Example:** Basic Web Experience
+ * @resource
+ * @section Creating Web Experiences
+ * @example Basic Web Experience
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -117,7 +118,7 @@ export interface WebExperience extends Resource<
  * });
  * ```
  *
- * **Example:** Embeddable Web Experience
+ * @example Embeddable Web Experience
  * ```typescript
  * const web = yield* AWS.QBusiness.WebExperience("Chat", {
  *   applicationId: app.applicationId,
@@ -125,8 +126,6 @@ export interface WebExperience extends Resource<
  *   samplePromptsControlMode: "ENABLED",
  * });
  * ```
- *
- * @resource
  */
 export const WebExperience = Resource<WebExperience>(
   "AWS.QBusiness.WebExperience",

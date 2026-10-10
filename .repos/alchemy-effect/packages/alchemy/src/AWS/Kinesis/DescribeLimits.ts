@@ -10,8 +10,9 @@ export interface DescribeLimitsRequest extends Kinesis.DescribeLimitsInput {}
  * An account-level operation (no stream argument) that reports shard quotas
  * and current usage for the region. Provide the implementation with
  * `Effect.provide(AWS.Kinesis.DescribeLimitsHttp)`.
- * ### Account Settings
- * **Example:** Check Shard Quota Headroom
+ * @binding
+ * @section Account Settings
+ * @example Check Shard Quota Headroom
  * ```typescript
  * // init — account-level binding takes no resource
  * const describeLimits = yield* AWS.Kinesis.DescribeLimits();
@@ -20,8 +21,6 @@ export interface DescribeLimitsRequest extends Kinesis.DescribeLimitsInput {}
  * const limits = yield* describeLimits();
  * const headroom = (limits.ShardLimit ?? 0) - (limits.OpenShardCount ?? 0);
  * ```
- *
- * @binding
  */
 export interface DescribeLimits extends Binding.Service<
   DescribeLimits,

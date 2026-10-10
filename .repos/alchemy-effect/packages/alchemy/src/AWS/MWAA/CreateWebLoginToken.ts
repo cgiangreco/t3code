@@ -15,8 +15,9 @@ import type { Environment } from "./Environment.ts";
  * `{ airflowRole }` to scope it down). The `WebToken` is `Redacted` — unwrap
  * it with `Redacted.value`. Provide the implementation with
  * `Effect.provide(AWS.MWAA.CreateWebLoginTokenHttp)`.
- * ### Creating Web Login Tokens
- * **Example:** Mint a Web Login Token
+ * @binding
+ * @section Creating Web Login Tokens
+ * @example Mint a Web Login Token
  * ```typescript
  * // init — bind the operation to the environment (Admin session)
  * const createWebLoginToken = yield* AWS.MWAA.CreateWebLoginToken(environment);
@@ -28,14 +29,12 @@ import type { Environment } from "./Environment.ts";
  *   `?login=true#${Redacted.value(token.WebToken!)}`;
  * ```
  *
- * **Example:** Scope the Session to a Read-Only Airflow Role
+ * @example Scope the Session to a Read-Only Airflow Role
  * ```typescript
  * const createViewerToken = yield* AWS.MWAA.CreateWebLoginToken(environment, {
  *   airflowRole: "Viewer",
  * });
  * ```
- *
- * @binding
  */
 export interface CreateWebLoginToken extends Binding.Service<
   CreateWebLoginToken,

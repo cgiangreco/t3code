@@ -15,8 +15,9 @@ export interface UpdateItemRequest extends Omit<
  * that applies an update expression to a single item, automatically injecting
  * the table name. Provide the `UpdateItemHttp` layer on the Function to
  * satisfy the binding.
- * ### Writing Data
- * **Example:** Update an Item with an Update Expression
+ * @binding
+ * @section Writing Data
+ * @example Update an Item with an Update Expression
  * ```typescript
  * const updateItem = yield* AWS.DynamoDB.UpdateItem(table);
  *
@@ -31,8 +32,6 @@ export interface UpdateItemRequest extends Omit<
  *   ReturnValues: "ALL_NEW",
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateItem extends Binding.Service<
   UpdateItem,

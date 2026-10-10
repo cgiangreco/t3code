@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Polls the status of an asynchronous Cloud Control operation started with
  * {@link CreateResource}, {@link UpdateResource}, or {@link DeleteResource}
  * until its `OperationStatus` settles (`SUCCESS` / `FAILED` / `CANCEL_COMPLETE`).
- * ### Tracking Requests
- * **Example:** Poll a request token until it settles
+ * @binding
+ * @section Tracking Requests
+ * @example Poll a request token until it settles
  * ```typescript
  * const getResourceRequestStatus =
  *   yield* CloudControl.GetResourceRequestStatus();
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface GetResourceRequestStatus extends Binding.Service<
   GetResourceRequestStatus,

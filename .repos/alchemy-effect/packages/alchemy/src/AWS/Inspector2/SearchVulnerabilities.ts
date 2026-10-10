@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.SearchVulnerabilitiesHttp)`.
- * ### Coverage & Vulnerability Intel
- * **Example:** Look Up a CVE
+ * @binding
+ * @section Coverage & Vulnerability Intel
+ * @example Look Up a CVE
  * ```typescript
  * // init
  * const searchVulnerabilities = yield* AWS.Inspector2.SearchVulnerabilities();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   filterCriteria: { vulnerabilityIds: ["CVE-2021-44228"] },
  * });
  * ```
- *
- * @binding
  */
 export interface SearchVulnerabilities extends Binding.Service<
   SearchVulnerabilities,

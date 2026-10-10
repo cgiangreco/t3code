@@ -55,8 +55,11 @@ export type CustomPage = Resource<
  * A Cloudflare Zero Trust Access custom page. Replaces the default Access
  * block pages (`identity_denied` / `forbidden`) with custom HTML, which can
  * then be selected on an Access application.
- * ### Creating a Custom Page
- * **Example:** Custom forbidden page
+ * @resource
+ * @product Access
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a Custom Page
+ * @example Custom forbidden page
  * ```typescript
  * const page = yield* Cloudflare.Access.CustomPage("Forbidden", {
  *   type: "forbidden",
@@ -64,7 +67,7 @@ export type CustomPage = Resource<
  * });
  * ```
  *
- * **Example:** Custom identity-denied page with an explicit name
+ * @example Custom identity-denied page with an explicit name
  * ```typescript
  * const page = yield* Cloudflare.Access.CustomPage("Denied", {
  *   name: "corp-identity-denied",
@@ -73,18 +76,14 @@ export type CustomPage = Resource<
  * });
  * ```
  *
- * ### Updating the HTML
- * **Example:** HTML and name converge in place
+ * @section Updating the HTML
+ * @example HTML and name converge in place
  * ```typescript
  * const page = yield* Cloudflare.Access.CustomPage("Forbidden", {
  *   type: "forbidden",
  *   customHtml: "<html><body><h1>Still denied</h1></body></html>",
  * });
  * ```
- *
- * @resource
- * @product Access
- * @category Cloudflare One (Zero Trust)
  */
 export const CustomPage = Resource<CustomPage>("Cloudflare.Access.CustomPage");
 

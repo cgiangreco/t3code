@@ -47,8 +47,9 @@ export interface ManageConnectionsClient {
  * Provide `ApiGatewayV2.ManageConnectionsHttp` on the hosting function's
  * Effect (`Effect.provide(ApiGatewayV2.ManageConnectionsHttp)`) to satisfy
  * the binding.
- * ### Pushing to clients
- * **Example:** Echo a message back to the sender
+ * @binding
+ * @section Pushing to clients
+ * @example Echo a message back to the sender
  * ```typescript
  * const connections = yield* ApiGatewayV2.ManageConnections(stage);
  *
@@ -67,13 +68,11 @@ export interface ManageConnectionsClient {
  * );
  * ```
  *
- * ### Managing connections
- * **Example:** Disconnect a client
+ * @section Managing connections
+ * @example Disconnect a client
  * ```typescript
  * yield* connections.deleteConnection({ ConnectionId: staleConnectionId });
  * ```
- *
- * @binding
  */
 export interface ManageConnections extends Binding.Service<
   ManageConnections,

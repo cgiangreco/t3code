@@ -15,8 +15,9 @@ export interface ListStreamConsumersRequest extends Omit<
  * consumers registered on it — the stream ARN is injected automatically.
  * Provide the implementation with
  * `Effect.provide(AWS.Kinesis.ListStreamConsumersHttp)`.
- * ### Enhanced Fan-Out
- * **Example:** List Registered Consumers
+ * @binding
+ * @section Enhanced Fan-Out
+ * @example List Registered Consumers
  * ```typescript
  * // init
  * const listStreamConsumers = yield* AWS.Kinesis.ListStreamConsumers(stream);
@@ -25,8 +26,6 @@ export interface ListStreamConsumersRequest extends Omit<
  * const result = yield* listStreamConsumers();
  * const names = (result.Consumers ?? []).map((c) => c.ConsumerName);
  * ```
- *
- * @binding
  */
 export interface ListStreamConsumers extends Binding.Service<
   ListStreamConsumers,

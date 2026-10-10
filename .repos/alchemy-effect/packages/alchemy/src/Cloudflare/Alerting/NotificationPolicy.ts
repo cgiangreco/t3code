@@ -113,8 +113,11 @@ export type NotificationPolicy = Resource<
  * A notification policy connects an alert type (the event Cloudflare
  * watches for) to one or more destinations — email addresses, webhook
  * destinations, or PagerDuty services — optionally narrowed by filters.
- * ### Creating a policy
- * **Example:** Email notifications for Universal SSL events
+ * @resource
+ * @product Alerting
+ * @category Observability & Analytics
+ * @section Creating a policy
+ * @example Email notifications for Universal SSL events
  * ```typescript
  * yield* Cloudflare.Alerting.NotificationPolicy("SslAlerts", {
  *   alertType: "universal_ssl_event_type",
@@ -122,7 +125,7 @@ export type NotificationPolicy = Resource<
  * });
  * ```
  *
- * **Example:** Disabled policy with a description
+ * @example Disabled policy with a description
  * ```typescript
  * yield* Cloudflare.Alerting.NotificationPolicy("SslAlerts", {
  *   alertType: "universal_ssl_event_type",
@@ -132,8 +135,8 @@ export type NotificationPolicy = Resource<
  * });
  * ```
  *
- * ### Webhook destinations
- * **Example:** Dispatch to a webhook destination
+ * @section Webhook destinations
+ * @example Dispatch to a webhook destination
  * ```typescript
  * const webhook = yield* Cloudflare.Alerting.NotificationWebhook("AlertsHook", {
  *   url: "https://alerts.example.com/cf",
@@ -145,8 +148,8 @@ export type NotificationPolicy = Resource<
  * });
  * ```
  *
- * ### Filters
- * **Example:** Health check alerts for specific zones
+ * @section Filters
+ * @example Health check alerts for specific zones
  * ```typescript
  * yield* Cloudflare.Alerting.NotificationPolicy("HealthAlerts", {
  *   alertType: "health_check_status_notification",
@@ -159,10 +162,6 @@ export type NotificationPolicy = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/notifications/
- *
- * @resource
- * @product Alerting
- * @category Observability & Analytics
  */
 export const NotificationPolicy = Resource<NotificationPolicy>(TypeId);
 

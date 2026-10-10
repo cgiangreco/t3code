@@ -64,8 +64,9 @@ export interface DBParameterGroup extends Resource<
  * engine configuration parameters applied to individual Neptune
  * {@link DBInstance}s via `dbParameterGroupName` (cluster-wide settings live
  * in a {@link DBClusterParameterGroup} instead).
- * ### Creating a Parameter Group
- * **Example:** Parameter group with a custom query timeout
+ * @resource
+ * @section Creating a Parameter Group
+ * @example Parameter group with a custom query timeout
  * ```typescript
  * const params = yield* DBParameterGroup("InstanceParams", {
  *   family: "neptune1.4",
@@ -75,8 +76,8 @@ export interface DBParameterGroup extends Resource<
  * });
  * ```
  *
- * ### Attaching to an Instance
- * **Example:** Instance using the parameter group
+ * @section Attaching to an Instance
+ * @example Instance using the parameter group
  * ```typescript
  * const writer = yield* DBInstance("Writer", {
  *   dbClusterIdentifier: cluster.dbClusterIdentifier,
@@ -84,8 +85,6 @@ export interface DBParameterGroup extends Resource<
  *   dbParameterGroupName: params.dbParameterGroupName,
  * });
  * ```
- *
- * @resource
  */
 export const DBParameterGroup = Resource<DBParameterGroup>(
   "AWS.Neptune.DBParameterGroup",

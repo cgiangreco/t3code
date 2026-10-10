@@ -23,8 +23,9 @@ export interface StartJobRequest extends Omit<
  * the `geo:StartJob` grant is on `*`. Provide the implementation with
  * `Effect.provide(AWS.Location.StartJobHttp)`.
  *
- * ### Managing Batch Jobs
- * **Example:** Start a Batch Job
+ * @binding
+ * @section Managing Batch Jobs
+ * @example Start a Batch Job
  * ```typescript
  * const startJob = yield* Location.StartJob(jobsRole);
  *
@@ -35,8 +36,6 @@ export interface StartJobRequest extends Omit<
  * });
  * // job.JobId → poll with Location.GetJob
  * ```
- *
- * @binding
  */
 export interface StartJob extends Binding.Service<
   StartJob,

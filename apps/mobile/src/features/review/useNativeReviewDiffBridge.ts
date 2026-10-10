@@ -1,20 +1,20 @@
 import { useCallback, useMemo, useState } from "react";
 import type { NativeSyntheticEvent } from "react-native";
 
+import { type NativeReviewDiffHighlightScheme } from "../diffs/nativeReviewDiffHighlighter";
 import { createNativeReviewDiffTheme, type NativeReviewDiffData } from "./nativeReviewDiffAdapter";
 import { useAppearanceCodeSurface } from "../settings/appearance/useAppearanceCodeSurface";
-import { useAppearancePreferences } from "../settings/appearance/AppearancePreferencesProvider";
 import { useNativeReviewDiffHighlighting } from "./useNativeReviewDiffHighlighting";
 import { buildNativeReviewTokensResetKey } from "./reviewDiffBridgeKeys";
-import { useUniwindTheme } from "../../lib/useUniwindTheme";
 
-export { buildNativeReviewTokensResetKey } from "./reviewDiffBridgeKeys";
+export { buildNativeReviewTokensResetKey, hashReviewDiffKey } from "./reviewDiffBridgeKeys";
 
 export function useNativeReviewDiffBridge(input: {
   readonly threadKey: string | null;
   readonly sectionId: string | null;
   readonly diff: string | null | undefined;
   readonly data: NativeReviewDiffData;
+  readonly scheme: NativeReviewDiffHighlightScheme;
   readonly collapsedFileIds: ReadonlyArray<string>;
   readonly viewedFileIds: ReadonlyArray<string>;
   readonly selectedRowIds: ReadonlyArray<string>;
@@ -25,22 +25,18 @@ export function useNativeReviewDiffBridge(input: {
     collapsedFileIds,
     data,
     diff,
+    scheme,
     sectionId,
     selectedRowIds,
     threadKey,
     viewedFileIds,
   } = input;
   const { nativeReviewDiffStyle } = useAppearanceCodeSurface();
-  const { themeAppearance: scheme, themeId } = useAppearancePreferences();
-  const appTheme = useUniwindTheme();
   const [collapsedCommentIds, setCollapsedCommentIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
 
-  const theme = useMemo(
-    () => createNativeReviewDiffTheme(scheme, themeId, appTheme),
-    [appTheme, scheme, themeId],
-  );
+  const theme = useMemo(() => createNativeReviewDiffTheme(scheme), [scheme]);
   const rowsJson = useMemo(() => JSON.stringify(data.rows), [data.rows]);
   const collapsedFileIdsJson = useMemo(() => JSON.stringify(collapsedFileIds), [collapsedFileIds]);
   const viewedFileIdsJson = useMemo(() => JSON.stringify(viewedFileIds), [viewedFileIds]);
@@ -110,7 +106,6 @@ export function useNativeReviewDiffBridge(input: {
   );
 
   return {
-    themeId,
     theme,
     rowsJson,
     collapsedFileIdsJson,

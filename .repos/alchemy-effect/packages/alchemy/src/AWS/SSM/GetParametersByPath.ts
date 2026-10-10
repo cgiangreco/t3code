@@ -18,8 +18,9 @@ export interface GetParametersByPathRequest extends Omit<
  * `/*` subtree wildcard, plus `kms:Decrypt` on the bound parameter's
  * encryption key so `WithDecryption: true` works for `SecureString` children
  * encrypted with the same key.
- * ### Reading a Parameter Subtree
- * **Example:** Read All Parameters Under a Path
+ * @binding
+ * @section Reading a Parameter Subtree
+ * @example Read All Parameters Under a Path
  * ```typescript
  * const root = yield* SSM.Parameter("ConfigRoot", {
  *   name: "/my-app/config",
@@ -30,8 +31,6 @@ export interface GetParametersByPathRequest extends Omit<
  * // returns /my-app/config/db-url, /my-app/config/flags/beta, …
  * const result = yield* getByPath({ Recursive: true });
  * ```
- *
- * @binding
  */
 export interface GetParametersByPath extends Binding.Service<
   GetParametersByPath,

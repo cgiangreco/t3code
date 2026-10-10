@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * 24 hours (up to 14 days with an explicit time window) — node reboots,
  * failovers, configuration changes. Provide the implementation with
  * `Effect.provide(AWS.DAX.DescribeEventsHttp)`.
- * ### Monitoring Clusters
- * **Example:** Read a Cluster's Recent Events
+ * @binding
+ * @section Monitoring Clusters
+ * @example Read a Cluster's Recent Events
  * ```typescript
  * const describeEvents = yield* DAX.DescribeEvents();
  *
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.logInfo(`${event.Date}: ${event.Message}`);
  * }
  * ```
- *
- * @binding
  */
 export interface DescribeEvents extends Binding.Service<
   DescribeEvents,

@@ -12,8 +12,9 @@ import type { Channel } from "./Channel.ts";
  * so a playout dashboard can show upcoming input switches and ad breaks.
  * The channel id is injected from the binding. Provide the implementation
  * with `Effect.provide(AWS.MediaLive.DescribeScheduleHttp)`.
- * ### Driving the Channel Schedule
- * **Example:** List the Channel's Scheduled Actions
+ * @binding
+ * @section Driving the Channel Schedule
+ * @example List the Channel's Scheduled Actions
  * ```typescript
  * // init — bind the operation to the channel
  * const describeSchedule = yield* AWS.MediaLive.DescribeSchedule(channel);
@@ -21,8 +22,6 @@ import type { Channel } from "./Channel.ts";
  * // runtime
  * const { ScheduleActions } = yield* describeSchedule();
  * ```
- *
- * @binding
  */
 export interface DescribeSchedule extends Binding.Service<
   DescribeSchedule,

@@ -66,8 +66,9 @@ export interface Permissions extends Resource<
  * grant option on the resource) — see
  * {@link DataLakeSettings | AWS.LakeFormation.DataLakeSettings}.
  *
- * ### Granting Permissions
- * **Example:** Grant Database Permissions to a Role
+ * @resource
+ * @section Granting Permissions
+ * @example Grant Database Permissions to a Role
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -79,7 +80,7 @@ export interface Permissions extends Resource<
  * });
  * ```
  *
- * **Example:** Grant Table Select with Grant Option
+ * @example Grant Table Select with Grant Option
  * ```typescript
  * const grant = yield* AWS.LakeFormation.Permissions("AnalystTableAccess", {
  *   principal: analystRole.roleArn,
@@ -91,7 +92,7 @@ export interface Permissions extends Resource<
  * });
  * ```
  *
- * **Example:** Grant Data Location Access
+ * @example Grant Data Location Access
  * ```typescript
  * const grant = yield* AWS.LakeFormation.Permissions("EtlLocationAccess", {
  *   principal: etlRole.roleArn,
@@ -99,8 +100,6 @@ export interface Permissions extends Resource<
  *   permissions: ["DATA_LOCATION_ACCESS"],
  * });
  * ```
- *
- * @resource
  */
 export const Permissions = Resource<Permissions>(
   "AWS.LakeFormation.Permissions",

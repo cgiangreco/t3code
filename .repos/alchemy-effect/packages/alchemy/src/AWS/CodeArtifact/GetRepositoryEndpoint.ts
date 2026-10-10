@@ -17,16 +17,15 @@ export interface GetRepositoryEndpointRequest extends Omit<
  *
  * Resolves the URL package managers (npm, pip, maven, …) use to talk to the bound repository for a given package format. Provide the implementation with
  * `Effect.provide(AWS.CodeArtifact.GetRepositoryEndpointHttp)`.
- * ### Resolving the Registry Endpoint
- * **Example:** Get the npm Endpoint
+ * @binding
+ * @section Resolving the Registry Endpoint
+ * @example Get the npm Endpoint
  * ```typescript
  * const getEndpoint = yield* AWS.CodeArtifact.GetRepositoryEndpoint(repo);
  *
  * const res = yield* getEndpoint({ format: "npm" });
  * console.log(res.repositoryEndpoint);
  * ```
- *
- * @binding
  */
 export interface GetRepositoryEndpoint extends Binding.Service<
   GetRepositoryEndpoint,

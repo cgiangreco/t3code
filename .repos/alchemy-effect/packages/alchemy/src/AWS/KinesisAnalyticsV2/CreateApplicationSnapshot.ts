@@ -14,15 +14,14 @@ export interface CreateApplicationSnapshotRequest extends Omit<
  * e.g. a scheduled backup ahead of a deploy. The application must be
  * `RUNNING` with snapshots enabled; poll the result with
  * {@link DescribeApplicationSnapshot}.
- * ### Managing Snapshots
- * **Example:** Take a savepoint before a deploy
+ * @binding
+ * @section Managing Snapshots
+ * @example Take a savepoint before a deploy
  * ```typescript
  * const createSnapshot = yield* AWS.KinesisAnalyticsV2.CreateApplicationSnapshot(app);
  *
  * yield* createSnapshot({ SnapshotName: "pre-deploy" });
  * ```
- *
- * @binding
  */
 export interface CreateApplicationSnapshot extends Binding.Service<
   CreateApplicationSnapshot,

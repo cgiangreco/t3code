@@ -66,7 +66,6 @@ const colors = {
   terraform: "#693acf",
   text: "#84848a",
   typescript: "#1a85d4",
-  video: "#a631be",
   vite: "#a631be",
   vscode: "#1a85d4",
   vue: "#199f43",
@@ -79,8 +78,11 @@ const colors = {
 
 const customIcons = {
   agents: "t3-file-icon-agents",
+  claude: "t3-file-icon-claude",
+  package: "t3-file-icon-package-json",
   pnpm: "t3-file-icon-pnpm",
-  video: "t3-file-icon-video",
+  readme: "t3-file-icon-readme",
+  tsconfig: "t3-file-icon-tsconfig",
 };
 
 function symbolFromSprite(sprite, id) {

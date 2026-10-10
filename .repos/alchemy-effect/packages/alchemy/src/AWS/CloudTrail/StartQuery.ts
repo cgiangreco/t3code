@@ -27,8 +27,9 @@ export interface StartQueryRequest extends Omit<
  * {@link EventDataStore} and returns the `QueryId` to poll with
  * {@link DescribeQuery} / {@link GetQueryResults}. Provide the implementation
  * with `Effect.provide(AWS.CloudTrail.StartQueryHttp)`.
- * ### Querying CloudTrail Lake
- * **Example:** Start a Lake Query
+ * @binding
+ * @section Querying CloudTrail Lake
+ * @example Start a Lake Query
  * ```typescript
  * // init — bind the operation to the event data store
  * const startQuery = yield* AWS.CloudTrail.StartQuery(store);
@@ -39,8 +40,6 @@ export interface StartQueryRequest extends Omit<
  *     `SELECT eventID, eventName FROM ${id} LIMIT 10`,
  * });
  * ```
- *
- * @binding
  */
 export interface StartQuery extends Binding.Service<
   StartQuery,

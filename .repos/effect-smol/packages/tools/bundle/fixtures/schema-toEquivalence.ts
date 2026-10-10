@@ -6,4 +6,4 @@ const schema = Schema.Struct({
   c: Schema.Array(Schema.String)
 })
 
-export const equivalence = Schema.toEquivalence(schema)
+Schema.toEquivalence(schema)

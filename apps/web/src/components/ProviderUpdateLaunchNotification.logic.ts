@@ -8,7 +8,6 @@ import {
   type ServerProvider,
 } from "@t3tools/contracts";
 import {
-  isAtomCommandInterrupted,
   squashAtomCommandFailure,
   type AtomCommandResult,
 } from "@t3tools/client-runtime/state/runtime";
@@ -17,13 +16,6 @@ export type ProviderUpdateCandidate = ServerProvider & {
   readonly versionAdvisory: NonNullable<ServerProvider["versionAdvisory"]> & {
     readonly status: "behind_latest";
     readonly latestVersion: string;
-  };
-};
-
-export type ProviderSettingsUpdateCandidate = ServerProvider & {
-  readonly versionAdvisory: NonNullable<ServerProvider["versionAdvisory"]> & {
-    readonly canUpdate: true;
-    readonly updateCommand: string;
   };
 };
 
@@ -142,8 +134,6 @@ export function isProviderUpdateCandidate(
 ): provider is ProviderUpdateCandidate {
   return (
     provider.enabled &&
-    provider.compatibilityAdvisory?.latestVersionStatus !== "broken" &&
-    provider.compatibilityAdvisory?.latestVersionStatus !== "unsupported" &&
     provider.versionAdvisory?.status === "behind_latest" &&
     provider.versionAdvisory.latestVersion !== null
   );
@@ -157,19 +147,6 @@ export function collectProviderUpdateCandidates(
   providers: ReadonlyArray<ServerProvider>,
 ): ProviderUpdateCandidate[] {
   return dedupeProvidersByDriver(providers.filter(isProviderUpdateCandidate));
-}
-
-export function isProviderSettingsUpdateCandidate(
-  provider: ServerProvider,
-): provider is ProviderSettingsUpdateCandidate {
-  return (
-    provider.enabled &&
-    provider.compatibilityAdvisory?.latestVersionStatus !== "broken" &&
-    provider.compatibilityAdvisory?.latestVersionStatus !== "unsupported" &&
-    provider.versionAdvisory?.status === "behind_latest" &&
-    provider.versionAdvisory.canUpdate === true &&
-    provider.versionAdvisory.updateCommand !== null
-  );
 }
 
 export function hasOneClickUpdateProviderCandidate(
@@ -225,7 +202,11 @@ export function providerUpdateNotificationKey(
   return parts.length > 0 ? parts.join("|") : null;
 }
 
-function formatProviderList(providers: ReadonlyArray<Pick<ServerProvider, "driver">>) {
+export function providerUpdateCandidateKey(provider: ProviderUpdateCandidate): string {
+  return providerUpdateNotificationKey([provider])!;
+}
+
+export function formatProviderList(providers: ReadonlyArray<Pick<ServerProvider, "driver">>) {
   const names = providers.map(
     (provider) => PROVIDER_DISPLAY_NAMES[provider.driver] ?? provider.driver,
   );
@@ -250,11 +231,7 @@ export function getProviderUpdateInitialToastView(input: {
   };
 }
 
-export function shouldShowPrimaryProviderUpdateToast(view: ProviderUpdateToastView): boolean {
-  return view.phase !== "running";
-}
-
-function getProviderUpdateRunningToastView(providerCount: number): ProviderUpdateToastView {
+export function getProviderUpdateRunningToastView(providerCount: number): ProviderUpdateToastView {
   return {
     phase: "running",
     type: "loading",
@@ -331,59 +308,39 @@ export function getProviderUpdateProgressToastView(input: {
   return getProviderUpdateRunningToastView(input.providerCount);
 }
 
-/** One provider update sent by the cross-machine "Update all", with its result. */
-export interface ProviderUpdateRun {
-  readonly machineLabel: string;
-  readonly driver: ProviderDriverKind;
-  readonly instanceId: ProviderInstanceId;
-  readonly result: AtomCommandResult<
-    { readonly providers: ReadonlyArray<ServerProvider> },
-    unknown
-  >;
-}
-
-/**
- * Summarize a cross-machine "Update all" as one toast, or null when every
- * request was interrupted. Each update that did not succeed gets its own line,
- * so a failure on one machine is not hidden by successes on the others.
- */
-export function getProviderUpdateRunToastView(
-  runs: ReadonlyArray<ProviderUpdateRun>,
-): Pick<ProviderUpdateToastView, "type" | "title" | "description"> | null {
-  const settled = runs.filter((run) => !isAtomCommandInterrupted(run.result));
-  if (settled.length === 0) {
-    return null;
-  }
-  const failureLines = settled.flatMap((run) => {
-    const label = `${run.machineLabel} · ${PROVIDER_DISPLAY_NAMES[run.driver] ?? run.driver}`;
-    if (run.result._tag === "Failure") {
-      const error = squashAtomCommandFailure(run.result);
-      return [`${label}: ${error instanceof Error ? error.message : "Provider update failed."}`];
-    }
-    const updateState = run.result.value.providers.find(
-      (provider) => provider.instanceId === run.instanceId,
-    )?.updateState;
-    return updateState?.status === "succeeded"
-      ? []
-      : [`${label}: ${updateState?.message ?? "Provider update did not finish."}`];
+export function getSingleProviderUpdateProgressToastView(
+  provider: ServerProvider,
+): ProviderUpdateToastView {
+  const view = getProviderUpdateProgressToastView({
+    providers: [provider],
+    providerCount: 1,
   });
-  if (failureLines.length === 0) {
-    return {
-      type: "success",
-      title: settled.length === 1 ? "Provider updated" : `${settled.length} providers updated`,
-      description: getProviderUpdatedDescription(settled.length),
-    };
+  const providerName = PROVIDER_DISPLAY_NAMES[provider.driver] ?? provider.driver;
+
+  switch (view.phase) {
+    case "running":
+      return {
+        ...view,
+        title: `Updating ${providerName}`,
+      };
+    case "failed":
+      return {
+        ...view,
+        title: getProviderFailedUpdateTitle(provider),
+      };
+    case "unchanged":
+      return {
+        ...view,
+        title: `${providerName} still needs an update`,
+      };
+    case "succeeded":
+      return {
+        ...view,
+        title: getProviderUpdatedTitle(provider),
+      };
+    default:
+      return view;
   }
-  return {
-    type: "error",
-    title:
-      failureLines.length < settled.length
-        ? `${failureLines.length} of ${settled.length} provider updates failed`
-        : settled.length === 1
-          ? "Provider update failed"
-          : "Provider updates failed",
-    description: failureLines.join("\n"),
-  };
 }
 
 export function collectUpdatedProviderSnapshots(input: {
@@ -672,6 +629,42 @@ export function collectProviderUpdateOutcomeSnapshots(
     }
   }
   return [...worstByDriver.values()];
+}
+
+/**
+ * The first secondary (non-primary) backend whose update resolved without
+ * succeeding. The primary's own failed/unchanged state is already surfaced
+ * inline in settings, so only secondaries (which have no inline row) need an
+ * explicit callout.
+ */
+export function firstUnsuccessfulSecondaryProviderOutcome(
+  results: ReadonlyArray<PromiseSettledResult<LocalProviderUpdateOutcome>>,
+): { readonly provider: ServerProvider; readonly status: "failed" | "unchanged" } | null {
+  for (const result of results) {
+    if (result.status !== "fulfilled") {
+      continue;
+    }
+    const outcome = result.value;
+    if (outcome.isPrimary || outcome.provider === null) {
+      continue;
+    }
+    const status = outcome.provider.updateState?.status;
+    if (status === "failed" || status === "unchanged") {
+      return { provider: outcome.provider, status };
+    }
+  }
+  return null;
+}
+
+const WSL_INSTANCE_ID_PREFIX = "wsl:";
+
+/** The distro name from a WSL backend instance id ("wsl:ubuntu" -> "ubuntu"), or null for the default. */
+export function parseWslDistroFromInstanceId(instanceId: string | undefined): string | null {
+  if (!instanceId || !instanceId.startsWith(WSL_INSTANCE_ID_PREFIX)) {
+    return null;
+  }
+  const distro = instanceId.slice(WSL_INSTANCE_ID_PREFIX.length).trim();
+  return distro.length === 0 || distro === "default" ? null : distro;
 }
 
 /**

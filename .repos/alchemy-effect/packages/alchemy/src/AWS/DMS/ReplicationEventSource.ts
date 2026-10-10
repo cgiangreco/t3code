@@ -63,8 +63,8 @@ export interface ReplicationEventSourceProps extends EventRouteProps {
  * host-specific implementation layer (e.g. `AWS.Lambda.EventSource`) on the
  * Function effect.
  *
- * ### Consuming Replication Events
- * **Example:** Alert On Task Failures
+ * @section Consuming Replication Events
+ * @example Alert On Task Failures
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

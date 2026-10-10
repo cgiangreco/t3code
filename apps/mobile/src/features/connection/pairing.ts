@@ -18,7 +18,7 @@ function isIpLiteral(host: string): boolean {
   }
 }
 
-export class PairingQrPayloadEmptyError extends Schema.TaggedError<PairingQrPayloadEmptyError>()(
+export class PairingQrPayloadEmptyError extends Schema.TaggedErrorClass<PairingQrPayloadEmptyError>()(
   "PairingQrPayloadEmptyError",
   {},
 ) {

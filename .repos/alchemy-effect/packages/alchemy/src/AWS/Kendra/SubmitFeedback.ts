@@ -20,8 +20,9 @@ export interface SubmitFeedbackRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.SubmitFeedbackHttp)`.
  *
- * ### Querying an Index
- * **Example:** Submit Click Feedback
+ * @binding
+ * @section Querying an Index
+ * @example Submit Click Feedback
  * ```typescript
  * const submitFeedback = yield* AWS.Kendra.SubmitFeedback(index);
  *
@@ -30,8 +31,6 @@ export interface SubmitFeedbackRequest extends Omit<
  *   ClickFeedbackItems: [{ ResultId: resultId, ClickTime: new Date() }],
  * });
  * ```
- *
- * @binding
  */
 export interface SubmitFeedback extends Binding.Service<
   SubmitFeedback,

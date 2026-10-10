@@ -161,8 +161,9 @@ export interface RuleProps {
 
 /**
  * An Amazon EventBridge rule that matches events and routes them to targets.
- * ### Creating Rules
- * **Example:** Event Pattern Rule
+ * @resource
+ * @section Creating Rules
+ * @example Event Pattern Rule
  * ```typescript
  * const rule = yield* Rule("S3Events", {
  *   eventPattern: {
@@ -176,7 +177,7 @@ export interface RuleProps {
  * });
  * ```
  *
- * **Example:** Scheduled Rule
+ * @example Scheduled Rule
  * ```typescript
  * const rule = yield* Rule("EveryFiveMinutes", {
  *   scheduleExpression: "rate(5 minutes)",
@@ -187,8 +188,8 @@ export interface RuleProps {
  * });
  * ```
  *
- * ### Targeting
- * **Example:** Rule with Input Transformer
+ * @section Targeting
+ * @example Rule with Input Transformer
  * ```typescript
  * const rule = yield* Rule("TransformedEvents", {
  *   eventPattern: {
@@ -209,7 +210,7 @@ export interface RuleProps {
  * });
  * ```
  *
- * **Example:** Rule with Dead Letter Queue
+ * @example Rule with Dead Letter Queue
  * ```typescript
  * const rule = yield* Rule("ReliableEvents", {
  *   eventPattern: { source: ["my.app"] },
@@ -227,7 +228,7 @@ export interface RuleProps {
  * });
  * ```
  *
- * **Example:** Rule with ECS Target
+ * @example Rule with ECS Target
  * ```typescript
  * const rule = yield* Rule("EcsSchedule", {
  *   scheduleExpression: "rate(1 hour)",
@@ -250,8 +251,6 @@ export interface RuleProps {
  *   }],
  * });
  * ```
- *
- * @resource
  */
 export interface Rule extends Resource<
   "AWS.EventBridge.Rule",

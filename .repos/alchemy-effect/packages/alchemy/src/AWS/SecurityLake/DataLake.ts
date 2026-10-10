@@ -147,8 +147,8 @@ export interface DataLake extends Resource<
  * Lake affects the whole account, and the S3 buckets it creates are retained
  * after the data lake is deleted.
  *
- * ### Enabling Security Lake
- * **Example:** Single-Region data lake
+ * @section Enabling Security Lake
+ * @example Single-Region data lake
  * ```typescript
  * const lake = yield* SecurityLake.DataLake("Lake", {
  *   configurations: [{ region: "us-west-2" }],
@@ -156,7 +156,7 @@ export interface DataLake extends Resource<
  * });
  * ```
  *
- * **Example:** Lifecycle management and KMS encryption
+ * @example Lifecycle management and KMS encryption
  * ```typescript
  * const lake = yield* SecurityLake.DataLake("Lake", {
  *   configurations: [

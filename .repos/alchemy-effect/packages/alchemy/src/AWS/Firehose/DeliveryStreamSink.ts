@@ -29,8 +29,9 @@ export type DeliveryStreamSinkError =
  * order on a bounded schedule; exhausting retries fails the sink with a typed
  * `BatchRetryExhaustedError` carrying the stranded records.
  *
- * ### Streaming Records
- * **Example:** Run a Stream of Records into the Delivery Stream
+ * @binding
+ * @section Streaming Records
+ * @example Run a Stream of Records into the Delivery Stream
  * ```typescript
  * // init — bind the sink (provide AWS.Firehose.DeliveryStreamSinkHttp on the Function)
  * const sink = yield* AWS.Firehose.DeliveryStreamSink(deliveryStream);
@@ -48,8 +49,6 @@ export type DeliveryStreamSinkError =
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface DeliveryStreamSink extends Binding.Service<
   DeliveryStreamSink,

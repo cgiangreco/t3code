@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:PutManagedScalingPolicy` — attaches or replaces the bound cluster's managed scaling policy — EMR then resizes the cluster within the configured compute limits.
- * ### Scaling the Cluster
- * **Example:** Enable Managed Scaling
+ * @binding
+ * @section Scaling the Cluster
+ * @example Enable Managed Scaling
  * ```typescript
  * const putScalingPolicy = yield* AWS.EMR.PutManagedScalingPolicy(cluster);
  *
@@ -20,8 +21,6 @@ import type { Cluster } from "./Cluster.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface PutManagedScalingPolicy extends Binding.Service<
   PutManagedScalingPolicy,

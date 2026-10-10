@@ -18,8 +18,9 @@ export interface GenerateMacRequest extends Omit<
  * so any party with `kms:VerifyMac` can validate tokens without ever
  * holding the shared secret.
  *
- * ### Message Authentication
- * **Example:** Compute an HMAC
+ * @binding
+ * @section Message Authentication
+ * @example Compute an HMAC
  * ```typescript
  * const generateMac = yield* AWS.KMS.GenerateMac(hmacKey);
  *
@@ -28,8 +29,6 @@ export interface GenerateMacRequest extends Omit<
  *   MacAlgorithm: "HMAC_SHA_256",
  * });
  * ```
- *
- * @binding
  */
 export interface GenerateMac extends Binding.Service<
   GenerateMac,

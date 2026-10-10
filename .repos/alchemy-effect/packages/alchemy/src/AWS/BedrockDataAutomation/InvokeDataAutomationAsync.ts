@@ -28,8 +28,9 @@ export interface InvokeDataAutomationAsyncRequest extends Omit<
  * on the output location — Bedrock Data Automation accesses S3 with the
  * caller's permissions. Provide the implementation with
  * `Effect.provide(AWS.BedrockDataAutomation.InvokeDataAutomationAsyncHttp)`.
- * ### Invoking Data Automation
- * **Example:** Start An Async Job For An Uploaded Document
+ * @binding
+ * @section Invoking Data Automation
+ * @example Start An Async Job For An Uploaded Document
  * ```typescript
  * // deploy time — bind the project
  * const invokeAsync = yield* AWS.BedrockDataAutomation.InvokeDataAutomationAsync(project);
@@ -42,7 +43,7 @@ export interface InvokeDataAutomationAsyncRequest extends Omit<
  * });
  * ```
  *
- * **Example:** Get Notified Via EventBridge When The Job Settles
+ * @example Get Notified Via EventBridge When The Job Settles
  * ```typescript
  * yield* invokeAsync({
  *   inputConfiguration: { s3Uri: input },
@@ -54,8 +55,6 @@ export interface InvokeDataAutomationAsyncRequest extends Omit<
  * });
  * // pair with AWS.BedrockDataAutomation.consumeDataAutomationJobEvents
  * ```
- *
- * @binding
  */
 export interface InvokeDataAutomationAsync extends Binding.Service<
   InvokeDataAutomationAsync,

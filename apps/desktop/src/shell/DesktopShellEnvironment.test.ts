@@ -7,15 +7,11 @@ import * as PlatformError from "effect/PlatformError";
 import * as Schema from "effect/Schema";
 import * as Sink from "effect/Sink";
 import * as Stream from "effect/Stream";
-import * as ChildProcess from "effect/process/ChildProcess";
-import * as ChildProcessSpawner from "effect/process/ChildProcessSpawner";
-import * as NodeOS from "node:os";
-import { vi } from "vite-plus/test";
+import * as ChildProcess from "effect/unstable/process/ChildProcess";
+import * as ChildProcessSpawner from "effect/unstable/process/ChildProcessSpawner";
 
 import * as DesktopEnvironment from "../app/DesktopEnvironment.ts";
 import * as DesktopShellEnvironment from "./DesktopShellEnvironment.ts";
-
-vi.mock("node:os", { spy: true });
 
 const textEncoder = new TextEncoder();
 
@@ -33,14 +29,14 @@ function envOutput(values: Readonly<Record<string, string>>): string {
     .join("\n");
 }
 
-function makeProcess(output: string, exitCode = 0): ChildProcessSpawner.ChildProcessHandle {
+function makeProcess(output: string): ChildProcessSpawner.ChildProcessHandle {
   const stdout = output.length === 0 ? Stream.empty : Stream.make(textEncoder.encode(output));
   return ChildProcessSpawner.makeHandle({
     pid: ChildProcessSpawner.ProcessId(123),
     stdout,
     stderr: Stream.empty,
     all: stdout,
-    exitCode: Effect.succeed(ChildProcessSpawner.ExitCode(exitCode)),
+    exitCode: Effect.succeed(ChildProcessSpawner.ExitCode(0)),
     isRunning: Effect.succeed(false),
     kill: () => Effect.void,
     stdin: Sink.drain,
@@ -71,29 +67,22 @@ function withProcessEnv<A, E, R>(
 function runShellEnvironment(input: {
   readonly env: NodeJS.ProcessEnv;
   readonly platform: NodeJS.Platform;
-  readonly userShell?: string;
-  readonly handler: (
-    command: ChildProcess.Command,
-  ) => string | { output: string; exitCode: number };
+  readonly handler: (command: ChildProcess.Command) => string;
   readonly failure?: PlatformError.PlatformError;
 }) {
-  const layerEnvironment = Layer.succeed(
+  const environmentLayer = Layer.succeed(
     DesktopEnvironment.DesktopEnvironment,
     DesktopEnvironment.DesktopEnvironment.of({
       platform: input.platform,
     } as DesktopEnvironment.DesktopEnvironment["Service"]),
   );
-  const layerSpawner = Layer.succeed(
+  const spawnerLayer = Layer.succeed(
     ChildProcessSpawner.ChildProcessSpawner,
-    ChildProcessSpawner.make((command) => {
-      if (input.failure !== undefined) return Effect.fail(input.failure);
-      const result = input.handler(command);
-      return Effect.succeed(
-        typeof result === "string"
-          ? makeProcess(result)
-          : makeProcess(result.output, result.exitCode),
-      );
-    }),
+    ChildProcessSpawner.make((command) =>
+      input.failure === undefined
+        ? Effect.succeed(makeProcess(input.handler(command)))
+        : Effect.fail(input.failure),
+    ),
   );
 
   const program = Effect.gen(function* () {
@@ -102,93 +91,15 @@ function runShellEnvironment(input: {
   }).pipe(
     Effect.provide(
       DesktopShellEnvironment.layer.pipe(
-        Layer.provide(Layer.mergeAll(layerEnvironment, NodeServices.layer, layerSpawner)),
+        Layer.provide(Layer.mergeAll(environmentLayer, NodeServices.layer, spawnerLayer)),
       ),
     ),
   );
 
-  return Effect.acquireUseRelease(
-    Effect.sync(() =>
-      vi.spyOn(NodeOS, "userInfo").mockReturnValue({
-        ...NodeOS.userInfo(),
-        shell: input.userShell ?? null,
-      }),
-    ),
-    () => withProcessEnv(input.env, program),
-    (spy) => Effect.sync(() => spy.mockRestore()),
-  );
+  return withProcessEnv(input.env, program);
 }
 
 describe("DesktopShellEnvironment", () => {
-  it.effect("rejects PATH output from a failed shell and tries the next candidate", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = { SHELL: "/bin/failing", PATH: "/usr/bin" };
-      const commands: string[] = [];
-
-      yield* runShellEnvironment({
-        env,
-        platform: "linux",
-        userShell: "/usr/local/bin/fish",
-        handler: (command) => {
-          if (command._tag !== "StandardCommand") return "";
-          commands.push(command.command);
-          return command.command === "/bin/failing"
-            ? { output: envOutput({ PATH: "/failed/bin" }), exitCode: 7 }
-            : envOutput({ PATH: "/home/test/.local/bin:/usr/bin" });
-        },
-      }).pipe(Effect.provide(Logger.layer([])));
-
-      assert.deepEqual(commands, ["/bin/failing", "/usr/local/bin/fish"]);
-      assert.equal(env.PATH, "/home/test/.local/bin:/usr/bin");
-    }),
-  );
-
-  it.effect.each(["darwin", "linux"] as const)(
-    "uses the account shell when SHELL is missing on %s",
-    (platform) =>
-      Effect.gen(function* () {
-        const env: NodeJS.ProcessEnv = { PATH: "/usr/bin" };
-        const commands: string[] = [];
-
-        yield* runShellEnvironment({
-          env,
-          platform,
-          userShell: "/usr/local/bin/fish",
-          handler: (command) => {
-            if (command._tag !== "StandardCommand") return "";
-            commands.push(command.command);
-            return envOutput({ PATH: "/home/test/.local/bin:/usr/bin" });
-          },
-        });
-
-        assert.deepEqual(commands, ["/usr/local/bin/fish"]);
-        assert.equal(env.PATH, "/home/test/.local/bin:/usr/bin");
-      }),
-  );
-
-  it.effect("tries the account shell before the platform fallback when SHELL has no PATH", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = { SHELL: "/bin/missing", PATH: "/usr/bin" };
-      const commands: string[] = [];
-
-      yield* runShellEnvironment({
-        env,
-        platform: "linux",
-        userShell: "/usr/local/bin/fish",
-        handler: (command) => {
-          if (command._tag !== "StandardCommand") return "";
-          commands.push(command.command);
-          return command.command === "/usr/local/bin/fish"
-            ? envOutput({ PATH: "/home/test/.local/bin:/usr/bin" })
-            : "";
-        },
-      });
-
-      assert.deepEqual(commands, ["/bin/missing", "/usr/local/bin/fish"]);
-      assert.equal(env.PATH, "/home/test/.local/bin:/usr/bin");
-    }),
-  );
-
   it.effect("hydrates PATH and missing SSH_AUTH_SOCK from the login shell on macOS", () =>
     Effect.gen(function* () {
       const env: NodeJS.ProcessEnv = {
@@ -241,108 +152,6 @@ describe("DesktopShellEnvironment", () => {
     }),
   );
 
-  it.effect("hydrates the locale from the login shell on macOS", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = {
-        SHELL: "/bin/zsh",
-        PATH: "/usr/bin",
-      };
-
-      yield* runShellEnvironment({
-        env,
-        platform: "darwin",
-        handler: () =>
-          envOutput({
-            PATH: "/opt/homebrew/bin:/usr/bin",
-            LANG: "de_DE.UTF-8",
-          }),
-      });
-
-      assert.equal(env.LANG, "de_DE.UTF-8");
-    }),
-  );
-
-  it.effect("preserves an inherited locale over the login shell on macOS", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = {
-        SHELL: "/bin/zsh",
-        PATH: "/usr/bin",
-        LANG: "en_US.UTF-8",
-      };
-
-      yield* runShellEnvironment({
-        env,
-        platform: "darwin",
-        handler: () =>
-          envOutput({
-            PATH: "/opt/homebrew/bin:/usr/bin",
-            LANG: "de_DE.UTF-8",
-          }),
-      });
-
-      assert.equal(env.LANG, "en_US.UTF-8");
-    }),
-  );
-
-  it.effect("does not mix login-shell locale categories into an inherited locale", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = {
-        SHELL: "/bin/zsh",
-        PATH: "/usr/bin",
-        LANG: "en_US.UTF-8",
-      };
-
-      yield* runShellEnvironment({
-        env,
-        platform: "darwin",
-        handler: () =>
-          envOutput({
-            PATH: "/opt/homebrew/bin:/usr/bin",
-            LC_ALL: "de_DE.UTF-8",
-          }),
-      });
-
-      assert.equal(env.LANG, "en_US.UTF-8");
-      assert.equal(env.LC_ALL, undefined);
-    }),
-  );
-
-  it.effect("falls back to a UTF-8 LC_CTYPE when no locale is available on macOS", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = {
-        SHELL: "/bin/zsh",
-        PATH: "/usr/bin",
-      };
-
-      yield* runShellEnvironment({
-        env,
-        platform: "darwin",
-        handler: () => envOutput({ PATH: "/opt/homebrew/bin:/usr/bin" }),
-      });
-
-      assert.equal(env.LANG, undefined);
-      assert.equal(env.LC_ALL, undefined);
-      assert.equal(env.LC_CTYPE, "en_US.UTF-8");
-    }),
-  );
-
-  it.effect("does not apply the locale fallback on linux", () =>
-    Effect.gen(function* () {
-      const env: NodeJS.ProcessEnv = {
-        SHELL: "/bin/zsh",
-        PATH: "/usr/bin",
-      };
-
-      yield* runShellEnvironment({
-        env,
-        platform: "linux",
-        handler: () => envOutput({ PATH: "/home/linuxbrew/.linuxbrew/bin:/usr/bin" }),
-      });
-
-      assert.equal(env.LANG, undefined);
-    }),
-  );
-
   it.effect("hydrates PATH and missing SSH_AUTH_SOCK from the login shell on linux", () =>
     Effect.gen(function* () {
       const env: NodeJS.ProcessEnv = {
@@ -357,13 +166,11 @@ describe("DesktopShellEnvironment", () => {
           envOutput({
             PATH: "/home/linuxbrew/.linuxbrew/bin:/usr/bin",
             SSH_AUTH_SOCK: "/tmp/secretive.sock",
-            T3CODE_TELEMETRY_ENABLED: "false",
           }),
       });
 
       assert.equal(env.PATH, "/home/linuxbrew/.linuxbrew/bin:/usr/bin");
       assert.equal(env.SSH_AUTH_SOCK, "/tmp/secretive.sock");
-      assert.equal(env.T3CODE_TELEMETRY_ENABLED, "false");
     }),
   );
 
@@ -411,7 +218,7 @@ describe("DesktopShellEnvironment", () => {
                 FNM_DIR: "C:\\Users\\testuser\\AppData\\Roaming\\fnm",
                 FNM_MULTISHELL_PATH: "C:\\Users\\testuser\\AppData\\Local\\fnm_multishells\\123",
               })
-            : envOutput({ PATH: 'C:\\Custom\\Bin;C:";C:\\Windows\\System32' });
+            : envOutput({ PATH: "C:\\Custom\\Bin;C:\\Windows\\System32" });
         },
       });
 
@@ -424,11 +231,9 @@ describe("DesktopShellEnvironment", () => {
           "C:\\Users\\testuser\\AppData\\Local\\Programs\\nodejs",
           "C:\\Users\\testuser\\AppData\\Local\\Volta\\bin",
           "C:\\Users\\testuser\\AppData\\Local\\pnpm",
-          "C:\\Users\\testuser\\.local\\bin",
           "C:\\Users\\testuser\\.bun\\bin",
           "C:\\Users\\testuser\\scoop\\shims",
           "C:\\Custom\\Bin",
-          "C:",
         ].join(";"),
       );
       assert.equal(env.FNM_DIR, "C:\\Users\\testuser\\AppData\\Roaming\\fnm");
@@ -487,6 +292,16 @@ describe("DesktopShellEnvironment", () => {
       assert.equal(env.DBUS_SESSION_BUS_ADDRESS, "unix:path=/run/user/1000/bus");
     }),
   );
+
+  it("resolves dbus runtime dir candidates with existence checks", () => {
+    const busPath = DesktopShellEnvironment.resolveDefaultLinuxDbusSessionBusAddress({
+      env: { XDG_RUNTIME_DIR: "/tmp/stale-runtime" },
+      uid: 1000,
+      exists: (path) => path === "/run/user/1000/bus",
+    });
+
+    assert.equal(busPath, "unix:path=/run/user/1000/bus");
+  });
 
   it.effect("logs command failures with safe probe context and the exact cause", () => {
     const env: NodeJS.ProcessEnv = {

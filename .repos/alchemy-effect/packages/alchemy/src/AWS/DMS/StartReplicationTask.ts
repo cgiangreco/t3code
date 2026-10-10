@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * Function that starts CDC during business hours, an event-driven Function
  * that kicks off a migration when upstream data lands). Provide the
  * implementation with `Effect.provide(AWS.DMS.StartReplicationTaskHttp)`.
- * ### Orchestrating Replication Tasks
- * **Example:** Start a Task
+ * @binding
+ * @section Orchestrating Replication Tasks
+ * @example Start a Task
  * ```typescript
  * // init — account-level, no target resource
  * const startReplicationTask = yield* AWS.DMS.StartReplicationTask();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   StartReplicationTaskType: "start-replication",
  * });
  * ```
- *
- * @binding
  */
 export interface StartReplicationTask extends Binding.Service<
   StartReplicationTask,

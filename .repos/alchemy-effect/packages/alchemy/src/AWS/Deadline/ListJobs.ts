@@ -9,8 +9,9 @@ import type { Queue } from "./Queue.ts";
  * Enumerates the jobs in the bound {@link Queue} (paginated). The queue's
  * `farmId`/`queueId` are injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Deadline.ListJobsHttp)`.
- * ### Monitoring Jobs
- * **Example:** List The Queue's Jobs
+ * @binding
+ * @section Monitoring Jobs
+ * @example List The Queue's Jobs
  * ```typescript
  * // init — bind the operation to the queue
  * const listJobs = yield* AWS.Deadline.ListJobs(queue);
@@ -18,8 +19,6 @@ import type { Queue } from "./Queue.ts";
  * // runtime
  * const { jobs } = yield* listJobs();
  * ```
- *
- * @binding
  */
 export interface ListJobs extends Binding.Service<
   ListJobs,

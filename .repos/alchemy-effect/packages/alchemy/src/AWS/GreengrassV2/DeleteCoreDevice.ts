@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * retires devices. The caller supplies the core device thing name at
  * runtime. Provide the implementation with
  * `Effect.provide(AWS.GreengrassV2.DeleteCoreDeviceHttp)`.
- * ### Managing Core Devices
- * **Example:** Decommission A Core Device
+ * @binding
+ * @section Managing Core Devices
+ * @example Decommission A Core Device
  * ```typescript
  * // init — account-level binding, no resource argument
  * const deleteCoreDevice = yield* AWS.GreengrassV2.DeleteCoreDevice();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteCoreDevice({ coreDeviceThingName: "RetiredCore" });
  * ```
- *
- * @binding
  */
 export interface DeleteCoreDevice extends Binding.Service<
   DeleteCoreDevice,

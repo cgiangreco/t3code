@@ -43,8 +43,9 @@ export interface GroupingConfiguration extends Resource<
  * There is at most ONE grouping configuration per account/region;
  * `PutGroupingConfiguration` replaces the whole definition list.
  *
- * ### Creating a Grouping Configuration
- * **Example:** Group Services by Team Tag
+ * @resource
+ * @section Creating a Grouping Configuration
+ * @example Group Services by Team Tag
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -62,7 +63,7 @@ export interface GroupingConfiguration extends Resource<
  * );
  * ```
  *
- * **Example:** Multiple Grouping Dimensions
+ * @example Multiple Grouping Dimensions
  * ```typescript
  * const grouping = yield* AWS.ApplicationSignals.GroupingConfiguration(
  *   "Grouping",
@@ -78,8 +79,6 @@ export interface GroupingConfiguration extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const GroupingConfiguration = Resource<GroupingConfiguration>(
   "AWS.ApplicationSignals.GroupingConfiguration",

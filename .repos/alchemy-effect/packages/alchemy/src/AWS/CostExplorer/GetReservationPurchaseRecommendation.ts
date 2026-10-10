@@ -14,8 +14,9 @@ export interface GetReservationPurchaseRecommendationRequest
  * Get reserved-instance purchase recommendations for a service based
  * on your historical usage. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.GetReservationPurchaseRecommendationHttp)`.
- * ### Reservations
- * **Example:** Get RI Purchase Recommendations
+ * @binding
+ * @section Reservations
+ * @example Get RI Purchase Recommendations
  * ```typescript
  * // init — account-level binding takes no resource
  * const getReservationPurchaseRecommendation = yield* AWS.CostExplorer.GetReservationPurchaseRecommendation();
@@ -26,8 +27,6 @@ export interface GetReservationPurchaseRecommendationRequest
  * });
  * const recommendations = result.Recommendations;
  * ```
- *
- * @binding
  */
 export interface GetReservationPurchaseRecommendation extends Binding.Service<
   GetReservationPurchaseRecommendation,

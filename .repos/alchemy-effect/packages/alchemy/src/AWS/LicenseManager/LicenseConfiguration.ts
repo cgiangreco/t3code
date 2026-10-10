@@ -96,8 +96,9 @@ export interface LicenseConfiguration extends Resource<
  * A license configuration specifies the licensing dimension (vCPUs,
  * instances, cores, or sockets), an optional license count, and whether
  * the count is a hard limit that blocks new launches once consumed.
- * ### Creating License Configurations
- * **Example:** Track licenses by vCPU
+ * @resource
+ * @section Creating License Configurations
+ * @example Track licenses by vCPU
  * ```typescript
  * import * as LicenseManager from "alchemy/AWS/LicenseManager";
  *
@@ -106,7 +107,7 @@ export interface LicenseConfiguration extends Resource<
  * });
  * ```
  *
- * **Example:** Enforce a hard license limit
+ * @example Enforce a hard license limit
  * ```typescript
  * const licenses = yield* LicenseManager.LicenseConfiguration("Licenses", {
  *   licenseCountingType: "Instance",
@@ -115,7 +116,7 @@ export interface LicenseConfiguration extends Resource<
  * });
  * ```
  *
- * **Example:** Socket licensing with dedicated-host rules
+ * @example Socket licensing with dedicated-host rules
  * ```typescript
  * const licenses = yield* LicenseManager.LicenseConfiguration("Licenses", {
  *   licenseCountingType: "Socket",
@@ -124,8 +125,6 @@ export interface LicenseConfiguration extends Resource<
  *   description: "Oracle DB socket licenses",
  * });
  * ```
- *
- * @resource
  */
 export const LicenseConfiguration = Resource<LicenseConfiguration>(
   "AWS.LicenseManager.LicenseConfiguration",

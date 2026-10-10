@@ -323,8 +323,9 @@ const inferProxyEngineFamily = (engine: string) => {
  *
  * The return value intentionally exposes the underlying `DB*` resources so
  * users can expand into the lower-level surface without rewriting the stack.
- * ### Creating a Database
- * **Example:** Start a Small Aurora Cluster
+ * @resource
+ * @section Creating a Database
+ * @example Start a Small Aurora Cluster
  * ```typescript
  * const db = yield* AWS.RDS.Aurora("AppDb", {
  *   subnetIds: [privateSubnetA.subnetId, privateSubnetB.subnetId],
@@ -332,8 +333,8 @@ const inferProxyEngineFamily = (engine: string) => {
  * });
  * ```
  *
- * ### Scaling Out
- * **Example:** Add Readers and a Proxy
+ * @section Scaling Out
+ * @example Add Readers and a Proxy
  * ```typescript
  * const db = yield* AWS.RDS.Aurora("AppDb", {
  *   subnetIds: [privateSubnetA.subnetId, privateSubnetB.subnetId],
@@ -343,8 +344,8 @@ const inferProxyEngineFamily = (engine: string) => {
  * });
  * ```
  *
- * ### Querying from a Function
- * **Example:** Query over the Data API
+ * @section Querying from a Function
+ * @example Query over the Data API
  * ```typescript
  * // the Data API is enabled by default (dataApi: true) — bind
  * // AWS.RDSData.ExecuteStatement to query without a VPC socket
@@ -354,8 +355,6 @@ const inferProxyEngineFamily = (engine: string) => {
  * });
  * const result = yield* executeStatement({ sql: "SELECT 1" });
  * ```
- *
- * @resource
  */
 export const Aurora = (id: string, props: AuroraProps) =>
   Namespace.push(

@@ -1,36 +1,21 @@
 import { AlchemyContext } from "@/AlchemyContext.ts";
 import { AuthProviders } from "@/Auth/AuthProvider.ts";
-import { ArtifactStore, createArtifactStore } from "@/Artifacts.ts";
-import * as CliKit from "@/Cli/CliKit/index.ts";
 import * as Neon from "@/Neon";
-import { Credentials } from "@/Neon/Credentials.ts";
 import { Stack } from "@/Stack.ts";
 import { Stage } from "@/Stage.ts";
-import * as NodeServices from "@effect/platform-node/NodeServices";
-import { expect, it } from "alchemy-test";
+import { NodeServices } from "@effect/platform-node";
+import { it } from "alchemy-test";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import * as Result from "effect/Result";
-import * as FetchHttpClient from "effect/http/FetchHttpClient";
+import * as FetchHttpClient from "effect/unstable/http/FetchHttpClient";
 import { v4 as uuidv4 } from "uuid";
 
 it.live(
-  "resolving Neon credentials rejects an unknown explicit profile",
+  "building the Neon provider layers should not fail for unknown profile",
   () =>
     Effect.gen(function* () {
-      const result = yield* Effect.result(
-        Effect.sandbox(
-          Effect.gen(function* () {
-            return yield* yield* Credentials;
-          }).pipe(Effect.provide(Neon.providers())),
-        ),
-      );
-      expect(Result.isFailure(result)).toBe(true);
-      if (Result.isFailure(result)) {
-        expect(String(result.failure)).toContain("does not exist");
-        expect(String(result.failure)).toContain("alchemy profile create");
-      }
+      yield* Layer.build(Neon.providers());
     }).pipe(
       Effect.provide(
         Layer.mergeAll(
@@ -54,12 +39,9 @@ it.live(
               ALCHEMY_PROFILE: `non-existent-${uuidv4()}`,
             }),
           ),
-          Layer.sync(ArtifactStore, createArtifactStore),
           NodeServices.layer,
           FetchHttpClient.layer,
-          CliKit.layer({ input: false }),
         ),
       ),
     ),
-  { tags: ["unit", "provider:neon", "local"] },
 );

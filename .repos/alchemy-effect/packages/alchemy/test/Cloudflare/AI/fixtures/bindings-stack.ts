@@ -28,9 +28,7 @@ export default Alchemy.Stack(
     state: Cloudflare.state(),
   },
   Effect.gen(function* () {
-    const bucket = yield* Cloudflare.R2.Bucket("AiSearchBindingBucket", {
-      forceDestroy: true,
-    });
+    const bucket = yield* Cloudflare.R2.Bucket("AiSearchBindingBucket", {});
     const namespace = yield* Cloudflare.AI.SearchNamespace(
       "AiSearchBindingNs",
       {},
@@ -40,7 +38,7 @@ export default Alchemy.Stack(
     });
     const asyncWorker = yield* Cloudflare.Worker("AiSearchBindingsWorker", {
       main: path.resolve(import.meta.dirname, "bindings-worker.ts"),
-      workersDev: true,
+      url: true,
       env: { SEARCH: search, NS: namespace },
     });
     const effectWorker = yield* AiSearchEffectBindingsWorker;

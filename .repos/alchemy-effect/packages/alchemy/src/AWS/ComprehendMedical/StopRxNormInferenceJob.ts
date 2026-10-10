@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * arguments and grants `comprehendmedical:StopRxNormInferenceJob` on `*`. Provide the
  * implementation with `Effect.provide(AWS.ComprehendMedical.StopRxNormInferenceJobHttp)`.
  *
- * ### Batch RxNorm Inference Jobs
- * **Example:** Stop a Running Job
+ * @binding
+ * @section Batch RxNorm Inference Jobs
+ * @example Stop a Running Job
  * ```typescript
  * // init
  * const stopRxNormInferenceJob = yield* AWS.ComprehendMedical.StopRxNormInferenceJob();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* stopRxNormInferenceJob({ JobId: jobId });
  * ```
- *
- * @binding
  */
 export interface StopRxNormInferenceJob extends Binding.Service<
   StopRxNormInferenceJob,

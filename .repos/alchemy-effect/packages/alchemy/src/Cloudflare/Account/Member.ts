@@ -128,8 +128,11 @@ export type Member = Resource<
  * state, `read` scans the account for an existing membership with the same
  * email and reports it as `Unowned`, so the engine refuses to take it over
  * unless `--adopt` (or `adopt(true)`) is set.
- * ### Inviting a member
- * **Example:** Invite with a role looked up by name
+ * @resource
+ * @product Accounts
+ * @category Account & Identity
+ * @section Inviting a member
+ * @example Invite with a role looked up by name
  * ```typescript
  * const role = yield* Cloudflare.Account.findAccountRoleByName(
  *   accountId,
@@ -142,8 +145,8 @@ export type Member = Resource<
  * });
  * ```
  *
- * ### Changing roles
- * **Example:** Swap the member's role in place
+ * @section Changing roles
+ * @example Swap the member's role in place
  * ```typescript
  * // Same email — the membership is updated, not replaced.
  * yield* Cloudflare.Account.Member("Auditor", {
@@ -152,8 +155,8 @@ export type Member = Resource<
  * });
  * ```
  *
- * ### Scoped policies (Enterprise)
- * **Example:** Invite with a scoped policy instead of roles
+ * @section Scoped policies (Enterprise)
+ * @example Invite with a scoped policy instead of roles
  * ```typescript
  * yield* Cloudflare.Account.Member("ScopedOperator", {
  *   email: "operator@example.com",
@@ -166,10 +169,6 @@ export type Member = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/fundamentals/manage-members/
- *
- * @resource
- * @product Accounts
- * @category Account & Identity
  */
 export const Member = Resource<Member>(TypeId);
 

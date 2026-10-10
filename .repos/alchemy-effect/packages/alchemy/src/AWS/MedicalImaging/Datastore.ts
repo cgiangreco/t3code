@@ -70,13 +70,14 @@ export interface Datastore extends Resource<
  * minutes) and must be empty (no image sets) before they can be deleted.
  * HealthImaging has no update API, so every property except tags triggers a
  * replacement.
- * ### Creating a Data Store
- * **Example:** Basic Data Store
+ * @resource
+ * @section Creating a Data Store
+ * @example Basic Data Store
  * ```typescript
  * const datastore = yield* Datastore("Imaging", {});
  * ```
  *
- * **Example:** Data Store with a Customer-Managed KMS Key
+ * @example Data Store with a Customer-Managed KMS Key
  * ```typescript
  * const datastore = yield* Datastore("Imaging", {
  *   kmsKeyArn: key.keyArn,
@@ -84,15 +85,13 @@ export interface Datastore extends Resource<
  * });
  * ```
  *
- * ### Importing DICOM Data
- * **Example:** Reference the Data Store Id
+ * @section Importing DICOM Data
+ * @example Reference the Data Store Id
  * ```typescript
  * const datastore = yield* Datastore("Imaging", {});
  * // startDICOMImportJob and image-set APIs address the store by id
  * const id = datastore.datastoreId;
  * ```
- *
- * @resource
  */
 export const Datastore = Resource<Datastore>("AWS.MedicalImaging.Datastore");
 

@@ -71,11 +71,12 @@ export interface Secret extends Resource<
  * by `GitHub.providers()` (which uses the Alchemy AuthProvider — env,
  * stored PAT, `gh` CLI, or OAuth). The token needs `repo` scope for
  * private repositories or `public_repo` for public ones.
- * ### Repository Secrets
+ * @resource
+ * @section Repository Secrets
  * Store secrets accessible to all GitHub Actions workflows in the
  * repository.
  *
- * **Example:** Create a Repository Secret
+ * @example Create a Repository Secret
  * ```typescript
  * yield* GitHub.Secret("aws-role", {
  *   owner: "my-org",
@@ -85,12 +86,12 @@ export interface Secret extends Resource<
  * });
  * ```
  *
- * ### Environment Secrets
+ * @section Environment Secrets
  * Scope a secret to a specific GitHub Actions environment (e.g.
  * `production`, `staging`). Environment secrets require environment
  * protection rules to be satisfied before workflows can access them.
  *
- * **Example:** Create an Environment Secret
+ * @example Create an Environment Secret
  * ```typescript
  * yield* GitHub.Secret("deploy-key", {
  *   owner: "my-org",
@@ -101,12 +102,12 @@ export interface Secret extends Resource<
  * });
  * ```
  *
- * ### Wiring with Other Resources
+ * @section Wiring with Other Resources
  * A common pattern is wiring the output of another resource — like an
  * IAM role ARN or a database URL — directly into a GitHub secret so
  * that CI workflows can use it.
  *
- * **Example:** Store an IAM Role ARN for CI
+ * @example Store an IAM Role ARN for CI
  * ```typescript
  * const role = yield* AWS.IAM.Role("ci-role", { ... });
  *
@@ -118,7 +119,7 @@ export interface Secret extends Resource<
  * });
  * ```
  *
- * **Example:** Store Multiple Secrets
+ * @example Store Multiple Secrets
  * ```typescript
  * yield* GitHub.Secret("db-url", {
  *   owner: "my-org",
@@ -136,9 +137,6 @@ export interface Secret extends Resource<
  *   value: Redacted.make(apiKey),
  * });
  * ```
- *
- * @resource
- * @product Actions
  */
 export const Secret = Resource<Secret>("GitHub.Secret");
 

@@ -13,16 +13,15 @@ export interface DescribeBackupRequest extends DynamoDB.DescribeBackupInput {}
  * ARN. The IAM grant covers every backup of the bound table
  * (`{tableArn}/backup/*`). Provide the `DescribeBackupHttp` layer on the
  * Function to satisfy the binding.
- * ### Backup and Restore
- * **Example:** Poll a Backup Until It Is Available
+ * @binding
+ * @section Backup and Restore
+ * @example Poll a Backup Until It Is Available
  * ```typescript
  * const describeBackup = yield* AWS.DynamoDB.DescribeBackup(table);
  *
  * const response = yield* describeBackup({ BackupArn: backupArn });
  * const status = response.BackupDescription?.BackupDetails?.BackupStatus;
  * ```
- *
- * @binding
  */
 export interface DescribeBackup extends Binding.Service<
   DescribeBackup,

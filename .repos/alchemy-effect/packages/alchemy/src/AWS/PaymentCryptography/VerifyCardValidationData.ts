@@ -14,8 +14,9 @@ export interface VerifyCardValidationDataRequest extends Omit<
  * Verification Key (CVK) {@link Key} used to generate them. A mismatch fails
  * with the typed `VerificationFailedException`. Provide
  * `VerifyCardValidationDataHttp` on the Function to satisfy this service.
- * ### Card Validation Data
- * **Example:** Verify a CVV2 presented in a transaction
+ * @binding
+ * @section Card Validation Data
+ * @example Verify a CVV2 presented in a transaction
  * ```typescript
  * // init
  * const verifyCvv2 = yield* PaymentCryptography.VerifyCardValidationData(cvk);
@@ -34,8 +35,6 @@ export interface VerifyCardValidationDataRequest extends Omit<
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface VerifyCardValidationData extends Binding.Service<
   VerifyCardValidationData,

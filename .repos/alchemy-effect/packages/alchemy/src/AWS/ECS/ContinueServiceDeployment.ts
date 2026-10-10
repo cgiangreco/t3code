@@ -15,8 +15,9 @@ export interface ContinueServiceDeploymentRequest
  * that validates the green revision and then approves (or vetoes) the
  * traffic shift. The host is granted `ecs:ContinueServiceDeployment` on the
  * bound service's deployments.
- * ### Service Deployments
- * **Example:** Approve a Lifecycle-Hook Stage
+ * @binding
+ * @section Service Deployments
+ * @example Approve a Lifecycle-Hook Stage
  * ```typescript
  * const continueServiceDeployment =
  *   yield* AWS.ECS.ContinueServiceDeployment(service);
@@ -26,8 +27,6 @@ export interface ContinueServiceDeploymentRequest
  *   hookId,
  * });
  * ```
- *
- * @binding
  */
 export interface ContinueServiceDeployment extends Binding.Service<
   ContinueServiceDeployment,

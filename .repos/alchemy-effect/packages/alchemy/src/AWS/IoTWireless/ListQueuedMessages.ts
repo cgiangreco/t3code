@@ -17,12 +17,13 @@ export interface ListQueuedMessagesRequest extends Omit<
  * messages queued for the bound wireless device from a deployed Lambda or
  * Task.
  *
- * ### Inspecting the Downlink Queue
+ * @binding
+ * @section Inspecting the Downlink Queue
  * Provide the `ListQueuedMessagesHttp` implementation layer on the Function
  * effect, bind the device in the init phase, then call the returned client
  * at runtime.
  *
- * **Example:** Count Pending Downlinks
+ * @example Count Pending Downlinks
  * ```typescript
  * // init
  * const listQueued = yield* AWS.IoTWireless.ListQueuedMessages(device);
@@ -33,8 +34,6 @@ export interface ListQueuedMessagesRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTWireless.ListQueuedMessagesHttp))
  * ```
- *
- * @binding
  */
 export interface ListQueuedMessages extends Binding.Service<
   ListQueuedMessages,

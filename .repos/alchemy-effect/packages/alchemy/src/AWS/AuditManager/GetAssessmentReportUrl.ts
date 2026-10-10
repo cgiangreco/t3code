@@ -15,14 +15,13 @@ export interface GetAssessmentReportUrlRequest extends Omit<
  * Gets the presigned URL for downloading a generated assessment
  * report. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.GetAssessmentReportUrlHttp)`.
- * ### Assessment Reports
- * **Example:** Presign a Report Download
+ * @binding
+ * @section Assessment Reports
+ * @example Presign a Report Download
  * ```typescript
  * const getAssessmentReportUrl = yield* AWS.AuditManager.GetAssessmentReportUrl(assessment);
  * const result = yield* getAssessmentReportUrl({ assessmentReportId });
  * ```
- *
- * @binding
  */
 export interface GetAssessmentReportUrl extends Binding.Service<
   GetAssessmentReportUrl,

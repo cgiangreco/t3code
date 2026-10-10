@@ -1,16 +1,16 @@
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessPlatform } from "@t3tools/shared/hostProcess";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as Stream from "effect/Stream";
-import { HttpClient, HttpClientRequest } from "effect/http";
-import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { HttpClient, HttpClientRequest } from "effect/unstable/http";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 export const DEFAULT_TAILSCALE_SERVE_PORT = 443;
 export const TAILSCALE_STATUS_TIMEOUT = Duration.millis(1_500);
-const TAILSCALE_SERVE_TIMEOUT = Duration.seconds(10);
-const TAILSCALE_PROBE_TIMEOUT = Duration.millis(2_500);
+export const TAILSCALE_SERVE_TIMEOUT = Duration.seconds(10);
+export const TAILSCALE_PROBE_TIMEOUT = Duration.millis(2_500);
 
 // tailscale is a real executable everywhere (`tailscale.exe` on Windows), so
 // it is always spawned directly rather than through cmd.exe shell mode.
@@ -47,14 +47,14 @@ const STDERR_DIAGNOSTIC_PATTERNS: ReadonlyArray<
 ];
 
 /** Classifies stderr into a safe label, dropping the text itself. */
-const stderrDiagnosticOf = (stderr: string): TailscaleStderrDiagnostic | undefined => {
+export const stderrDiagnosticOf = (stderr: string): TailscaleStderrDiagnostic | undefined => {
   if (stderr.trim().length === 0) {
     return undefined;
   }
   return STDERR_DIAGNOSTIC_PATTERNS.find(([pattern]) => pattern.test(stderr))?.[1] ?? "unknown";
 };
 
-export class TailscaleCommandSpawnError extends Schema.TaggedError<TailscaleCommandSpawnError>()(
+export class TailscaleCommandSpawnError extends Schema.TaggedErrorClass<TailscaleCommandSpawnError>()(
   "TailscaleCommandSpawnError",
   {
     ...TailscaleCommandContext,
@@ -66,7 +66,7 @@ export class TailscaleCommandSpawnError extends Schema.TaggedError<TailscaleComm
   }
 }
 
-class TailscaleCommandOutputError extends Schema.TaggedError<TailscaleCommandOutputError>()(
+export class TailscaleCommandOutputError extends Schema.TaggedErrorClass<TailscaleCommandOutputError>()(
   "TailscaleCommandOutputError",
   {
     ...TailscaleCommandContext,
@@ -78,7 +78,7 @@ class TailscaleCommandOutputError extends Schema.TaggedError<TailscaleCommandOut
   }
 }
 
-export class TailscaleCommandExitError extends Schema.TaggedError<TailscaleCommandExitError>()(
+export class TailscaleCommandExitError extends Schema.TaggedErrorClass<TailscaleCommandExitError>()(
   "TailscaleCommandExitError",
   {
     ...TailscaleCommandContext,
@@ -98,7 +98,7 @@ export class TailscaleCommandExitError extends Schema.TaggedError<TailscaleComma
   }
 }
 
-export class TailscaleCommandTimeoutError extends Schema.TaggedError<TailscaleCommandTimeoutError>()(
+export class TailscaleCommandTimeoutError extends Schema.TaggedErrorClass<TailscaleCommandTimeoutError>()(
   "TailscaleCommandTimeoutError",
   {
     ...TailscaleCommandContext,
@@ -111,13 +111,15 @@ export class TailscaleCommandTimeoutError extends Schema.TaggedError<TailscaleCo
   }
 }
 
-export type TailscaleCommandError =
-  | TailscaleCommandSpawnError
-  | TailscaleCommandOutputError
-  | TailscaleCommandExitError
-  | TailscaleCommandTimeoutError;
+export const TailscaleCommandError = Schema.Union([
+  TailscaleCommandSpawnError,
+  TailscaleCommandOutputError,
+  TailscaleCommandExitError,
+  TailscaleCommandTimeoutError,
+]);
+export type TailscaleCommandError = typeof TailscaleCommandError.Type;
 
-export class TailscaleStatusParseError extends Schema.TaggedError<TailscaleStatusParseError>()(
+export class TailscaleStatusParseError extends Schema.TaggedErrorClass<TailscaleStatusParseError>()(
   "TailscaleStatusParseError",
   { cause: Schema.Defect() },
 ) {
@@ -135,6 +137,7 @@ const TailscaleStatusJson = Schema.Struct({
   Self: Schema.optional(TailscaleStatusSelf),
 });
 
+export type TailscaleStatusSelf = typeof TailscaleStatusSelf.Type;
 export type TailscaleStatusJson = typeof TailscaleStatusJson.Type;
 
 export interface TailscaleStatus {
@@ -217,7 +220,7 @@ export const parseTailscaleStatus = (
 export const readTailscaleStatus = Effect.gen(function* () {
   const args = ["status", "--json"];
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
-  const hostPlatform = yield* HostProcess.Platform;
+  const hostPlatform = yield* HostProcessPlatform;
   const executable = tailscaleCommandForPlatform(hostPlatform);
   const commandContext = {
     executable,
@@ -225,15 +228,11 @@ export const readTailscaleStatus = Effect.gen(function* () {
     argumentCount: args.length,
   };
   return yield* Effect.gen(function* () {
-    const child = yield* spawner.spawn(ChildProcess.make(executable, args)).pipe(
-      Effect.mapError((cause) => new TailscaleCommandSpawnError({ ...commandContext, cause })),
-      // Spawning can also fail as a defect rather than a typed error - a
-      // non-directory entry on PATH makes node throw ENOTDIR synchronously.
-      // `mapError` never sees that, so it would escape as an uncaught error.
-      Effect.catchDefect((cause) =>
-        Effect.fail(new TailscaleCommandSpawnError({ ...commandContext, cause })),
-      ),
-    );
+    const child = yield* spawner
+      .spawn(ChildProcess.make(executable, args))
+      .pipe(
+        Effect.mapError((cause) => new TailscaleCommandSpawnError({ ...commandContext, cause })),
+      );
     const [stdout, stderr, exitCode] = yield* Effect.all(
       [
         collectStdout(child.stdout),
@@ -291,7 +290,7 @@ const runTailscaleCommand = (
 ): Effect.Effect<void, TailscaleCommandError, ChildProcessSpawner.ChildProcessSpawner> =>
   Effect.gen(function* () {
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
-    const hostPlatform = yield* HostProcess.Platform;
+    const hostPlatform = yield* HostProcessPlatform;
     const executable = tailscaleCommandForPlatform(hostPlatform);
     const commandContext = {
       executable,
@@ -300,12 +299,11 @@ const runTailscaleCommand = (
     };
     const timeout = Duration.fromInputUnsafe(timeoutInput);
     return yield* Effect.gen(function* () {
-      const child = yield* spawner.spawn(ChildProcess.make(executable, args)).pipe(
-        Effect.mapError((cause) => new TailscaleCommandSpawnError({ ...commandContext, cause })),
-        Effect.catchDefect((cause) =>
-          Effect.fail(new TailscaleCommandSpawnError({ ...commandContext, cause })),
-        ),
-      );
+      const child = yield* spawner
+        .spawn(ChildProcess.make(executable, args))
+        .pipe(
+          Effect.mapError((cause) => new TailscaleCommandSpawnError({ ...commandContext, cause })),
+        );
       const [stderr, exitCode] = yield* Effect.all(
         [collectStderr(child.stderr), child.exitCode.pipe(Effect.map(Number))],
         { concurrency: "unbounded" },
@@ -379,3 +377,23 @@ export const probeTailscaleHttpsEndpoint = (input: {
       onSome: (httpResponse) => httpResponse.status >= 200 && httpResponse.status < 300,
     });
   }).pipe(Effect.orElseSucceed(() => false));
+
+export const resolveTailscaleHttpsBaseUrl = (
+  input: {
+    readonly servePort?: number;
+  } = {},
+): Effect.Effect<
+  string | null,
+  TailscaleCommandError | TailscaleStatusParseError,
+  ChildProcessSpawner.ChildProcessSpawner
+> =>
+  readTailscaleStatus.pipe(
+    Effect.map((status) =>
+      status.magicDnsName
+        ? buildTailscaleHttpsBaseUrl({
+            magicDnsName: status.magicDnsName,
+            ...(input.servePort === undefined ? {} : { servePort: input.servePort }),
+          })
+        : null,
+    ),
+  );

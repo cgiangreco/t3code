@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * error channel. Provide the implementation with
  * `Effect.provide(AWS.IoTFleetWise.BatchCreateVehicleHttp)`.
  *
- * ### Provisioning Vehicles
- * **Example:** Provision a Batch of Vehicles
+ * @binding
+ * @section Provisioning Vehicles
+ * @example Provision a Batch of Vehicles
  * ```typescript
  * const batchCreateVehicle = yield* IoTFleetWise.BatchCreateVehicle();
  *
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchCreateVehicle extends Binding.Service<
   BatchCreateVehicle,

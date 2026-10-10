@@ -12,8 +12,9 @@ export interface GetInternetEventRequest extends im.GetInternetEventInput {}
  *
  * Provide `InternetMonitor.GetInternetEventHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Reading Internet Events
- * **Example:** Read an Internet Event by Id
+ * @binding
+ * @section Reading Internet Events
+ * @example Read an Internet Event by Id
  * ```typescript
  * // init — grants internetmonitor:GetInternetEvent
  * const getInternetEvent = yield* AWS.InternetMonitor.GetInternetEvent();
@@ -22,8 +23,6 @@ export interface GetInternetEventRequest extends im.GetInternetEventInput {}
  * const event = yield* getInternetEvent({ EventId: eventId });
  * const location = event.ClientLocation;
  * ```
- *
- * @binding
  */
 export interface GetInternetEvent extends Binding.Service<
   GetInternetEvent,

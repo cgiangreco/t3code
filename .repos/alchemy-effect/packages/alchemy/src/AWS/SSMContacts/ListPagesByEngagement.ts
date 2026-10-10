@@ -9,15 +9,14 @@ import * as Binding from "../../Binding.ts";
  * and escalation stage.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMContacts.ListPagesByEngagementHttp)`.
- * ### Working with Pages
- * **Example:** List an Engagement's Pages
+ * @binding
+ * @section Working with Pages
+ * @example List an Engagement's Pages
  * ```typescript
  * const listPagesByEngagement = yield* AWS.SSMContacts.ListPagesByEngagement();
  *
  * const { Pages } = yield* listPagesByEngagement({ EngagementId: engagementArn });
  * ```
- *
- * @binding
  */
 export interface ListPagesByEngagement extends Binding.Service<
   ListPagesByEngagement,

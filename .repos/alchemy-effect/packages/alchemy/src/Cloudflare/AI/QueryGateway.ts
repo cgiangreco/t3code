@@ -3,7 +3,7 @@
 import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import type { LanguageModel } from "effect/ai/LanguageModel";
+import type { LanguageModel } from "effect/unstable/ai/LanguageModel";
 import * as Binding from "../../Binding.ts";
 import type { RuntimeContext } from "../../RuntimeContext.ts";
 import type { Gateway as GatewayResource } from "./Gateway.ts";
@@ -15,7 +15,7 @@ import { type LanguageModelOptions } from "./LanguageModel.ts";
  * the Cloudflare.AI. Gateway runtime binding so each operation returns
  * an Effect tagged with {@link GatewayError}, exposes the raw
  * Workers AI handle for `ai.run(...)`, and provides a `model(options)`
- * factory that produces an `effect/ai` `LanguageModel`
+ * factory that produces an `effect/unstable/ai` `LanguageModel`
  * `Layer`.
  *
  * Bind a {@link Gateway} to a Worker and obtain the
@@ -25,9 +25,12 @@ import { type LanguageModelOptions } from "./LanguageModel.ts";
  * Context tag, its type, and the callable —
  * `yield* Cloudflare.AI.QueryGateway(gateway)`.
  *
+ * @binding
+ * @product AI Gateway
+ * @category AI
  *
- * ### Calling AI Gateway
- * **Example:** Run through a gateway
+ * @section Calling AI Gateway
+ * @example Run through a gateway
  * Bind the gateway during the Worker's init phase, then use `run` or
  * `getUrl` from request handlers.
  * ```typescript
@@ -45,8 +48,8 @@ import { type LanguageModelOptions } from "./LanguageModel.ts";
  * };
  * ```
  *
- * ### Driving Effect AI through the gateway
- * **Example:** `aiGateway.model(...)` -> Effect AI `LanguageModel`
+ * @section Driving Effect AI through the gateway
+ * @example `aiGateway.model(...)` -> Effect AI `LanguageModel`
  * `model(options)` produces a `Layer<LanguageModel, never,
  * RuntimeContext>` that translates `LanguageModel.generateText` /
  * `streamText` calls (including tool calls and structured outputs)
@@ -67,10 +70,6 @@ import { type LanguageModelOptions } from "./LanguageModel.ts";
  *
  * Provide {@link QueryGatewayBinding} in the worker's runtime layer
  * to resolve the underlying Cloudflare.AI. binding at request time.
- *
- * @binding
- * @product AI Gateway
- * @category AI
  */
 export interface QueryGateway extends Binding.Service<
   QueryGateway,

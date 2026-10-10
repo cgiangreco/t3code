@@ -19,8 +19,9 @@ export interface GetDomainSuggestionsRequest
  * Provide the implementation with
  * `Effect.provide(AWS.Route53Domains.GetDomainSuggestionsHttp)`.
  *
- * ### Suggesting Domain Names
- * **Example:** Suggest Available Alternatives for a Name
+ * @binding
+ * @section Suggesting Domain Names
+ * @example Suggest Available Alternatives for a Name
  * ```typescript
  * // init
  * const getDomainSuggestions =
@@ -34,8 +35,6 @@ export interface GetDomainSuggestionsRequest
  * });
  * const names = (result.SuggestionsList ?? []).map((s) => s.DomainName);
  * ```
- *
- * @binding
  */
 export interface GetDomainSuggestions extends Binding.Service<
   GetDomainSuggestions,

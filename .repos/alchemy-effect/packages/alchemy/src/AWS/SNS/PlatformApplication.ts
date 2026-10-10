@@ -72,8 +72,9 @@ export interface PlatformApplication extends Resource<
  * `CreatePlatformEndpoint` binding, and messages are delivered with
  * `PublishToEndpoint`. SNS validates the credential when the application is
  * created, so a real push-service credential is required.
- * ### Creating Platform Applications
- * **Example:** FCM (GCM) Application
+ * @resource
+ * @section Creating Platform Applications
+ * @example FCM (GCM) Application
  * ```typescript
  * import * as SNS from "alchemy/AWS/SNS";
  * import * as Redacted from "effect/Redacted";
@@ -84,7 +85,7 @@ export interface PlatformApplication extends Resource<
  * });
  * ```
  *
- * **Example:** APNS Application
+ * @example APNS Application
  * ```typescript
  * const app = yield* SNS.PlatformApplication("IosPushApp", {
  *   platform: "APNS",
@@ -93,8 +94,8 @@ export interface PlatformApplication extends Resource<
  * });
  * ```
  *
- * ### Runtime Endpoints
- * **Example:** Register a Device Token at Runtime
+ * @section Runtime Endpoints
+ * @example Register a Device Token at Runtime
  * ```typescript
  * // init
  * const createEndpoint = yield* SNS.CreatePlatformEndpoint(app);
@@ -107,8 +108,6 @@ export interface PlatformApplication extends Resource<
  *   Message: "hello",
  * });
  * ```
- *
- * @resource
  */
 export const PlatformApplication = Resource<PlatformApplication>(
   "AWS.SNS.PlatformApplication",

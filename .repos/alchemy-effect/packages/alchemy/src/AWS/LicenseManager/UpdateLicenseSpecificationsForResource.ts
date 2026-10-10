@@ -16,8 +16,9 @@ export interface UpdateLicenseSpecificationsForResourceRequest
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.UpdateLicenseSpecificationsForResourceHttp)`.
- * ### Resource Inventory and Specifications
- * **Example:** Attach a License Configuration to an AMI
+ * @binding
+ * @section Resource Inventory and Specifications
+ * @example Attach a License Configuration to an AMI
  * ```typescript
  * // init
  * const updateSpecifications =
@@ -31,8 +32,6 @@ export interface UpdateLicenseSpecificationsForResourceRequest
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateLicenseSpecificationsForResource extends Binding.Service<
   UpdateLicenseSpecificationsForResource,

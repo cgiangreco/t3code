@@ -9,8 +9,9 @@ import type { EventDataStore } from "./EventDataStore.ts";
  * Cancels a running CloudTrail Lake query. Cancelling a query that already
  * finished fails with the typed `InactiveQueryException`. Provide the
  * implementation with `Effect.provide(AWS.CloudTrail.CancelQueryHttp)`.
- * ### Querying CloudTrail Lake
- * **Example:** Cancel a Running Query
+ * @binding
+ * @section Querying CloudTrail Lake
+ * @example Cancel a Running Query
  * ```typescript
  * // init — bind the operation to the event data store
  * const cancelQuery = yield* AWS.CloudTrail.CancelQuery(store);
@@ -19,8 +20,6 @@ import type { EventDataStore } from "./EventDataStore.ts";
  * const result = yield* cancelQuery({ QueryId: queryId });
  * console.log(result.QueryStatus); // CANCELLED
  * ```
- *
- * @binding
  */
 export interface CancelQuery extends Binding.Service<
   CancelQuery,

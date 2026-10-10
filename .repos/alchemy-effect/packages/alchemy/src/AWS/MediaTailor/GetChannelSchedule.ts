@@ -10,15 +10,14 @@ import * as Binding from "../../Binding.ts";
  * grants `mediatailor:GetChannelSchedule` on `*`. Provide the implementation
  * with `Effect.provide(AWS.MediaTailor.GetChannelScheduleHttp)`.
  *
- * ### Channel Assembly
- * **Example:** Read a channel's schedule
+ * @binding
+ * @section Channel Assembly
+ * @example Read a channel's schedule
  * ```typescript
  * const getChannelSchedule = yield* AWS.MediaTailor.GetChannelSchedule();
  *
  * const { Items } = yield* getChannelSchedule({ ChannelName: "my-channel" });
  * ```
- *
- * @binding
  */
 export interface GetChannelSchedule extends Binding.Service<
   GetChannelSchedule,

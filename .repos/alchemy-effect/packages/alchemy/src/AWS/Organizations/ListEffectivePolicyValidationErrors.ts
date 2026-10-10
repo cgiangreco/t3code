@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — Organizations is a management-account-scoped
  * global service, so the binding takes no resource argument. Provide the
  * implementation with `Effect.provide(AWS.Organizations.ListEffectivePolicyValidationErrorsHttp)`.
- * ### Policies & Effective Policy
- * **Example:** Read Effective-Policy Validation Errors
+ * @binding
+ * @section Policies & Effective Policy
+ * @example Read Effective-Policy Validation Errors
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listEffectivePolicyValidationErrors = yield* AWS.Organizations.ListEffectivePolicyValidationErrors();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *     PolicyType: "TAG_POLICY",
  *   });
  * ```
- *
- * @binding
  */
 export interface ListEffectivePolicyValidationErrors extends Binding.Service<
   ListEffectivePolicyValidationErrors,

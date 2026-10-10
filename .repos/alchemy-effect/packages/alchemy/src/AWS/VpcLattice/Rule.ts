@@ -107,8 +107,9 @@ export interface Rule extends Resource<
  * fixed response), evaluated in priority order before the listener's default
  * action.
  *
- * ### Creating Rules
- * **Example:** Path-Prefix Rule Forwarding to a Target Group
+ * @resource
+ * @section Creating Rules
+ * @example Path-Prefix Rule Forwarding to a Target Group
  * ```typescript
  * const rule = yield* Rule("ApiRule", {
  *   serviceIdentifier: service.serviceId,
@@ -125,7 +126,7 @@ export interface Rule extends Resource<
  * });
  * ```
  *
- * **Example:** Method Match with a Fixed Response
+ * @example Method Match with a Fixed Response
  * ```typescript
  * const rule = yield* Rule("BlockDeletes", {
  *   serviceIdentifier: service.serviceId,
@@ -135,8 +136,6 @@ export interface Rule extends Resource<
  *   action: { fixedResponse: { statusCode: 403 } },
  * });
  * ```
- *
- * @resource
  */
 export const Rule = Resource<Rule>("AWS.VpcLattice.Rule");
 

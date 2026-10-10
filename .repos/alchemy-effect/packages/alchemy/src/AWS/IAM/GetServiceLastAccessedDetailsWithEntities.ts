@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * implementation with
  * `Effect.provide(AWS.IAM.GetServiceLastAccessedDetailsWithEntitiesHttp)`.
  *
- * ### Access Advisor
- * **Example:** List the Entities That Used a Service
+ * @binding
+ * @section Access Advisor
+ * @example List the Entities That Used a Service
  * ```typescript
  * // init
  * const getDetailsWithEntities =
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *   ServiceNamespace: "s3",
  * });
  * ```
- *
- * @binding
  */
 export interface GetServiceLastAccessedDetailsWithEntities extends Binding.Service<
   GetServiceLastAccessedDetailsWithEntities,

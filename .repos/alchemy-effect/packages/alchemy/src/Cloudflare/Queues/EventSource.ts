@@ -83,7 +83,10 @@ export type Message<Body = unknown> = cf.Message<Body>;
  * settings before dead-lettering. Per-message control is still
  * available by calling `msg.ack()` / `msg.retry()` inside the
  * handler.
- * **Example:** Example
+ * @binding
+ * @product Queues
+ * @category Storage & Databases
+ * @example
  * ```typescript
  * import * as Cloudflare from "alchemy/Cloudflare";
  * import * as Duration from "effect/Duration";
@@ -105,17 +108,13 @@ export type Message<Body = unknown> = cf.Message<Body>;
  * );
  * ```
  *
- * **Example:** Example
+ * @example
  * ```typescript
  * // Without options — handler is the second argument.
  * yield* Cloudflare.Queues.consumeQueueMessages<MyEvent>(queueResource, (stream) =>
  *   Stream.runForEach(stream, (msg) => Effect.log(`event ${msg.body.id}`)),
  * );
  * ```
- *
- * @binding
- * @product Queues
- * @category Storage & Databases
  */
 export function consumeQueueMessages<Body = unknown>(
   queue: Queue,

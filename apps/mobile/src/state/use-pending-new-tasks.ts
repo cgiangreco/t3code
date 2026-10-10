@@ -1,25 +1,35 @@
-import { useAtomValue } from "@effect/atom-react";
 import { useMemo } from "react";
-import { buildPendingNewTasks, type PendingNewTask } from "./pending-new-tasks-model";
-import { flattenQueuedThreadMessages } from "./thread-outbox-model";
-import { composerDraftsAtom } from "./use-composer-drafts";
+
+import { deriveThreadTitleFromPrompt } from "../lib/projectThreadStartTurn";
+import {
+  flattenQueuedThreadMessages,
+  type QueuedThreadCreation,
+  type QueuedThreadMessage,
+} from "./thread-outbox-model";
 import { useThreadOutboxMessages } from "./use-thread-outbox";
 
-export type {
-  PendingDraftTask,
-  PendingNewTask,
-  PendingQueuedTask,
-} from "./pending-new-tasks-model";
+/** A queued new-task creation, shaped for thread-list presentation. */
+export interface PendingNewTask {
+  readonly message: QueuedThreadMessage;
+  readonly creation: QueuedThreadCreation;
+  readonly title: string;
+}
 
 export function usePendingNewTasks(): ReadonlyArray<PendingNewTask> {
   const queuedMessagesByThreadKey = useThreadOutboxMessages();
-  const drafts = useAtomValue(composerDraftsAtom);
-  return useMemo(
-    () =>
-      buildPendingNewTasks({
-        queuedMessages: flattenQueuedThreadMessages(queuedMessagesByThreadKey),
-        drafts,
-      }),
-    [queuedMessagesByThreadKey, drafts],
-  );
+  return useMemo(() => {
+    const tasks: PendingNewTask[] = [];
+    for (const message of flattenQueuedThreadMessages(queuedMessagesByThreadKey)) {
+      if (!message.creation) {
+        continue;
+      }
+      tasks.push({
+        message,
+        creation: message.creation,
+        title: deriveThreadTitleFromPrompt(message.text),
+      });
+    }
+    tasks.sort((left, right) => right.message.createdAt.localeCompare(left.message.createdAt));
+    return tasks;
+  }, [queuedMessagesByThreadKey]);
 }

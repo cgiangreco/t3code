@@ -107,8 +107,8 @@ const detailTypeFor = (transition: string): string =>
  * `event.detail.LifecycleHookName` in the handler if multiple groups share the
  * Function.
  *
- * ### Draining Instances
- * **Example:** Signal CONTINUE when an instance is about to terminate
+ * @section Draining Instances
+ * @example Signal CONTINUE when an instance is about to terminate
  * ```typescript
  * const lifecycle = yield* CompleteLifecycleAction(group);
  * yield* consumeLifecycleActions(
@@ -127,7 +127,7 @@ const detailTypeFor = (transition: string): string =>
  * );
  * ```
  *
- * **Example:** Register the event source inside a Lambda Function
+ * @example Register the event source inside a Lambda Function
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  * import {

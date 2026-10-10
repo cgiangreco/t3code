@@ -16,8 +16,9 @@ export interface RemovePermissionRequest extends Omit<
  * label. The binding grants the host function `sns:RemovePermission` on the
  * topic. Provide the `RemovePermissionHttp` layer on the Function to
  * implement the binding.
- * ### Managing Topic Permissions
- * **Example:** Remove a Permission by Label
+ * @binding
+ * @section Managing Topic Permissions
+ * @example Remove a Permission by Label
  * ```typescript
  * // init (provide SNS.RemovePermissionHttp on the Function)
  * const removePermission = yield* SNS.RemovePermission(topic);
@@ -25,8 +26,6 @@ export interface RemovePermissionRequest extends Omit<
  * // runtime
  * yield* removePermission({ Label: "PartnerPublish" });
  * ```
- *
- * @binding
  */
 export interface RemovePermission extends Binding.Service<
   RemovePermission,

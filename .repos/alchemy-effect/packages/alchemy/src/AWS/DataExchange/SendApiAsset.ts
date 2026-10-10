@@ -12,8 +12,9 @@ import type { DataSet } from "./DataSet.ts";
  * revision and asset ids of the API asset to call.
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.SendApiAssetHttp)`.
- * ### Calling API Assets
- * **Example:** Call A Subscribed API Asset
+ * @binding
+ * @section Calling API Assets
+ * @example Call A Subscribed API Asset
  * ```typescript
  * const sendApiAsset = yield* AWS.DataExchange.SendApiAsset(dataSet);
  *
@@ -25,8 +26,6 @@ import type { DataSet } from "./DataSet.ts";
  *   Path: "/prices",
  * });
  * ```
- *
- * @binding
  */
 export interface SendApiAsset extends Binding.Service<
   SendApiAsset,

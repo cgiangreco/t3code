@@ -17,8 +17,9 @@ export interface SendConnectorEventRequest
  * responses) into Managed integrations. Provide the implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.SendConnectorEventHttp)`.
  *
- * ### Connectors
- * **Example:** Report a Device State Change from a Connector
+ * @binding
+ * @section Connectors
+ * @example Report a Device State Change from a Connector
  * ```typescript
  * const sendConnectorEvent = yield* IoTManagedIntegrations.SendConnectorEvent();
  *
@@ -34,8 +35,6 @@ export interface SendConnectorEventRequest
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface SendConnectorEvent extends Binding.Service<
   SendConnectorEvent,

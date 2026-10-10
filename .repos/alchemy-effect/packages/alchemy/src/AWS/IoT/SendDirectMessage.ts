@@ -14,8 +14,9 @@ export interface SendDirectMessageRequest
  * a callable that delivers a message directly to a connected client without
  * publishing through a topic. Provide the implementation with
  * `Effect.provide(AWS.IoT.SendDirectMessageHttp)`.
- * ### MQTT Connections
- * **Example:** Send a Command to a Device
+ * @binding
+ * @section MQTT Connections
+ * @example Send a Command to a Device
  * ```typescript
  * const sendDirectMessage = yield* AWS.IoT.SendDirectMessage("sensor-*");
  *
@@ -25,8 +26,6 @@ export interface SendDirectMessageRequest
  *   payload: JSON.stringify({ at: "now" }),
  * });
  * ```
- *
- * @binding
  */
 export interface SendDirectMessage extends Binding.Service<
   SendDirectMessage,

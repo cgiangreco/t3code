@@ -113,8 +113,9 @@ export interface Collection extends Resource<
  * the provider polls (bounded, ~5 minutes) until the collection reaches
  * `ACTIVE`.
  *
- * ### Creating Collections
- * **Example:** Vector Search Collection for a Bedrock Knowledge Base
+ * @resource
+ * @section Creating Collections
+ * @example Vector Search Collection for a Bedrock Knowledge Base
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -146,8 +147,8 @@ export interface Collection extends Resource<
  * // collection.collectionEndpoint is the aoss data-plane endpoint
  * ```
  *
- * ### Search Collections
- * **Example:** Simple Search Collection
+ * @section Search Collections
+ * @example Simple Search Collection
  * ```typescript
  * const collection = yield* AWS.OpenSearchServerless.Collection("Search", {
  *   collectionName: "logs",
@@ -155,8 +156,6 @@ export interface Collection extends Resource<
  *   description: "application logs",
  * });
  * ```
- *
- * @resource
  */
 export const Collection = Resource<Collection>(
   "AWS.OpenSearchServerless.Collection",

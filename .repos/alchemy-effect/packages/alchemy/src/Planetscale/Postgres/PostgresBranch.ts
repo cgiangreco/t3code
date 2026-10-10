@@ -24,8 +24,7 @@ export interface PostgresBranchProps extends BaseBranchProps {
 
   /**
    * PostgreSQL cluster size for the branch. Required if `backupId` is provided.
-   * Short NAS sizes are expanded using the target branch region. Metal
-   * requires the full SKU (e.g. `"M1_10_AWS_ARM_D_METAL_10"`).
+   * Short sizes are expanded using the target branch region.
    */
   clusterSize?: PostgresClusterSize;
 
@@ -51,8 +50,8 @@ export interface PostgresBranchAttributes extends BaseBranchAttributes {}
  * A PlanetScale branch of a {@link PostgresDatabase}. For MySQL branches
  * use {@link MySQLBranch} instead.
  *
- * ### Creating a Branch
- * **Example:** Branch from main
+ * @section Creating a Branch
+ * @example Branch from main
  * ```typescript
  * const branch = yield* Planetscale.PostgresBranch("Feature123", {
  *   database: "my-db",
@@ -60,7 +59,7 @@ export interface PostgresBranchAttributes extends BaseBranchAttributes {}
  * });
  * ```
  *
- * **Example:** Branch from a PostgresDatabase resource
+ * @example Branch from a PostgresDatabase resource
  * ```typescript
  * const db = yield* Planetscale.PostgresDatabase("MyDb", { clusterSize: "PS_10" });
  * const branch = yield* Planetscale.PostgresBranch("Feature456", {
@@ -69,8 +68,8 @@ export interface PostgresBranchAttributes extends BaseBranchAttributes {}
  * });
  * ```
  *
- * ### Migrations and seed data
- * **Example:** Apply migrations on a branch
+ * @section Migrations and seed data
+ * @example Apply migrations on a branch
  * ```typescript
  * const branch = yield* Planetscale.PostgresBranch("Feature123", {
  *   database: db,

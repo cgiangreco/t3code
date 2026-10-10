@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * `*`. Provide the implementation with
  * `Effect.provide(AWS.MediaConvert.SearchJobsHttp)`.
  *
- * ### Tracking Jobs
- * **Example:** Find Jobs for an Input File
+ * @binding
+ * @section Tracking Jobs
+ * @example Find Jobs for an Input File
  * ```typescript
  * // init
  * const searchJobs = yield* AWS.MediaConvert.SearchJobs();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   Status: "COMPLETE",
  * });
  * ```
- *
- * @binding
  */
 export interface SearchJobs extends Binding.Service<
   SearchJobs,

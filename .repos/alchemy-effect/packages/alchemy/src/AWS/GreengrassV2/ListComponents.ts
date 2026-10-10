@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * optionally scoped to `PRIVATE` or `PUBLIC` components — the entry point
  * for fleet-software inventory tooling. Provide the implementation with
  * `Effect.provide(AWS.GreengrassV2.ListComponentsHttp)`.
- * ### Reading Components
- * **Example:** List Private Components
+ * @binding
+ * @section Reading Components
+ * @example List Private Components
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listComponents = yield* AWS.GreengrassV2.ListComponents();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { components } = yield* listComponents({ scope: "PRIVATE" });
  * ```
- *
- * @binding
  */
 export interface ListComponents extends Binding.Service<
   ListComponents,

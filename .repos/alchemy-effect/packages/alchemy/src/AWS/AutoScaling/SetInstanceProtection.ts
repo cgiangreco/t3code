@@ -20,8 +20,9 @@ export interface SetInstanceProtectionRequest extends Omit<
  * while it processes a long-running job, then removes protection when idle so
  * the group may reclaim it. Provide the implementation with
  * `Effect.provide(AWS.AutoScaling.SetInstanceProtectionHttp)`.
- * ### Scale-In Protection
- * **Example:** Protect a busy worker from scale-in
+ * @binding
+ * @section Scale-In Protection
+ * @example Protect a busy worker from scale-in
  * ```typescript
  * // init — bind the operation to the group
  * const setInstanceProtection =
@@ -33,8 +34,6 @@ export interface SetInstanceProtectionRequest extends Omit<
  *   ProtectedFromScaleIn: true,
  * });
  * ```
- *
- * @binding
  */
 export interface SetInstanceProtection extends Binding.Service<
   SetInstanceProtection,

@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * operation over the AWS-managed platform catalog, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.Signer.ListSigningPlatformsHttp)`.
- * ### Discovering Platforms
- * **Example:** Enumerate Available Platforms
+ * @binding
+ * @section Discovering Platforms
+ * @example Enumerate Available Platforms
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listSigningPlatforms = yield* AWS.Signer.ListSigningPlatforms();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * const { platforms } = yield* listSigningPlatforms();
  * const ids = (platforms ?? []).map((p) => p.platformId);
  * ```
- *
- * @binding
  */
 export interface ListSigningPlatforms extends Binding.Service<
   ListSigningPlatforms,

@@ -54,8 +54,9 @@ export interface AddonSubscription extends Resource<
  * :::warning
  * Creating a subscription accepts the Add On's **additional pricing**.
  * :::
- * ### Subscribing to an Add On
- * **Example:** Spamhaus DBL
+ * @resource
+ * @section Subscribing to an Add On
+ * @example Spamhaus DBL
  * ```typescript
  * import * as MailManager from "alchemy/AWS/MailManager";
  *
@@ -66,8 +67,6 @@ export interface AddonSubscription extends Resource<
  *   addonSubscriptionId: subscription.addonSubscriptionId,
  * });
  * ```
- *
- * @resource
  */
 export const AddonSubscription = Resource<AddonSubscription>(
   "AWS.MailManager.AddonSubscription",

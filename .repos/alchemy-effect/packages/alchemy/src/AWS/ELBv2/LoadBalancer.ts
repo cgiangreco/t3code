@@ -108,8 +108,9 @@ export interface LoadBalancer extends Resource<
 
 /**
  * An ELBv2 (Application / Network / Gateway) load balancer.
- * ### Creating a Load Balancer
- * **Example:** Internet-facing Application Load Balancer
+ * @resource
+ * @section Creating a Load Balancer
+ * @example Internet-facing Application Load Balancer
  * ```typescript
  * const lb = yield* LoadBalancer("web", {
  *   type: "application",
@@ -119,7 +120,7 @@ export interface LoadBalancer extends Resource<
  * });
  * ```
  *
- * **Example:** Network Load Balancer with static EIPs
+ * @example Network Load Balancer with static EIPs
  * ```typescript
  * const nlb = yield* LoadBalancer("edge", {
  *   type: "network",
@@ -131,8 +132,8 @@ export interface LoadBalancer extends Resource<
  * });
  * ```
  *
- * ### Attributes
- * **Example:** Idle timeout and deletion protection
+ * @section Attributes
+ * @example Idle timeout and deletion protection
  * ```typescript
  * const lb = yield* LoadBalancer("web", {
  *   type: "application",
@@ -143,8 +144,6 @@ export interface LoadBalancer extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const LoadBalancer = Resource<LoadBalancer>("AWS.ELBv2.LoadBalancer");
 

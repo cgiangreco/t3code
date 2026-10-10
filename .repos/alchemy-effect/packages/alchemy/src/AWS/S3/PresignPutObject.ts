@@ -1,4 +1,4 @@
-import type { PresignError } from "@distilled.cloud/aws/Presign";
+import type { CredentialsError } from "@distilled.cloud/aws/Credentials";
 import type * as Effect from "effect/Effect";
 import * as Binding from "../../Binding.ts";
 import type { Bucket } from "./Bucket.ts";
@@ -29,15 +29,15 @@ export interface PresignPutObjectRequest {
  * inherits the signer's IAM permissions, the binding grants `s3:PutObject`
  * on the bucket's objects to the host Function.
  *
- * ### Presigning Upload URLs
- * **Example:** Mint a presigned PUT URL
+ * @section Presigning Upload URLs
+ * @example Mint a presigned PUT URL
  * ```typescript
  * const presignPutObject = yield* S3.PresignPutObject(bucket);
  * const url = yield* presignPutObject({ key: "uploads/avatar.png" });
  * // hand `url` to a browser — it can PUT the object without AWS credentials
  * ```
  *
- * **Example:** Pin the uploaded Content-Type
+ * @example Pin the uploaded Content-Type
  * ```typescript
  * const url = yield* presignPutObject({
  *   key: "uploads/avatar.png",
@@ -54,7 +54,9 @@ export interface PresignPutObject extends Binding.Service<
   (
     bucket: Bucket,
   ) => Effect.Effect<
-    (request: PresignPutObjectRequest) => Effect.Effect<string, PresignError>
+    (
+      request: PresignPutObjectRequest,
+    ) => Effect.Effect<string, CredentialsError>
   >
 > {}
 

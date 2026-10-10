@@ -16,8 +16,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StartFaceSearchHttp)`.
  *
- * ### Video Analysis
- * **Example:** Start a Video Face Search
+ * @binding
+ * @section Video Analysis
+ * @example Start a Video Face Search
  * ```typescript
  * // init
  * const startFaceSearch = yield* AWS.Rekognition.StartFaceSearch();
@@ -29,8 +30,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // started.JobId
  * ```
- *
- * @binding
  */
 export interface StartFaceSearch extends Binding.Service<
   StartFaceSearch,

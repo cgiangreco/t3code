@@ -17,8 +17,9 @@ export interface MergeShardsRequest extends Omit<
  * `Stream` resource's `shardCount` prop covers uniform scaling via
  * `UpdateShardCount`; merge/split give per-shard control). Provide the
  * implementation with `Effect.provide(AWS.Kinesis.MergeShardsHttp)`.
- * ### Managing Shards
- * **Example:** Merge Two Adjacent Shards
+ * @binding
+ * @section Managing Shards
+ * @example Merge Two Adjacent Shards
  * ```typescript
  * // init — bind the operation to the stream
  * const mergeShards = yield* AWS.Kinesis.MergeShards(stream);
@@ -29,8 +30,6 @@ export interface MergeShardsRequest extends Omit<
  *   AdjacentShardToMerge: "shardId-000000000001",
  * });
  * ```
- *
- * @binding
  */
 export interface MergeShards extends Binding.Service<
   MergeShards,

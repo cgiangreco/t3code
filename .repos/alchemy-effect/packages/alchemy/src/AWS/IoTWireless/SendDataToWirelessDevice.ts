@@ -18,12 +18,13 @@ export interface SendDataToWirelessDeviceRequest extends Omit<
  * Task. The message is delivered the next time the device opens a receive
  * window.
  *
- * ### Sending Downlink Messages
+ * @binding
+ * @section Sending Downlink Messages
  * Provide the `SendDataToWirelessDeviceHttp` implementation layer on the
  * Function effect, bind the device in the init phase, then call the
  * returned client at runtime.
  *
- * **Example:** Queue a Downlink to a LoRaWAN Device
+ * @example Queue a Downlink to a LoRaWAN Device
  * ```typescript
  * // init
  * const sendData = yield* AWS.IoTWireless.SendDataToWirelessDevice(device);
@@ -37,8 +38,6 @@ export interface SendDataToWirelessDeviceRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTWireless.SendDataToWirelessDeviceHttp))
  * ```
- *
- * @binding
  */
 export interface SendDataToWirelessDevice extends Binding.Service<
   SendDataToWirelessDevice,

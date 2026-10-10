@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * and event name — empty when Insights has recorded no anomalies. Provide
  * the implementation with
  * `Effect.provide(AWS.CloudTrail.ListInsightsMetricDataHttp)`.
- * ### Reading Insights Metrics
- * **Example:** Read API Call Rate Metrics
+ * @binding
+ * @section Reading Insights Metrics
+ * @example Read API Call Rate Metrics
  * ```typescript
  * // init — account-level binding takes no resource
  * const listInsightsMetricData =
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.Timestamps?.length, result.Values?.length);
  * ```
- *
- * @binding
  */
 export interface ListInsightsMetricData extends Binding.Service<
   ListInsightsMetricData,

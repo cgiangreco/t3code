@@ -16,8 +16,9 @@ export interface ListFragmentsRequest extends Omit<
  * Bind this operation to a `Stream` inside a function runtime to get a
  * callable that resolves the per-stream data endpoint (`GetDataEndpoint`)
  * and lists the media fragments stored in the requested timestamp range.
- * ### Reading Media
- * **Example:** List Stored Fragments
+ * @binding
+ * @section Reading Media
+ * @example List Stored Fragments
  * ```typescript
  * // init
  * const listFragments = yield* AWS.KinesisVideo.ListFragments(stream);
@@ -30,8 +31,6 @@ export interface ListFragmentsRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface ListFragments extends Binding.Service<
   ListFragments,

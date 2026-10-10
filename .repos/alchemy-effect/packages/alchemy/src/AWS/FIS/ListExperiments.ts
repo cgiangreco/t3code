@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * a guard that refuses to start a new experiment while one is already
  * running. Provide the implementation with
  * `Effect.provide(AWS.FIS.ListExperimentsHttp)`.
- * ### Running Experiments
- * **Example:** Find Running Experiments for a Template
+ * @binding
+ * @section Running Experiments
+ * @example Find Running Experiments for a Template
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listExperiments = yield* AWS.FIS.ListExperiments();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   (e) => e.state?.status === "running",
  * );
  * ```
- *
- * @binding
  */
 export interface ListExperiments extends Binding.Service<
   ListExperiments,

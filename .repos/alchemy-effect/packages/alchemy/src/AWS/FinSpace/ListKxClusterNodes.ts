@@ -7,15 +7,14 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:ListKxClusterNodes` — lists the nodes of a kdb cluster in the bound environment — node ids, availability zones, and launch times.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.ListKxClusterNodesHttp)`.
- * ### Monitoring Clusters
- * **Example:** List a Cluster's Nodes
+ * @binding
+ * @section Monitoring Clusters
+ * @example List a Cluster's Nodes
  * ```typescript
  * const listNodes = yield* AWS.FinSpace.ListKxClusterNodes(kdb);
  *
  * const { nodes } = yield* listNodes({ clusterName: "hdb" });
  * ```
- *
- * @binding
  */
 export interface ListKxClusterNodes extends Binding.Service<
   ListKxClusterNodes,

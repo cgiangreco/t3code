@@ -97,8 +97,9 @@ export interface Ruleset extends Resource<
  * An AWS Glue DataBrew ruleset — a set of data-quality rules bound to a
  * dataset. Attach it to a profile job via `validationConfigurations` to
  * produce pass/fail validation results alongside the data profile.
- * ### Creating Rulesets
- * **Example:** Data-Quality Rules for a Dataset
+ * @resource
+ * @section Creating Rulesets
+ * @example Data-Quality Rules for a Dataset
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -115,7 +116,7 @@ export interface Ruleset extends Resource<
  * });
  * ```
  *
- * **Example:** Validate in a Profile Job
+ * @example Validate in a Profile Job
  * ```typescript
  * const profile = yield* AWS.DataBrew.Job("Profile", {
  *   type: "PROFILE",
@@ -125,8 +126,6 @@ export interface Ruleset extends Resource<
  *   validationConfigurations: [{ rulesetArn: ruleset.rulesetArn }],
  * });
  * ```
- *
- * @resource
  */
 export const Ruleset = Resource<Ruleset>("AWS.DataBrew.Ruleset");
 

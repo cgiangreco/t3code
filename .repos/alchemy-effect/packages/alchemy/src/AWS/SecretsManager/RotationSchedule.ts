@@ -101,8 +101,9 @@ export interface RotationSchedule extends Resource<
  * invoke permission and the runtime handler — reach for the resource
  * directly only when the rotation function is managed outside the current
  * stack.
- * ### Scheduling Rotation
- * **Example:** Rotate Every 30 Days
+ * @resource
+ * @section Scheduling Rotation
+ * @example Rotate Every 30 Days
  * ```typescript
  * const schedule = yield* RotationSchedule("DbSecretRotation", {
  *   secretId: secret.secretArn,
@@ -111,7 +112,7 @@ export interface RotationSchedule extends Resource<
  * });
  * ```
  *
- * **Example:** Cron Schedule with a Rotation Window
+ * @example Cron Schedule with a Rotation Window
  * ```typescript
  * const schedule = yield* RotationSchedule("DbSecretRotation", {
  *   secretId: secret.secretArn,
@@ -122,8 +123,6 @@ export interface RotationSchedule extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const RotationSchedule = Resource<RotationSchedule>(
   "AWS.SecretsManager.RotationSchedule",
@@ -146,7 +145,7 @@ const retryWhileInvokePermissionPropagates = <A, E extends { _tag: string }, R>(
   Effect.retry(self, {
     while: (e) =>
       e._tag === "InvalidRequestException" &&
-      ((e as { message?: string }).message?.includes("Lambda") ?? false),
+      ((e as { Message?: string }).Message?.includes("Lambda") ?? false),
     schedule: Schedule.max([Schedule.fixed("3 seconds"), Schedule.recurs(10)]),
   });
 

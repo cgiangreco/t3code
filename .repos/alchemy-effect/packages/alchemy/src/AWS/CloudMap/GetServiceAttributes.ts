@@ -10,8 +10,9 @@ import type { Service } from "./Service.ts";
  * Use it to distribute small pieces of service-level configuration to
  * consumers without an extra config store. Provide the implementation with
  * `Effect.provide(AWS.CloudMap.GetServiceAttributesHttp)`.
- * ### Service Attributes
- * **Example:** Read the Service's Attributes
+ * @binding
+ * @section Service Attributes
+ * @example Read the Service's Attributes
  * ```typescript
  * const getServiceAttributes =
  *   yield* AWS.CloudMap.GetServiceAttributes(service);
@@ -19,8 +20,6 @@ import type { Service } from "./Service.ts";
  * const { ServiceAttributes } = yield* getServiceAttributes();
  * console.log(ServiceAttributes?.Attributes?.tier);
  * ```
- *
- * @binding
  */
 export interface GetServiceAttributes extends Binding.Service<
   GetServiceAttributes,

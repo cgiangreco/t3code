@@ -21,8 +21,9 @@ export interface ListIngestionJobsRequest extends Omit<
  * The binding grants the function `bedrock:ListIngestionJobs` scoped to the
  * data source's parent knowledge base.
  *
- * ### Syncing a Data Source
- * **Example:** List Recent Ingestion Jobs
+ * @binding
+ * @section Syncing a Data Source
+ * @example List Recent Ingestion Jobs
  * ```typescript
  * // init
  * const listIngestionJobs = yield* Bedrock.ListIngestionJobs(dataSource);
@@ -33,8 +34,6 @@ export interface ListIngestionJobsRequest extends Omit<
  *   maxResults: 10,
  * });
  * ```
- *
- * @binding
  */
 export interface ListIngestionJobs extends Binding.Service<
   ListIngestionJobs,

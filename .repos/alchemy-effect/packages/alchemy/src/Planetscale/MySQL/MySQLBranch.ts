@@ -46,8 +46,8 @@ export interface MySQLBranchAttributes extends BaseBranchAttributes {}
  * A PlanetScale branch of a {@link MySQLDatabase}. For PostgreSQL branches
  * use {@link PostgresBranch} instead.
  *
- * ### Creating a Branch
- * **Example:** Branch from main
+ * @section Creating a Branch
+ * @example Branch from main
  * ```typescript
  * const branch = yield* Planetscale.MySQLBranch("Feature123", {
  *   database: "my-db",
@@ -56,7 +56,7 @@ export interface MySQLBranchAttributes extends BaseBranchAttributes {}
  * });
  * ```
  *
- * **Example:** Branch from a MySQLDatabase resource
+ * @example Branch from a MySQLDatabase resource
  * ```typescript
  * const db = yield* Planetscale.MySQLDatabase("MyDb", { clusterSize: "PS_10" });
  * const branch = yield* Planetscale.MySQLBranch("Feature456", {
@@ -66,8 +66,8 @@ export interface MySQLBranchAttributes extends BaseBranchAttributes {}
  * });
  * ```
  *
- * ### Restoring from Backup
- * **Example:** Branch restored from a backup
+ * @section Restoring from Backup
+ * @example Branch restored from a backup
  * ```typescript
  * const branch = yield* Planetscale.MySQLBranch("Restored", {
  *   database: "my-db",
@@ -78,8 +78,8 @@ export interface MySQLBranchAttributes extends BaseBranchAttributes {}
  * });
  * ```
  *
- * ### Migrations and seed data
- * **Example:** Apply migrations on a branch
+ * @section Migrations and seed data
+ * @example Apply migrations on a branch
  * ```typescript
  * const branch = yield* Planetscale.MySQLBranch("Feature123", {
  *   database: db,

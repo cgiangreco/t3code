@@ -11,8 +11,9 @@ import type { AddressList } from "./AddressList.ts";
  * the address is not on the list. The address list id is injected from
  * the binding. Provide the implementation with
  * `Effect.provide(AWS.MailManager.GetMemberOfAddressListHttp)`.
- * ### Managing Address List Members
- * **Example:** Check Whether a Sender Is Blocked
+ * @binding
+ * @section Managing Address List Members
+ * @example Check Whether a Sender Is Blocked
  * ```typescript
  * const getMember = yield* MailManager.GetMemberOfAddressList(blockList);
  *
@@ -22,8 +23,6 @@ import type { AddressList } from "./AddressList.ts";
  *   Effect.catchTag("ResourceNotFoundException", () => Effect.succeed(false)),
  * );
  * ```
- *
- * @binding
  */
 export interface GetMemberOfAddressList extends Binding.Service<
   GetMemberOfAddressList,

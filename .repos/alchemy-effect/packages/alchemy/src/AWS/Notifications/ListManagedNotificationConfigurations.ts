@@ -15,8 +15,9 @@ export interface ListManagedNotificationConfigurationsRequest
  * Security/Operations/Issue/Billing categories), optionally filtered by an
  * associated channel. Provide the implementation with
  * `Effect.provide(AWS.Notifications.ListManagedNotificationConfigurationsHttp)`.
- * ### Reading AWS-Managed Notifications
- * **Example:** List Managed Notification Configurations
+ * @binding
+ * @section Reading AWS-Managed Notifications
+ * @example List Managed Notification Configurations
  * ```typescript
  * // init — account-level binding takes no resource
  * const listManagedNotificationConfigurations =
@@ -26,8 +27,6 @@ export interface ListManagedNotificationConfigurationsRequest
  * const result = yield* listManagedNotificationConfigurations();
  * const names = result.managedNotificationConfigurations.map((c) => c.name);
  * ```
- *
- * @binding
  */
 export interface ListManagedNotificationConfigurations extends Binding.Service<
   ListManagedNotificationConfigurations,

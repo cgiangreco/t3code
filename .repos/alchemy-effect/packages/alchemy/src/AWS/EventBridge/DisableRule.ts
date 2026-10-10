@@ -11,8 +11,9 @@ import type { Rule } from "./Rule.ts";
  * callable that pauses the rule — the runtime half of a feature toggle or
  * kill switch. Provide the `DisableRuleHttp` layer on the Function to
  * satisfy the binding.
- * ### Toggling Rules
- * **Example:** Pause the Bound Rule
+ * @binding
+ * @section Toggling Rules
+ * @example Pause the Bound Rule
  * ```typescript
  * // init — bind the rule (provide AWS.EventBridge.DisableRuleHttp on the Function)
  * const disableRule = yield* AWS.EventBridge.DisableRule(rule);
@@ -20,8 +21,6 @@ import type { Rule } from "./Rule.ts";
  * // runtime — stop event routing until re-enabled
  * yield* disableRule();
  * ```
- *
- * @binding
  */
 export interface DisableRule extends Binding.Service<
   DisableRule,

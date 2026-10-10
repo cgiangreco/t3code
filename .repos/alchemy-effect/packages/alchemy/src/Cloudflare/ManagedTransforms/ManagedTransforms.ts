@@ -128,8 +128,11 @@ export type ManagedTransforms = Resource<
  * Some transforms are plan-gated (e.g. `add_bot_protection_headers`
  * requires Bot Management) — enabling those fails server-side on
  * unentitled zones.
- * ### Request transforms
- * **Example:** Add visitor location headers
+ * @resource
+ * @product Managed Transforms
+ * @category Rules & Configuration
+ * @section Request transforms
+ * @example Add visitor location headers
  * ```typescript
  * yield* Cloudflare.ManagedTransforms.ManagedTransforms("Transforms", {
  *   zoneId: zone.zoneId,
@@ -137,7 +140,7 @@ export type ManagedTransforms = Resource<
  * });
  * ```
  *
- * **Example:** Remove visitor IP headers
+ * @example Remove visitor IP headers
  * ```typescript
  * yield* Cloudflare.ManagedTransforms.ManagedTransforms("Transforms", {
  *   zoneId: zone.zoneId,
@@ -145,8 +148,8 @@ export type ManagedTransforms = Resource<
  * });
  * ```
  *
- * ### Response transforms
- * **Example:** Harden responses
+ * @section Response transforms
+ * @example Harden responses
  * ```typescript
  * yield* Cloudflare.ManagedTransforms.ManagedTransforms("Transforms", {
  *   zoneId: zone.zoneId,
@@ -157,8 +160,8 @@ export type ManagedTransforms = Resource<
  * });
  * ```
  *
- * ### Mixed
- * **Example:** Manage request and response transforms together
+ * @section Mixed
+ * @example Manage request and response transforms together
  * ```typescript
  * yield* Cloudflare.ManagedTransforms.ManagedTransforms("Transforms", {
  *   zoneId: zone.zoneId,
@@ -168,10 +171,6 @@ export type ManagedTransforms = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/rules/transform/managed-transforms/
- *
- * @resource
- * @product Managed Transforms
- * @category Rules & Configuration
  */
 export const ManagedTransforms = Resource<ManagedTransforms>(TypeId, {
   aliases: ["Cloudflare.ManagedTransforms"],

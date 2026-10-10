@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * resumes or stops each build with `SendWorkflowStepAction`. Provide the
  * implementation with
  * `Effect.provide(AWS.ImageBuilder.ListWaitingWorkflowStepsHttp)`.
- * ### Workflow Monitoring
- * **Example:** List Steps Waiting for Action
+ * @binding
+ * @section Workflow Monitoring
+ * @example List Steps Waiting for Action
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listWaitingWorkflowSteps =
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { steps } = yield* listWaitingWorkflowSteps();
  * ```
- *
- * @binding
  */
 export interface ListWaitingWorkflowSteps extends Binding.Service<
   ListWaitingWorkflowSteps,

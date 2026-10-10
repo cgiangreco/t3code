@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Amazon Transcribe batch actions have no resource-level IAM; the host is
  * granted `transcribe:DeleteCallAnalyticsCategory` on `*`.
  *
- * ### Call Analytics Categories
- * **Example:** Delete a Call Analytics Category
+ * @binding
+ * @section Call Analytics Categories
+ * @example Delete a Call Analytics Category
  * ```typescript
  * // init
  * const deleteCallAnalyticsCategory = yield* AWS.Transcribe.DeleteCallAnalyticsCategory();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteCallAnalyticsCategory({ CategoryName: "long-silence" });
  * ```
- *
- * @binding
  */
 export interface DeleteCallAnalyticsCategory extends Binding.Service<
   DeleteCallAnalyticsCategory,

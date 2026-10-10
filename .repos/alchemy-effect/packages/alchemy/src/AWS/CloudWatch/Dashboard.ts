@@ -144,8 +144,9 @@ export interface Dashboard extends Resource<
  * An Amazon CloudWatch dashboard. The `DashboardBody` is a structured,
  * typed document (metric, text, alarm-status, and log widgets) that the
  * provider serializes to the JSON string CloudWatch expects.
- * ### Creating Dashboards
- * **Example:** Basic Dashboard
+ * @resource
+ * @section Creating Dashboards
+ * @example Basic Dashboard
  * ```typescript
  * const dashboard = yield* Dashboard("OpsDashboard", {
  *   DashboardBody: {
@@ -154,7 +155,7 @@ export interface Dashboard extends Resource<
  * });
  * ```
  *
- * **Example:** Dashboard with Metric and Text Widgets
+ * @example Dashboard with Metric and Text Widgets
  * ```typescript
  * const dashboard = yield* Dashboard("PaymentsDashboard", {
  *   DashboardBody: {
@@ -180,8 +181,8 @@ export interface Dashboard extends Resource<
  * });
  * ```
  *
- * ### Reading Dashboards at Runtime
- * **Example:** Read the Dashboard Body from a Function
+ * @section Reading Dashboards at Runtime
+ * @example Read the Dashboard Body from a Function
  * ```typescript
  * // init — bind the dashboard to the function (see GetDashboard)
  * const getDashboard = yield* AWS.CloudWatch.GetDashboard(dashboard);
@@ -190,8 +191,6 @@ export interface Dashboard extends Resource<
  * const result = yield* getDashboard();
  * const body = JSON.parse(result.DashboardBody ?? "{}");
  * ```
- *
- * @resource
  */
 export const Dashboard = Resource<Dashboard>("AWS.CloudWatch.Dashboard");
 

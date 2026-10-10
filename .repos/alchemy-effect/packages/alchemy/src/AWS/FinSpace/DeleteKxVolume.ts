@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:DeleteKxVolume` — deletes a volume from the bound environment. The volume must not be attached to any cluster.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.DeleteKxVolumeHttp)`.
- * ### Managing Volumes
- * **Example:** Delete a Volume
+ * @binding
+ * @section Managing Volumes
+ * @example Delete a Volume
  * ```typescript
  * const deleteVolume = yield* AWS.FinSpace.DeleteKxVolume(kdb);
  *
@@ -17,8 +18,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   clientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface DeleteKxVolume extends Binding.Service<
   DeleteKxVolume,

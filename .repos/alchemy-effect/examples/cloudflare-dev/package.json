@@ -14,18 +14,14 @@
     "dev": "alchemy dev",
     "destroy": "alchemy destroy",
     "logs": "alchemy logs",
-    "tail": "alchemy logs --tail",
+    "tail": "alchemy tail",
     "test": "bun test"
   },
   "dependencies": {
-    "@cloudflare/puppeteer": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@effect/platform-bun": "catalog:",
     "@effect/platform-node": "catalog:",
     "alchemy": "workspace:*",
     "effect": "catalog:"
-  },
-  "devDependencies": {
-    "alchemy-test": "workspace:*"
   }
 }

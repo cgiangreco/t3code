@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.BatchGetFreeTrialInfoHttp)`.
- * ### Account Settings & Usage
- * **Example:** Free Trial Status
+ * @binding
+ * @section Account Settings & Usage
+ * @example Free Trial Status
  * ```typescript
  * // init
  * const batchGetFreeTrialInfo = yield* AWS.Inspector2.BatchGetFreeTrialInfo();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { accounts } = yield* batchGetFreeTrialInfo({ accountIds: [accountId] });
  * ```
- *
- * @binding
  */
 export interface BatchGetFreeTrialInfo extends Binding.Service<
   BatchGetFreeTrialInfo,

@@ -19,8 +19,9 @@ export type ListJobRunAttemptsInput = Omit<
  * {@link Application} — how many times the retry policy re-ran the job and
  * how each attempt ended. Provide the implementation with
  * `Effect.provide(AWS.EMRServerless.ListJobRunAttemptsHttp)`.
- * ### Running Jobs
- * **Example:** Inspect A Job's Attempts
+ * @binding
+ * @section Running Jobs
+ * @example Inspect A Job's Attempts
  * ```typescript
  * // init
  * const listJobRunAttempts = yield* AWS.EMRServerless.ListJobRunAttempts(app);
@@ -28,8 +29,6 @@ export type ListJobRunAttemptsInput = Omit<
  * // runtime
  * const { jobRunAttempts } = yield* listJobRunAttempts({ jobRunId });
  * ```
- *
- * @binding
  */
 export interface ListJobRunAttempts extends Binding.Service<
   ListJobRunAttempts,

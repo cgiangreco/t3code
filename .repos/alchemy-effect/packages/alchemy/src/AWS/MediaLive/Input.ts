@@ -117,8 +117,9 @@ export interface Input extends Resource<
  * channel reads live content from (RTMP/RTP push, HLS/MP4 pull,
  * MediaConnect flow, ...).
  *
- * ### Creating Inputs
- * **Example:** RTMP push input behind an allowlist
+ * @resource
+ * @section Creating Inputs
+ * @example RTMP push input behind an allowlist
  * ```typescript
  * const isg = yield* MediaLive.InputSecurityGroup("Allowlist", {
  *   whitelistRules: ["0.0.0.0/0"],
@@ -130,7 +131,7 @@ export interface Input extends Resource<
  * });
  * ```
  *
- * **Example:** HLS pull input
+ * @example HLS pull input
  * ```typescript
  * const input = yield* MediaLive.Input("Vod", {
  *   type: "URL_PULL",
@@ -138,8 +139,8 @@ export interface Input extends Resource<
  * });
  * ```
  *
- * ### Attaching to a Channel
- * **Example:** Feed a channel
+ * @section Attaching to a Channel
+ * @example Feed a channel
  * ```typescript
  * const channel = yield* MediaLive.Channel("Live", {
  *   roleArn: role.roleArn,
@@ -150,8 +151,6 @@ export interface Input extends Resource<
  *   destinations,
  * });
  * ```
- *
- * @resource
  */
 export const Input = Resource<Input>("AWS.MediaLive.Input");
 

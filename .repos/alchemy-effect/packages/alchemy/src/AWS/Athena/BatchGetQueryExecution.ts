@@ -9,8 +9,9 @@ import type { WorkGroup } from "./WorkGroup.ts";
  * Reads up to 50 query executions from the bound workgroup in one call.
  * Provide the implementation with
  * `Effect.provide(AWS.Athena.BatchGetQueryExecutionHttp)`.
- * ### Inspecting Query Executions
- * **Example:** Read Several Executions at Once
+ * @binding
+ * @section Inspecting Query Executions
+ * @example Read Several Executions at Once
  * ```typescript
  * // init — bind the operation to the workgroup
  * const batchGetQueryExecution =
@@ -20,8 +21,6 @@ import type { WorkGroup } from "./WorkGroup.ts";
  * const res = yield* batchGetQueryExecution({ QueryExecutionIds: ids });
  * console.log(res.QueryExecutions?.map((qe) => qe.Status?.State));
  * ```
- *
- * @binding
  */
 export interface BatchGetQueryExecution extends Binding.Service<
   BatchGetQueryExecution,

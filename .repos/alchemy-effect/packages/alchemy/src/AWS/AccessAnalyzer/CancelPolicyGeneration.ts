@@ -7,15 +7,14 @@ import * as Binding from "../../Binding.ts";
  *
  * Cancels an in-progress policy-generation job. Provide the implementation
  * with `Effect.provide(AWS.AccessAnalyzer.CancelPolicyGenerationHttp)`.
- * ### Policy Generation
- * **Example:** Cancel a Generation Job
+ * @binding
+ * @section Policy Generation
+ * @example Cancel a Generation Job
  * ```typescript
  * const cancelGeneration =
  *   yield* AWS.AccessAnalyzer.CancelPolicyGeneration();
  * yield* cancelGeneration({ jobId });
  * ```
- *
- * @binding
  */
 export interface CancelPolicyGeneration extends Binding.Service<
   CancelPolicyGeneration,

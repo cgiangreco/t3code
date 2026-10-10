@@ -21,8 +21,9 @@ export interface PutBackupPolicyRequest extends Omit<
  * FileSystem resource's `backup` prop — this binding is for operational
  * tooling that toggles backups on demand. Provide the implementation with
  * `Effect.provide(AWS.EFS.PutBackupPolicyHttp)`.
- * ### Backup Policy
- * **Example:** Enable automatic backups
+ * @binding
+ * @section Backup Policy
+ * @example Enable automatic backups
  * ```typescript
  * const putBackupPolicy = yield* AWS.EFS.PutBackupPolicy(files);
  *
@@ -30,8 +31,6 @@ export interface PutBackupPolicyRequest extends Omit<
  *   BackupPolicy: { Status: "ENABLED" },
  * });
  * ```
- *
- * @binding
  */
 export interface PutBackupPolicy extends Binding.Service<
   PutBackupPolicy,

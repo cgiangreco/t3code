@@ -80,23 +80,22 @@ export interface Database extends Resource<
  * were not already onboarded receive `TimestreamNotOnboarded` (a specialized
  * `AccessDenied`) on every operation.
  * :::
- * ### Creating Databases
- * **Example:** Basic Database
+ * @resource
+ * @section Creating Databases
+ * @example Basic Database
  * ```typescript
  * import * as Timestream from "alchemy/AWS/Timestream";
  *
  * const database = yield* Timestream.Database("Metrics");
  * ```
  *
- * **Example:** Database with a Customer-Managed KMS Key
+ * @example Database with a Customer-Managed KMS Key
  * ```typescript
  * const database = yield* Timestream.Database("SecureMetrics", {
  *   kmsKeyId: "alias/my-timestream-key",
  *   tags: { Environment: "production" },
  * });
  * ```
- *
- * @resource
  */
 export const Database = Resource<Database>("AWS.Timestream.Database");
 

@@ -69,8 +69,9 @@ export interface ResourceAssociation extends Resource<
  * with an AppRegistry {@link Application} so the resource is inventoried
  * under the application in myApplications.
  *
- * ### Associating a Resource
- * **Example:** Associate a CloudFormation Stack
+ * @resource
+ * @section Associating a Resource
+ * @example Associate a CloudFormation Stack
  * ```typescript
  * import * as AppRegistry from "alchemy/AWS/AppRegistry";
  * import * as CloudFormation from "alchemy/AWS/CloudFormation";
@@ -87,7 +88,7 @@ export interface ResourceAssociation extends Resource<
  * });
  * ```
  *
- * **Example:** Associate Without Applying the Application Tag
+ * @example Associate Without Applying the Application Tag
  * ```typescript
  * const association = yield* AppRegistry.ResourceAssociation("StackAssoc", {
  *   application: app.applicationId,
@@ -96,8 +97,6 @@ export interface ResourceAssociation extends Resource<
  *   options: ["SKIP_APPLICATION_TAG"],
  * });
  * ```
- *
- * @resource
  */
 export const ResourceAssociation = Resource<ResourceAssociation>(
   "AWS.AppRegistry.ResourceAssociation",

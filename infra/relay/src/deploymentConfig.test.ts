@@ -7,14 +7,20 @@ import {
   managedEndpointHostname,
   isManagedEndpointHostname,
   managedEndpointTunnelName,
-  managedEndpointTunnelNamePrefix,
   relayOwnsManagedEndpointZone,
   RelayPublicDomainLabelTooLongError,
   relayPublicDomainForStage,
   relayResourceNameForStage,
+  relayStageSlug,
 } from "./deploymentConfig.ts";
 
 const isRelayPublicDomainLabelTooLongError = Schema.is(RelayPublicDomainLabelTooLongError);
+
+describe("relayStageSlug", () => {
+  it("matches Alchemy physical-name sanitization for default developer stages", () => {
+    expect(relayStageSlug("dev_julius")).toBe("dev-julius");
+  });
+});
 
 describe("relayPublicDomainForStage", () => {
   it("uses the canonical relay hostname for production", () => {
@@ -84,9 +90,6 @@ describe("managed endpoint names", () => {
     );
     expect(managedEndpointTunnelName("dev_julius", hash)).toBe(
       "t3coderelay-managedendpoint-dev-julius-abcdef0123456789",
-    );
-    expect(managedEndpointTunnelNamePrefix("dev_julius")).toBe(
-      "t3coderelay-managedendpoint-dev-julius-",
     );
   });
 

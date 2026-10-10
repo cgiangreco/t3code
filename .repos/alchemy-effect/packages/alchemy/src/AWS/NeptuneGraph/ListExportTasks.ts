@@ -9,15 +9,14 @@ import type { Graph } from "./Graph.ts";
  *
  * Lists the export tasks of the bound graph. Provide the implementation with
  * `Effect.provide(AWS.NeptuneGraph.ListExportTasksHttp)`.
- * ### Importing and Exporting Data
- * **Example:** List a graph's export tasks
+ * @binding
+ * @section Importing and Exporting Data
+ * @example List a graph's export tasks
  * ```typescript
  * const listExportTasks = yield* NeptuneGraph.ListExportTasks(graph);
  *
  * const { tasks } = yield* listExportTasks();
  * ```
- *
- * @binding
  */
 export interface ListExportTasks extends Binding.Service<
   ListExportTasks,

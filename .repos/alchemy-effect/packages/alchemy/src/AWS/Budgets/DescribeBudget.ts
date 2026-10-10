@@ -20,8 +20,9 @@ export interface DescribeBudgetRequest extends Omit<
  * far in the period), e.g. for a cost kill-switch or a spend dashboard.
  * Provide the implementation with
  * `Effect.provide(AWS.Budgets.DescribeBudgetHttp)`.
- * ### Reading Budget Spend
- * **Example:** Check Actual Spend Against the Limit
+ * @binding
+ * @section Reading Budget Spend
+ * @example Check Actual Spend Against the Limit
  * ```typescript
  * // init — bind the operation to the budget
  * const describeBudget = yield* AWS.Budgets.DescribeBudget(budget);
@@ -32,8 +33,6 @@ export interface DescribeBudgetRequest extends Omit<
  * const limit = Number(b?.BudgetLimit?.Amount ?? "0");
  * const overBudget = limit > 0 && actual >= limit;
  * ```
- *
- * @binding
  */
 export interface DescribeBudget extends Binding.Service<
   DescribeBudget,

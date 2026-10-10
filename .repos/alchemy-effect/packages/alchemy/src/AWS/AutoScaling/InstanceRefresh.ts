@@ -80,8 +80,9 @@ export interface InstanceRefreshClient {
  * Lets a deploy pipeline Lambda roll the fleet onto a new launch template
  * version, watch progress, and cancel or roll back a bad deploy. Provide the
  * implementation with `Effect.provide(AWS.AutoScaling.InstanceRefreshHttp)`.
- * ### Rolling Deployments
- * **Example:** Roll the fleet and watch progress
+ * @binding
+ * @section Rolling Deployments
+ * @example Roll the fleet and watch progress
  * ```typescript
  * // init — bind the operations to the group
  * const refresh = yield* AWS.AutoScaling.InstanceRefresh(group);
@@ -97,14 +98,12 @@ export interface InstanceRefreshClient {
  * });
  * ```
  *
- * **Example:** Cancel a bad deploy
+ * @example Cancel a bad deploy
  * ```typescript
  * yield* refresh.cancel().pipe(
  *   Effect.catchTag("ActiveInstanceRefreshNotFoundFault", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface InstanceRefresh extends Binding.Service<
   InstanceRefresh,

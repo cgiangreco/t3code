@@ -12,8 +12,9 @@ export interface GetInsightEventsRequest extends xray.GetInsightEventsRequest {}
  * provide the implementation with `Effect.provide(XRay.GetInsightEventsHttp)`.
  * The action is account-scoped: X-Ray does not support resource-level
  * permissions for `xray:GetInsightEvents`, so the binding grants it on `*`.
- * ### Insights
- * **Example:** Walk an insight's impact timeline
+ * @binding
+ * @section Insights
+ * @example Walk an insight's impact timeline
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -24,8 +25,6 @@ export interface GetInsightEventsRequest extends xray.GetInsightEventsRequest {}
  * const result = yield* getInsightEvents({ InsightId: insightId });
  * const timeline = result.InsightEvents ?? [];
  * ```
- *
- * @binding
  */
 export interface GetInsightEvents extends Binding.Service<
   GetInsightEvents,

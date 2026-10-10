@@ -136,13 +136,11 @@ describe("IncomingShareInbox", () => {
   it("does not acknowledge a supported payload when its durable write fails", async () => {
     const clearPayloads = vi.fn();
     const cleanup = vi.fn(async () => undefined);
-    const rollback = vi.fn(async () => undefined);
     const { inbox } = createHarness({
       clearPayloads,
       buildDraft: async ({ id, createdAt }) => ({
         draft: draft(id, createdAt),
         cleanup,
-        rollback,
       }),
       writeDraft: async () => {
         throw new Error("disk full");
@@ -152,7 +150,6 @@ describe("IncomingShareInbox", () => {
     await expect(inbox.refresh({ ingestNative: true })).rejects.toThrow("disk full");
     expect(clearPayloads).not.toHaveBeenCalled();
     expect(cleanup).not.toHaveBeenCalled();
-    expect(rollback).toHaveBeenCalledOnce();
   });
 
   it("durably reserves a share for one project before draft import", async () => {

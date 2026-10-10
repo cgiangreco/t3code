@@ -8,8 +8,9 @@ import type { MatchingWorkflow } from "./MatchingWorkflow.ts";
  *
  * Lists the matching job runs of the bound workflow. Provide the
  * implementation with `Effect.provide(AWS.EntityResolution.ListMatchingJobsHttp)`.
- * ### Running Matching Jobs
- * **Example:** List Recent Jobs
+ * @binding
+ * @section Running Matching Jobs
+ * @example List Recent Jobs
  * ```typescript
  * // init — bind the operation to the workflow
  * const listMatchingJobs = yield* AWS.EntityResolution.ListMatchingJobs(workflow);
@@ -17,8 +18,6 @@ import type { MatchingWorkflow } from "./MatchingWorkflow.ts";
  * // runtime
  * const { jobs } = yield* listMatchingJobs({});
  * ```
- *
- * @binding
  */
 export interface ListMatchingJobs extends Binding.Service<
   ListMatchingJobs,

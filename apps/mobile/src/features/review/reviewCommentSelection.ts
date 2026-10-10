@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from "react";
-import { replaceComposerContextReferences } from "@t3tools/shared/composerContextReferences";
 
 import type { ReviewRenderableLineRow } from "./reviewModel";
 
@@ -83,6 +82,16 @@ export function getSelectedReviewCommentLines(
 
 export function getReviewUnifiedLineNumber(line: ReviewRenderableLineRow): number | null {
   return line.newLineNumber ?? line.oldLineNumber;
+}
+
+export function formatReviewLineLabel(line: ReviewRenderableLineRow): string {
+  if (line.newLineNumber !== null) {
+    return `new line ${line.newLineNumber}`;
+  }
+  if (line.oldLineNumber !== null) {
+    return `old line ${line.oldLineNumber}`;
+  }
+  return "file";
 }
 
 export function getReviewChangeMarker(change: ReviewRenderableLineRow["change"]): string {
@@ -270,23 +279,8 @@ export function countReviewCommentContexts(value: string): number {
 
 export function parseReviewInlineComments(value: string): ReadonlyArray<ReviewInlineComment> {
   const comments: ReviewInlineComment[] = [];
-  // Match on masked delimiters, as `parseReviewCommentMessageSegments` does: a chip label may
-  // contain `</review_comment>`, which would otherwise end the block early and truncate it.
-  const masked = replaceComposerContextReferences(value, (reference) =>
-    " ".repeat(reference.source.length),
-  );
-  for (const [index, match] of Array.from(
-    masked.matchAll(REVIEW_COMMENT_BLOCK_PATTERN),
-  ).entries()) {
-    const matchIndex = match.index;
-    const raw = value.slice(matchIndex, matchIndex + match[0].length);
-    const attributeStart = "<review_comment".length;
-    const attributeEnd = attributeStart + (match[1]?.length ?? 0);
-    const comment = parseReviewInlineComment(
-      raw.slice(attributeStart, attributeEnd),
-      raw.slice(attributeEnd + 1, -"</review_comment>".length),
-      index,
-    );
+  for (const [index, match] of Array.from(value.matchAll(REVIEW_COMMENT_BLOCK_PATTERN)).entries()) {
+    const comment = parseReviewInlineComment(match[1] ?? "", match[2] ?? "", index);
     if (!comment) {
       continue;
     }
@@ -302,12 +296,9 @@ export function parseReviewCommentMessageSegments(
   const segments: ReviewCommentMessageSegment[] = [];
   let cursor = 0;
   let parsedCommentIndex = 0;
-  // Labels are opaque text, even when they contain legacy review markup. Keep offsets intact.
-  const masked = replaceComposerContextReferences(value, (reference) =>
-    " ".repeat(reference.source.length),
-  );
-  for (const match of masked.matchAll(REVIEW_COMMENT_BLOCK_PATTERN)) {
-    const matchIndex = match.index;
+
+  for (const match of value.matchAll(REVIEW_COMMENT_BLOCK_PATTERN)) {
+    const matchIndex = match.index ?? 0;
     const beforeText = value.slice(cursor, matchIndex);
     if (beforeText.length > 0) {
       segments.push({
@@ -317,16 +308,7 @@ export function parseReviewCommentMessageSegments(
       });
     }
 
-    // Use the masked delimiters but read the original payload. Re-parsing raw text could
-    // mistake a closing tag inside a chip label for the end of the review.
-    const raw = value.slice(matchIndex, matchIndex + match[0].length);
-    const attributeStart = "<review_comment".length;
-    const attributeEnd = attributeStart + (match[1]?.length ?? 0);
-    const comment = parseReviewInlineComment(
-      raw.slice(attributeStart, attributeEnd),
-      raw.slice(attributeEnd + 1, -"</review_comment>".length),
-      parsedCommentIndex,
-    );
+    const comment = parseReviewInlineComment(match[1] ?? "", match[2] ?? "", parsedCommentIndex);
     if (comment) {
       segments.push({ kind: "review-comment", comment });
       parsedCommentIndex += 1;
@@ -334,7 +316,7 @@ export function parseReviewCommentMessageSegments(
       segments.push({
         kind: "text",
         id: `review-comment-invalid:${matchIndex}`,
-        text: value.slice(matchIndex, matchIndex + match[0].length),
+        text: match[0],
       });
     }
 

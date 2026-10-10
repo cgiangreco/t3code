@@ -129,13 +129,16 @@ export type LiveInput = Resource<
  * recorded from it.
  *
  * Requires the Stream subscription to be enabled on the account.
- * ### Creating a live input
- * **Example:** Basic live input
+ * @resource
+ * @product Stream
+ * @category Media
+ * @section Creating a live input
+ * @example Basic live input
  * ```typescript
  * const input = yield* Cloudflare.Stream.LiveInput("Broadcast", {});
  * ```
  *
- * **Example:** Live input with automatic recording
+ * @example Live input with automatic recording
  * ```typescript
  * const input = yield* Cloudflare.Stream.LiveInput("Broadcast", {
  *   meta: { name: "town-hall" },
@@ -147,8 +150,8 @@ export type LiveInput = Resource<
  * });
  * ```
  *
- * ### Managing a live input
- * **Example:** Disable ingest without deleting the input
+ * @section Managing a live input
+ * @example Disable ingest without deleting the input
  * ```typescript
  * const input = yield* Cloudflare.Stream.LiveInput("Broadcast", {
  *   enabled: false,
@@ -156,10 +159,6 @@ export type LiveInput = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/stream/stream-live/
- *
- * @resource
- * @product Stream
- * @category Media
  */
 export const LiveInput = Resource<LiveInput>(TypeId);
 

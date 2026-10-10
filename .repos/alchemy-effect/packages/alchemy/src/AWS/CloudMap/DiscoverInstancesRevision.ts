@@ -19,8 +19,9 @@ export interface DiscoverInstancesRevisionRequest extends Omit<
  * change detector and re-call `DiscoverInstances` only when the revision
  * moves. Provide the implementation with
  * `Effect.provide(AWS.CloudMap.DiscoverInstancesRevisionHttp)`.
- * ### Discovering Instances
- * **Example:** Refresh a Cached Instance List Only on Change
+ * @binding
+ * @section Discovering Instances
+ * @example Refresh a Cached Instance List Only on Change
  * ```typescript
  * const discoverInstancesRevision =
  *   yield* AWS.CloudMap.DiscoverInstancesRevision(service);
@@ -30,8 +31,6 @@ export interface DiscoverInstancesRevisionRequest extends Omit<
  *   // instance set changed — re-run DiscoverInstances
  * }
  * ```
- *
- * @binding
  */
 export interface DiscoverInstancesRevision extends Binding.Service<
   DiscoverInstancesRevision,

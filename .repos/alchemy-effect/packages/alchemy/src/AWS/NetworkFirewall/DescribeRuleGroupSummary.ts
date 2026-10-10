@@ -16,8 +16,9 @@ export interface DescribeRuleGroupSummaryRequest extends Omit<
  *
  * Provide `NetworkFirewall.DescribeRuleGroupSummaryHttp` on the hosting
  * Lambda Function to satisfy the requirement.
- * ### Reading Rule Group State
- * **Example:** Summarize the Stateful Rules
+ * @binding
+ * @section Reading Rule Group State
+ * @example Summarize the Stateful Rules
  * ```typescript
  * // init — grants network-firewall:DescribeRuleGroupSummary on the rule group
  * const describeRuleGroupSummary =
@@ -26,8 +27,6 @@ export interface DescribeRuleGroupSummaryRequest extends Omit<
  * // runtime
  * const { Summary } = yield* describeRuleGroupSummary();
  * ```
- *
- * @binding
  */
 export interface DescribeRuleGroupSummary extends Binding.Service<
   DescribeRuleGroupSummary,

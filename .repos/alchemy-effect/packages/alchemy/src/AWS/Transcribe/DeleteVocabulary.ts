@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Amazon Transcribe batch actions have no resource-level IAM; the host is
  * granted `transcribe:DeleteVocabulary` on `*`.
  *
- * ### Custom Vocabularies
- * **Example:** Delete a Custom Vocabulary
+ * @binding
+ * @section Custom Vocabularies
+ * @example Delete a Custom Vocabulary
  * ```typescript
  * // init
  * const deleteVocabulary = yield* AWS.Transcribe.DeleteVocabulary();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteVocabulary({ VocabularyName: "tenant-123-vocabulary" });
  * ```
- *
- * @binding
  */
 export interface DeleteVocabulary extends Binding.Service<
   DeleteVocabulary,

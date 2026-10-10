@@ -75,8 +75,9 @@ export interface ExportJob extends Resource<
  * once started and cannot be stopped or deleted; its record ages out
  * server-side.
  *
- * ### Exporting Search Results
- * **Example:** Export to an S3 Bucket
+ * @resource
+ * @section Exporting Search Results
+ * @example Export to an S3 Bucket
  * ```typescript
  * const exportJob = yield* BackupSearch.ExportJob("Results", {
  *   searchJobIdentifier: search.searchJobIdentifier,
@@ -89,8 +90,6 @@ export interface ExportJob extends Resource<
  *   roleArn: role.roleArn,
  * });
  * ```
- *
- * @resource
  */
 export const ExportJob = Resource<ExportJob>("AWS.BackupSearch.ExportJob");
 

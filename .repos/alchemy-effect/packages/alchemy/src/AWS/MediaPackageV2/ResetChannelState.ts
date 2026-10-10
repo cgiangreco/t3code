@@ -12,8 +12,9 @@ import type { Channel } from "./Channel.ts";
  * channel's group and name are injected from the binding. Provide the
  * implementation with
  * `Effect.provide(AWS.MediaPackageV2.ResetChannelStateHttp)`.
- * ### Resetting Ingest State
- * **Example:** Reset a Channel After a Corrupted Contribution
+ * @binding
+ * @section Resetting Ingest State
+ * @example Reset a Channel After a Corrupted Contribution
  * ```typescript
  * // init — bind the operation to the channel
  * const resetChannel = yield* AWS.MediaPackageV2.ResetChannelState(channel);
@@ -21,8 +22,6 @@ import type { Channel } from "./Channel.ts";
  * // runtime
  * const { ResetAt } = yield* resetChannel();
  * ```
- *
- * @binding
  */
 export interface ResetChannelState extends Binding.Service<
   ResetChannelState,

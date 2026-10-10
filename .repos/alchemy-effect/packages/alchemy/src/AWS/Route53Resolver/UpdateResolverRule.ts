@@ -19,8 +19,9 @@ export interface UpdateResolverRuleRequest extends Omit<
  *
  * Provide `Route53Resolver.UpdateResolverRuleHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Updating Rules at Runtime
- * **Example:** Fail Over the Rule's Target IPs
+ * @binding
+ * @section Updating Rules at Runtime
+ * @example Fail Over the Rule's Target IPs
  * ```typescript
  * // init — grants route53resolver:UpdateResolverRule on the rule
  * const updateRule = yield* AWS.Route53Resolver.UpdateResolverRule(rule);
@@ -30,8 +31,6 @@ export interface UpdateResolverRuleRequest extends Omit<
  *   Config: { TargetIps: [{ Ip: "192.168.2.10", Port: 53 }] },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateResolverRule extends Binding.Service<
   UpdateResolverRule,

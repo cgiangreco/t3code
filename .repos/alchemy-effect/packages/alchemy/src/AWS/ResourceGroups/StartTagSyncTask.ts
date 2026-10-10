@@ -25,8 +25,9 @@ export type StartTagSyncTaskRequest = Omit<
  * permissions tag-sync uses and a trust policy for
  * `resource-groups.amazonaws.com`. Provide the implementation with
  * `Effect.provide(AWS.ResourceGroups.StartTagSyncTaskHttp)`.
- * ### Tag-Sync Tasks
- * **Example:** Keep A Group In Sync With A Tag
+ * @binding
+ * @section Tag-Sync Tasks
+ * @example Keep A Group In Sync With A Tag
  * ```typescript
  * // init — bind the operation to the group and the sync role
  * const startTagSyncTask = yield* AWS.ResourceGroups.StartTagSyncTask(group, syncRole);
@@ -37,8 +38,6 @@ export type StartTagSyncTaskRequest = Omit<
  *   TagValue: "platform",
  * });
  * ```
- *
- * @binding
  */
 export interface StartTagSyncTask extends Binding.Service<
   StartTagSyncTask,

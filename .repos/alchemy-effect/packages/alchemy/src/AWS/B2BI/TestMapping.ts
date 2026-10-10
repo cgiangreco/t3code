@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * validating templates or transforming small documents on the fly without a
  * deployed transformer. Provide the implementation with
  * `Effect.provide(AWS.B2BI.TestMappingHttp)`.
- * ### Testing Mappings
- * **Example:** Map a JSON Document with a JSONATA Template
+ * @binding
+ * @section Testing Mappings
+ * @example Map a JSON Document with a JSONATA Template
  * ```typescript
  * // init — account-level, no resource argument
  * const testMapping = yield* AWS.B2BI.TestMapping();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.mappedFileContent === '{"name":"acme"}'
  * ```
- *
- * @binding
  */
 export interface TestMapping extends Binding.Service<
   TestMapping,

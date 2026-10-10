@@ -74,8 +74,9 @@ export interface ServerlessCluster extends Resource<
  * The provisioned (broker-count) MSK cluster is a separate, much slower
  * (~20-40 minute) resource and is intentionally not modeled here.
  *
- * ### Creating a Serverless Cluster
- * **Example:** Serverless Cluster in a VPC
+ * @resource
+ * @section Creating a Serverless Cluster
+ * @example Serverless Cluster in a VPC
  * ```typescript
  * const cluster = yield* ServerlessCluster("Events", {
  *   subnetIds: [subnetA.subnetId, subnetB.subnetId],
@@ -83,15 +84,13 @@ export interface ServerlessCluster extends Resource<
  * });
  * ```
  *
- * ### Consuming from a Lambda Function
- * **Example:** Wire a topic to a Lambda
+ * @section Consuming from a Lambda Function
+ * @example Wire a topic to a Lambda
  * ```typescript
  * yield* Kafka.consumeKafkaTopic(cluster, { topics: ["orders"] }, (records) =>
  *   records.pipe(Stream.runForEach((r) => Effect.log(r.value))),
  * );
  * ```
- *
- * @resource
  */
 export const ServerlessCluster = Resource<ServerlessCluster>(
   "AWS.Kafka.ServerlessCluster",

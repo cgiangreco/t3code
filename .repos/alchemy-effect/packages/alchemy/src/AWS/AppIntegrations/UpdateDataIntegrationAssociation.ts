@@ -17,8 +17,9 @@ export interface UpdateDataIntegrationAssociationRequest extends Omit<
  *
  * Provide the `UpdateDataIntegrationAssociationHttp` layer on the Function to
  * satisfy the binding.
- * ### Updating Data Integration Associations
- * **Example:** Rerun an On-Demand Data Pull
+ * @binding
+ * @section Updating Data Integration Associations
+ * @example Rerun an On-Demand Data Pull
  * ```typescript
  * // init (provide AWS.AppIntegrations.UpdateDataIntegrationAssociationHttp on the Function)
  * const updateDataIntegrationAssociation =
@@ -33,8 +34,6 @@ export interface UpdateDataIntegrationAssociationRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateDataIntegrationAssociation extends Binding.Service<
   UpdateDataIntegrationAssociation,

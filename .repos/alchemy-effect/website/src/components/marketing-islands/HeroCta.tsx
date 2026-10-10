@@ -28,7 +28,7 @@ export default function HeroCta() {
             Tutorial
           </a>
         </div>
-        <div className="hero-cta__line" data-nosnippet="">
+        <div className="hero-cta__line">
           <span>
             <span aria-hidden>🤖</span> Using a coding agent?
           </span>
@@ -75,9 +75,7 @@ function CopyCard() {
           {copied ? <CheckIcon /> : <CopyIcon />}
         </span>
       </span>
-      <code className="hero-cta__prompt-code" data-nosnippet="">
-        {PROMPT}
-      </code>
+      <code className="hero-cta__prompt-code">{PROMPT}</code>
     </button>
   );
 }

@@ -15,8 +15,9 @@ import type { LinkedWhatsAppBusinessAccount } from "./LinkedWhatsAppBusinessAcco
  * the deploy-time half grants `social-messaging:PostWhatsAppMessageMedia` on `*`.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.PostWhatsAppMessageMediaHttp)`.
- * ### Managing Message Media
- * **Example:** Upload Media from S3
+ * @binding
+ * @section Managing Message Media
+ * @example Upload Media from S3
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const postMedia = yield* AWS.SocialMessaging.PostWhatsAppMessageMedia(account);
@@ -27,8 +28,6 @@ import type { LinkedWhatsAppBusinessAccount } from "./LinkedWhatsAppBusinessAcco
  *   sourceS3File: { bucketName: "my-assets", key: "welcome.png" },
  * });
  * ```
- *
- * @binding
  */
 export interface PostWhatsAppMessageMedia extends Binding.Service<
   PostWhatsAppMessageMedia,

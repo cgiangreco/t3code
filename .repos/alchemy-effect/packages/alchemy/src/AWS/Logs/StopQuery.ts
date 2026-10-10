@@ -11,8 +11,9 @@ export interface StopQueryRequest extends Logs.StopQueryRequest {}
  * Bind this operation to the `LogGroup` an Insights query was started against
  * (via {@link import("./StartQuery.ts").StartQuery}) to cancel it while it is
  * still `Scheduled` or `Running` — e.g. on caller timeout or shutdown.
- * ### Logs Insights
- * **Example:** Cancel a Running Query
+ * @binding
+ * @section Logs Insights
+ * @example Cancel a Running Query
  * ```typescript
  * const startQuery = yield* AWS.Logs.StartQuery(logGroup);
  * const stopQuery = yield* AWS.Logs.StopQuery(logGroup);
@@ -20,8 +21,6 @@ export interface StopQueryRequest extends Logs.StopQueryRequest {}
  * const { queryId } = yield* startQuery({ queryString, startTime, endTime });
  * const { success } = yield* stopQuery({ queryId: queryId! });
  * ```
- *
- * @binding
  */
 export interface StopQuery extends Binding.Service<
   StopQuery,

@@ -402,8 +402,9 @@ export interface DBCluster extends Resource<
  * `dbSubnetGroupName`, `storageEncrypted`, `kmsKeyId`, `engineMode`,
  * `globalClusterIdentifier`, `availabilityZones`, `engineLifecycleSupport`)
  * force a replacement.
- * ### Serverless v2 Cluster
- * **Example:** Aurora Postgres serverless-v2
+ * @resource
+ * @section Serverless v2 Cluster
+ * @example Aurora Postgres serverless-v2
  * ```typescript
  * const cluster = yield* DBCluster("Cluster", {
  *   engine: "aurora-postgresql",
@@ -416,8 +417,8 @@ export interface DBCluster extends Resource<
  * });
  * ```
  *
- * ### Logs & Monitoring
- * **Example:** Export logs and enable Performance Insights
+ * @section Logs & Monitoring
+ * @example Export logs and enable Performance Insights
  * ```typescript
  * const cluster = yield* DBCluster("Cluster", {
  *   engine: "aurora-postgresql",
@@ -427,8 +428,6 @@ export interface DBCluster extends Resource<
  *   monitoringRoleArn: monitoringRole.roleArn,
  * });
  * ```
- *
- * @resource
  */
 export const DBCluster = Resource<DBCluster>("AWS.RDS.DBCluster");
 

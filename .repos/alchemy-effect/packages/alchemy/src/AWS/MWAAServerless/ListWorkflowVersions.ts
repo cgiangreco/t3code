@@ -20,8 +20,9 @@ export type ListWorkflowVersionsInput = Omit<
  * for pinning `StartWorkflowRun` to a specific version. Provide the
  * implementation with
  * `Effect.provide(AWS.MWAAServerless.ListWorkflowVersionsHttp)`.
- * ### Observing Workflows
- * **Example:** List Workflow Versions
+ * @binding
+ * @section Observing Workflows
+ * @example List Workflow Versions
  * ```typescript
  * // init — bind the operation to the workflow
  * const listWorkflowVersions =
@@ -31,8 +32,6 @@ export type ListWorkflowVersionsInput = Omit<
  * const { WorkflowVersions } = yield* listWorkflowVersions();
  * const latest = WorkflowVersions?.find((v) => v.IsLatestVersion);
  * ```
- *
- * @binding
  */
 export interface ListWorkflowVersions extends Binding.Service<
   ListWorkflowVersions,

@@ -16,8 +16,9 @@ export interface CreateLogStreamRequest extends Omit<
  * writing to them with `PutLogEvents`, automatically injecting the log group
  * name. For a fixed stream known at deploy time, declare an
  * `AWS.Logs.LogStream` resource instead.
- * ### Writing Logs
- * **Example:** Create a Per-Tenant Stream, Then Write
+ * @binding
+ * @section Writing Logs
+ * @example Create a Per-Tenant Stream, Then Write
  * ```typescript
  * const createLogStream = yield* AWS.Logs.CreateLogStream(logGroup);
  * const putLogEvents = yield* AWS.Logs.PutLogEvents(logGroup);
@@ -30,8 +31,6 @@ export interface CreateLogStreamRequest extends Omit<
  *   logEvents: [{ timestamp, message }],
  * });
  * ```
- *
- * @binding
  */
 export interface CreateLogStream extends Binding.Service<
   CreateLogStream,

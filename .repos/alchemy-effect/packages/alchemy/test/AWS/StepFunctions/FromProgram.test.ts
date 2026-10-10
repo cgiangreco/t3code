@@ -23,9 +23,7 @@ import {
 
 const { test } = Test.make({ providers: AWS.providers() });
 
-// Keep this a file:// URL — `.pathname` yields `/D:/...` on Windows, which
-// resolveMainPath cannot stat; it converts URLs via fileURLToPath itself.
-const doublerMain = new URL("./fixtures/doubler.ts", import.meta.url).href;
+const doublerMain = new URL("./fixtures/doubler.ts", import.meta.url).pathname;
 
 const plain = (
   value: string | Redacted.Redacted<string> | undefined,
@@ -57,7 +55,7 @@ test.provider(
             main: doublerMain,
             handler: "handler",
             isExternal: true,
-            functionUrl: false,
+            url: false,
             timeout: Duration.seconds(15),
           });
           const machine = yield* StateMachine.fromProgram("OrderProgram", {
@@ -170,13 +168,5 @@ test.provider(
 
       yield* stack.destroy();
     }),
-  {
-    tags: [
-      "provider:aws",
-      "provider:aws:lambda",
-      "provider:aws:stepfunctions",
-      "live",
-    ],
-    timeout: 180_000,
-  },
+  { timeout: 180_000 },
 );

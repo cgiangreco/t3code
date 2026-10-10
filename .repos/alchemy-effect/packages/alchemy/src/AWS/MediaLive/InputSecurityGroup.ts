@@ -70,15 +70,16 @@ export interface InputSecurityGroup extends Resource<
  * gates which source networks may push content to attached PUSH inputs
  * (RTMP_PUSH, RTP_PUSH, UDP_PUSH).
  *
- * ### Creating an Input Security Group
- * **Example:** Allow a single network
+ * @resource
+ * @section Creating an Input Security Group
+ * @example Allow a single network
  * ```typescript
  * const isg = yield* MediaLive.InputSecurityGroup("Allowlist", {
  *   whitelistRules: ["10.0.0.0/16"],
  * });
  * ```
  *
- * **Example:** Open to the world (test-only)
+ * @example Open to the world (test-only)
  * ```typescript
  * const isg = yield* MediaLive.InputSecurityGroup("Open", {
  *   whitelistRules: ["0.0.0.0/0"],
@@ -86,8 +87,8 @@ export interface InputSecurityGroup extends Resource<
  * });
  * ```
  *
- * ### Attaching to an Input
- * **Example:** Gate an RTMP push input
+ * @section Attaching to an Input
+ * @example Gate an RTMP push input
  * ```typescript
  * const input = yield* MediaLive.Input("Stream", {
  *   type: "RTMP_PUSH",
@@ -95,8 +96,6 @@ export interface InputSecurityGroup extends Resource<
  *   destinations: [{ StreamName: "live/stream" }],
  * });
  * ```
- *
- * @resource
  */
 export const InputSecurityGroup = Resource<InputSecurityGroup>(
   "AWS.MediaLive.InputSecurityGroup",

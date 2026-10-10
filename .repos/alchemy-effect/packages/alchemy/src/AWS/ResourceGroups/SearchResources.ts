@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * the grant is on `*` (including the Tagging API / CloudFormation
  * read-through permissions the search fans out to). Provide the
  * implementation with `Effect.provide(AWS.ResourceGroups.SearchResourcesHttp)`.
- * ### Searching Resources
- * **Example:** Find Resources By Tag
+ * @binding
+ * @section Searching Resources
+ * @example Find Resources By Tag
  * ```typescript
  * // init
  * const searchResources = yield* AWS.ResourceGroups.SearchResources();
@@ -29,8 +30,6 @@ import * as Binding from "../../Binding.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface SearchResources extends Binding.Service<
   SearchResources,

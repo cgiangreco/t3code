@@ -15,8 +15,9 @@ export interface ListDataIntegrationAssociationsRequest extends Omit<
  *
  * Provide the `ListDataIntegrationAssociationsHttp` layer on the Function to
  * satisfy the binding.
- * ### Listing Data Integration Associations
- * **Example:** List a Data Integration's Associations
+ * @binding
+ * @section Listing Data Integration Associations
+ * @example List a Data Integration's Associations
  * ```typescript
  * // init (provide AWS.AppIntegrations.ListDataIntegrationAssociationsHttp on the Function)
  * const listDataIntegrationAssociations =
@@ -26,8 +27,6 @@ export interface ListDataIntegrationAssociationsRequest extends Omit<
  * const { DataIntegrationAssociations } =
  *   yield* listDataIntegrationAssociations();
  * ```
- *
- * @binding
  */
 export interface ListDataIntegrationAssociations extends Binding.Service<
   ListDataIntegrationAssociations,

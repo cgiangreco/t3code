@@ -146,8 +146,9 @@ export interface Profile extends Resource<
  * Anywhere service is trusted to assume for authenticated certificate
  * identities, optionally intersected with managed policies and an inline
  * session policy.
- * ### Creating a Profile
- * **Example:** Basic Profile
+ * @resource
+ * @section Creating a Profile
+ * @example Basic Profile
  * ```typescript
  * const role = yield* IAM.Role("WorkloadRole", {
  *   assumeRolePolicyDocument: {
@@ -166,8 +167,8 @@ export interface Profile extends Resource<
  * });
  * ```
  *
- * ### Restricting the Session
- * **Example:** Session Policy and Duration
+ * @section Restricting the Session
+ * @example Session Policy and Duration
  * ```typescript
  * const profile = yield* RolesAnywhere.Profile("Profile", {
  *   roleArns: [role.roleArn],
@@ -181,8 +182,8 @@ export interface Profile extends Resource<
  * });
  * ```
  *
- * ### Mapping Certificate Attributes
- * **Example:** Session Tags from the Certificate Subject
+ * @section Mapping Certificate Attributes
+ * @example Session Tags from the Certificate Subject
  * ```typescript
  * const profile = yield* RolesAnywhere.Profile("Profile", {
  *   roleArns: [role.roleArn],
@@ -194,8 +195,6 @@ export interface Profile extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const Profile = Resource<Profile>("AWS.RolesAnywhere.Profile");
 

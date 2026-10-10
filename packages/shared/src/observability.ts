@@ -1,40 +1,12 @@
 import * as Cause from "effect/Cause";
-import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import type * as Exit from "effect/Exit";
 import * as ExitRuntime from "effect/Exit";
 import * as Option from "effect/Option";
-import * as Schema from "effect/Schema";
-import * as SchemaIssue from "effect/SchemaIssue";
-import * as SchemaTransformation from "effect/SchemaTransformation";
 import * as Tracer from "effect/Tracer";
-import { OtlpResource, OtlpTracer, OtlpSerialization } from "effect/observability";
+import { OtlpResource, OtlpTracer } from "effect/unstable/observability";
 
 import { RotatingFileSink } from "./logging.ts";
-
-export const OtlpProtocol = Schema.Literals(["http/json", "http/protobuf"]);
-export type OtlpProtocol = typeof OtlpProtocol.Type;
-export const layerOtlpSerialization = (protocol: OtlpProtocol) =>
-  protocol === "http/protobuf" ? OtlpSerialization.layerProtobuf : OtlpSerialization.layerJson;
-
-/**
- * How one signal is exported, once whichever source named that signal's
- * endpoint has been resolved. Held per signal rather than per process, so a
- * wire format or a credential cannot be paired by hand with an endpoint that
- * came from somewhere else.
- */
-export interface SignalExport {
-  readonly protocol: OtlpProtocol;
-  readonly headers: Readonly<Record<string, string>> | undefined;
-  readonly exportIntervalMs: number;
-}
-
-/** What T3 Code exports with when nothing configured a signal. */
-export const DEFAULT_SIGNAL_EXPORT: SignalExport = {
-  protocol: "http/json",
-  headers: undefined,
-  exportIntervalMs: 10_000,
-};
 
 const FLUSH_BUFFER_THRESHOLD = 256;
 const textEncoder = new TextEncoder();
@@ -331,7 +303,7 @@ export function truncateTraceAttributes(attributes: TraceAttributes): TraceAttri
   return truncated ?? attributes;
 }
 
-function spanToTraceRecord(span: SerializableSpan): EffectTraceRecord {
+export function spanToTraceRecord(span: SerializableSpan): EffectTraceRecord {
   const status = span.status as Extract<Tracer.SpanStatus, { _tag: "Ended" }>;
   const parentSpanId = Option.getOrUndefined(span.parent)?.spanId;
 
@@ -372,12 +344,6 @@ export const makeTraceSink = Effect.fn("makeTraceSink")(function* (options: Trac
   });
 
   let buffer: Array<string> = [];
-  // A failure episode starts at the first dropped record and ends when a flush
-  // sees that the latest write succeeded. Flush checks once per window, so a
-  // disk that flaps inside one window stays one episode.
-  let writeFailing = false;
-  let droppedCount = 0;
-  let failureReported = false;
   let pendingFlushStats: TraceSinkFlushStats = {
     logicalWriteBytes: 0,
     count: 0,
@@ -414,14 +380,9 @@ export const makeTraceSink = Effect.fn("makeTraceSink")(function* (options: Trac
       try {
         sink.write(chunk);
       } catch {
-        // A failing disk (ENOSPC, EACCES, EIO) drops the rest of the batch.
-        // Retrying it would grow the backlog, and every later push would
-        // retry all of it.
-        writeFailing = true;
-        droppedCount += records.length - persistedCount;
+        buffer.unshift(...records.slice(persistedCount));
         return;
       }
-      writeFailing = false;
       pendingFlushStats = {
         logicalWriteBytes: pendingFlushStats.logicalWriteBytes + chunkBytes,
         count: pendingFlushStats.count + nextIndex - persistedCount,
@@ -431,9 +392,7 @@ export const makeTraceSink = Effect.fn("makeTraceSink")(function* (options: Trac
     }
   };
 
-  // Logs once when writes start failing and once when they recover, so a disk
-  // that stays broken costs one line, not one per flush.
-  const flush = Effect.gen(function* () {
+  const flush = Effect.sync(() => {
     flushUnsafe();
     const stats = pendingFlushStats;
     pendingFlushStats = {
@@ -441,28 +400,12 @@ export const makeTraceSink = Effect.fn("makeTraceSink")(function* (options: Trac
       count: 0,
       durationMs: 0,
     };
-    if (stats.count > 0 && options.onFlush) {
-      yield* options.onFlush(stats).pipe(Effect.ignore);
-    }
-    if (droppedCount > 0 && !failureReported) {
-      failureReported = true;
-      yield* Effect.logWarning("Trace writes are failing, dropping records until they recover", {
-        filePath: options.filePath,
-      });
-    }
-    if (failureReported && !writeFailing) {
-      yield* Effect.logInfo("Trace writes recovered", {
-        filePath: options.filePath,
-        droppedCount,
-      });
-      failureReported = false;
-      droppedCount = 0;
-    }
+    return stats;
   }).pipe(
+    Effect.flatMap((stats) =>
+      stats.count > 0 && options.onFlush ? options.onFlush(stats).pipe(Effect.ignore) : Effect.void,
+    ),
     Effect.withTracerEnabled(false),
-    // The timed fiber inherits the makeTraceSink span. That span has ended but
-    // lives as long as the sink, so the tracer logger must not add logs to it.
-    Effect.updateContext(Context.omit(Tracer.ParentSpan)<never>),
   );
 
   yield* Effect.addFinalizer(() => flush.pipe(Effect.ignore));
@@ -528,15 +471,13 @@ class LocalFileSpan implements Tracer.Span {
   }
 
   end(endTime: bigint, exit: Exit.Exit<unknown, unknown>): void {
-    // Cached lookup fibers retain parent spans. Traces need success status, not result payloads.
-    const traceExit = ExitRuntime.isSuccess(exit) ? ExitRuntime.void : exit;
     this.status = {
       _tag: "Ended",
       startTime: this.status.startTime,
       endTime,
-      exit: traceExit,
+      exit,
     };
-    this.delegate.end(endTime, traceExit);
+    this.delegate.end(endTime, exit);
 
     if (this.sampled) {
       this.push(spanToTraceRecord(this));
@@ -700,7 +641,7 @@ function decodeAttributes(
     entries[attribute.key] = decodeValue(attribute.value);
   }
 
-  return truncateTraceAttributes(compactTraceAttributes(entries));
+  return compactTraceAttributes(entries);
 }
 
 function decodeValue(input: OtlpResource.AnyValue | null | undefined): unknown {
@@ -742,51 +683,3 @@ function parseBigInt(input: string): bigint {
     return 0n;
   }
 }
-
-/**
- * Parses the `OTEL_EXPORTER_OTLP_HEADERS` wire format used by
- * `T3CODE_OTLP_HEADERS`: W3C Baggage `key=value` pairs joined by commas, with
- * percent-encoded values. Each pair splits at its first `=` so an encoded or
- * literal `=` inside a value survives, and whitespace around the separators is
- * ignored.
- */
-export const OtlpHeadersFromString = Schema.String.pipe(
-  Schema.decodeTo(
-    Schema.Record(Schema.String, Schema.String),
-    SchemaTransformation.transformEffect({
-      decode: (input) => {
-        const headers: Record<string, string> = {};
-        for (const pair of input.split(",")) {
-          if (pair.trim() === "") {
-            continue;
-          }
-          const separator = pair.indexOf("=");
-          const key = separator === -1 ? "" : pair.slice(0, separator).trim();
-          if (key === "") {
-            return Effect.fail(
-              new SchemaIssue.InvalidValue({
-                message: `Expected key=value but received ${JSON.stringify(pair.trim())}.`,
-              }),
-            );
-          }
-          try {
-            headers[key] = decodeURIComponent(pair.slice(separator + 1).trim());
-          } catch {
-            return Effect.fail(
-              new SchemaIssue.InvalidValue({
-                message: `Header ${JSON.stringify(key)} has a malformed percent-encoded value.`,
-              }),
-            );
-          }
-        }
-        return Effect.succeed(headers);
-      },
-      encode: (headers) =>
-        Effect.succeed(
-          Object.entries(headers)
-            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-            .join(","),
-        ),
-    }),
-  ),
-);

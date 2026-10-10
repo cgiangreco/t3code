@@ -20,13 +20,14 @@ export interface DisconnectUserRequest extends Omit<
  * does not prevent reconnection, so revoke by not minting further tokens.
  * The call succeeds even when the user has no open connections.
  *
- * ### Moderating Users
+ * @binding
+ * @section Moderating Users
  * Provide the `DisconnectUserHttp` implementation layer on the Function
  * effect, bind the room in the init phase, then call the returned client at
  * runtime. The binding grants `ivschat:DisconnectUser` on the room and
  * injects its ARN as the `roomIdentifier` automatically.
  *
- * **Example:** Disconnect a user from a Lambda
+ * @example Disconnect a user from a Lambda
  * ```typescript
  * // init
  * const room = yield* IVSChat.Room("LiveChat");
@@ -42,8 +43,6 @@ export interface DisconnectUserRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(IVSChat.DisconnectUserHttp))
  * ```
- *
- * @binding
  */
 export interface DisconnectUser extends Binding.Service<
   DisconnectUser,

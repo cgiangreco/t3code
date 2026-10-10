@@ -13,8 +13,9 @@ export interface GetItemRequest extends Omit<
  *
  * Bind this operation to a `Table` inside a function runtime to get a callable
  * that automatically injects the table name.
- * ### Reading Data
- * **Example:** Read a Single Item
+ * @binding
+ * @section Reading Data
+ * @example Read a Single Item
  * ```typescript
  * const getItem = yield* AWS.DynamoDB.GetItem(table);
  *
@@ -24,8 +25,6 @@ export interface GetItemRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface GetItem extends Binding.Service<
   GetItem,

@@ -1,7 +1,6 @@
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { makeLocalBucketBinding } from "./BucketLocal.ts";
-import { makeWrite } from "./WriteBucketBinding.ts";
 import { WriteBucket } from "./WriteBucket.ts";
 import { makeWriteR2HttpClient } from "./WriteBucketHttp.ts";
 
@@ -30,10 +29,5 @@ import { makeWriteR2HttpClient } from "./WriteBucketHttp.ts";
  */
 export const WriteBucketLocal = Layer.effect(
   WriteBucket,
-  Effect.suspend(() =>
-    makeLocalBucketBinding({
-      makeHttpClient: makeWriteR2HttpClient,
-      makeNativeClient: makeWrite,
-    }),
-  ),
+  Effect.suspend(() => makeLocalBucketBinding(makeWriteR2HttpClient)),
 );

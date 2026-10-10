@@ -1,7 +1,5 @@
-import { vi } from "vite-plus/test";
 import {
   EnvironmentId,
-  AuthSourceControlWriteScope,
   WS_METHODS,
   type VcsListRefsInput,
   type VcsListRefsResult,
@@ -15,7 +13,7 @@ import * as Ref from "effect/Ref";
 import * as Stream from "effect/Stream";
 import * as SubscriptionRef from "effect/SubscriptionRef";
 import * as TestClock from "effect/testing/TestClock";
-import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
+import { AsyncResult, Atom, AtomRegistry } from "effect/unstable/reactivity";
 
 import {
   AVAILABLE_CONNECTION_STATE,
@@ -88,7 +86,6 @@ function session(client: WsRpcProtocolClient): RpcSession {
   return {
     client,
     initialConfig: Effect.never,
-    subscribeServerConfig: (input) => client.subscribeServerConfig(input),
     ready: Effect.void,
     probe: Effect.void,
     closed: Effect.never,
@@ -100,12 +97,12 @@ function cacheWithRefs(
   overrides: Partial<Persistence.EnvironmentCacheStore["Service"]> = {},
 ) {
   return Persistence.EnvironmentCacheStore.of({
-    loadShell: () => Effect.succeedNone,
+    loadShell: () => Effect.succeed(Option.none()),
     saveShell: () => Effect.void,
-    loadThread: () => Effect.succeedNone,
+    loadThread: () => Effect.succeed(Option.none()),
     saveThread: () => Effect.void,
     removeThread: () => Effect.void,
-    loadServerConfig: () => Effect.succeedNone,
+    loadServerConfig: () => Effect.succeed(Option.none()),
     saveServerConfig: () => Effect.void,
     loadVcsRefs: () => Effect.succeed(refs),
     saveVcsRefs: () => Effect.void,
@@ -645,23 +642,3 @@ describe("cached VCS refs", () => {
     ),
   );
 });
-
-// Transport fixtures have a source-control-only session; authorization edge cases
-// are exercised by commandPermissions.test.ts.
-vi.mock("./session.ts", () => ({
-  createEnvironmentSessionAtoms: () => ({ sessionStateAtom: grantedSessions }),
-}));
-const grantedSessions = Atom.family((_id: EnvironmentId) =>
-  Atom.make(
-    AsyncResult.success({
-      authenticated: true,
-      auth: {
-        policy: "remote-reachable",
-        bootstrapMethods: [],
-        sessionMethods: [],
-        sessionCookieName: "test",
-      },
-      scopes: [AuthSourceControlWriteScope],
-    }),
-  ),
-);

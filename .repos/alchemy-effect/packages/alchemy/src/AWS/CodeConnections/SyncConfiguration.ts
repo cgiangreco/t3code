@@ -89,8 +89,9 @@ export interface SyncConfiguration extends Resource<
  * branch + deployment file to an Amazon Web Services resource so Git sync
  * keeps the resource updated from the repository (CloudFormation stack
  * sync).
- * ### Syncing a CloudFormation Stack
- * **Example:** Stack Sync from a Repository Link
+ * @resource
+ * @section Syncing a CloudFormation Stack
+ * @example Stack Sync from a Repository Link
  * ```typescript
  * const sync = yield* CodeConnections.SyncConfiguration("StackSync", {
  *   branch: "main",
@@ -101,7 +102,7 @@ export interface SyncConfiguration extends Resource<
  * });
  * ```
  *
- * **Example:** Sync Only on Deployment-File Changes
+ * @example Sync Only on Deployment-File Changes
  * ```typescript
  * const sync = yield* CodeConnections.SyncConfiguration("StackSync", {
  *   branch: "main",
@@ -113,8 +114,6 @@ export interface SyncConfiguration extends Resource<
  *   pullRequestComment: "DISABLED",
  * });
  * ```
- *
- * @resource
  */
 export const SyncConfiguration = Resource<SyncConfiguration>(
   "AWS.CodeConnections.SyncConfiguration",

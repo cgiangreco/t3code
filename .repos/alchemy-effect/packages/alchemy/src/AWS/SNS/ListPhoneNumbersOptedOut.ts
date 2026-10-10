@@ -11,14 +11,13 @@ export interface ListPhoneNumbersOptedOutRequest
  * An account-scoped operation — pages through the phone numbers whose
  * owners opted out of receiving SMS from this account.
  * Provide the `ListPhoneNumbersOptedOutHttp` layer on the Function to implement the binding.
- * ### SMS Opt-Out Management
- * **Example:** List Opted-Out Numbers
+ * @binding
+ * @section SMS Opt-Out Management
+ * @example List Opted-Out Numbers
  * ```typescript
  * const listOptedOut = yield* SNS.ListPhoneNumbersOptedOut();
  * const { phoneNumbers } = yield* listOptedOut();
  * ```
- *
- * @binding
  */
 export interface ListPhoneNumbersOptedOut extends Binding.Service<
   ListPhoneNumbersOptedOut,

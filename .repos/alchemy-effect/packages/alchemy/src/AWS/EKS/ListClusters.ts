@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * `eks:ListClusters` is granted on `*` — the operation is account-scoped and takes no resource.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.ListClustersHttp)`.
- * ### Discovering Clusters
- * **Example:** List All Clusters
+ * @binding
+ * @section Discovering Clusters
+ * @example List All Clusters
  * ```typescript
  * // init
  * const listClusters = yield* AWS.EKS.ListClusters();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { clusters } = yield* listClusters();
  * ```
- *
- * @binding
  */
 export interface ListClusters extends Binding.Service<
   ListClusters,

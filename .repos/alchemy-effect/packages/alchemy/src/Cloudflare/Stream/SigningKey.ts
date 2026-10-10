@@ -59,8 +59,11 @@ export type SigningKey = Resource<
  * attributes.
  *
  * Requires the Stream subscription to be enabled on the account.
- * ### Creating a signing key
- * **Example:** Signing key for signed playback URLs
+ * @resource
+ * @product Stream
+ * @category Media
+ * @section Creating a signing key
+ * @example Signing key for signed playback URLs
  * ```typescript
  * const key = yield* Cloudflare.Stream.SigningKey("PlaybackKey", {});
  *
@@ -70,10 +73,6 @@ export type SigningKey = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/stream/viewing-videos/securing-your-stream/
- *
- * @resource
- * @product Stream
- * @category Media
  */
 export const SigningKey = Resource<SigningKey>(TypeId);
 
@@ -99,7 +98,7 @@ export const SigningKeyProvider = () =>
           Array.from(chunk).flatMap((page) =>
             (page.result ?? [])
               .filter(
-                (key): key is stream.KeysGetResultItem & { id: string } =>
+                (key): key is { id: string; created?: string | null } =>
                   typeof key.id === "string",
               )
               .map(
@@ -154,7 +153,7 @@ export const SigningKeyProvider = () =>
       }
 
       // Ensure — create a new key (`createKey` takes an empty body).
-      const created = yield* stream.createKey({ accountId });
+      const created = yield* stream.createKey({ accountId, body: {} });
       return {
         keyId: created.id ?? "",
         accountId,

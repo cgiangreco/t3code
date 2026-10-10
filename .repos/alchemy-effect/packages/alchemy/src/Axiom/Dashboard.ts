@@ -2,10 +2,24 @@ import * as Axiom from "@distilled.cloud/axiom";
 import * as Effect from "effect/Effect";
 import * as Provider from "../Provider.ts";
 import { Resource } from "../Resource.ts";
+import type { Chart, LayoutCell } from "./Chart.ts";
 import type { Providers } from "./Providers.ts";
 
-/** Dashboard input. */
-export type DashboardProps = Axiom.CreateDashboardRequest;
+type DashboardDoc = Axiom.CreateDashboardInput["dashboard"];
+
+/**
+ * Dashboard input. Mirrors `Operations.CreateDashboardInput` but
+ * narrows `dashboard.charts` and `dashboard.layout` to the typed
+ * {@link Chart} / {@link LayoutCell} shapes (Axiom declares them
+ * as `Schema.Array(Schema.Unknown)`, so this is a compile-time-only
+ * refinement; runtime validation is unchanged).
+ */
+export type DashboardProps = Omit<Axiom.CreateDashboardInput, "dashboard"> & {
+  readonly dashboard: Omit<DashboardDoc, "charts" | "layout"> & {
+    readonly charts: readonly Chart[];
+    readonly layout: readonly LayoutCell[];
+  };
+};
 
 export type Dashboard = Resource<
   "Axiom.Dashboard",
@@ -19,7 +33,7 @@ export type Dashboard = Resource<
     updatedAt: string;
     updatedBy: string;
     /** The full dashboard document as returned by Axiom. */
-    dashboard: Axiom.DashboardWriteResponse["dashboard"]["dashboard"];
+    dashboard: Axiom.CreateDashboardOutput["dashboard"]["dashboard"];
   },
   never,
   Providers
@@ -48,10 +62,11 @@ export type Dashboard = Resource<
  * - The chart payload is strict: only `id`, `name`, `type`, `query`. Extra
  *   keys (e.g. `dataset`, `description`) trigger
  *   `Unrecognized keys: "<name>"`.
+ * @resource
  * @see https://axiom.co/docs/query-data/dashboards
  *
- * ### Creating a Dashboard
- * **Example:** Minimal empty dashboard
+ * @section Creating a Dashboard
+ * @example Minimal empty dashboard
  * ```typescript
  * yield* Axiom.Dashboard("ops", {
  *   dashboard: {
@@ -68,7 +83,7 @@ export type Dashboard = Resource<
  * });
  * ```
  *
- * **Example:** One-chart dashboard
+ * @example One-chart dashboard
  * ```typescript
  * import type { Chart, LayoutCell } from "alchemy/Axiom";
  *
@@ -97,7 +112,7 @@ export type Dashboard = Resource<
  * });
  * ```
  *
- * **Example:** Compare to last 24h
+ * @example Compare to last 24h
  * ```typescript
  * yield* Axiom.Dashboard("compare", {
  *   dashboard: {
@@ -113,9 +128,6 @@ export type Dashboard = Resource<
  *   },
  * });
  * ```
- *
- * @resource
- * @product Dashboard
  */
 export const Dashboard = Resource<Dashboard>("Axiom.Dashboard");
 
@@ -129,7 +141,7 @@ export const DashboardProvider = () =>
       const del = yield* Axiom.deleteDashboard;
       const listAll = yield* Axiom.listDashboards;
 
-      const toAttrsFromCreate = (envelope: Axiom.DashboardWriteResponse) => ({
+      const toAttrsFromCreate = (envelope: Axiom.CreateDashboardOutput) => ({
         uid: envelope.dashboard.uid,
         id: envelope.dashboard.id,
         createdAt: envelope.dashboard.createdAt,
@@ -138,7 +150,7 @@ export const DashboardProvider = () =>
         updatedBy: envelope.dashboard.updatedBy,
         dashboard: envelope.dashboard.dashboard,
       });
-      const toAttrsFromGet = (current: Axiom.DashboardResource) => ({
+      const toAttrsFromGet = (current: Axiom.GetDashboardOutput) => ({
         uid: current.uid,
         id: current.id,
         createdAt: current.createdAt,

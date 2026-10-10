@@ -67,16 +67,15 @@ export interface Invalidation extends Resource<
  *
  * `Invalidation` is a helper resource for website deployments that need to
  * clear selected CloudFront cache paths after asset updates.
- * ### Creating Invalidations
- * **Example:** Invalidate The Entire Distribution
+ * @resource
+ * @section Creating Invalidations
+ * @example Invalidate The Entire Distribution
  * ```typescript
  * const invalidation = yield* Invalidation("WebsiteInvalidation", {
  *   distributionId: distribution.distributionId,
  *   version: files.version,
  * });
  * ```
- *
- * @resource
  */
 export const Invalidation = Resource<Invalidation>(
   "AWS.CloudFront.Invalidation",

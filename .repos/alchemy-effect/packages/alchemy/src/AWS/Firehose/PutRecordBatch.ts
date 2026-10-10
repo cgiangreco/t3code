@@ -17,8 +17,9 @@ export interface PutRecordBatchRequest extends Omit<
  * client-enforced). Even a 200 response can carry per-record failures —
  * check `FailedPutCount` and retry the failed entries from
  * `RequestResponses`.
- * ### Putting Records
- * **Example:** Put a batch of records
+ * @binding
+ * @section Putting Records
+ * @example Put a batch of records
  * ```typescript
  * // init
  * const putRecordBatch = yield* AWS.Firehose.PutRecordBatch(deliveryStream);
@@ -33,8 +34,6 @@ export interface PutRecordBatchRequest extends Omit<
  *   // retry entries whose RequestResponses[i].ErrorCode is set
  * }
  * ```
- *
- * @binding
  */
 export interface PutRecordBatch extends Binding.Service<
   PutRecordBatch,

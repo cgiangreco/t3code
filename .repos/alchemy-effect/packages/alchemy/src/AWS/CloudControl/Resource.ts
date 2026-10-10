@@ -60,8 +60,9 @@ export interface CloudControlResource extends makeResource<
  * request token (bounded) until it reaches `SUCCESS`, surfacing a `FAILED`
  * operation as a typed error rather than hanging. Updates are expressed as an
  * RFC 6902 JSON Patch computed over the keys you specify.
- * ### Managing a Resource
- * **Example:** SSM Parameter
+ * @resource
+ * @section Managing a Resource
+ * @example SSM Parameter
  * ```typescript
  * const param = yield* CloudControl.Resource("Greeting", {
  *   typeName: "AWS::SSM::Parameter",
@@ -75,7 +76,7 @@ export interface CloudControlResource extends makeResource<
  * // param.properties.Value -> "hello"
  * ```
  *
- * **Example:** SNS Topic
+ * @example SNS Topic
  * ```typescript
  * const topic = yield* CloudControl.Resource("Alerts", {
  *   typeName: "AWS::SNS::Topic",
@@ -83,8 +84,6 @@ export interface CloudControlResource extends makeResource<
  * });
  * // topic.identifier -> "arn:aws:sns:us-west-2:...:alerts"
  * ```
- *
- * @resource
  */
 export const Resource = makeResource<CloudControlResource>(
   "AWS.CloudControl.Resource",

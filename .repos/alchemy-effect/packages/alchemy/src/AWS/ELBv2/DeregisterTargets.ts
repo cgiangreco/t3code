@@ -22,8 +22,9 @@ export interface DeregisterTargetsRequest extends Omit<
  * graceful self-removal on shutdown.
  * Provide the implementation with
  * `Effect.provide(AWS.ELBv2.DeregisterTargetsHttp)`.
- * ### Dynamic Target Management
- * **Example:** Drain an IP target
+ * @binding
+ * @section Dynamic Target Management
+ * @example Drain an IP target
  * ```typescript
  * // init — bind the operation to the target group
  * const deregisterTargets = yield* AWS.ELBv2.DeregisterTargets(targetGroup);
@@ -33,8 +34,6 @@ export interface DeregisterTargetsRequest extends Omit<
  *   Targets: [{ Id: "10.0.1.15", Port: 8080 }],
  * });
  * ```
- *
- * @binding
  */
 export interface DeregisterTargets extends Binding.Service<
   DeregisterTargets,

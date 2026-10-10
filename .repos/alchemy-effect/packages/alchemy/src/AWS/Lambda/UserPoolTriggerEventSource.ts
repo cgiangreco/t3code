@@ -55,15 +55,14 @@ export const isUserPoolTriggerEvent = (
  * runtime it dispatches matching trigger events (matched on `userPoolId` +
  * `triggerSource` prefix) to the registered handler and returns the
  * handler's (mutated) event to Cognito.
- * ### Handling user pool triggers
- * **Example:** Auto-confirm sign-ups
+ * @binding
+ * @section Handling user pool triggers
+ * @example Auto-confirm sign-ups
  * ```typescript
  * yield* Cognito.onPreSignUp(pool, (event) =>
  *   Effect.sync(() => Cognito.autoConfirmUser(event, { verifyEmail: true })),
  * );
  * ```
- *
- * @binding
  */
 export const UserPoolTriggerEventSource = Layer.effect(
   CognitoUserPoolTriggerEventSource,

@@ -9,7 +9,7 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Logger from "effect/Logger";
 import * as Redacted from "effect/Redacted";
-import { FetchHttpClient } from "effect/http";
+import { FetchHttpClient } from "effect/unstable/http";
 
 import * as Devices from "./Devices.ts";
 import * as AgentActivityRows from "./AgentActivityRows.ts";
@@ -18,16 +18,6 @@ import * as EnvironmentLinks from "../environments/EnvironmentLinks.ts";
 import * as LiveActivities from "./LiveActivities.ts";
 import * as RelayConfiguration from "../Config.ts";
 import * as AgentActivityPublisher from "./AgentActivityPublisher.ts";
-import * as FcmDeliveries from "./FcmDeliveries.ts";
-
-const layerPublisher = AgentActivityPublisher.layer.pipe(
-  Layer.provide(
-    Layer.succeed(FcmDeliveries.FcmDeliveries, {
-      enqueue: () => Effect.succeed(null),
-      process: () => Effect.void,
-    }),
-  ),
-);
 import * as ApnsDeliveries from "./ApnsDeliveries.ts";
 import * as ApnsClient from "./ApnsClient.ts";
 import * as ApnsProviderTokens from "./ApnsProviderTokens.ts";
@@ -106,6 +96,7 @@ function makeEnvironmentLinks(
 ): EnvironmentLinks.EnvironmentLinks["Service"] {
   return {
     upsert: () => Effect.void,
+    listUsersForEnvironment: () => Effect.succeed(["dev:julius"]),
     listDeliveryUsersForEnvironment: () =>
       Effect.succeed([
         {
@@ -114,10 +105,9 @@ function makeEnvironmentLinks(
           liveActivitiesEnabled: true,
         },
       ]),
+    listPublicKeysForEnvironment: () => Effect.succeed([]),
     listForUser: () => Effect.succeed([]),
     getForUser: () => Effect.succeed(null),
-    findActiveManagedForEnvironment: () => Effect.succeed([]),
-    setHoldWebhooksWhileOffline: () => Effect.void,
     revokeForUser: () => Effect.succeed(false),
     ...overrides,
   };
@@ -153,13 +143,13 @@ const config = RelayConfiguration.RelayConfiguration.of({
   managedEndpointNamespace: undefined,
 });
 
-function layerRegistrationReplay(input: {
+function makeRegistrationReplayLayer(input: {
   readonly devices: Devices.Devices["Service"];
   readonly liveActivities: LiveActivities.LiveActivities["Service"];
   readonly queuedJobs: Array<SignedApnsDeliveryJob>;
 }) {
   return MobileRegistrations.layer.pipe(
-    Layer.provide(layerPublisher),
+    Layer.provide(AgentActivityPublisher.layer),
     Layer.provide(
       ApnsDeliveries.layer.pipe(
         Layer.provide(ApnsClient.layer.pipe(Layer.provide(ApnsProviderTokens.layer))),
@@ -490,7 +480,7 @@ describe("MobileRegistrations", () => {
         expect(registeredDevices).toHaveLength(1);
         expect(queuedStarts).toEqual([]);
         expect(queuedJobs).toEqual([]);
-      }).pipe(Effect.provide(layerRegistrationReplay({ devices, liveActivities, queuedJobs })));
+      }).pipe(Effect.provide(makeRegistrationReplayLayer({ devices, liveActivities, queuedJobs })));
     },
   );
 });

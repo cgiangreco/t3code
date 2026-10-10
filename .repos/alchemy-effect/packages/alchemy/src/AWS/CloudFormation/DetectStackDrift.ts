@@ -16,15 +16,14 @@ import type { Stack } from "./Stack.ts";
  * the function also needs read access to the resource types in the template
  * for the detection to complete. Provide the implementation with
  * `Effect.provide(AWS.CloudFormation.DetectStackDriftHttp)`.
- * ### Drift Detection
- * **Example:** Start Drift Detection
+ * @binding
+ * @section Drift Detection
+ * @example Start Drift Detection
  * ```typescript
  * const detectStackDrift = yield* AWS.CloudFormation.DetectStackDrift(stack);
  *
  * const { StackDriftDetectionId } = yield* detectStackDrift();
  * ```
- *
- * @binding
  */
 export interface DetectStackDrift extends Binding.Service<
   DetectStackDrift,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.SearchProvisionedProductsHttp)`.
- * ### Tracking Provisioned Products
- * **Example:** List the Caller's Provisioned Products
+ * @binding
+ * @section Tracking Provisioned Products
+ * @example List the Caller's Provisioned Products
  * ```typescript
  * // init — account-level binding, no resource argument
  * const searchProvisionedProducts = yield* AWS.ServiceCatalog.SearchProvisionedProducts();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { ProvisionedProducts } = yield* searchProvisionedProducts();
  * ```
- *
- * @binding
  */
 export interface SearchProvisionedProducts extends Binding.Service<
   SearchProvisionedProducts,

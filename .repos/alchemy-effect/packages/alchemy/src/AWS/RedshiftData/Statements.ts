@@ -248,15 +248,16 @@ export interface StatementsClient {
  * Provide the implementation with
  * `Effect.provide(AWS.RedshiftData.StatementsHttp)`.
  *
- * ### Running SQL
- * **Example:** Query a Workgroup
+ * @binding
+ * @section Running SQL
+ * @example Query a Workgroup
  * ```typescript
  * const sql = yield* RedshiftData.Statements(workgroup, { database: "dev" });
  * const result = yield* sql.query("SELECT 1 AS n");
  * // result.Records -> [[{ longValue: 1 }]]
  * ```
  *
- * **Example:** Run a Batch of Statements in One Transaction
+ * @example Run a Batch of Statements in One Transaction
  * ```typescript
  * const submitted = yield* sql.executeBatch({
  *   Sqls: ["CREATE TABLE IF NOT EXISTS events(id int)", "INSERT INTO events VALUES (1)"],
@@ -265,14 +266,14 @@ export interface StatementsClient {
  * const described = yield* sql.describe(submitted.Id!);
  * ```
  *
- * **Example:** Cancel a Running Statement
+ * @example Cancel a Running Statement
  * ```typescript
  * const submitted = yield* sql.execute({ Sql: "SELECT count(*) FROM big_table" });
  * const { Status } = yield* sql.cancel(submitted.Id!);
  * ```
  *
- * ### Browsing Metadata
- * **Example:** List Databases, Schemas and Tables
+ * @section Browsing Metadata
+ * @example List Databases, Schemas and Tables
  * ```typescript
  * const { Databases } = yield* sql.listDatabases();
  * const { Schemas } = yield* sql.listSchemas({ SchemaPattern: "public" });
@@ -280,10 +281,10 @@ export interface StatementsClient {
  * const { ColumnList } = yield* sql.describeTable({ Schema: "public", Table: "events" });
  * ```
  *
- * **Example:** Serve Query Results from a Lambda Function
+ * @example Serve Query Results from a Lambda Function
  * ```typescript
  * export default QueryFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     const namespace = yield* RedshiftServerless.Namespace("Analytics", {
  *       dbName: "analytics",
@@ -309,8 +310,6 @@ export interface StatementsClient {
  *   }).pipe(Effect.provide(RedshiftData.StatementsHttp)),
  * );
  * ```
- *
- * @binding
  */
 export interface Statements extends Binding.Service<
   Statements,

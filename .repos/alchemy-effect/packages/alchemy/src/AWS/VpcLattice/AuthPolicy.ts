@@ -51,8 +51,9 @@ export interface AuthPolicy extends Resource<
  * resource policy evaluated on every request when the target's `authType`
  * is `AWS_IAM`.
  *
- * ### Attaching Auth Policies
- * **Example:** Allow Authenticated Invoke on a Service Network
+ * @resource
+ * @section Attaching Auth Policies
+ * @example Allow Authenticated Invoke on a Service Network
  * ```typescript
  * const network = yield* ServiceNetwork("SecureNetwork", {
  *   authType: "AWS_IAM",
@@ -73,7 +74,7 @@ export interface AuthPolicy extends Resource<
  * });
  * ```
  *
- * **Example:** Raw JSON Escape Hatch
+ * @example Raw JSON Escape Hatch
  * ```typescript
  * const authPolicy = yield* AuthPolicy("ServiceAuthPolicy", {
  *   resourceIdentifier: service.serviceId,
@@ -83,8 +84,6 @@ export interface AuthPolicy extends Resource<
  *   }),
  * });
  * ```
- *
- * @resource
  */
 export const AuthPolicy = Resource<AuthPolicy>("AWS.VpcLattice.AuthPolicy");
 

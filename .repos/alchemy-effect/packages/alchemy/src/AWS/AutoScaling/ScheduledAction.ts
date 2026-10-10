@@ -106,8 +106,8 @@ export interface ScheduledAction extends Resource<
  * A scheduled scaling action that changes an Auto Scaling Group's capacity on a
  * recurring cron schedule or at a single future time.
  *
- * ### Creating a Scheduled Action
- * **Example:** Scale up every weekday morning
+ * @section Creating a Scheduled Action
+ * @example Scale up every weekday morning
  * ```typescript
  * const action = yield* ScheduledAction("MorningScaleUp", {
  *   autoScalingGroup: group,
@@ -119,7 +119,7 @@ export interface ScheduledAction extends Resource<
  * });
  * ```
  *
- * **Example:** One-time capacity change
+ * @example One-time capacity change
  * ```typescript
  * const action = yield* ScheduledAction("BlackFriday", {
  *   autoScalingGroup: group,

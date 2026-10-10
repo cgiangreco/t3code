@@ -19,15 +19,14 @@ export interface ListConversationsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.ListConversationsHttp)`.
  *
- * ### Conversations
- * **Example:** List Conversations
+ * @binding
+ * @section Conversations
+ * @example List Conversations
  * ```typescript
  * const listConversations = yield* AWS.QBusiness.ListConversations(app);
  *
  * const { conversations } = yield* listConversations();
  * ```
- *
- * @binding
  */
 export interface ListConversations extends Binding.Service<
   ListConversations,

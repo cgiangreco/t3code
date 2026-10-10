@@ -12,15 +12,14 @@ export interface ListApplicationVersionsRequest extends Omit<
  * Runtime binding for `kinesisanalytics:ListApplicationVersions` — pages
  * through the bound application's version history (every configuration
  * update creates a version), e.g. to pick a rollback target.
- * ### Observing the Application
- * **Example:** List recent versions
+ * @binding
+ * @section Observing the Application
+ * @example List recent versions
  * ```typescript
  * const listVersions = yield* AWS.KinesisAnalyticsV2.ListApplicationVersions(app);
  *
  * const { ApplicationVersionSummaries } = yield* listVersions({ Limit: 10 });
  * ```
- *
- * @binding
  */
 export interface ListApplicationVersions extends Binding.Service<
   ListApplicationVersions,

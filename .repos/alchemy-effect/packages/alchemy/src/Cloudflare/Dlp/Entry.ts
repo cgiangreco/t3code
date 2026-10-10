@@ -55,7 +55,7 @@ export type EntryAttributes = {
   /** Whether the entry participates in scans. */
   enabled: boolean;
   /** Observed detection pattern. */
-  pattern: { regex: string; validation: "luhn" | (string & {}) | undefined };
+  pattern: { regex: string; validation: "luhn" | undefined };
   /** The profile the entry is attached to, if any. */
   profileId: string | undefined;
 };
@@ -76,8 +76,11 @@ export type Entry = Resource<
  *
  * Requires the Cloudflare DLP entitlement (a paid Zero Trust add-on);
  * accounts without it receive the typed `Forbidden` error on all writes.
- * ### Creating a DLP entry
- * **Example:** Attach a regex entry to a profile
+ * @resource
+ * @product DLP
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a DLP entry
+ * @example Attach a regex entry to a profile
  * ```typescript
  * const entry = yield* Cloudflare.Dlp.Entry("EmployeeId", {
  *   pattern: { regex: "EMP-[0-9]{6}" },
@@ -85,7 +88,7 @@ export type Entry = Resource<
  * });
  * ```
  *
- * **Example:** Luhn-validated card entry
+ * @example Luhn-validated card entry
  * ```typescript
  * const card = yield* Cloudflare.Dlp.Entry("CardNumber", {
  *   pattern: { regex: "[0-9]{13,16}", validation: "luhn" },
@@ -94,10 +97,6 @@ export type Entry = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/policies/data-loss-prevention/dlp-profiles/
- *
- * @resource
- * @product DLP
- * @category Cloudflare One (Zero Trust)
  */
 export const Entry = Resource<Entry>(TypeId);
 
@@ -146,7 +145,7 @@ export const EntryProvider = () =>
           Array.from(chunk).flatMap((page) =>
             (page.result ?? [])
               .filter(
-                (entry): entry is zeroTrust.DlpEntriesListResultItemCase0 =>
+                (entry): entry is typeof entry & { type: "custom" } =>
                   "type" in entry && entry.type === "custom",
               )
               .map((entry) => toAttributes(entry, accountId)),
@@ -222,7 +221,7 @@ type ObservedEntry = {
   id: string;
   enabled: boolean;
   name: string;
-  pattern: { regex: string; validation?: "luhn" | (string & {}) | null };
+  pattern: { regex: string; validation?: "luhn" | null };
   description?: string | null;
   profileId?: string | null;
 };
@@ -234,9 +233,7 @@ type ObservedEntry = {
 const observeEntry = (accountId: string, entryId: string) =>
   zeroTrust.getDlpEntryCustom({ accountId, entryId }).pipe(
     Effect.map((entry) =>
-      "type" in entry && entry.type === "custom"
-        ? (entry as zeroTrust.DlpEntriesGetResultCase0)
-        : undefined,
+      "type" in entry && entry.type === "custom" ? entry : undefined,
     ),
     Effect.catchTag("DlpEntryNotFound", () => Effect.succeed(undefined)),
   );

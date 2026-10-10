@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.DescribeStandardsHttp)`.
- * ### Standards & Controls
- * **Example:** List Available Standards
+ * @binding
+ * @section Standards & Controls
+ * @example List Available Standards
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeStandards = yield* AWS.SecurityHub.DescribeStandards();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { Standards } = yield* describeStandards();
  * ```
- *
- * @binding
  */
 export interface DescribeStandards extends Binding.Service<
   DescribeStandards,

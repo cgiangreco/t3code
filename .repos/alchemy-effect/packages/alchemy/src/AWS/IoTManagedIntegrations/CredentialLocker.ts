@@ -52,21 +52,20 @@ export interface CredentialLocker extends Resource<
  * IoT Managed Integrations is a regional service available in a limited set
  * of regions (e.g. `eu-west-1`, `ca-central-1`).
  *
- * ### Creating Credential Lockers
- * **Example:** Basic Credential Locker
+ * @resource
+ * @section Creating Credential Lockers
+ * @example Basic Credential Locker
  * ```typescript
  * const locker = yield* CredentialLocker("DeviceCredentials", {});
  * ```
  *
- * **Example:** Named Credential Locker with Tags
+ * @example Named Credential Locker with Tags
  * ```typescript
  * const locker = yield* CredentialLocker("DeviceCredentials", {
  *   name: "my-device-credentials",
  *   tags: { team: "iot" },
  * });
  * ```
- *
- * @resource
  */
 export const CredentialLocker = Resource<CredentialLocker>(
   "AWS.IoTManagedIntegrations.CredentialLocker",

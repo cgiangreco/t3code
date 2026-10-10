@@ -15,8 +15,9 @@ export interface StartQueryRequest extends Omit<
  *
  * Provide `InternetMonitor.StartQueryHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Querying Measurements
- * **Example:** Start a Measurements Query
+ * @binding
+ * @section Querying Measurements
+ * @example Start a Measurements Query
  * ```typescript
  * // init — grants internetmonitor:StartQuery on the monitor
  * const startQuery = yield* AWS.InternetMonitor.StartQuery(monitor);
@@ -28,8 +29,6 @@ export interface StartQueryRequest extends Omit<
  *   QueryType: "MEASUREMENTS",
  * });
  * ```
- *
- * @binding
  */
 export interface StartQuery extends Binding.Service<
   StartQuery,

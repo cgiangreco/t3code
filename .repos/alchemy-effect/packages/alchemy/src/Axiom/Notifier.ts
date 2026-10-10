@@ -4,12 +4,12 @@ import * as Provider from "../Provider.ts";
 import { Resource } from "../Resource.ts";
 import type { Providers } from "./Providers.ts";
 
-export type NotifierProps = Axiom.CreateNotifierRequest;
+export type NotifierProps = Axiom.CreateNotifierInput;
 
 export type Notifier = Resource<
   "Axiom.Notifier",
   NotifierProps,
-  Axiom.CreateNotifierResponse & { id: string },
+  Axiom.CreateNotifierOutput & { id: string },
   never,
   Providers
 >;
@@ -19,10 +19,11 @@ export type Notifier = Resource<
  * Opsgenie, Discord, Microsoft Teams, generic webhook, or a fully custom
  * webhook with templated body/headers) that {@link Monitor monitors} target
  * via `notifierIds`. Exactly one channel under `properties` should be set.
+ * @resource
  * @see https://axiom.co/docs/monitor-data/notifiers
  *
- * ### Creating a Notifier
- * **Example:** Slack incoming webhook
+ * @section Creating a Notifier
+ * @example Slack incoming webhook
  * ```typescript
  * const slack = yield* Axiom.Notifier("ops-slack", {
  *   name: "ops-channel",
@@ -32,7 +33,7 @@ export type Notifier = Resource<
  * });
  * ```
  *
- * **Example:** Email distribution list
+ * @example Email distribution list
  * ```typescript
  * yield* Axiom.Notifier("ops-email", {
  *   name: "ops-team",
@@ -40,7 +41,7 @@ export type Notifier = Resource<
  * });
  * ```
  *
- * **Example:** PagerDuty integration
+ * @example PagerDuty integration
  * ```typescript
  * yield* Axiom.Notifier("pagerduty", {
  *   name: "primary-oncall",
@@ -50,7 +51,7 @@ export type Notifier = Resource<
  * });
  * ```
  *
- * **Example:** Custom webhook with templated body
+ * @example Custom webhook with templated body
  * ```typescript
  * yield* Axiom.Notifier("incident-webhook", {
  *   name: "incident.io",
@@ -64,9 +65,6 @@ export type Notifier = Resource<
  *   },
  * });
  * ```
- *
- * @resource
- * @product Monitor
  */
 export const Notifier = Resource<Notifier>("Axiom.Notifier");
 

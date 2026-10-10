@@ -88,8 +88,9 @@ export type RoomMessageReviewEventSourceService = <Req = never>(
  * Use the {@link onReviewMessage} helper rather than the service directly,
  * and provide `Lambda.RoomMessageReviewEventSource` on the hosting
  * function.
- * ### Reviewing Messages
- * **Example:** Moderate a Room from a Lambda Function
+ * @binding
+ * @section Reviewing Messages
+ * @example Moderate a Room from a Lambda Function
  * ```typescript
  * export default ChatFunction.make(
  *   { main: import.meta.url },
@@ -110,8 +111,6 @@ export type RoomMessageReviewEventSourceService = <Req = never>(
  *   }).pipe(Effect.provide(Lambda.RoomMessageReviewEventSource)),
  * );
  * ```
- *
- * @binding
  */
 export interface RoomMessageReviewEventSource extends Binding.Service<
   RoomMessageReviewEventSource,

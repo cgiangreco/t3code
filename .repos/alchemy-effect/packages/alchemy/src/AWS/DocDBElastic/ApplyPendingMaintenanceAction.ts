@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * engine update immediately, at the next maintenance window, or undo an
  * earlier opt-in. Provide the implementation with
  * `Effect.provide(AWS.DocDBElastic.ApplyPendingMaintenanceActionHttp)`.
- * ### Scheduling Maintenance
- * **Example:** Apply Maintenance at the Next Window
+ * @binding
+ * @section Scheduling Maintenance
+ * @example Apply Maintenance at the Next Window
  * ```typescript
  * const applyPending = yield* DocDBElastic.ApplyPendingMaintenanceAction();
  *
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   optInType: "NEXT_MAINTENANCE",
  * });
  * ```
- *
- * @binding
  */
 export interface ApplyPendingMaintenanceAction extends Binding.Service<
   ApplyPendingMaintenanceAction,

@@ -13,8 +13,9 @@ import type { Directory } from "./Directory.ts";
  * pass a `Redacted` value. The directory id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DirectoryService.CreateComputerHttp)`.
- * ### Managing Computers
- * **Example:** Create a Computer Account
+ * @binding
+ * @section Managing Computers
+ * @example Create a Computer Account
  * ```typescript
  * // init — bind the operation to the directory
  * const createComputer = yield* AWS.DirectoryService.CreateComputer(directory);
@@ -25,8 +26,6 @@ import type { Directory } from "./Directory.ts";
  *   Password: Redacted.make("0ne-Time-Secret!"),
  * });
  * ```
- *
- * @binding
  */
 export interface CreateComputer extends Binding.Service<
   CreateComputer,

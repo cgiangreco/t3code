@@ -58,8 +58,9 @@ export interface TargetGroupAttachment extends Resource<
  * `elasticloadbalancing.amazonaws.com` to invoke it, scoped to the target
  * group ARN — create a {@link Permission} first. The provider retries the
  * registration briefly while that permission propagates.
- * ### Registering Targets
- * **Example:** Lambda function target
+ * @resource
+ * @section Registering Targets
+ * @example Lambda function target
  * ```typescript
  * const tg = yield* TargetGroup("fn", { targetType: "lambda" });
  * yield* Lambda.Permission("AlbInvoke", {
@@ -74,7 +75,7 @@ export interface TargetGroupAttachment extends Resource<
  * });
  * ```
  *
- * **Example:** IP address target
+ * @example IP address target
  * ```typescript
  * yield* TargetGroupAttachment("ip-target", {
  *   targetGroupArn: tg.targetGroupArn,
@@ -83,7 +84,7 @@ export interface TargetGroupAttachment extends Resource<
  * });
  * ```
  *
- * **Example:** EC2 instance target
+ * @example EC2 instance target
  * ```typescript
  * yield* TargetGroupAttachment("instance-target", {
  *   targetGroupArn: tg.targetGroupArn,
@@ -91,8 +92,6 @@ export interface TargetGroupAttachment extends Resource<
  *   port: 80,
  * });
  * ```
- *
- * @resource
  */
 export const TargetGroupAttachment = Resource<TargetGroupAttachment>(
   "AWS.ELBv2.TargetGroupAttachment",

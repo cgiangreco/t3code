@@ -8,8 +8,9 @@ import type { Adapter } from "./Adapter.ts";
  * status, dataset configuration, and evaluation metrics of a version of
  * the bound adapter.
  *
- * ### Managing Adapters
- * **Example:** Poll Adapter Version Training
+ * @binding
+ * @section Managing Adapters
+ * @example Poll Adapter Version Training
  * ```typescript
  * // init
  * const getAdapterVersion = yield* AWS.Textract.GetAdapterVersion(adapter);
@@ -20,8 +21,6 @@ import type { Adapter } from "./Adapter.ts";
  *   // ready for AnalyzeDocument AdaptersConfig
  * }
  * ```
- *
- * @binding
  */
 export interface GetAdapterVersion extends Binding.Service<
   GetAdapterVersion,

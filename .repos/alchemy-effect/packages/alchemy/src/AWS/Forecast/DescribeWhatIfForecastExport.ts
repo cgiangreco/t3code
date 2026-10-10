@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * implementation with
  * `Effect.provide(AWS.Forecast.DescribeWhatIfForecastExportHttp)`.
  *
- * ### Exporting Forecasts
- * **Example:** Poll a Scenario Export
+ * @binding
+ * @section Exporting Forecasts
+ * @example Poll a Scenario Export
  * ```typescript
  * // init
  * const describeWhatIfForecastExport =
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   WhatIfForecastExportArn: exportArn,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeWhatIfForecastExport extends Binding.Service<
   DescribeWhatIfForecastExport,

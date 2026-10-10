@@ -17,8 +17,9 @@ export interface DeleteObjectsRequest extends Omit<
  * `s3:DeleteObject`/`s3:DeleteObjectVersion` are granted on the bucket's
  * objects. Provide the implementation with
  * `Effect.provide(AWS.S3.DeleteObjectsHttp)`.
- * ### Deleting Objects
- * **Example:** Delete Several Objects at Once
+ * @binding
+ * @section Deleting Objects
+ * @example Delete Several Objects at Once
  * ```typescript
  * // init — bind the operation to the bucket
  * const deleteObjects = yield* AWS.S3.DeleteObjects(bucket);
@@ -31,8 +32,6 @@ export interface DeleteObjectsRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface DeleteObjects extends Binding.Service<
   DeleteObjects,

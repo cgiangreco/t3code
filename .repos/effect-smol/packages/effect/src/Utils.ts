@@ -11,12 +11,10 @@
  * @since 2.0.0
  */
 import type { Kind, TypeLambda } from "./HKT.ts"
-import { getStackTraceLimit } from "./internal/stackTraceLimit.ts"
 import type * as Types from "./Types.ts"
 
 /**
- * Yields its wrapped value exactly once, then completes with the value sent
- * back in.
+ * Yields its wrapped value exactly once through an `IterableIterator`.
  *
  * **When to use**
  *
@@ -26,35 +24,37 @@ import type * as Types from "./Types.ts"
  *
  * **Details**
  *
- * The first call to `next()` returns a fresh `{ value: self, done: false }`.
- * Every subsequent call returns `{ value: a, done: true }` where `a` is the
- * argument passed to `next()`. To keep `yield*` cheap, the completion result
- * is the iterator itself rather than a new object, so only the iterator and
- * the single yielded result are allocated per `yield*`.
+ * The first call to `next()` returns `{ value: self, done: false }`. Every
+ * subsequent call returns `{ value: a, done: true }` where `a` is the argument
+ * passed to `next()`. `[Symbol.iterator]()` returns a **new** `SingleShotGen`
+ * wrapping the same value, so the outer type can be iterated multiple times.
  *
  * **Example** (Yielding a wrapped value in a generator)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Utils } from "effect"
  *
  * const gen = new Utils.SingleShotGen<string, number>("hello")
  *
- * gen.next(0).value // => "hello"
+ * // First call yields the wrapped value
+ * console.log(gen.next(0))
+ * // { value: "hello", done: false }
  *
- * gen.next(42).value // => 42
+ * // Second call signals completion with the provided value
+ * console.log(gen.next(42))
+ * // { value: 42, done: true }
  * ```
  *
  * @see {@link Gen} for the type-level signature that relies on `SingleShotGen`
  * @category constructors
  * @since 2.0.0
  */
-export class SingleShotGen<T, A> implements Iterator<T, A> {
-  declare private value: T | A
-  declare private done: boolean
+export class SingleShotGen<T, A> implements IterableIterator<T, A> {
+  private called = false
+  readonly self: T
 
   constructor(self: T) {
-    this.value = self
-    this.done = false
+    this.self = self
   }
 
   /**
@@ -68,12 +68,30 @@ export class SingleShotGen<T, A> implements Iterator<T, A> {
    * @since 2.0.0
    */
   next(a: A): IteratorResult<T, A> {
-    if (this.done) {
-      this.value = a
-      return this as unknown as IteratorReturnResult<A>
-    }
-    this.done = true
-    return { value: this.value as T, done: false }
+    return this.called ?
+      ({
+        value: a,
+        done: true
+      }) :
+      (this.called = true,
+        ({
+          value: this.self,
+          done: false
+        }))
+  }
+
+  /**
+   * Creates a fresh single-shot iterator over the stored value.
+   *
+   * **When to use**
+   *
+   * Use to iterate the wrapped value again without reusing the consumed
+   * iterator state.
+   *
+   * @since 2.0.0
+   */
+  [Symbol.iterator](): IterableIterator<T, A> {
+    return new SingleShotGen<T, A>(this.self)
   }
 }
 
@@ -95,21 +113,15 @@ export class SingleShotGen<T, A> implements Iterator<T, A> {
  *
  * **Example** (Declaring variance for a TypeLambda)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Option, Utils } from "effect"
  *
- * const variance: Utils.Variance<
+ * declare const variance: Utils.Variance<
  *   Option.OptionTypeLambda,
- *   unknown,
- *   string,
- *   string
- * > = {
- *   _F: (value) => value,
- *   _R: () => {},
- *   _O: () => "output",
- *   _E: () => "error"
- * }
- * Array.of(variance._O(undefined as never), variance._E(undefined as never)) // => ["output", "error"]
+ *   never,
+ *   never,
+ *   never
+ * >
  * ```
  *
  * @see {@link Gen} for the type-level signature that uses `Variance`
@@ -140,15 +152,10 @@ export interface Variance<in out F extends TypeLambda, in R, out O, out E> {
  *
  * **Example** (Typing a gen function for Option)
  *
- * ```ts import.meta.vitest
- * import { Option } from "effect"
- * import type { Utils } from "effect"
+ * ```ts
+ * import type { Option, Utils } from "effect"
  *
- * const gen: Utils.Gen<Option.OptionTypeLambda> = Option.gen
- * const result = gen(function*() {
- *   return yield* Option.some(1)
- * })
- * result // => Option.some(1)
+ * declare const gen: Utils.Gen<Option.OptionTypeLambda>
  * ```
  *
  * @see {@link Variance} for encoding the variance used for inference
@@ -205,8 +212,7 @@ const pickInternalCall = (): <A>(body: () => A) => A => {
     }
   }
 
-  const isNotOptimizedAway = getStackTraceLimit() !== 0 &&
-    standard[InternalTypeId](() => new Error().stack)?.includes(InternalTypeId) === true
+  const isNotOptimizedAway = standard[InternalTypeId](() => new Error().stack)?.includes(InternalTypeId) === true
 
   return isNotOptimizedAway ? standard[InternalTypeId] : forced[InternalTypeId]
 }

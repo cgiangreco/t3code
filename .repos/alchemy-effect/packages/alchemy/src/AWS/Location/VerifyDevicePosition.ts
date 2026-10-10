@@ -19,8 +19,9 @@ export interface VerifyDevicePositionRequest extends Omit<
  * `geo:VerifyDevicePosition`), scoped to one {@link Tracker}. Provide the implementation with
  * `Effect.provide(AWS.Location.VerifyDevicePositionHttp)`.
  *
- * ### Verifying Device Positions
- * **Example:** Verify a Position Against Wi-Fi Signals
+ * @binding
+ * @section Verifying Device Positions
+ * @example Verify a Position Against Wi-Fi Signals
  * ```typescript
  * const verifyPosition = yield* Location.VerifyDevicePosition(tracker);
  *
@@ -34,8 +35,6 @@ export interface VerifyDevicePositionRequest extends Omit<
  * });
  * // verdict.InferredState → inferred position + accuracy
  * ```
- *
- * @binding
  */
 export interface VerifyDevicePosition extends Binding.Service<
   VerifyDevicePosition,

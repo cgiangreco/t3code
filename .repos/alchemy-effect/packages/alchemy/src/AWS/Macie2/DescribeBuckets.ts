@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.DescribeBucketsHttp)`.
- * ### S3 Bucket Inventory
- * **Example:** Query Macie's Bucket Inventory
+ * @binding
+ * @section S3 Bucket Inventory
+ * @example Query Macie's Bucket Inventory
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeBuckets = yield* AWS.Macie2.DescribeBuckets();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { buckets } = yield* describeBuckets({});
  * ```
- *
- * @binding
  */
 export interface DescribeBuckets extends Binding.Service<
   DescribeBuckets,

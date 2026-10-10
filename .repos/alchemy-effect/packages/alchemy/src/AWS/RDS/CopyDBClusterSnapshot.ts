@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * Copies an Aurora cluster snapshot (e.g. to archive it under a new
  * identifier or re-encrypt with a different KMS key). Provide the implementation with
  * `Effect.provide(AWS.RDS.CopyDBClusterSnapshotHttp)`.
- * ### Managing Cluster Snapshots
- * **Example:** Archive a Cluster Snapshot
+ * @binding
+ * @section Managing Cluster Snapshots
+ * @example Archive a Cluster Snapshot
  * ```typescript
  * const copyDBClusterSnapshot = yield* AWS.RDS.CopyDBClusterSnapshot();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   TargetDBClusterSnapshotIdentifier: `archive-${snapshotId}`,
  * });
  * ```
- *
- * @binding
  */
 export interface CopyDBClusterSnapshot extends Binding.Service<
   CopyDBClusterSnapshot,

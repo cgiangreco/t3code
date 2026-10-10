@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * data resource's properties and a presigned download location for its
  * input file.
  *
- * ### Reading Parallel Data
- * **Example:** Read a parallel data resource
+ * @binding
+ * @section Reading Parallel Data
+ * @example Read a parallel data resource
  * ```typescript
  * // init
  * const getParallelData = yield* AWS.Translate.GetParallelData();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* getParallelData({ Name: examples.parallelDataName });
  * // result.ParallelDataProperties?.Status === "ACTIVE"
  * ```
- *
- * @binding
  */
 export interface GetParallelData extends Binding.Service<
   GetParallelData,

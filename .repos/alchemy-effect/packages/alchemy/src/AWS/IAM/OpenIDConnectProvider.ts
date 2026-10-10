@@ -58,8 +58,9 @@ export interface OpenIDConnectProvider extends Resource<
  *
  * `OpenIDConnectProvider` registers an external OIDC issuer so IAM roles can be
  * assumed through web identity federation flows such as GitHub Actions.
- * ### Federating with OIDC
- * **Example:** Create a GitHub Actions OIDC Provider
+ * @resource
+ * @section Federating with OIDC
+ * @example Create a GitHub Actions OIDC Provider
  * ```typescript
  * const oidc = yield* OpenIDConnectProvider("GithubOidc", {
  *   url: "https://token.actions.githubusercontent.com",
@@ -67,8 +68,6 @@ export interface OpenIDConnectProvider extends Resource<
  *   thumbprintList: ["6938fd4d98bab03faadb97b34396831e3780aea1"],
  * });
  * ```
- *
- * @resource
  */
 export const OpenIDConnectProvider = Resource<OpenIDConnectProvider>(
   "AWS.IAM.OpenIDConnectProvider",

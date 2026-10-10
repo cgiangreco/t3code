@@ -32,11 +32,14 @@ import * as Reducer from "./Reducer.ts"
  *
  * **Example** (Coercing values to numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number as N } from "effect"
  *
- * N.Number("42") // => 42
- * N.Number("3.14") // => 3.14
+ * const num = N.Number("42")
+ * console.log(num) // 42
+ *
+ * const float = N.Number("3.14")
+ * console.log(float) // 3.14
  * ```
  *
  * @category constructors
@@ -53,11 +56,12 @@ export const Number = globalThis.Number
  *
  * **Example** (Checking for numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.isNumber(2) // => true
- * Number.isNumber("2") // => false
+ * assert.deepStrictEqual(Number.isNumber(2), true)
+ * assert.deepStrictEqual(Number.isNumber("2"), false)
  * ```
  *
  * @category guards
@@ -74,10 +78,11 @@ export const isNumber: (input: unknown) => input is number = predicate.isNumber
  *
  * **Example** (Adding numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.sum(2, 3) // => 5
+ * assert.deepStrictEqual(Number.sum(2, 3), 5)
  * ```
  *
  * @see {@link sumAll} for summing an iterable of numbers
@@ -99,10 +104,11 @@ export const sum: {
  *
  * **Example** (Multiplying numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.multiply(2, 3) // => 6
+ * assert.deepStrictEqual(Number.multiply(2, 3), 6)
  * ```
  *
  * @see {@link multiplyAll} for multiplying an iterable of numbers
@@ -124,10 +130,11 @@ export const multiply: {
  *
  * **Example** (Subtracting numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.subtract(2, 3) // => -1
+ * assert.deepStrictEqual(Number.subtract(2, 3), -1)
  * ```
  *
  * @category math
@@ -147,11 +154,11 @@ export const subtract: {
  *
  * **Example** (Dividing numbers safely)
  *
- * ```ts import.meta.vitest
- * import { Number, Option } from "effect"
+ * ```ts
+ * import { Number } from "effect"
  *
- * Number.divide(6, 3) // => Option.some(2)
- * Number.divide(6, 0) // => Option.none()
+ * Number.divide(6, 3) // Option.some(2)
+ * Number.divide(6, 0) // Option.none()
  * ```
  *
  * @see {@link divideUnsafe} for division that throws when the divisor is zero
@@ -182,16 +189,12 @@ export const divide: {
  *
  * **Example** (Dividing numbers unsafely)
  *
- * ```ts import.meta.vitest
- * import { Number, Result } from "effect"
+ * ```ts
+ * import { Number } from "effect"
  *
- * Number.divideUnsafe(6, 3) // => 2
+ * console.log(Number.divideUnsafe(6, 3)) // 2
  *
- * const failure = Result.try({
- *   try: () => Number.divideUnsafe(6, 0),
- *   catch: (error) => (error as Error).message
- * })
- * Result.merge(failure) // => "Division by zero"
+ * // Passing 0 as the divisor throws a RangeError("Division by zero").
  * ```
  *
  * @see {@link divide} for division that returns `Option.none` when the divisor is zero
@@ -217,10 +220,11 @@ export const divideUnsafe: {
  *
  * **Example** (Incrementing a number)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.increment(2) // => 3
+ * assert.deepStrictEqual(Number.increment(2), 3)
  * ```
  *
  * @category math
@@ -237,10 +241,11 @@ export const increment = (n: number): number => n + 1
  *
  * **Example** (Decrementing a number)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.decrement(3) // => 2
+ * assert.deepStrictEqual(Number.decrement(3), 2)
  * ```
  *
  * @category math
@@ -258,12 +263,12 @@ export const decrement = (n: number): number => n - 1
  *
  * **Example** (Comparing numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
  *
- * Number.Order(1, 2) // => -1
- * Number.Order(2, 1) // => 1
- * Number.Order(1, 1) // => 0
+ * console.log(Number.Order(1, 2)) // -1
+ * console.log(Number.Order(2, 1)) // 1
+ * console.log(Number.Order(1, 1)) // 0
  * ```
  *
  * @category instances
@@ -281,12 +286,12 @@ export const Order: order.Order<number> = order.Number
  *
  * **Example** (Comparing numbers for equivalence)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
  *
- * Number.Equivalence(1, 1) // => true
- * Number.Equivalence(1, 2) // => false
- * Number.Equivalence(NaN, NaN) // => true
+ * console.log(Number.Equivalence(1, 1)) // true
+ * console.log(Number.Equivalence(1, 2)) // false
+ * console.log(Number.Equivalence(NaN, NaN)) // true
  * ```
  *
  * @category instances
@@ -303,12 +308,13 @@ export const Equivalence: Equ.Equivalence<number> = Equ.Number
  *
  * **Example** (Checking less-than comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.isLessThan(2, 3) // => true
- * Number.isLessThan(3, 3) // => false
- * Number.isLessThan(4, 3) // => false
+ * assert.deepStrictEqual(Number.isLessThan(2, 3), true)
+ * assert.deepStrictEqual(Number.isLessThan(3, 3), false)
+ * assert.deepStrictEqual(Number.isLessThan(4, 3), false)
  * ```
  *
  * @category predicates
@@ -328,12 +334,13 @@ export const isLessThan: {
  *
  * **Example** (Checking less-than-or-equal comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.isLessThanOrEqualTo(2, 3) // => true
- * Number.isLessThanOrEqualTo(3, 3) // => true
- * Number.isLessThanOrEqualTo(4, 3) // => false
+ * assert.deepStrictEqual(Number.isLessThanOrEqualTo(2, 3), true)
+ * assert.deepStrictEqual(Number.isLessThanOrEqualTo(3, 3), true)
+ * assert.deepStrictEqual(Number.isLessThanOrEqualTo(4, 3), false)
  * ```
  *
  * @category predicates
@@ -353,12 +360,13 @@ export const isLessThanOrEqualTo: {
  *
  * **Example** (Checking greater-than comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.isGreaterThan(2, 3) // => false
- * Number.isGreaterThan(3, 3) // => false
- * Number.isGreaterThan(4, 3) // => true
+ * assert.deepStrictEqual(Number.isGreaterThan(2, 3), false)
+ * assert.deepStrictEqual(Number.isGreaterThan(3, 3), false)
+ * assert.deepStrictEqual(Number.isGreaterThan(4, 3), true)
  * ```
  *
  * @category predicates
@@ -378,12 +386,13 @@ export const isGreaterThan: {
  *
  * **Example** (Checking greater-than-or-equal comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.isGreaterThanOrEqualTo(2, 3) // => false
- * Number.isGreaterThanOrEqualTo(3, 3) // => true
- * Number.isGreaterThanOrEqualTo(4, 3) // => true
+ * assert.deepStrictEqual(Number.isGreaterThanOrEqualTo(2, 3), false)
+ * assert.deepStrictEqual(Number.isGreaterThanOrEqualTo(3, 3), true)
+ * assert.deepStrictEqual(Number.isGreaterThanOrEqualTo(4, 3), true)
  * ```
  *
  * @category predicates
@@ -403,14 +412,15 @@ export const isGreaterThanOrEqualTo: {
  *
  * **Example** (Checking inclusive ranges)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
  * const between = Number.between({ minimum: 0, maximum: 5 })
  *
- * between(3) // => true
- * between(-1) // => false
- * between(6) // => false
+ * assert.deepStrictEqual(between(3), true)
+ * assert.deepStrictEqual(between(-1), false)
+ * assert.deepStrictEqual(between(6), false)
  * ```
  *
  * @see {@link clamp} for forcing a number into an inclusive range
@@ -441,19 +451,18 @@ export const between: {
  * - If the `number` is less than the `minimum` value, the function returns the `minimum` value.
  * - If the `number` is greater than the `maximum` value, the function returns the `maximum` value.
  * - Otherwise, it returns the original `number`.
- * - `NaN` is ordered below every non-`NaN` number by `Number.Order`, so it is
- *   clamped to `minimum`.
  *
  * **Example** (Clamping to a range)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
  * const clamp = Number.clamp({ minimum: 1, maximum: 5 })
  *
- * clamp(3) // => 3
- * clamp(0) // => 1
- * clamp(6) // => 5
+ * assert.equal(clamp(3), 3)
+ * assert.equal(clamp(0), 1)
+ * assert.equal(clamp(6), 5)
  * ```
  *
  * @see {@link between} for checking whether a number is already inside a range
@@ -481,10 +490,11 @@ export const clamp: {
  *
  * **Example** (Finding the minimum)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.min(2, 3) // => 2
+ * assert.deepStrictEqual(Number.min(2, 3), 2)
  * ```
  *
  * @see {@link max} for selecting the larger value
@@ -506,10 +516,11 @@ export const min: {
  *
  * **Example** (Finding the maximum)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.max(2, 3) // => 3
+ * assert.deepStrictEqual(Number.max(2, 3), 3)
  * ```
  *
  * @see {@link min} for selecting the smaller value
@@ -531,12 +542,13 @@ export const max: {
  *
  * **Example** (Determining the sign)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.sign(-5) // => -1
- * Number.sign(0) // => 0
- * Number.sign(5) // => 1
+ * assert.deepStrictEqual(Number.sign(-5), -1)
+ * assert.deepStrictEqual(Number.sign(0), 0)
+ * assert.deepStrictEqual(Number.sign(5), 1)
  * ```
  *
  * @category math
@@ -553,10 +565,11 @@ export const sign = (n: number): Ordering => Order(n, 0)
  *
  * **Example** (Summing an iterable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.sumAll([2, 3, 4]) // => 9
+ * assert.deepStrictEqual(Number.sumAll([2, 3, 4]), 9)
  * ```
  *
  * @see {@link sum} for adding two numbers
@@ -582,10 +595,11 @@ export const sumAll = (collection: Iterable<number>): number => {
  *
  * **Example** (Multiplying an iterable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.multiplyAll([2, 3, 4]) // => 24
+ * assert.deepStrictEqual(Number.multiplyAll([2, 3, 4]), 24)
  * ```
  *
  * @see {@link multiply} for multiplying two numbers
@@ -615,12 +629,13 @@ export const multiplyAll = (collection: Iterable<number>): number => {
  *
  * **Example** (Calculating remainders)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.remainder(2, 2) // => 0
- * Number.remainder(3, 2) // => 1
- * Number.remainder(-4, 2) // => -0
+ * assert.deepStrictEqual(Number.remainder(2, 2), 0)
+ * assert.deepStrictEqual(Number.remainder(3, 2), 1)
+ * assert.deepStrictEqual(Number.remainder(-4, 2), -0)
  * ```
  *
  * @see {@link divide} for quotient calculation with division-by-zero represented as `Option.none`
@@ -632,13 +647,23 @@ export const remainder: {
   (divisor: number): (self: number) => number
   (self: number, divisor: number): number
 } = dual(2, (self: number, divisor: number): number => {
-  if (!globalThis.Number.isFinite(self) || !globalThis.Number.isFinite(divisor) || divisor === 0) {
-    return NaN
+  const selfString = self.toString()
+  const divisorString = divisor.toString()
+  if (selfString.includes("e") || divisorString.includes("e")) {
+    if (!globalThis.Number.isFinite(self) || !globalThis.Number.isFinite(divisor) || divisor === 0) {
+      return NaN
+    }
+    return remainderWithScientificNotation(self, divisor)
   }
-  if (globalThis.Number.isInteger(self) && globalThis.Number.isInteger(divisor)) {
-    return self % divisor
-  }
+  const selfDecCount = (selfString.split(".")[1] || "").length
+  const divisorDecCount = (divisorString.split(".")[1] || "").length
+  const decCount = selfDecCount > divisorDecCount ? selfDecCount : divisorDecCount
+  const selfInt = parseInt(self.toFixed(decCount).replace(".", ""))
+  const divisorInt = parseInt(divisor.toFixed(decCount).replace(".", ""))
+  return (selfInt % divisorInt) / Math.pow(10, decCount)
+})
 
+function remainderWithScientificNotation(self: number, divisor: number): number {
   const [selfCoefficient, selfExponent] = toScientificInteger(self)
   const [divisorCoefficient, divisorExponent] = toScientificInteger(divisor)
   const exponent = Math.min(selfExponent, divisorExponent)
@@ -650,12 +675,9 @@ export const remainder: {
   }
   const remainder = globalThis.Number(`${out}e${exponent}`)
   return remainder === 0 ? Math.sign(self) * globalThis.Number.MIN_VALUE : remainder
-})
+}
 
 function toScientificInteger(n: number): readonly [coefficient: bigint, exponent: number] {
-  if (globalThis.Number.isInteger(n)) {
-    return [BigInt(n), 0]
-  }
   const scientific = Math.abs(n).toExponential()
   const eIndex = scientific.indexOf("e")
   const digits = scientific.slice(0, eIndex).replace(".", "")
@@ -672,11 +694,12 @@ function toScientificInteger(n: number): readonly [coefficient: bigint, exponent
  *
  * **Example** (Finding the next power of two)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.nextPow2(5) // => 8
- * Number.nextPow2(17) // => 32
+ * assert.deepStrictEqual(Number.nextPow2(5), 8)
+ * assert.deepStrictEqual(Number.nextPow2(17), 32)
  * ```
  *
  * @category math
@@ -697,15 +720,15 @@ export const nextPow2 = (n: number): number => {
  *
  * **Example** (Parsing numbers from strings)
  *
- * ```ts import.meta.vitest
- * import { Number, Option } from "effect"
+ * ```ts
+ * import { Number } from "effect"
  *
- * Number.parse("42") // => Option.some(42)
- * Number.parse("3.14") // => Option.some(3.14)
- * Number.parse("NaN") // => Option.some(NaN)
- * Number.parse("Infinity") // => Option.some(Infinity)
- * Number.parse("-Infinity") // => Option.some(-Infinity)
- * Number.parse("not a number") // => Option.none()
+ * Number.parse("42") // Option.some(42)
+ * Number.parse("3.14") // Option.some(3.14)
+ * Number.parse("NaN") // Option.some(NaN)
+ * Number.parse("Infinity") // Option.some(Infinity)
+ * Number.parse("-Infinity") // Option.some(-Infinity)
+ * Number.parse("not a number") // Option.none()
  * ```
  *
  * @see {@link Number} for native constructor coercion
@@ -739,11 +762,12 @@ export const parse = (s: string): Option.Option<number> => {
  *
  * **Example** (Rounding with precision)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number } from "effect"
+ * import * as assert from "node:assert"
  *
- * Number.round(1.1234, 2) // => 1.12
- * Number.round(1.567, 2) // => 1.57
+ * assert.deepStrictEqual(Number.round(1.1234, 2), 1.12)
+ * assert.deepStrictEqual(Number.round(1.567, 2), 1.57)
  * ```
  *
  * @category math

@@ -15,8 +15,9 @@ export interface ListRulesRequest extends Omit<
  * a callable scoped to that bus; omit the bus argument to list rules on the
  * account's default bus. Provide the `ListRulesHttp` layer on the Function to
  * satisfy the binding.
- * ### Listing Rules
- * **Example:** List Rules on a Bus
+ * @binding
+ * @section Listing Rules
+ * @example List Rules on a Bus
  * ```typescript
  * // init — bind the bus (provide AWS.EventBridge.ListRulesHttp on the Function)
  * const listRules = yield* AWS.EventBridge.ListRules(bus);
@@ -24,8 +25,6 @@ export interface ListRulesRequest extends Omit<
  * // runtime — list rules, optionally filtered by name prefix
  * const { Rules } = yield* listRules({ NamePrefix: "orders-" });
  * ```
- *
- * @binding
  */
 export interface ListRules extends Binding.Service<
   ListRules,

@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.ListCisScansHttp)`.
- * ### CIS Scan Results
- * **Example:** List Completed CIS Scans
+ * @binding
+ * @section CIS Scan Results
+ * @example List Completed CIS Scans
  * ```typescript
  * // init
  * const listCisScans = yield* AWS.Inspector2.ListCisScans();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { scans } = yield* listCisScans();
  * ```
- *
- * @binding
  */
 export interface ListCisScans extends Binding.Service<
   ListCisScans,

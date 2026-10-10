@@ -153,8 +153,9 @@ export interface Pipeline extends Resource<
  * Pipelines take roughly 5-10 minutes to provision and are billed per
  * Ingestion-OCU-hour while they exist (minimum 1 OCU). Destroy pipelines you
  * are not using.
- * ### Creating a Pipeline
- * **Example:** HTTP Source to S3 Sink
+ * @resource
+ * @section Creating a Pipeline
+ * @example HTTP Source to S3 Sink
  * ```typescript
  * const pipeline = yield* Pipeline("Logs", {
  *   minUnits: 1,
@@ -178,7 +179,7 @@ export interface Pipeline extends Resource<
  * });
  * ```
  *
- * **Example:** Pipeline with CloudWatch Logging
+ * @example Pipeline with CloudWatch Logging
  * ```typescript
  * const pipeline = yield* Pipeline("Logs", {
  *   minUnits: 1,
@@ -192,8 +193,6 @@ export interface Pipeline extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Pipeline = Resource<Pipeline>("AWS.OSIS.Pipeline");
 

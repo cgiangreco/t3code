@@ -11,12 +11,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-places:SearchText`. Requests and responses are raw distilled types (no
  * marshalling).
  *
- * ### Searching Places
+ * @binding
+ * @section Searching Places
  * Provide the `SearchTextHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoPlaces.SearchTextHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Search for a place by text
+ * @example Search for a place by text
  * ```typescript
  * // init
  * const searchText = yield* AWS.GeoPlaces.SearchText();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const first = result.ResultItems?.[0];
  * ```
- *
- * @binding
  */
 export interface SearchText extends Binding.Service<
   SearchText,

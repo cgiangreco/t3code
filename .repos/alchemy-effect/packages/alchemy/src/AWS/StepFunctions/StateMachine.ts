@@ -213,8 +213,9 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * serialization — and an execution role is created automatically unless an
  * explicit `roleArn` is given. Lambda functions referenced in the definition
  * are granted `lambda:InvokeFunction` on the auto-created role.
- * ### Creating State Machines
- * **Example:** Standard Workflow with a Pass State
+ * @resource
+ * @section Creating State Machines
+ * @example Standard Workflow with a Pass State
  * ```typescript
  * import * as StepFunctions from "alchemy/AWS/StepFunctions";
  *
@@ -228,7 +229,7 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * });
  * ```
  *
- * **Example:** Express Workflow
+ * @example Express Workflow
  * ```typescript
  * const machine = yield* StepFunctions.StateMachine("FastWorkflow", {
  *   type: "EXPRESS",
@@ -241,11 +242,11 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * });
  * ```
  *
- * ### Orchestrating Lambda Functions
+ * @section Orchestrating Lambda Functions
  * Reference a function ARN in a Task state — `lambda:InvokeFunction` is
  * granted on the auto-created execution role automatically.
  *
- * **Example:** Invoke a Lambda Function
+ * @example Invoke a Lambda Function
  * ```typescript
  * const machine = yield* StepFunctions.StateMachine("Pipeline", {
  *   definition: {
@@ -261,8 +262,8 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * });
  * ```
  *
- * ### Service Integrations
- * **Example:** Send a Task Token to SQS (callback pattern)
+ * @section Service Integrations
+ * @example Send a Task Token to SQS (callback pattern)
  * ```typescript
  * const machine = yield* StepFunctions.StateMachine("Callback", {
  *   definition: {
@@ -289,11 +290,11 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * });
  * ```
  *
- * ### Starting Executions at Runtime
+ * @section Starting Executions at Runtime
  * Bind execution operations in the init phase and use them in runtime
  * handlers.
  *
- * **Example:** Start a workflow from a handler
+ * @example Start a workflow from a handler
  * ```typescript
  * // init
  * const startExecution = yield* StepFunctions.StartExecution(machine);
@@ -309,7 +310,7 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * };
  * ```
  *
- * **Example:** Run an EXPRESS workflow synchronously
+ * @example Run an EXPRESS workflow synchronously
  * ```typescript
  * // init
  * const startSyncExecution = yield* StepFunctions.StartSyncExecution(machine);
@@ -321,14 +322,14 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  * // result.status === "SUCCEEDED", result.output is the workflow output
  * ```
  *
- * ### Typed Programs
+ * @section Typed Programs
  * Author the workflow as a typed `Sfn` program (mirroring Effect's names —
  * `Sfn.gen`, `Sfn.invoke`, `Sfn.when`, `Sfn.forEach`, `Sfn.catchTag`, ...)
  * and compile it with `StateMachine.fromProgram`. The compiler emits a plain
  * ASL definition plus the IAM policy statements its task states need; the
  * raw `definition` path above stays fully usable underneath.
  *
- * **Example:** Compile a typed program
+ * @example Compile a typed program
  * ```typescript
  * import { Sfn, StateMachine } from "alchemy/AWS/StepFunctions";
  *
@@ -347,8 +348,6 @@ const fromProgram = (id: string, props: FromProgramProps) =>
  *   }),
  * });
  * ```
- *
- * @resource
  */
 export const StateMachine: typeof StateMachineResource & {
   fromProgram: typeof fromProgram;

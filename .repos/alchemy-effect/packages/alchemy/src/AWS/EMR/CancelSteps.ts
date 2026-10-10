@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:CancelSteps` — cancels pending or running steps on the bound cluster. Cancellation is asynchronous — poll {@link DescribeStep} for the final state.
- * ### Running Steps
- * **Example:** Cancel a Step
+ * @binding
+ * @section Running Steps
+ * @example Cancel a Step
  * ```typescript
  * const cancelSteps = yield* AWS.EMR.CancelSteps(cluster);
  *
@@ -15,8 +16,6 @@ import type { Cluster } from "./Cluster.ts";
  *   StepCancellationOption: "SEND_INTERRUPT",
  * });
  * ```
- *
- * @binding
  */
 export interface CancelSteps extends Binding.Service<
   CancelSteps,

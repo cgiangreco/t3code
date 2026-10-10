@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * status. Useful for governance dashboards that surface in-flight landing
  * zone upgrades. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ListLandingZoneOperationsHttp)`.
- * ### Polling Asynchronous Operations
- * **Example:** List In-Progress Landing Zone Operations
+ * @binding
+ * @section Polling Asynchronous Operations
+ * @example List In-Progress Landing Zone Operations
  * ```typescript
  * // init — account-level binding takes no resource
  * const listLandingZoneOperations =
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.landingZoneOperations.length);
  * ```
- *
- * @binding
  */
 export interface ListLandingZoneOperations extends Binding.Service<
   ListLandingZoneOperations,

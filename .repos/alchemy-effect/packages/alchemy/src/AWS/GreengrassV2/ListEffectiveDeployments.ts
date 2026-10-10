@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * caller supplies the core device thing name at runtime. Provide the
  * implementation with
  * `Effect.provide(AWS.GreengrassV2.ListEffectiveDeploymentsHttp)`.
- * ### Managing Core Devices
- * **Example:** Track A Rollout On A Device
+ * @binding
+ * @section Managing Core Devices
+ * @example Track A Rollout On A Device
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listEffectiveDeployments = yield* AWS.GreengrassV2.ListEffectiveDeployments();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   coreDeviceThingName: "MyCore",
  * });
  * ```
- *
- * @binding
  */
 export interface ListEffectiveDeployments extends Binding.Service<
   ListEffectiveDeployments,

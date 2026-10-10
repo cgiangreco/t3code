@@ -1,6 +1,6 @@
 import { diffWordsWithSpace } from "diff";
 
-import type { ReviewHighlightedToken } from "./reviewHighlightedToken.types";
+import type { ReviewHighlightedToken } from "./shikiReviewHighlighter";
 
 interface ReviewDiffOperation {
   readonly value: string;

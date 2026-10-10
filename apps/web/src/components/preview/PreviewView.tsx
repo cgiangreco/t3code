@@ -1,34 +1,18 @@
 "use client";
 
 import { scopedThreadKey } from "@t3tools/client-runtime/environment";
-import { previewStreamDownloadUrl } from "@t3tools/client-runtime/preview/server-browser-stream";
+import { squashAtomCommandFailure } from "@t3tools/client-runtime/state/runtime";
 import {
-  isAtomCommandInterrupted,
-  squashAtomCommandFailure,
-} from "@t3tools/client-runtime/state/runtime";
-import {
-  AuthOrchestrationOperateScope,
-  DEFAULT_BROWSER_PROFILE_ID,
   FILL_PREVIEW_VIEWPORT,
   type PreviewAnnotationPayload,
   type PreviewViewportSetting,
   type ScopedThreadRef,
-  DEFAULT_PREVIEW_ZOOM_FACTOR,
-  PREVIEW_ZOOM_LEVELS,
-  type PreviewAdjustInput,
 } from "@t3tools/contracts";
-import { normalizePreviewUrl, resolveAddressBarInput } from "@t3tools/shared/preview";
+import { normalizePreviewUrl } from "@t3tools/shared/preview";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  BROWSER_HISTORY_MAX_ENTRIES_PER_PROJECT,
-  recordVisitForThread,
-  removeUrlForThread,
-  setTitleForThreadUrl,
-  useThreadRecentHistory,
-} from "~/browserHistoryStore";
 import { type ComposerImageAttachment, useComposerDraftStore } from "~/composerDraftStore";
-import { capturePreviewAnnotationScreenshot } from "~/lib/previewAnnotation";
+import { previewAnnotationScreenshotFile } from "~/lib/previewAnnotation";
 import { ensureLocalApi } from "~/localApi";
 import {
   rememberPreviewUrl,
@@ -36,62 +20,39 @@ import {
   useThreadPreviewState,
 } from "~/previewStateStore";
 import { resolveDiscoveredServerUrl } from "~/browser/browserTargetResolver";
-import { useEnvironmentSupportsServerBrowser } from "~/state/entities";
-import {
-  useEnvironment,
-  useEnvironmentHttpBaseUrl,
-  usePrimaryEnvironmentId,
-} from "~/state/environments";
 import { previewEnvironment } from "~/state/preview";
-import { usePreviewStreamAccess } from "~/state/previewStream";
 import { useAtomCommand } from "~/state/use-atom-command";
-import {
-  browserMiniPlayerSource,
-  selectThreadPreviewMiniPlayerTabId,
-  usePreviewMiniPlayerStore,
-} from "~/previewMiniPlayerStore";
-import { readEnvironmentScope, useEnvironmentScope } from "~/state/session";
+import { selectThreadPreviewMiniPlayer, usePreviewMiniPlayerStore } from "~/previewMiniPlayerStore";
 import { useRightPanelStore } from "~/rightPanelStore";
 
 import { previewBridge } from "./previewBridge";
 import { subscribePreviewAction } from "./previewActionBus";
-import { closePreviewSession } from "./closePreviewSession";
 import { openPreviewSession } from "./openPreviewSession";
-import { showPreviewPopup } from "./showPreviewPopup";
 import { PreviewChromeRow } from "./PreviewChromeRow";
 import { PreviewEmptyState } from "./PreviewEmptyState";
-import { PreviewMoreMenu, type PreviewMoreMenuActions } from "./PreviewMoreMenu";
+import { PreviewMoreMenu } from "./PreviewMoreMenu";
 import {
   commitBrowserViewportChange,
   subscribeBrowserViewportChange,
 } from "~/browser/browserViewportActions";
-import { browserResponsiveViewportForToggle, useBrowserDefaults } from "~/browser/browserDefaults";
-import { BrowserDeviceToolbar } from "~/browser/BrowserDeviceToolbar";
-import { BROWSER_DEVICE_TOOLBAR_HEIGHT } from "~/browser/browserViewportLayout";
+import { resolveResponsiveBrowserViewportSize } from "~/browser/browserViewportLayout";
 import { previewRuntimeTabId } from "~/browser/previewRuntimeTabId";
-import { BrowserSettingsReadError } from "~/browser/openFileInPreview";
-import { PreviewFileNotShown, PreviewUnreachable } from "./PreviewUnreachable";
+import { PreviewUnreachable } from "./PreviewUnreachable";
 import { revealInFileExplorerLabel } from "./fileExplorerLabel";
 import { shouldShowPreviewEmptyState } from "./previewEmptyStateLogic";
-import { Badge } from "~/components/ui/badge";
 import { BrowserSurfaceSlot } from "~/browser/BrowserSurfaceSlot";
-import { alternatePreviewRuntime, useRendersServerTabNatively } from "~/browser/previewRuntime";
-import { ServerBrowserSurface, type ServerBrowserHandle } from "~/browser/ServerBrowserSurface";
-import { cn } from "~/lib/utils";
 import { useBrowserSurfaceStore } from "~/browser/browserSurfaceStore";
+import { useLoadingProgress } from "./useLoadingProgress";
 import { usePreviewSession } from "./usePreviewSession";
 import { ZoomIndicator } from "./ZoomIndicator";
 import { AgentBrowserCursor } from "./AgentBrowserCursor";
 import {
   findActiveBrowserRecordingRuntimeTabId,
-  isBrowserRecordingStartCancelledError,
   startBrowserRecording,
   stopBrowserRecording,
   useActiveBrowserRecordingTabIds,
 } from "~/browser/browserRecording";
 import { stackedThreadToast, toastManager } from "~/components/ui/toast";
-import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
-import { observeResize } from "~/lib/observeResize";
 
 interface Props {
   threadRef: ScopedThreadRef;
@@ -104,39 +65,7 @@ interface Props {
   ) => void;
 }
 
-function previewProfileName(
-  profiles: ReadonlyArray<{ readonly id: string; readonly name: string }>,
-  profileId: string,
-): string {
-  return profiles.find((profile) => profile.id === profileId)?.name ?? "Removed profile";
-}
-
 const localApi = typeof window === "undefined" ? null : ensureLocalApi();
-
-/** Resolves stream access only while a server tab shows a file it downloaded. */
-function ServerTabFileNotShown(props: {
-  readonly threadRef: ScopedThreadRef;
-  readonly tabId: string;
-  readonly url: string;
-  readonly download: { readonly id: string; readonly fileName: string };
-}) {
-  const access = usePreviewStreamAccess(props.threadRef.environmentId);
-  return (
-    <PreviewFileNotShown
-      url={props.url}
-      fileName={props.download.fileName}
-      downloadUrl={
-        access
-          ? previewStreamDownloadUrl(
-              { access, threadId: props.threadRef.threadId, tabId: props.tabId },
-              props.download.id,
-            )
-          : null
-      }
-      onOpen={() => void localApi?.shell.openExternal(props.url).catch(() => undefined)}
-    />
-  );
-}
 
 /**
  * Single-tab preview surface: chrome row on top, one webview below, empty
@@ -151,37 +80,17 @@ export function PreviewView({
 }: Props) {
   const [focusUrlNonce, setFocusUrlNonce] = useState<number | undefined>(undefined);
   const [pickActive, setPickActive] = useState(false);
-  const canSendAnnotation =
-    useEnvironmentScope(threadRef.environmentId, AuthOrchestrationOperateScope) &&
-    Boolean(onSendAnnotation);
   const activeRecordingTabIds = useActiveBrowserRecordingTabIds();
-  const pickActiveRef = useRef<{ cancelled: boolean } | null>(null);
+  const pickActiveRef = useRef(false);
   const isMountedRef = useRef(true);
-  // Kept in sync so the title effect can depend on the stable thread key
-  // instead of the thread object, which is recreated on every update.
-  const threadRefRef = useRef(threadRef);
-  threadRefRef.current = threadRef;
   const previewState = useThreadPreviewState(threadRef);
-  const recentHistoryEntries = useThreadRecentHistory(
-    threadRef,
-    BROWSER_HISTORY_MAX_ENTRIES_PER_PROJECT,
-  );
-  const miniPlayerTabId = usePreviewMiniPlayerStore((state) =>
-    selectThreadPreviewMiniPlayerTabId(state.byThreadKey, threadRef),
+  const miniPlayer = usePreviewMiniPlayerStore((state) =>
+    selectThreadPreviewMiniPlayer(state.byThreadKey, threadRef),
   );
   const addPreviewAnnotation = useComposerDraftStore((store) => store.addPreviewAnnotation);
   const addImage = useComposerDraftStore((store) => store.addImage);
-  const environmentHttpBaseUrl = useEnvironmentHttpBaseUrl(threadRef.environmentId);
-  const environmentHostname = environmentHttpBaseUrl
-    ? new URL(environmentHttpBaseUrl).hostname
-    : null;
   const open = useAtomCommand(previewEnvironment.open);
-  const closePreview = useAtomCommand(previewEnvironment.close, "preview close");
-  const environmentLabel = useEnvironment(threadRef.environmentId)?.label ?? "the environment";
-  const primaryEnvironmentId = usePrimaryEnvironmentId();
-  const serverBrowser = useEnvironmentSupportsServerBrowser(threadRef.environmentId);
   const resize = useAtomCommand(previewEnvironment.resize, "preview viewport resize");
-  const adjust = useAtomCommand(previewEnvironment.adjust, "preview appearance or zoom");
 
   usePreviewSession(threadRef);
 
@@ -203,29 +112,6 @@ export function PreviewView({
         : findActiveBrowserRecordingRuntimeTabId(threadRef, tabId)
       : null;
   const snapshot = tabId ? (previewState.sessions[tabId] ?? null) : null;
-  // Server tabs run in the environment's browser and stream to any client, except the
-  // desktop app's own server's tabs, which render here natively while the server drives them.
-  const nativeServerTab = useRendersServerTabNatively(threadRef.environmentId, snapshot);
-  const isServerTab = snapshot?.runtime === "server" && !nativeServerTab;
-  /** The server owns this tab's appearance, zoom, and size, whoever renders it. */
-  const serverOwnsRendering = snapshot?.runtime === "server";
-  const serverSurfaceRef = useRef<ServerBrowserHandle | null>(null);
-  const [serverAspectRatioLocked, setServerAspectRatioLocked] = useState(false);
-  const serverBodyRef = useRef<HTMLDivElement | null>(null);
-  const [serverToolbarWidth, setServerToolbarWidth] = useState(0);
-  // The streamed tab's device toolbar spans the panel; only measured while it shows.
-  const serverToolbarShown =
-    snapshot?.runtime === "server" && (snapshot.viewport ?? FILL_PREVIEW_VIEWPORT)._tag !== "fill";
-  useEffect(() => {
-    const element = serverBodyRef.current;
-    if (!element || !serverToolbarShown) return;
-    return observeResize(element, ([entry]) =>
-      setServerToolbarWidth(Math.max(1, Math.round(entry?.contentRect.width ?? 0))),
-    );
-  }, [serverToolbarShown]);
-  const [serverControlledTabId, setServerControlledTabId] = useState<string | null>(null);
-  const serverInputDisabled = isServerTab && serverControlledTabId !== runtimeTabId;
-  const [serverFrameTabId, setServerFrameTabId] = useState<string | null>(null);
   const desktopOverlay = tabId ? (previewState.desktopByTabId[tabId] ?? null) : null;
   const navStatus = snapshot?.navStatus ?? { _tag: "Idle" as const };
   const url = navStatus._tag === "Idle" ? "" : navStatus.url;
@@ -235,155 +121,68 @@ export function PreviewView({
   const refreshDisabled = navStatus._tag === "Idle";
   const isUnreachable = navStatus._tag === "LoadFailed";
   const showEmptyState = shouldShowPreviewEmptyState(snapshot);
-  const serverStreamPending =
-    isServerTab && !showEmptyState && !isUnreachable && serverFrameTabId !== runtimeTabId;
   const controller = desktopOverlay?.controller ?? "none";
+  const loadProgress = useLoadingProgress(loading);
   const viewport = snapshot?.viewport ?? FILL_PREVIEW_VIEWPORT;
-  const browserDefaults = useBrowserDefaults();
-  // A tab created before profiles existed carries no profile of its own. It
-  // runs in the built-in `default` partition — the scope the browser used
-  // before profiles — not in whatever profile is configured as the default
-  // now, so that is what its label names and its clear actions target.
-  // Passing the snapshot's raw `undefined` through would reach the IPC layer
-  // as "every profile".
-  const activeProfileId = snapshot?.profileId ?? DEFAULT_BROWSER_PROFILE_ID;
-  const activeProfileName = previewProfileName(browserDefaults.profiles, activeProfileId);
   const panelRect = useBrowserSurfaceStore((state) =>
     runtimeTabId ? (state.byTabId[runtimeTabId]?.rect ?? null) : null,
   );
 
-  const navUrl = navStatus._tag === "Success" ? navStatus.url : null;
-  const navTitle = navStatus._tag === "Success" ? navStatus.title : null;
-  const latestHistoryUrl = recentHistoryEntries[0]?.url;
-  const threadKey = scopedThreadKey(threadRef);
-  useEffect(() => {
-    if (!navUrl || !navTitle || !latestHistoryUrl) return;
-    // Agent-driven pages only enrich an existing requested URL.
-    setTitleForThreadUrl(threadRefRef.current, navUrl, navTitle, environmentHostname);
-    // threadKey stands in for threadRef, whose identity churns on every thread update.
-  }, [environmentHostname, latestHistoryUrl, navTitle, navUrl, threadKey]);
-
   const navigateToResolvedUrl = useCallback(
     async (resolvedUrl: string) => {
-      if (isServerTab && serverSurfaceRef.current) {
-        if (serverInputDisabled) return false;
-        serverSurfaceRef.current.navigate(resolvedUrl);
-        rememberPreviewUrl(threadRef, resolvedUrl);
-        return true;
-      }
       if (runtimeTabId && previewBridge) {
-        // The bridge mirrors the resolved URL back to the server.
+        // Drive the webview imperatively; `usePreviewBridge` mirrors the
+        // resolved URL back to the server so other clients stay in sync.
         await previewBridge.navigate(runtimeTabId, resolvedUrl);
         rememberPreviewUrl(threadRef, resolvedUrl);
-        return true;
+      } else {
+        await openPreviewSession({
+          openPreview: open,
+          threadRef,
+          url: resolvedUrl,
+        });
       }
-      const result = await openPreviewSession({ openPreview: open, threadRef, url: resolvedUrl });
-      if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
-        const error = squashAtomCommandFailure(result);
-        if (error instanceof BrowserSettingsReadError) {
-          toastManager.add({
-            type: "error",
-            title: "Unable to open browser",
-            description: error.message,
-          });
-        }
-      }
-      return result._tag === "Success";
     },
-    [isServerTab, open, runtimeTabId, serverInputDisabled, threadRef],
+    [open, runtimeTabId, threadRef],
   );
 
   const handleSubmitUrl = useCallback(
     async (next: string) => {
       try {
-        const resolved = resolveAddressBarInput(next);
-        if (await navigateToResolvedUrl(resolved)) {
-          recordVisitForThread(threadRef, resolved);
-        }
+        await navigateToResolvedUrl(normalizePreviewUrl(next));
       } catch {
-        // Only empty input or an unsupported scheme lands here; the bar keeps the text.
+        // Server-side `failed` event renders the unreachable view.
       }
     },
-    [navigateToResolvedUrl, threadRef],
+    [navigateToResolvedUrl],
   );
 
   const handleOpenServerUrl = useCallback(
     async (next: string) => {
       try {
-        // A server tab's browser runs on the environment, where loopback is already right.
-        const resolved =
-          isServerTab || !previewBridge
-            ? normalizePreviewUrl(next)
-            : resolveDiscoveredServerUrl(threadRef.environmentId, next);
-        if (await navigateToResolvedUrl(resolved)) {
-          recordVisitForThread(threadRef, next);
-        }
+        await navigateToResolvedUrl(resolveDiscoveredServerUrl(threadRef.environmentId, next));
       } catch {
         // Server-side `failed` event renders the unreachable view.
       }
     },
-    [isServerTab, navigateToResolvedUrl, threadRef],
+    [navigateToResolvedUrl, threadRef.environmentId],
   );
 
   const handleRefresh = useCallback(() => {
-    if (isServerTab) serverSurfaceRef.current?.reload();
-    else if (previewBridge && runtimeTabId) void previewBridge.refresh(runtimeTabId);
-  }, [isServerTab, runtimeTabId]);
-
-  /** Appearance and zoom of a server tab, through the server for every client. */
-  const adjustServerTab = useCallback(
-    async (change: Omit<PreviewAdjustInput, "threadId" | "tabId">) => {
-      if (!tabId) return;
-      const result = await adjust({
-        environmentId: threadRef.environmentId,
-        input: { threadId: threadRef.threadId, tabId, ...change },
-      });
-      if (result._tag === "Failure") {
-        const error = squashAtomCommandFailure(result);
-        toastManager.add({
-          type: "error",
-          title: "Unable to change the browser tab",
-          description: error instanceof Error ? error.message : "An error occurred.",
-        });
-        return;
-      }
-      updatePreviewServerSnapshot(threadRef, result.value);
-    },
-    [adjust, tabId, threadRef],
-  );
-
-  const serverZoomFactor = snapshot?.zoomFactor ?? DEFAULT_PREVIEW_ZOOM_FACTOR;
-  const stepServerZoom = useCallback(
-    (direction: -1 | 0 | 1) => {
-      const index = PREVIEW_ZOOM_LEVELS.indexOf(serverZoomFactor);
-      const next =
-        direction === 0
-          ? DEFAULT_PREVIEW_ZOOM_FACTOR
-          : PREVIEW_ZOOM_LEVELS[
-              Math.min(
-                Math.max((index < 0 ? 7 : index) + direction, 0),
-                PREVIEW_ZOOM_LEVELS.length - 1,
-              )
-            ]!;
-      if (next !== serverZoomFactor) void adjustServerTab({ zoomFactor: next });
-    },
-    [adjustServerTab, serverZoomFactor],
-  );
+    if (previewBridge && runtimeTabId) void previewBridge.refresh(runtimeTabId);
+  }, [runtimeTabId]);
 
   const handleZoomIn = useCallback(() => {
-    if (serverOwnsRendering) stepServerZoom(1);
-    else if (previewBridge && runtimeTabId) void previewBridge.zoomIn(runtimeTabId);
-  }, [runtimeTabId, serverOwnsRendering, stepServerZoom]);
+    if (previewBridge && runtimeTabId) void previewBridge.zoomIn(runtimeTabId);
+  }, [runtimeTabId]);
 
   const handleZoomOut = useCallback(() => {
-    if (serverOwnsRendering) stepServerZoom(-1);
-    else if (previewBridge && runtimeTabId) void previewBridge.zoomOut(runtimeTabId);
-  }, [runtimeTabId, serverOwnsRendering, stepServerZoom]);
+    if (previewBridge && runtimeTabId) void previewBridge.zoomOut(runtimeTabId);
+  }, [runtimeTabId]);
 
   const handleResetZoom = useCallback(() => {
-    if (serverOwnsRendering) stepServerZoom(0);
-    else if (previewBridge && runtimeTabId) void previewBridge.resetZoom(runtimeTabId);
-  }, [runtimeTabId, serverOwnsRendering, stepServerZoom]);
+    if (previewBridge && runtimeTabId) void previewBridge.resetZoom(runtimeTabId);
+  }, [runtimeTabId]);
 
   const handleViewportChange = useCallback(
     async (nextViewport: PreviewViewportSetting) => {
@@ -417,14 +216,12 @@ export function PreviewView({
       return;
     }
 
-    void commitBrowserViewportChange(
-      runtimeTabId,
-      browserResponsiveViewportForToggle({
-        defaults: browserDefaults,
-        panelRect,
-        zoomFactor: serverOwnsRendering ? serverZoomFactor : desktopOverlay?.zoomFactor,
-      }),
-    ).catch(() => undefined);
+    const responsiveSize = panelRect
+      ? resolveResponsiveBrowserViewportSize(panelRect, desktopOverlay?.zoomFactor)
+      : { width: 1024, height: 768 };
+    void commitBrowserViewportChange(runtimeTabId, { _tag: "freeform", ...responsiveSize }).catch(
+      () => undefined,
+    );
   };
 
   useEffect(() => {
@@ -433,118 +230,27 @@ export function PreviewView({
   }, [handleViewportChange, runtimeTabId]);
 
   const handleBack = useCallback(() => {
-    if (isServerTab) serverSurfaceRef.current?.history(-1);
-    else if (previewBridge && runtimeTabId) void previewBridge.goBack(runtimeTabId);
-  }, [isServerTab, runtimeTabId]);
+    if (previewBridge && runtimeTabId) void previewBridge.goBack(runtimeTabId);
+  }, [runtimeTabId]);
 
   const handleForward = useCallback(() => {
-    if (isServerTab) serverSurfaceRef.current?.history(1);
-    else if (previewBridge && runtimeTabId) void previewBridge.goForward(runtimeTabId);
-  }, [isServerTab, runtimeTabId]);
+    if (previewBridge && runtimeTabId) void previewBridge.goForward(runtimeTabId);
+  }, [runtimeTabId]);
 
   const handleOpenInBrowser = useCallback(() => {
     if (!localApi || !url) return;
     void localApi.shell.openExternal(url).catch(() => undefined);
   }, [url]);
 
-  // A desktop tab of a remote environment can only reach what this computer
-  // reaches; the environment's browser reaches its own network, and its agents.
-  const moveTarget = alternatePreviewRuntime(
-    threadRef.environmentId,
-    primaryEnvironmentId,
-    serverBrowser,
-    snapshot,
-  );
-  const moveLabel =
-    moveTarget === "server" ? `Open in ${environmentLabel}'s browser` : "Open on this computer";
-  const handleMoveTab = useCallback(async () => {
-    if (!moveTarget || !tabId || !snapshot) return;
-    const result = await openPreviewSession({
-      openPreview: open,
-      threadRef,
-      // Loopback means the environment's machine, which this computer reaches by its address.
-      ...(url
-        ? {
-            url:
-              moveTarget === "desktop"
-                ? resolveDiscoveredServerUrl(threadRef.environmentId, url)
-                : url,
-          }
-        : {}),
-      viewport,
-      ...(snapshot.profileId === undefined ? {} : { profileId: snapshot.profileId }),
-      runtime: moveTarget,
-    });
-    if (result._tag === "Failure") {
-      if (isAtomCommandInterrupted(result)) return;
-      const error = squashAtomCommandFailure(result);
-      toastManager.add({
-        type: "error",
-        title: "Unable to move the browser tab",
-        description: error instanceof Error ? error.message : "An error occurred.",
-      });
-      return;
-    }
-    useRightPanelStore.getState().openBrowser(threadRef, result.value.tabId);
-    await closePreviewSession({ closePreview, snapshot, tabId, threadRef });
-  }, [closePreview, moveTarget, open, snapshot, tabId, threadRef, url, viewport]);
-
   const handlePictureInPicture = useCallback(() => {
     if (!tabId) return;
-    if (miniPlayerTabId === tabId) {
+    if (miniPlayer?.tabId === tabId) {
       usePreviewMiniPlayerStore.getState().close(threadRef);
       return;
     }
-    usePreviewMiniPlayerStore.getState().open(threadRef, browserMiniPlayerSource(tabId));
+    usePreviewMiniPlayerStore.getState().open(threadRef, tabId);
     useRightPanelStore.getState().close(threadRef);
-  }, [miniPlayerTabId, tabId, threadRef]);
-
-  /**
-   * The menu's actions. A server tab, streamed or rendered natively here, runs
-   * them through its environment, so every client and agent sees one state.
-   * Opening DevTools and a separate window need the desktop's own page.
-   */
-  const desktopCall = (op: ((tabId: string) => Promise<void>) | undefined) => () => {
-    if (op && runtimeTabId) void op(runtimeTabId).catch(() => undefined);
-  };
-  const moreMenuActions: PreviewMoreMenuActions | null = serverOwnsRendering
-    ? {
-        hardReload: () => void adjustServerTab({ hardReload: true }),
-        setColorScheme: (colorScheme) => void adjustServerTab({ colorScheme }),
-        zoomIn: handleZoomIn,
-        zoomOut: handleZoomOut,
-        resetZoom: handleResetZoom,
-        clearCookies: () => void adjustServerTab({ clear: "cookies" }),
-        clearCache: () => void adjustServerTab({ clear: "cache" }),
-        ...(nativeServerTab && previewBridge
-          ? {
-              openDevTools: desktopCall(previewBridge.openDevTools),
-              toggleNativePictureInPicture: () => handleNativePictureInPicture(),
-            }
-          : {}),
-      }
-    : previewBridge
-      ? {
-          hardReload: desktopCall(previewBridge.hardReload),
-          setColorScheme: (colorScheme) => {
-            if (runtimeTabId)
-              void previewBridge?.setColorScheme(runtimeTabId, colorScheme).catch(() => undefined);
-          },
-          zoomIn: handleZoomIn,
-          zoomOut: handleZoomOut,
-          resetZoom: handleResetZoom,
-          clearCookies: () =>
-            void previewBridge
-              ?.clearCookies(threadRef.environmentId, activeProfileId)
-              .catch(() => undefined),
-          clearCache: () =>
-            void previewBridge
-              ?.clearCache(threadRef.environmentId, activeProfileId)
-              .catch(() => undefined),
-          openDevTools: desktopCall(previewBridge.openDevTools),
-          toggleNativePictureInPicture: () => handleNativePictureInPicture(),
-        }
-      : null;
+  }, [miniPlayer?.tabId, tabId, threadRef]);
 
   const handleNativePictureInPicture = useCallback(() => {
     if (!previewBridge || !runtimeTabId) return;
@@ -658,12 +364,10 @@ export function PreviewView({
       }
       if (record) {
         void startBrowserRecording(runtimeTabId, threadRef, tabId).catch((error) => {
-          const description = error instanceof Error ? error.message : "An error occurred.";
-          if (isBrowserRecordingStartCancelledError(error)) return;
           toastManager.add({
             type: "error",
             title: "Unable to start recording",
-            description,
+            description: error instanceof Error ? error.message : "An error occurred.",
           });
         });
         return;
@@ -804,7 +508,6 @@ export function PreviewView({
   const handlePickElement = useCallback(() => {
     if (!previewBridge || !runtimeTabId) return;
     if (pickActiveRef.current) {
-      pickActiveRef.current.cancelled = true;
       void previewBridge.cancelPickElement(runtimeTabId).catch(() => undefined);
       return;
     }
@@ -815,52 +518,21 @@ export function PreviewView({
     // every pick they'd have to click back into the textarea.
     const previouslyFocused =
       typeof document !== "undefined" ? (document.activeElement as HTMLElement | null) : null;
-    const pickRequest = { cancelled: false };
-    let submitted = false;
-    pickActiveRef.current = pickRequest;
+    pickActiveRef.current = true;
     setPickActive(true);
     void (async () => {
       try {
-        await previewBridge.setAnnotationSendEnabled?.(
-          runtimeTabId,
-          Boolean(onSendAnnotation) &&
-            readEnvironmentScope(threadRef.environmentId, AuthOrchestrationOperateScope),
-        );
-        if (pickRequest.cancelled) return;
         const result = await previewBridge.pickElement(runtimeTabId);
-        if (!result || pickRequest.cancelled) return;
-        // The user has submitted. Nothing that happens after this point (a
-        // second picker click, a tab change, unmount) may discard it, so the
-        // pick stops being cancellable here rather than in `finally`.
-        if (pickActiveRef.current === pickRequest) {
-          pickActiveRef.current = null;
-          if (isMountedRef.current) setPickActive(false);
-          submitted = true;
-        }
-        const { annotation: picked, submission, screenshotFailed = false } = result;
-        // The structured annotation is still sendable when its optional crop
-        // stalls or fails, so tell the user what they lost and keep going
-        // instead of holding the composer for an attachment that never lands.
-        // The stored copy drops the screenshot on failure, otherwise the prompt
-        // would tell the agent a crop is attached when none was sent.
-        const capture = capturePreviewAnnotationScreenshot(picked);
-        // Main reports a crop that failed or timed out on its side; the local
-        // conversion can fail too. Either way the user should hear about it.
-        const cropDropped = screenshotFailed || capture.status === "failed";
-        const annotation = capture.status === "failed" ? { ...picked, screenshot: null } : picked;
+        if (!result) return;
+        const { annotation, submission } = result;
         addPreviewAnnotation(threadRef, annotation);
-        if (cropDropped) {
-          toastManager.add(
-            stackedThreadToast({
-              type: "error",
-              title: "Could not capture the picked element",
-              // The send path reports its own outcome, so only say what this
-              // handler knows: the crop was dropped.
-              description: "The annotation was kept without the screenshot.",
-            }),
-          );
+        let screenshotFile: File | null = null;
+        try {
+          screenshotFile = await previewAnnotationScreenshotFile(annotation);
+        } catch {
+          // The structured annotation is still sendable when converting its
+          // optional screenshot into a composer attachment fails.
         }
-        const screenshotFile = capture.status === "captured" ? capture.file : null;
         const image =
           screenshotFile && annotation.screenshot
             ? ({
@@ -876,28 +548,20 @@ export function PreviewView({
         if (image) {
           addImage(threadRef, image);
         }
-        if (
-          submission === "send" &&
-          readEnvironmentScope(threadRef.environmentId, AuthOrchestrationOperateScope)
-        ) {
+        if (submission === "send") {
           onSendAnnotation?.(annotation, image);
         }
       } catch {
         // Picker failed (e.g. webview navigated). Treat as silent cancel.
       } finally {
-        // A submitted pick already released itself above; a cancelled or
-        // failed one releases here. Avoid `setState on unmounted component`
-        // if the panel/thread closed while the pick was in flight.
-        const isCurrentPick = pickActiveRef.current === pickRequest;
-        if (isCurrentPick) {
-          pickActiveRef.current = null;
-          if (isMountedRef.current) setPickActive(false);
-        }
+        pickActiveRef.current = false;
+        // Avoid `setState on unmounted component` if the panel/thread closed
+        // while the pick was in flight.
+        if (isMountedRef.current) setPickActive(false);
         // Best-effort: restore focus to whatever the user had before the
         // pick stole it into the guest webContents. Skip if the previously-
         // focused element was unmounted or is no longer focusable.
         if (
-          (isCurrentPick || submitted) &&
           previouslyFocused &&
           previouslyFocused.isConnected &&
           typeof previouslyFocused.focus === "function"
@@ -912,21 +576,13 @@ export function PreviewView({
     })();
   }, [addImage, addPreviewAnnotation, onSendAnnotation, runtimeTabId, threadRef]);
 
-  useEffect(() => {
-    if (!pickActive || !previewBridge || !runtimeTabId) return;
-    void previewBridge
-      .setAnnotationSendEnabled?.(runtimeTabId, canSendAnnotation)
-      .catch(() => undefined);
-  }, [canSendAnnotation, pickActive, runtimeTabId]);
-
   // If the active tab changes mid-pick (close, thread switch, hot restart),
   // tell main to tear down the in-flight session AND reset our local toggle
   // state so the button doesn't get stuck pressed against a stale tab id.
   useEffect(() => {
     return () => {
       if (!pickActiveRef.current) return;
-      pickActiveRef.current.cancelled = true;
-      pickActiveRef.current = null;
+      pickActiveRef.current = false;
       if (previewBridge && runtimeTabId) {
         void previewBridge.cancelPickElement(runtimeTabId).catch(() => undefined);
       }
@@ -968,30 +624,24 @@ export function PreviewView({
     >
       <PreviewChromeRow
         url={url}
-        loading={loading || serverStreamPending}
-        canGoBack={canGoBack && !serverInputDisabled}
-        canGoForward={canGoForward && !serverInputDisabled}
-        refreshDisabled={refreshDisabled || serverInputDisabled}
-        inputDisabled={serverInputDisabled}
+        loading={loading}
+        loadProgress={loadProgress}
+        canGoBack={canGoBack}
+        canGoForward={canGoForward}
+        refreshDisabled={refreshDisabled}
         focusUrlNonce={focusUrlNonce}
         onBack={handleBack}
         onForward={handleForward}
         onRefresh={handleRefresh}
         onSubmit={(next) => void handleSubmitUrl(next)}
         onOpenInBrowser={tabId ? handleOpenInBrowser : undefined}
-        // Capture, annotation, and the more menu drive the desktop webview, so
-        // server tabs leave them out. Floating works for both.
-        onCapture={previewBridge && tabId && !isServerTab ? handleCapture : undefined}
+        onCapture={previewBridge && tabId ? handleCapture : undefined}
         captureDisabled={!desktopOverlay || isUnreachable}
         recording={recordingRuntimeTabId !== null}
-        onPictureInPicture={
-          tabId && (isServerTab || previewBridge) ? handlePictureInPicture : undefined
-        }
-        pictureInPicture={miniPlayerTabId === tabId}
-        pictureInPictureDisabled={
-          isUnreachable || (!isServerTab && !desktopOverlay?.hasWebContents)
-        }
-        onPickElement={previewBridge && tabId && !isServerTab ? handlePickElement : undefined}
+        onPictureInPicture={previewBridge && tabId ? handlePictureInPicture : undefined}
+        pictureInPicture={miniPlayer?.tabId === tabId}
+        pictureInPictureDisabled={!desktopOverlay?.hasWebContents || isUnreachable}
+        onPickElement={previewBridge && tabId ? handlePickElement : undefined}
         pickActive={pickActive}
         // Disable when there's no tab (nothing to pick on) OR the page
         // failed to load (a React overlay covers the webview, so the
@@ -1000,151 +650,61 @@ export function PreviewView({
         pickDisabledReason={
           isUnreachable ? "Page didn't load — pick unavailable until the page renders" : undefined
         }
-        leadingActions={
-          // Only when it differs from the default: labelling every tab
-          // "Default" would be noise on the common case, while a tab in
-          // another profile is exactly what needs calling out.
-          activeProfileId !== browserDefaults.profileId ? (
-            // Capped: profile names run to 48 characters, and an unbounded
-            // badge in this row takes its width from the URL input, the only
-            // flexible element in the compact chrome. The cap sits on the
-            // badge and the truncation on an inner span, because `Badge` is an
-            // `inline-flex` with `whitespace-nowrap` — `text-overflow` never
-            // reaches a bare text node inside it, so the name would be cut off
-            // at both ends with no ellipsis.
-            <Tooltip>
-              <TooltipTrigger render={<Badge variant="outline" className="max-w-28 shrink-0" />}>
-                <span className="truncate">{activeProfileName}</span>
-              </TooltipTrigger>
-              <TooltipPopup side="top">{activeProfileName}</TooltipPopup>
-            </Tooltip>
-          ) : null
-        }
         trailingActions={
-          moreMenuActions ? (
+          previewBridge ? (
             <PreviewMoreMenu
-              enabled={
-                runtimeTabId !== null &&
-                (serverOwnsRendering || (desktopOverlay?.hasWebContents ?? false))
-              }
-              actions={moreMenuActions}
-              {...(moveTarget
-                ? { move: { label: moveLabel, onMove: () => void handleMoveTab() } }
-                : {})}
-              profileName={activeProfileName}
-              zoomFactor={
-                serverOwnsRendering ? serverZoomFactor : (desktopOverlay?.zoomFactor ?? 1)
-              }
-              colorScheme={
-                serverOwnsRendering
-                  ? (snapshot?.colorScheme ?? "system")
-                  : (desktopOverlay?.colorScheme ?? "system")
-              }
+              tabId={runtimeTabId}
+              hasWebContents={desktopOverlay?.hasWebContents ?? false}
+              zoomFactor={desktopOverlay?.zoomFactor ?? 1}
+              colorScheme={desktopOverlay?.colorScheme ?? "system"}
               deviceToolbarVisible={viewport._tag !== "fill"}
               onToggleDeviceToolbar={handleToggleDeviceToolbar}
               nativePictureInPicture={desktopOverlay?.pictureInPicture ?? false}
+              onNativePictureInPicture={handleNativePictureInPicture}
             />
           ) : null
         }
       />
 
-      <div ref={serverBodyRef} className="relative min-h-0 flex-1 overflow-hidden">
-        {runtimeTabId && snapshot && isServerTab ? (
-          <>
-            {viewport._tag !== "fill" && !showEmptyState && !isUnreachable ? (
-              <div className="absolute inset-x-0 top-0 z-10">
-                <BrowserDeviceToolbar
-                  setting={viewport}
-                  width={serverToolbarWidth}
-                  aspectRatio={serverAspectRatioLocked ? viewport.width / viewport.height : null}
-                  onAspectRatioChange={(ratio) => setServerAspectRatioLocked(ratio !== null)}
-                  onChange={(setting) => commitBrowserViewportChange(runtimeTabId, setting)}
-                />
-              </div>
-            ) : null}
-            <div
-              className="absolute inset-x-0 bottom-0"
-              style={{ top: viewport._tag !== "fill" ? BROWSER_DEVICE_TOOLBAR_HEIGHT : 0 }}
-            >
-              <ServerBrowserSurface
-                key={runtimeTabId}
-                ref={serverSurfaceRef}
-                environmentId={threadRef.environmentId}
-                threadId={threadRef.threadId}
-                tabId={snapshot.tabId}
-                visible={visible}
-                onFirstFrame={() => setServerFrameTabId(runtimeTabId)}
-                onControl={(control) =>
-                  setServerControlledTabId(control?.controller === "you" ? runtimeTabId : null)
-                }
-                onPopup={(popupTabId) => showPreviewPopup(threadRef, popupTabId, "panel")}
-                // Stays connected under the empty state so a URL picked there reaches the page.
-                className={cn(
-                  "absolute inset-0 h-full w-full",
-                  (showEmptyState || isUnreachable) && "invisible",
-                )}
-              />
-            </div>
-          </>
-        ) : runtimeTabId && snapshot && !showEmptyState ? (
-          previewBridge ? (
-            <BrowserSurfaceSlot
-              key={runtimeTabId}
-              tabId={runtimeTabId}
-              visible={visible && !isUnreachable}
-              className="absolute inset-0 h-full w-full"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center p-8 text-center">
-              <p className="max-w-sm text-sm text-muted-foreground">
-                This tab is open in the T3 Code desktop app.
-              </p>
-            </div>
-          )
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        {runtimeTabId && snapshot && !showEmptyState ? (
+          <BrowserSurfaceSlot
+            key={runtimeTabId}
+            tabId={runtimeTabId}
+            visible={visible && !isUnreachable}
+            className="absolute inset-0 h-full w-full"
+          />
         ) : null}
         {showEmptyState ? (
           <PreviewEmptyState
-            threadRef={threadRef}
             environmentId={threadRef.environmentId}
             configuredUrls={configuredUrls}
-            recentEntries={recentHistoryEntries}
-            onRemoveRecent={(url) => removeUrlForThread(threadRef, url)}
+            recentlySeenUrls={previewState.recentlySeenUrls}
             onOpenUrl={(next) => void handleOpenServerUrl(next)}
           />
         ) : null}
         {snapshot && desktopOverlay ? (
           <ZoomIndicator zoomFactor={desktopOverlay.zoomFactor} />
         ) : null}
-        {runtimeTabId &&
-        desktopOverlay &&
-        !showEmptyState &&
-        !isUnreachable &&
-        !activeRecordingTabIds.has(runtimeTabId) ? (
+        {runtimeTabId && desktopOverlay && !showEmptyState && !isUnreachable ? (
           <AgentBrowserCursor
             tabId={runtimeTabId}
             zoomFactor={desktopOverlay.zoomFactor}
             controller={controller}
           />
         ) : null}
-        {navStatus._tag === "LoadFailed" && navStatus.download ? (
-          <div className="absolute inset-0 z-10 bg-background">
-            <ServerTabFileNotShown
-              threadRef={threadRef}
-              tabId={snapshot?.tabId ?? ""}
-              url={navStatus.url}
-              download={navStatus.download}
-            />
+        {controller !== "none" ? (
+          <div className="pointer-events-none absolute left-3 top-3 z-40 rounded-full border border-border/70 bg-background/90 px-2.5 py-1 text-[11px] font-medium shadow-sm backdrop-blur">
+            {controller === "agent" ? "Agent controlling browser" : "Human control"}
           </div>
-        ) : navStatus._tag === "LoadFailed" ? (
+        ) : null}
+        {navStatus._tag === "LoadFailed" ? (
           <div className="absolute inset-0 z-10 bg-background">
             <PreviewUnreachable
               url={navStatus.url}
               code={navStatus.code}
               description={navStatus.description}
               onReload={handleRefresh}
-              {...(moveTarget === "server"
-                ? { move: { label: moveLabel, onMove: () => void handleMoveTab() } }
-                : {})}
             />
           </div>
         ) : null}

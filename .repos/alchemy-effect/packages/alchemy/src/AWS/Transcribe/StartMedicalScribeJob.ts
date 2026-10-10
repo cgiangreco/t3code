@@ -28,8 +28,9 @@ export interface StartMedicalScribeJobRequest extends Omit<
  * is granted `iam:PassRole` on it alongside `transcribe:StartMedicalScribeJob`
  * (which has no resource-level IAM).
  *
- * ### Medical Scribe Jobs
- * **Example:** Start a Medical Scribe Job
+ * @binding
+ * @section Medical Scribe Jobs
+ * @example Start a Medical Scribe Job
  * ```typescript
  * // init — bind the Transcribe data-access role
  * const startMedicalScribeJob = yield* AWS.Transcribe.StartMedicalScribeJob(dataAccessRole);
@@ -42,8 +43,6 @@ export interface StartMedicalScribeJobRequest extends Omit<
  *   Settings: { ShowSpeakerLabels: true, MaxSpeakerLabels: 2 },
  * });
  * ```
- *
- * @binding
  */
 export interface StartMedicalScribeJob extends Binding.Service<
   StartMedicalScribeJob,

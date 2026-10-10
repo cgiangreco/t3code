@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Custom policy check: verifies a policy does not grant the specified actions
  * or resource access. Provide the implementation with
  * `Effect.provide(AWS.AccessAnalyzer.CheckAccessNotGrantedHttp)`.
- * ### Custom Policy Checks
- * **Example:** Assert a Policy Cannot Delete Buckets
+ * @binding
+ * @section Custom Policy Checks
+ * @example Assert a Policy Cannot Delete Buckets
  * ```typescript
  * const checkAccessNotGranted =
  *   yield* AWS.AccessAnalyzer.CheckAccessNotGranted();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.result === "PASS" | "FAIL"
  * ```
- *
- * @binding
  */
 export interface CheckAccessNotGranted extends Binding.Service<
   CheckAccessNotGranted,

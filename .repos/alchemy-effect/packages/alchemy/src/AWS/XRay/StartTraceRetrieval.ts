@@ -14,8 +14,9 @@ export interface StartTraceRetrievalRequest
  * provide the implementation with `Effect.provide(XRay.StartTraceRetrievalHttp)`.
  * The action is account-scoped: X-Ray does not support resource-level
  * permissions for `xray:StartTraceRetrieval`, so the binding grants it on `*`.
- * ### Transaction Search
- * **Example:** Start retrieving traces from Transaction Search
+ * @binding
+ * @section Transaction Search
+ * @example Start retrieving traces from Transaction Search
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -31,8 +32,6 @@ export interface StartTraceRetrievalRequest
  * });
  * const token = retrieval.RetrievalToken;
  * ```
- *
- * @binding
  */
 export interface StartTraceRetrieval extends Binding.Service<
   StartTraceRetrieval,

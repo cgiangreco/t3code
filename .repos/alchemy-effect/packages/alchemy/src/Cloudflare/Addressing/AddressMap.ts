@@ -109,8 +109,11 @@ export type AddressMap = Resource<
  * Requires the BYOIP add-on or Cloudflare-assigned static IPs on the
  * account; without the entitlement every mutating call fails with the typed
  * `FeatureNotEnabled` error (`address_maps_not_enabled_on_account`).
- * ### Creating an Address Map
- * **Example:** Disabled map with a description
+ * @resource
+ * @product Addressing
+ * @category Network
+ * @section Creating an Address Map
+ * @example Disabled map with a description
  * ```typescript
  * const map = yield* Cloudflare.Addressing.AddressMap("static-ips", {
  *   description: "static ingress IPs",
@@ -118,7 +121,7 @@ export type AddressMap = Resource<
  * });
  * ```
  *
- * **Example:** Map with IPs and zone memberships
+ * @example Map with IPs and zone memberships
  * ```typescript
  * const map = yield* Cloudflare.Addressing.AddressMap("ingress", {
  *   description: "ingress",
@@ -128,8 +131,8 @@ export type AddressMap = Resource<
  * });
  * ```
  *
- * ### Legacy TLS clients
- * **Example:** Default SNI for clients without SNI
+ * @section Legacy TLS clients
+ * @example Default SNI for clients without SNI
  * ```typescript
  * const map = yield* Cloudflare.Addressing.AddressMap("legacy", {
  *   enabled: true,
@@ -138,10 +141,6 @@ export type AddressMap = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/byoip/address-maps/
- *
- * @resource
- * @product Addressing
- * @category Network
  */
 export const AddressMap = Resource<AddressMap>(TypeId);
 
@@ -264,6 +263,7 @@ export const AddressMapProvider = () =>
             accountId: acct,
             addressMapId,
             ipAddress: ip,
+            body: {},
           });
         }
       }
@@ -291,11 +291,12 @@ export const AddressMapProvider = () =>
                 accountId: acct,
                 addressMapId,
                 zoneId: m.identifier,
+                body: {},
               })
             : addressing.putAddressMapAccount({
                 accountId: acct,
                 addressMapId,
-                memberAccountId: m.identifier,
+                body: {},
               });
         }
       }
@@ -313,7 +314,6 @@ export const AddressMapProvider = () =>
             : addressing.deleteAddressMapAccount({
                 accountId: acct,
                 addressMapId,
-                memberAccountId: m.identifier,
               });
         }
       }

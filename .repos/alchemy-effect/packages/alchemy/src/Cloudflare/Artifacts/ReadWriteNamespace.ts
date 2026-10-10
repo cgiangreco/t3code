@@ -9,17 +9,16 @@ import type * as Artifacts from "./Namespace.ts";
  * obtain the Effect-native {@link ReadWriteNamespaceClient} (read + write:
  * create / list / get / delete / import).
  *
- * **Example:** Using Artifacts inside a Worker
+ * @binding
+ * @product Artifacts
+ * @category Developer Platform
+ * @example Using Artifacts inside a Worker
  * ```typescript
  * const artifacts = yield* Cloudflare.Artifacts.ReadWriteNamespace(Repos);
  * const repo = yield* artifacts.create("starter-repo", {
  *   setDefaultBranch: "main",
  * });
  * ```
- *
- * @binding
- * @product Artifacts
- * @category Developer Platform
  */
 export interface ReadWriteNamespace extends Binding.Service<
   ReadWriteNamespace,
@@ -120,7 +119,6 @@ export interface ReadWriteNamespaceClient
 /**
  * Bind a Cloudflare Artifacts namespace with read-only access
  * (`Cloudflare.Artifacts.ReadNamespace(Repos)`): `get` / `list` / `raw`.
- *
  * @binding
  * @product Artifacts
  * @category Developer Platform
@@ -137,7 +135,6 @@ export const ReadNamespace = Binding.Service<ReadNamespace>(
 /**
  * Bind a Cloudflare Artifacts namespace with write access
  * (`Cloudflare.Artifacts.WriteNamespace(Repos)`): `create` / `delete` / `import`.
- *
  * @binding
  * @product Artifacts
  * @category Developer Platform

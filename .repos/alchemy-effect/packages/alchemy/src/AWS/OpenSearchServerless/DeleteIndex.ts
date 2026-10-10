@@ -13,8 +13,9 @@ import type { Collection } from "./Collection.ts";
  * The calling principal must also be granted `aoss:DeleteIndex` on the index
  * pattern by a data {@link AccessPolicy}. Provide the implementation with
  * `Effect.provide(AWS.OpenSearchServerless.DeleteIndexHttp)`.
- * ### Managing Indexes at Runtime
- * **Example:** Delete a tenant's index
+ * @binding
+ * @section Managing Indexes at Runtime
+ * @example Delete a tenant's index
  * ```typescript
  * const deleteIndex = yield* AWS.OpenSearchServerless.DeleteIndex(collection);
  *
@@ -22,8 +23,6 @@ import type { Collection } from "./Collection.ts";
  *   Effect.catchTag("ResourceNotFoundException", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteIndex extends Binding.Service<
   DeleteIndex,

@@ -18,11 +18,10 @@ import type { Inspectable } from "./Inspectable.ts"
 import { NodeInspectSymbol, toJson } from "./Inspectable.ts"
 import type { Pipeable } from "./Pipeable.ts"
 import { pipeArguments } from "./Pipeable.ts"
-import { hasProperty } from "./Predicate.ts"
 import * as TxRef from "./TxRef.ts"
 import type { NoInfer } from "./Types.ts"
 
-const TypeId = "~effect/TxChunk"
+const TypeId = "~effect/transactions/TxChunk"
 
 /**
  * TxChunk is a transactional chunk data structure that provides Software Transactional Memory (STM)
@@ -36,7 +35,7 @@ const TypeId = "~effect/TxChunk"
  *
  * **Example** (Using a transactional chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -50,6 +49,7 @@ const TypeId = "~effect/TxChunk"
  *   // Single operations - no explicit transaction needed
  *   yield* TxChunk.append(txChunk, 4)
  *   const result = yield* TxChunk.get(txChunk)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3, 4]
  *
  *   // Multi-step atomic operation - use explicit transaction
  *   yield* Effect.tx(
@@ -60,10 +60,8 @@ const TypeId = "~effect/TxChunk"
  *   )
  *
  *   const finalResult = yield* TxChunk.get(txChunk)
- *   return [Chunk.toArray(result), Chunk.toArray(finalResult)]
+ *   console.log(Chunk.toReadonlyArray(finalResult)) // [0, 1, 2, 3, 4, 5]
  * })
- *
- * await Effect.runPromise(program) // => [[1, 2, 3, 4], [0, 1, 2, 3, 4, 5]]
  * ```
  *
  * @category models
@@ -102,7 +100,7 @@ const TxChunkProto = {
  *
  * **Example** (Creating a TxChunk from a chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -112,10 +110,8 @@ const TxChunkProto = {
  *
  *   // Read the value - automatically transactional
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3]
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3]
  * ```
  *
  * @category constructors
@@ -134,7 +130,7 @@ export const make = <A>(initial: Chunk.Chunk<A>): Effect.Effect<TxChunk<A>> =>
  *
  * **Example** (Creating an empty TxChunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -143,15 +139,14 @@ export const make = <A>(initial: Chunk.Chunk<A>): Effect.Effect<TxChunk<A>> =>
  *
  *   // Check if it's empty - automatically transactional
  *   const isEmpty = yield* TxChunk.isEmpty(txChunk)
+ *   console.log(isEmpty) // true
  *
  *   // Add elements - automatically transactional
  *   yield* TxChunk.append(txChunk, 42)
  *
  *   const isStillEmpty = yield* TxChunk.isEmpty(txChunk)
- *   return [isEmpty, isStillEmpty]
+ *   console.log(isStillEmpty) // false
  * })
- *
- * await Effect.runPromise(program) // => [true, false]
  * ```
  *
  * @category constructors
@@ -170,7 +165,7 @@ export const empty = <A = never>(): Effect.Effect<TxChunk<A>> =>
  *
  * **Example** (Creating from an iterable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -179,6 +174,7 @@ export const empty = <A = never>(): Effect.Effect<TxChunk<A>> =>
  *
  *   // Read the contents - automatically transactional
  *   const chunk = yield* TxChunk.get(txChunk)
+ *   console.log(Chunk.toReadonlyArray(chunk)) // [1, 2, 3, 4, 5]
  *
  *   // Multi-step atomic modification - use explicit transaction
  *   yield* Effect.tx(
@@ -189,10 +185,8 @@ export const empty = <A = never>(): Effect.Effect<TxChunk<A>> =>
  *   )
  *
  *   const updated = yield* TxChunk.get(txChunk)
- *   return [Chunk.toArray(chunk), Chunk.toArray(updated)]
+ *   console.log(Chunk.toReadonlyArray(updated)) // [0, 1, 2, 3, 4, 5, 6]
  * })
- *
- * await Effect.runPromise(program) // => [[1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6]]
  * ```
  *
  * @category constructors
@@ -211,13 +205,12 @@ export const fromIterable = <A>(iterable: Iterable<A>): Effect.Effect<TxChunk<A>
  *
  * **Example** (Wrapping an existing TxRef)
  *
- * ```ts import.meta.vitest
- * import { Chunk, Effect, TxChunk, TxRef } from "effect"
+ * ```ts
+ * import { Chunk, TxChunk, TxRef } from "effect"
  *
  * // Create a TxChunk from an existing TxRef (advanced usage)
  * const ref = TxRef.makeUnsafe(Chunk.fromIterable([1, 2, 3]))
  * const txChunk = TxChunk.makeUnsafe(ref)
- * Chunk.toArray(await Effect.runPromise(TxChunk.get(txChunk))) // => [1, 2, 3]
  * ```
  *
  * @category constructors
@@ -231,25 +224,6 @@ export const makeUnsafe = <A>(ref: TxRef.TxRef<Chunk.Chunk<A>>): TxChunk<A> => {
 }
 
 /**
- * Checks whether `u` is a `TxChunk<unknown>`.
- *
- * **Example** (Checking for transactional chunks)
- *
- * ```ts import.meta.vitest
- * import { Chunk, TxChunk, TxRef } from "effect"
- *
- * const txChunk = TxChunk.makeUnsafe(TxRef.makeUnsafe(Chunk.empty<number>()))
- *
- * TxChunk.isTxChunk(txChunk) // => true
- * TxChunk.isTxChunk(Chunk.empty()) // => false
- * ```
- *
- * @category guards
- * @since 4.0.0
- */
-export const isTxChunk = (u: unknown): u is TxChunk<unknown> => hasProperty(u, TypeId)
-
-/**
  * Modifies the value of the `TxChunk` using the provided function.
  *
  * **Details**
@@ -259,7 +233,7 @@ export const isTxChunk = (u: unknown): u is TxChunk<unknown> => hasProperty(u, T
  *
  * **Example** (Modifying while returning a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -271,11 +245,11 @@ export const isTxChunk = (u: unknown): u is TxChunk<unknown> => hasProperty(u, T
  *     Chunk.append(chunk, 4) // new value
  *   ])
  *
- *   const newChunk = yield* TxChunk.get(txChunk)
- *   return [oldSize, Chunk.toArray(newChunk)]
- * })
+ *   console.log(oldSize) // 3
  *
- * await Effect.runPromise(program) // => [3, [1, 2, 3, 4]]
+ *   const newChunk = yield* TxChunk.get(txChunk)
+ *   console.log(Chunk.toReadonlyArray(newChunk)) // [1, 2, 3, 4]
+ * })
  * ```
  *
  * @category combinators
@@ -307,7 +281,7 @@ export const modify: {
  *
  * **Example** (Updating the stored chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -317,10 +291,8 @@ export const modify: {
  *   yield* TxChunk.update(txChunk, (chunk) => Chunk.reverse(chunk))
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [3, 2, 1]
  * })
- *
- * await Effect.runPromise(program) // => [3, 2, 1]
  * ```
  *
  * @category combinators
@@ -342,7 +314,7 @@ export const update: {
  *
  * **Example** (Reading the current chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -350,10 +322,12 @@ export const update: {
  *
  *   // Read the current value within a transaction
  *   const chunk = yield* TxChunk.get(txChunk)
- *   return [Chunk.toArray(chunk), Chunk.size(chunk)]
- * })
+ *   console.log(Chunk.toReadonlyArray(chunk)) // [1, 2, 3]
  *
- * await Effect.runPromise(program) // => [[1, 2, 3], 3]
+ *   // The value is tracked for conflict detection
+ *   const size = Chunk.size(chunk)
+ *   console.log(size) // 3
+ * })
  * ```
  *
  * @category combinators
@@ -371,7 +345,7 @@ export const get = <A>(self: TxChunk<A>): Effect.Effect<Chunk.Chunk<A>> => TxRef
  *
  * **Example** (Replacing the stored chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -382,10 +356,8 @@ export const get = <A>(self: TxChunk<A>): Effect.Effect<Chunk.Chunk<A>> => TxRef
  *   yield* TxChunk.set(txChunk, newChunk)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [10, 20, 30, 40]
  * })
- *
- * await Effect.runPromise(program) // => [10, 20, 30, 40]
  * ```
  *
  * @category combinators
@@ -409,7 +381,7 @@ export const set: {
  *
  * **Example** (Appending an element)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -419,10 +391,8 @@ export const set: {
  *   yield* TxChunk.append(txChunk, 4)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3, 4]
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3, 4]
  * ```
  *
  * @category combinators
@@ -446,7 +416,7 @@ export const append: {
  *
  * **Example** (Prepending an element)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -456,10 +426,8 @@ export const append: {
  *   yield* TxChunk.prepend(txChunk, 1)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3, 4]
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3, 4]
  * ```
  *
  * @category combinators
@@ -478,7 +446,7 @@ export const prepend: {
  *
  * **Example** (Getting the size)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -486,14 +454,13 @@ export const prepend: {
  *
  *   // Get the current size - automatically transactional
  *   const currentSize = yield* TxChunk.size(txChunk)
+ *   console.log(currentSize) // 5
  *
  *   // Size is tracked for conflict detection
  *   yield* TxChunk.append(txChunk, 6)
  *   const newSize = yield* TxChunk.size(txChunk)
- *   return [currentSize, newSize]
+ *   console.log(newSize) // 6
  * })
- *
- * await Effect.runPromise(program) // => [5, 6]
  * ```
  *
  * @category combinators
@@ -507,7 +474,7 @@ export const size = <A>(self: TxChunk<A>): Effect.Effect<number> =>
  *
  * **Example** (Checking for an empty chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -518,13 +485,12 @@ export const size = <A>(self: TxChunk<A>): Effect.Effect<number> =>
  *   const isEmpty1 = yield* TxChunk.isEmpty(emptyChunk)
  *   const isEmpty2 = yield* TxChunk.isEmpty(nonEmptyChunk)
  *
- *   return [isEmpty1, isEmpty2]
+ *   console.log(isEmpty1) // true
+ *   console.log(isEmpty2) // false
  * })
- *
- * await Effect.runPromise(program) // => [true, false]
  * ```
  *
- * @category predicates
+ * @category combinators
  * @since 4.0.0
  */
 export const isEmpty = <A>(self: TxChunk<A>): Effect.Effect<boolean> =>
@@ -535,7 +501,7 @@ export const isEmpty = <A>(self: TxChunk<A>): Effect.Effect<boolean> =>
  *
  * **Example** (Checking for a non-empty chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -546,13 +512,12 @@ export const isEmpty = <A>(self: TxChunk<A>): Effect.Effect<boolean> =>
  *   const isNonEmpty1 = yield* TxChunk.isNonEmpty(emptyChunk)
  *   const isNonEmpty2 = yield* TxChunk.isNonEmpty(nonEmptyChunk)
  *
- *   return [isNonEmpty1, isNonEmpty2]
+ *   console.log(isNonEmpty1) // false
+ *   console.log(isNonEmpty2) // true
  * })
- *
- * await Effect.runPromise(program) // => [false, true]
  * ```
  *
- * @category predicates
+ * @category combinators
  * @since 4.0.0
  */
 export const isNonEmpty = <A>(self: TxChunk<A>): Effect.Effect<boolean> =>
@@ -568,7 +533,7 @@ export const isNonEmpty = <A>(self: TxChunk<A>): Effect.Effect<boolean> =>
  *
  * **Example** (Taking leading elements)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -578,10 +543,8 @@ export const isNonEmpty = <A>(self: TxChunk<A>): Effect.Effect<boolean> =>
  *   yield* TxChunk.take(txChunk, 3)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3]
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3]
  * ```
  *
  * @category combinators
@@ -605,7 +568,7 @@ export const take: {
  *
  * **Example** (Dropping leading elements)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -615,10 +578,8 @@ export const take: {
  *   yield* TxChunk.drop(txChunk, 2)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [3, 4, 5]
  * })
- *
- * await Effect.runPromise(program) // => [3, 4, 5]
  * ```
  *
  * @category combinators
@@ -642,7 +603,7 @@ export const drop: {
  *
  * **Example** (Taking a slice)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -652,10 +613,8 @@ export const drop: {
  *   yield* TxChunk.slice(txChunk, 2, 5)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [3, 4, 5]
  * })
- *
- * await Effect.runPromise(program) // => [3, 4, 5]
  * ```
  *
  * @category combinators
@@ -681,7 +640,7 @@ export const slice: {
  *
  * **Example** (Mapping elements)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -691,10 +650,8 @@ export const slice: {
  *   yield* TxChunk.map(txChunk, (n) => n * 2)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [2, 4, 6, 8]
  * })
- *
- * await Effect.runPromise(program) // => [2, 4, 6, 8]
  * ```
  *
  * @category combinators
@@ -718,7 +675,7 @@ export const map: {
  *
  * **Example** (Filtering elements)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -728,10 +685,8 @@ export const map: {
  *   yield* TxChunk.filter(txChunk, (n) => n % 2 === 0)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [2, 4, 6]
  * })
- *
- * await Effect.runPromise(program) // => [2, 4, 6]
  * ```
  *
  * @category combinators
@@ -758,7 +713,7 @@ export const filter: {
  *
  * **Example** (Appending another chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -769,10 +724,8 @@ export const filter: {
  *   yield* TxChunk.appendAll(txChunk, otherChunk)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3, 4, 5, 6]
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3, 4, 5, 6]
  * ```
  *
  * @category combinators
@@ -797,7 +750,7 @@ export const appendAll: {
  *
  * **Example** (Prepending another chunk)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -808,10 +761,8 @@ export const appendAll: {
  *   yield* TxChunk.prependAll(txChunk, otherChunk)
  *
  *   const result = yield* TxChunk.get(txChunk)
- *   return Chunk.toArray(result)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3, 4, 5, 6]
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3, 4, 5, 6]
  * ```
  *
  * @category combinators
@@ -836,7 +787,7 @@ export const prependAll: {
  *
  * **Example** (Concatenating TxChunks)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Chunk, Effect, TxChunk } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -847,13 +798,12 @@ export const prependAll: {
  *   yield* TxChunk.concat(txChunk1, txChunk2)
  *
  *   const result = yield* TxChunk.get(txChunk1)
+ *   console.log(Chunk.toReadonlyArray(result)) // [1, 2, 3, 4, 5, 6]
  *
  *   // Original txChunk2 is unchanged
  *   const original = yield* TxChunk.get(txChunk2)
- *   return [Chunk.toArray(result), Chunk.toArray(original)]
+ *   console.log(Chunk.toReadonlyArray(original)) // [4, 5, 6]
  * })
- *
- * await Effect.runPromise(program) // => [[1, 2, 3, 4, 5, 6], [4, 5, 6]]
  * ```
  *
  * @category combinators

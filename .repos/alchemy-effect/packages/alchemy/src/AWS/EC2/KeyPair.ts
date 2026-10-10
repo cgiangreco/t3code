@@ -86,8 +86,9 @@ export interface KeyPair extends Resource<
  * {@link KeyPairProps.publicKeyMaterial} to import your own public key instead,
  * in which case no private key is stored.
  *
- * ### Creating a Key Pair
- * **Example:** Generated key pair
+ * @resource
+ * @section Creating a Key Pair
+ * @example Generated key pair
  * ```typescript
  * const keyPair = yield* AWS.EC2.KeyPair("DeployKey", {
  *   keyType: "ed25519",
@@ -96,14 +97,12 @@ export interface KeyPair extends Resource<
  * // keyPair.privateKey    -> Redacted<string> (the PEM private key)
  * ```
  *
- * **Example:** Imported public key
+ * @example Imported public key
  * ```typescript
  * const keyPair = yield* AWS.EC2.KeyPair("ImportedKey", {
  *   publicKeyMaterial: "ssh-ed25519 AAAAC3Nz... user@host",
  * });
  * ```
- *
- * @resource
  */
 export const KeyPair = Resource<KeyPair>("AWS.EC2.KeyPair");
 

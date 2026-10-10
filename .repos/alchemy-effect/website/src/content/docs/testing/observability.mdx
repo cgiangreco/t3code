@@ -3,59 +3,56 @@ title: Observability
 description: Effect emits OpenTelemetry natively and the exporter is a Layer. Provision the receiving end — datasets, monitors, notifiers, alarms — as resources in the same Stack as the code that emits the signals.
 ---
 
-Effect already emits traces, metrics, and logs, and every alchemy
-runtime ships with the OTLP exporter built in — the exporter is a
-Layer, wired to resources through the binding infrastructure. With
-alchemy the receiving end is code too: datasets, ingest tokens,
-monitors, notifiers, and alarms live in the same Stack as the
-Workers and Functions they observe, so a threshold change is a diff
-in the PR — reviewable, revertable, answered by `git blame`.
+Effect already emits traces, metrics, and logs. The exporter is a
+Layer — point it at any OTLP endpoint. With alchemy the receiving end
+is code too: datasets, ingest tokens, monitors, notifiers, and alarms
+live in the same Stack as the Workers and Functions they observe, so
+a threshold change is a diff in the PR — reviewable, revertable,
+answered by `git blame`.
 
 ## OTel everywhere
 
 Every `Effect.withSpan` opens a span, every `Metric` update records a
-data point, every `Effect.logInfo` ships a log line — and each fetch,
-queue message, cron fire, and invocation gets an `http.server`-style
-root span automatically. Where the signals go is decided by a
-telemetry Layer provided on the Function/Worker:
+data point, every `Effect.logInfo` ships a log line. Where the
+signals go is decided by a Layer — Effect ships OTLP exporters out of
+the box:
 
 ```typescript
-import * as Alchemy from "alchemy";
+import * as Layer from "effect/Layer";
+import * as FetchHttpClient from "effect/unstable/http/FetchHttpClient";
+import * as OtlpSerialization from "effect/unstable/observability/OtlpSerialization";
+import * as OtlpTracer from "effect/unstable/observability/OtlpTracer";
 
-Effect.provide(
-  Layer.mergeAll(
-    Cloudflare.R2.ReadWriteBucketBinding,
-    Alchemy.Telemetry.layerOtlp({
-      url: "https://collector.example.com",
-      headers: { "x-api-key": apiKey },
-    }),
-  ),
-)
+const Tracing = OtlpTracer.layer({
+  url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT!,
+  headers: { Authorization: `Bearer ${process.env.AXIOM_TOKEN}` },
+  resource: { serviceName: "api" },
+}).pipe(
+  Layer.provide(OtlpSerialization.layerJson),
+  Layer.provide(FetchHttpClient.layer),
+);
 ```
 
-Any OTLP endpoint works — Axiom, an OTel collector, any
-OTLP-compatible vendor. Swap the layer, ship somewhere else; the code
-emitting the signals never changes. Buffered telemetry is flushed
-when each request's scope closes (via `waitUntil` on Cloudflare, so
-export never delays a response). See
-[Telemetry](/infrastructure-as-effects/telemetry) for the full
-mechanics.
+Provide the Layer (`Effect.provide(Tracing)`) and every span flows to
+whatever OTLP endpoint the environment points at — Axiom, an OTel
+collector, any OTLP-compatible vendor. Swap the URL, ship somewhere
+else; the code emitting the signals never changes. `OtlpLogger` and
+`OtlpMetrics` follow the same shape for logs and metrics.
 
 ## Provision the receiving end
 
 The endpoint the exporter targets is a resource. An
-[Axiom](/axiom) `Dataset` is declared per OTEL signal and exposes its
+[Axiom](/axiom) `Dataset` is created per OTEL signal and exposes its
 OTLP endpoints as outputs:
 
 ```typescript
-// src/observability.ts
 import * as Axiom from "alchemy/Axiom";
 
-export const Traces = Axiom.Dataset("Traces", {
+const traces = yield* Axiom.Dataset("traces", {
   name: "app-traces",
   kind: "otel:traces:v1",
 });
-export const Logs = Axiom.Dataset("Logs", {
+const logs = yield* Axiom.Dataset("logs", {
   name: "app-logs",
   kind: "otel:logs:v1",
 });
@@ -65,38 +62,32 @@ Each dataset's `otelTracesEndpoint` / `otelLogsEndpoint` /
 `otelMetricsEndpoint` attributes are [Outputs](/infrastructure-as-code/outputs) —
 references you wire into whatever runs the exporter.
 
-## Bind the datasets to the runtime
+## Wire endpoints into the runtime
 
-Mint a least-privilege ingest token, then provide `Axiom.Telemetry`
-on the Worker — a binding layer that wires the datasets and token in
-one line:
+Mint a least-privilege ingest token and pass both the endpoint and
+the token to the Worker through `env`:
 
 ```typescript
-// src/observability.ts
-export const Ingest = Axiom.ApiToken("Ingest", {
+const ingest = yield* Axiom.ApiToken("ingest", {
   name: "prod-ingest",
   datasetCapabilities: {
     "app-traces": { ingest: ["create"] },
-    "app-logs": { ingest: ["create"] },
   },
 });
 
-// src/worker.ts — in the Worker's constructor Effect:
-import { Ingest, Logs, Traces } from "./observability.ts";
-
-Effect.provide(
-  Layer.mergeAll(
-    Cloudflare.R2.ReadWriteBucketBinding,
-    Axiom.Telemetry({ token: Ingest, traces: Traces, logs: Logs }),
-  ),
-)
+const api = yield* Cloudflare.Worker("Api", {
+  main: "./src/worker.ts",
+  env: {
+    OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: traces.otelTracesEndpoint,
+    AXIOM_TOKEN: ingest.token,
+  },
+});
 ```
 
-Building the layer binds each dataset's OTLP endpoint and the
-token's `Authorization` header onto the Worker — the bearer travels
-as a `secret_text` binding (see [Secrets](/environments/secrets)) and
-never appears in plaintext. At runtime the built-in exporter ships
-each signal to its dataset — no exporter code in the Worker.
+The endpoint is a plain string so it binds as `plain_text`; the token
+is a `Redacted` so it binds as `secret_text` — see
+[Secrets](/environments/secrets). At runtime the exporter Layer from the
+first snippet reads these and starts shipping.
 
 ## Export from the platform
 
@@ -106,10 +97,7 @@ On Cloudflare you can skip the in-process exporter entirely: an
 the Worker:
 
 ```typescript
-// in the Stack's generator
-const traces = yield* Traces;
-
-yield* Cloudflare.Workers.ObservabilityDestination("TracesExport", {
+yield* Cloudflare.Workers.ObservabilityDestination("Traces", {
   url: traces.otelTracesEndpoint,
   headers: { authorization: `Bearer ${process.env.AXIOM_TOKEN}` },
   logpushDataset: "opentelemetry-traces",
@@ -209,8 +197,6 @@ ALARM("HighLatency")'`), and because stacks are per-stage, `prod`,
 
 ## Where next
 
-- [Telemetry](/infrastructure-as-effects/telemetry) — how the built-in exporters work across every runtime, and the override API
 - [Axiom](/axiom) — datasets, tokens, monitors, notifiers, and dashboards as resources
 - [Axiom observability guide](/cloudflare/observability/axiom-observability) — end-to-end setup for a Cloudflare Worker
-- [Tutorial Part 6](/cloudflare/tutorial/part-6) — the step-by-step version
 - [Secrets](/environments/secrets) — how `Redacted` values like ingest tokens are bound

@@ -11,8 +11,9 @@ import type { ImagePipeline } from "./ImagePipeline.ts";
  * or a build-history dashboard. The pipeline's ARN is injected from the
  * binding. Provide the implementation with
  * `Effect.provide(AWS.ImageBuilder.ListImagePipelineImagesHttp)`.
- * ### Observing Pipelines
- * **Example:** List the Pipeline's Builds
+ * @binding
+ * @section Observing Pipelines
+ * @example List the Pipeline's Builds
  * ```typescript
  * // init — bind the operation to the pipeline
  * const listBuilds = yield* AWS.ImageBuilder.ListImagePipelineImages(
@@ -25,8 +26,6 @@ import type { ImagePipeline } from "./ImagePipeline.ts";
  *   (image) => image.state?.status === "AVAILABLE",
  * );
  * ```
- *
- * @binding
  */
 export interface ListImagePipelineImages extends Binding.Service<
   ListImagePipelineImages,

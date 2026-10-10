@@ -14,8 +14,9 @@ export interface ListRetrievedTracesRequest
  * provide the implementation with `Effect.provide(XRay.ListRetrievedTracesHttp)`.
  * The action is account-scoped: X-Ray does not support resource-level
  * permissions for `xray:ListRetrievedTraces`, so the binding grants it on `*`.
- * ### Transaction Search
- * **Example:** Poll a retrieval job for its traces
+ * @binding
+ * @section Transaction Search
+ * @example Poll a retrieval job for its traces
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -28,8 +29,6 @@ export interface ListRetrievedTracesRequest
  *   const traces = result.Traces ?? [];
  * }
  * ```
- *
- * @binding
  */
 export interface ListRetrievedTraces extends Binding.Service<
   ListRetrievedTraces,

@@ -16,8 +16,9 @@ export interface CheckoutBorrowLicenseRequest
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.CheckoutBorrowLicenseHttp)`.
- * ### License Checkout Data Plane
- * **Example:** Borrow an Entitlement for Offline Use
+ * @binding
+ * @section License Checkout Data Plane
+ * @example Borrow an Entitlement for Offline Use
  * ```typescript
  * // init
  * const checkoutBorrow = yield* AWS.LicenseManager.CheckoutBorrowLicense();
@@ -30,8 +31,6 @@ export interface CheckoutBorrowLicenseRequest
  *   ClientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface CheckoutBorrowLicense extends Binding.Service<
   CheckoutBorrowLicense,

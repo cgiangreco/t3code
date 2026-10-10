@@ -14,8 +14,9 @@ import * as Binding from "../../Binding.ts";
  * `AWS.S3.GetObject` capability on the bucket).
  * Provide the implementation with `Effect.provide(AWS.MediaConvert.ProbeHttp)`.
  *
- * ### Inspecting Inputs
- * **Example:** Probe an Uploaded File
+ * @binding
+ * @section Inspecting Inputs
+ * @example Probe an Uploaded File
  * ```typescript
  * // init
  * const probe = yield* AWS.MediaConvert.Probe();
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const video = ProbeResults?.[0]?.TrackMappings;
  * ```
- *
- * @binding
  */
 export interface Probe extends Binding.Service<
   Probe,

@@ -11,8 +11,9 @@ import type { Directory } from "./Directory.ts";
  * status, and start time. The directory id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DirectoryService.DescribeSnapshotsHttp)`.
- * ### Managing Snapshots
- * **Example:** List the Directory's Snapshots
+ * @binding
+ * @section Managing Snapshots
+ * @example List the Directory's Snapshots
  * ```typescript
  * // init — bind the operation to the directory
  * const describeSnapshots = yield* AWS.DirectoryService.DescribeSnapshots(directory);
@@ -23,8 +24,6 @@ import type { Directory } from "./Directory.ts";
  *   console.log(snapshot.SnapshotId, snapshot.Status);
  * }
  * ```
- *
- * @binding
  */
 export interface DescribeSnapshots extends Binding.Service<
   DescribeSnapshots,

@@ -20,8 +20,9 @@ export interface ExecuteCommandRequest extends Omit<
  * task role must allow the SSM messages channel. The response's
  * `session.tokenValue` is a `Redacted` bearer token for the SSM WebSocket
  * stream (`session.streamUrl`).
- * ### Executing Commands
- * **Example:** Run a Command in a Container
+ * @binding
+ * @section Executing Commands
+ * @example Run a Command in a Container
  * ```typescript
  * const executeCommand = yield* AWS.ECS.ExecuteCommand(cluster);
  *
@@ -32,8 +33,6 @@ export interface ExecuteCommandRequest extends Omit<
  * });
  * const streamUrl = response.session?.streamUrl;
  * ```
- *
- * @binding
  */
 export interface ExecuteCommand extends Binding.Service<
   ExecuteCommand,

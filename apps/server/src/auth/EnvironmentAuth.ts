@@ -2,8 +2,6 @@ import {
   AuthAccessTokenType,
   AuthAccessWriteScope,
   AuthAdministrativeScopes,
-  AuthOrchestrationOperateScope,
-  AuthOrchestrationReadScope,
   AuthStandardClientScopes,
   type AuthAccessTokenResult,
   type AuthBrowserSessionResult,
@@ -11,17 +9,13 @@ import {
   type AuthClientSession,
   type AuthCreatePairingCredentialInput,
   type AuthEnvironmentScope,
-  type AuthMcpClientAccess,
   type AuthPairingLink,
   type AuthPairingCredentialResult,
   type AuthSessionId,
   type AuthSessionState,
-  authScopeResponse,
   type ServerAuthDescriptor,
   type ServerAuthSessionMethod,
   type AuthWebSocketTicketResult,
-  DpopFailureReason,
-  type DpopFailureReason as DpopFailureReasonType,
 } from "@t3tools/contracts";
 import { encodeOAuthScope } from "@t3tools/shared/oauthScope";
 import * as Context from "effect/Context";
@@ -32,19 +26,16 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
-import * as HttpServerRequest from "effect/http/HttpServerRequest";
+import * as HttpServerRequest from "effect/unstable/http/HttpServerRequest";
 
-import * as ServerEnvironment from "../environment/ServerEnvironment.ts";
-import * as ServerConfig from "../config.ts";
 import * as EnvironmentAuthPolicy from "./EnvironmentAuthPolicy.ts";
 import * as PairingGrantStore from "./PairingGrantStore.ts";
 import * as ServerSecretStore from "./ServerSecretStore.ts";
 import * as SessionStore from "./SessionStore.ts";
-import { REUSABLE_DEV_SESSION_EXPIRES_AT, resolveReusableDevAuth } from "./ReusableDevAuth.ts";
 import { verifyRequestDpopProof } from "./dpop.ts";
-import * as SqlitePersistence from "../persistence/Sqlite.ts";
+import { layerConfig as SqlitePersistenceLayer } from "../persistence/Layers/Sqlite.ts";
 
-const DEFAULT_SESSION_SUBJECT = "cli-issued-session";
+export const DEFAULT_SESSION_SUBJECT = "cli-issued-session";
 export const INTERNAL_ADMINISTRATIVE_BOOTSTRAP_SUBJECT = "administrative-bootstrap";
 
 export interface IssuedPairingLink {
@@ -67,31 +58,6 @@ export interface IssuedBearerSession {
   readonly expiresAt: DateTime.Utc;
 }
 
-/**
- * Sessions an MCP client (an agent T3 Code did not launch) obtains through
- * OAuth. They are accepted only by `/mcp`, where every action is capped by the
- * access the user approved; the HTTP API and WebSocket reject them so an agent
- * token cannot reach the full RPC surface around that cap.
- *
- * A read-only grant holds `orchestration:read` alone. Any other grant also
- * holds `orchestration:operate` and carries its runtime-mode ceiling.
- */
-const MCP_CLIENT_SUBJECT = "mcp-client";
-const MCP_CLIENT_SESSION_TTL = Duration.days(30);
-
-export const mcpClientScopes = (
-  access: AuthMcpClientAccess,
-): ReadonlyArray<AuthEnvironmentScope> =>
-  access === "read-only"
-    ? [AuthOrchestrationReadScope]
-    : [AuthOrchestrationReadScope, AuthOrchestrationOperateScope];
-
-export interface McpClientSession {
-  readonly sessionId: AuthSessionId;
-  readonly label: string;
-  readonly access: AuthMcpClientAccess;
-}
-
 export interface AuthenticatedSession {
   readonly sessionId: AuthSessionId;
   readonly subject: string;
@@ -105,7 +71,7 @@ const serverAuthInternalErrorContext = {
   cause: Schema.Defect(),
 };
 
-export class ServerAuthBootstrapCredentialValidationError extends Schema.TaggedError<ServerAuthBootstrapCredentialValidationError>()(
+export class ServerAuthBootstrapCredentialValidationError extends Schema.TaggedErrorClass<ServerAuthBootstrapCredentialValidationError>()(
   "ServerAuthBootstrapCredentialValidationError",
   {
     ...serverAuthInternalErrorContext,
@@ -116,7 +82,7 @@ export class ServerAuthBootstrapCredentialValidationError extends Schema.TaggedE
   }
 }
 
-export class ServerAuthSessionCredentialValidationError extends Schema.TaggedError<ServerAuthSessionCredentialValidationError>()(
+export class ServerAuthSessionCredentialValidationError extends Schema.TaggedErrorClass<ServerAuthSessionCredentialValidationError>()(
   "ServerAuthSessionCredentialValidationError",
   {
     ...serverAuthInternalErrorContext,
@@ -127,7 +93,7 @@ export class ServerAuthSessionCredentialValidationError extends Schema.TaggedErr
   }
 }
 
-export class ServerAuthAuthenticatedSessionIssueError extends Schema.TaggedError<ServerAuthAuthenticatedSessionIssueError>()(
+export class ServerAuthAuthenticatedSessionIssueError extends Schema.TaggedErrorClass<ServerAuthAuthenticatedSessionIssueError>()(
   "ServerAuthAuthenticatedSessionIssueError",
   {
     ...serverAuthInternalErrorContext,
@@ -138,7 +104,7 @@ export class ServerAuthAuthenticatedSessionIssueError extends Schema.TaggedError
   }
 }
 
-export class ServerAuthAuthenticatedAccessTokenIssueError extends Schema.TaggedError<ServerAuthAuthenticatedAccessTokenIssueError>()(
+export class ServerAuthAuthenticatedAccessTokenIssueError extends Schema.TaggedErrorClass<ServerAuthAuthenticatedAccessTokenIssueError>()(
   "ServerAuthAuthenticatedAccessTokenIssueError",
   {
     ...serverAuthInternalErrorContext,
@@ -149,7 +115,7 @@ export class ServerAuthAuthenticatedAccessTokenIssueError extends Schema.TaggedE
   }
 }
 
-export class ServerAuthPairingLinkCreationError extends Schema.TaggedError<ServerAuthPairingLinkCreationError>()(
+export class ServerAuthPairingLinkCreationError extends Schema.TaggedErrorClass<ServerAuthPairingLinkCreationError>()(
   "ServerAuthPairingLinkCreationError",
   {
     ...serverAuthInternalErrorContext,
@@ -160,7 +126,7 @@ export class ServerAuthPairingLinkCreationError extends Schema.TaggedError<Serve
   }
 }
 
-export class ServerAuthPairingLinksListError extends Schema.TaggedError<ServerAuthPairingLinksListError>()(
+export class ServerAuthPairingLinksListError extends Schema.TaggedErrorClass<ServerAuthPairingLinksListError>()(
   "ServerAuthPairingLinksListError",
   {
     ...serverAuthInternalErrorContext,
@@ -171,7 +137,7 @@ export class ServerAuthPairingLinksListError extends Schema.TaggedError<ServerAu
   }
 }
 
-export class ServerAuthPairingLinkRevocationError extends Schema.TaggedError<ServerAuthPairingLinkRevocationError>()(
+export class ServerAuthPairingLinkRevocationError extends Schema.TaggedErrorClass<ServerAuthPairingLinkRevocationError>()(
   "ServerAuthPairingLinkRevocationError",
   {
     ...serverAuthInternalErrorContext,
@@ -182,7 +148,7 @@ export class ServerAuthPairingLinkRevocationError extends Schema.TaggedError<Ser
   }
 }
 
-export class ServerAuthSessionTokenIssueError extends Schema.TaggedError<ServerAuthSessionTokenIssueError>()(
+export class ServerAuthSessionTokenIssueError extends Schema.TaggedErrorClass<ServerAuthSessionTokenIssueError>()(
   "ServerAuthSessionTokenIssueError",
   {
     ...serverAuthInternalErrorContext,
@@ -193,7 +159,7 @@ export class ServerAuthSessionTokenIssueError extends Schema.TaggedError<ServerA
   }
 }
 
-export class ServerAuthSessionsListError extends Schema.TaggedError<ServerAuthSessionsListError>()(
+export class ServerAuthSessionsListError extends Schema.TaggedErrorClass<ServerAuthSessionsListError>()(
   "ServerAuthSessionsListError",
   {
     ...serverAuthInternalErrorContext,
@@ -204,7 +170,7 @@ export class ServerAuthSessionsListError extends Schema.TaggedError<ServerAuthSe
   }
 }
 
-export class ServerAuthSessionRevocationError extends Schema.TaggedError<ServerAuthSessionRevocationError>()(
+export class ServerAuthSessionRevocationError extends Schema.TaggedErrorClass<ServerAuthSessionRevocationError>()(
   "ServerAuthSessionRevocationError",
   {
     ...serverAuthInternalErrorContext,
@@ -215,7 +181,7 @@ export class ServerAuthSessionRevocationError extends Schema.TaggedError<ServerA
   }
 }
 
-export class ServerAuthOtherSessionsRevocationError extends Schema.TaggedError<ServerAuthOtherSessionsRevocationError>()(
+export class ServerAuthOtherSessionsRevocationError extends Schema.TaggedErrorClass<ServerAuthOtherSessionsRevocationError>()(
   "ServerAuthOtherSessionsRevocationError",
   {
     ...serverAuthInternalErrorContext,
@@ -226,7 +192,7 @@ export class ServerAuthOtherSessionsRevocationError extends Schema.TaggedError<S
   }
 }
 
-export class ServerAuthWebSocketTokenIssueError extends Schema.TaggedError<ServerAuthWebSocketTokenIssueError>()(
+export class ServerAuthWebSocketTokenIssueError extends Schema.TaggedErrorClass<ServerAuthWebSocketTokenIssueError>()(
   "ServerAuthWebSocketTokenIssueError",
   {
     ...serverAuthInternalErrorContext,
@@ -237,7 +203,7 @@ export class ServerAuthWebSocketTokenIssueError extends Schema.TaggedError<Serve
   }
 }
 
-export class ServerAuthDpopReplayStateRecordError extends Schema.TaggedError<ServerAuthDpopReplayStateRecordError>()(
+export class ServerAuthDpopReplayStateRecordError extends Schema.TaggedErrorClass<ServerAuthDpopReplayStateRecordError>()(
   "ServerAuthDpopReplayStateRecordError",
   {
     ...serverAuthInternalErrorContext,
@@ -248,7 +214,7 @@ export class ServerAuthDpopReplayStateRecordError extends Schema.TaggedError<Ser
   }
 }
 
-export class ServerAuthDpopReplayKeyCalculationError extends Schema.TaggedError<ServerAuthDpopReplayKeyCalculationError>()(
+export class ServerAuthDpopReplayKeyCalculationError extends Schema.TaggedErrorClass<ServerAuthDpopReplayKeyCalculationError>()(
   "ServerAuthDpopReplayKeyCalculationError",
   {
     ...serverAuthInternalErrorContext,
@@ -259,7 +225,7 @@ export class ServerAuthDpopReplayKeyCalculationError extends Schema.TaggedError<
   }
 }
 
-export class ServerAuthLinkedCloudAccountVerificationError extends Schema.TaggedError<ServerAuthLinkedCloudAccountVerificationError>()(
+export class ServerAuthLinkedCloudAccountVerificationError extends Schema.TaggedErrorClass<ServerAuthLinkedCloudAccountVerificationError>()(
   "ServerAuthLinkedCloudAccountVerificationError",
   {
     ...serverAuthInternalErrorContext,
@@ -270,7 +236,7 @@ export class ServerAuthLinkedCloudAccountVerificationError extends Schema.Tagged
   }
 }
 
-export class ServerAuthLinkedCloudAccountReadError extends Schema.TaggedError<ServerAuthLinkedCloudAccountReadError>()(
+export class ServerAuthLinkedCloudAccountReadError extends Schema.TaggedErrorClass<ServerAuthLinkedCloudAccountReadError>()(
   "ServerAuthLinkedCloudAccountReadError",
   {
     ...serverAuthInternalErrorContext,
@@ -281,7 +247,7 @@ export class ServerAuthLinkedCloudAccountReadError extends Schema.TaggedError<Se
   }
 }
 
-export class ServerAuthLinkedCloudAccountMissingError extends Schema.TaggedError<ServerAuthLinkedCloudAccountMissingError>()(
+export class ServerAuthLinkedCloudAccountMissingError extends Schema.TaggedErrorClass<ServerAuthLinkedCloudAccountMissingError>()(
   "ServerAuthLinkedCloudAccountMissingError",
   {},
 ) {
@@ -290,7 +256,7 @@ export class ServerAuthLinkedCloudAccountMissingError extends Schema.TaggedError
   }
 }
 
-export class ServerAuthCloudLinkJwtSigningError extends Schema.TaggedError<ServerAuthCloudLinkJwtSigningError>()(
+export class ServerAuthCloudLinkJwtSigningError extends Schema.TaggedErrorClass<ServerAuthCloudLinkJwtSigningError>()(
   "ServerAuthCloudLinkJwtSigningError",
   {
     ...serverAuthInternalErrorContext,
@@ -301,7 +267,7 @@ export class ServerAuthCloudLinkJwtSigningError extends Schema.TaggedError<Serve
   }
 }
 
-export class ServerAuthCloudMintPublicKeyMissingError extends Schema.TaggedError<ServerAuthCloudMintPublicKeyMissingError>()(
+export class ServerAuthCloudMintPublicKeyMissingError extends Schema.TaggedErrorClass<ServerAuthCloudMintPublicKeyMissingError>()(
   "ServerAuthCloudMintPublicKeyMissingError",
   {},
 ) {
@@ -310,7 +276,7 @@ export class ServerAuthCloudMintPublicKeyMissingError extends Schema.TaggedError
   }
 }
 
-export class ServerAuthCloudRelayIssuerMissingError extends Schema.TaggedError<ServerAuthCloudRelayIssuerMissingError>()(
+export class ServerAuthCloudRelayIssuerMissingError extends Schema.TaggedErrorClass<ServerAuthCloudRelayIssuerMissingError>()(
   "ServerAuthCloudRelayIssuerMissingError",
   {},
 ) {
@@ -319,7 +285,7 @@ export class ServerAuthCloudRelayIssuerMissingError extends Schema.TaggedError<S
   }
 }
 
-export class ServerAuthCloudHealthJwtSigningError extends Schema.TaggedError<ServerAuthCloudHealthJwtSigningError>()(
+export class ServerAuthCloudHealthJwtSigningError extends Schema.TaggedErrorClass<ServerAuthCloudHealthJwtSigningError>()(
   "ServerAuthCloudHealthJwtSigningError",
   {
     ...serverAuthInternalErrorContext,
@@ -330,7 +296,7 @@ export class ServerAuthCloudHealthJwtSigningError extends Schema.TaggedError<Ser
   }
 }
 
-export class ServerAuthCloudMintJwtSigningError extends Schema.TaggedError<ServerAuthCloudMintJwtSigningError>()(
+export class ServerAuthCloudMintJwtSigningError extends Schema.TaggedErrorClass<ServerAuthCloudMintJwtSigningError>()(
   "ServerAuthCloudMintJwtSigningError",
   {
     ...serverAuthInternalErrorContext,
@@ -368,7 +334,7 @@ export const ServerAuthInternalError = Schema.Union([
 export type ServerAuthInternalError = typeof ServerAuthInternalError.Type;
 export const isServerAuthInternalError = Schema.is(ServerAuthInternalError);
 
-export class ServerAuthMissingCredentialError extends Schema.TaggedError<ServerAuthMissingCredentialError>()(
+export class ServerAuthMissingCredentialError extends Schema.TaggedErrorClass<ServerAuthMissingCredentialError>()(
   "ServerAuthMissingCredentialError",
   {},
 ) {
@@ -377,11 +343,10 @@ export class ServerAuthMissingCredentialError extends Schema.TaggedError<ServerA
   }
 }
 
-export class ServerAuthInvalidCredentialError extends Schema.TaggedError<ServerAuthInvalidCredentialError>()(
+export class ServerAuthInvalidCredentialError extends Schema.TaggedErrorClass<ServerAuthInvalidCredentialError>()(
   "ServerAuthInvalidCredentialError",
   {
     diagnostic: Schema.optional(Schema.String),
-    dpopFailureReason: Schema.optionalKey(DpopFailureReason),
     cause: Schema.optional(Schema.Defect()),
   },
 ) {
@@ -401,12 +366,7 @@ export const serverAuthCredentialReason = (
 ): "missing_credential" | "invalid_credential" =>
   error._tag === "ServerAuthMissingCredentialError" ? "missing_credential" : "invalid_credential";
 
-export const serverAuthDpopFailureReason = (
-  error: ServerAuthCredentialError,
-): DpopFailureReasonType | undefined =>
-  error._tag === "ServerAuthInvalidCredentialError" ? error.dpopFailureReason : undefined;
-
-export class ServerAuthInvalidScopeError extends Schema.TaggedError<ServerAuthInvalidScopeError>()(
+export class ServerAuthInvalidScopeError extends Schema.TaggedErrorClass<ServerAuthInvalidScopeError>()(
   "ServerAuthInvalidScopeError",
   {},
 ) {
@@ -415,7 +375,7 @@ export class ServerAuthInvalidScopeError extends Schema.TaggedError<ServerAuthIn
   }
 }
 
-export class ServerAuthScopeNotGrantedError extends Schema.TaggedError<ServerAuthScopeNotGrantedError>()(
+export class ServerAuthScopeNotGrantedError extends Schema.TaggedErrorClass<ServerAuthScopeNotGrantedError>()(
   "ServerAuthScopeNotGrantedError",
   {},
 ) {
@@ -435,20 +395,7 @@ export const serverAuthInvalidRequestReason = (
 ): "invalid_scope" | "scope_not_granted" =>
   error._tag === "ServerAuthInvalidScopeError" ? "invalid_scope" : "scope_not_granted";
 
-export class ServerAuthMcpApprovalCodeError extends Schema.TaggedError<ServerAuthMcpApprovalCodeError>()(
-  "ServerAuthMcpApprovalCodeError",
-  { reason: Schema.Literals(["unknown_or_used", "not_a_pairing_code", "insufficient_scope"]) },
-) {
-  override get message(): string {
-    return this.reason === "insufficient_scope"
-      ? "That pairing code cannot grant this access, and it is now used up. Create one with the standard scopes, or choose Read only with a new code."
-      : this.reason === "not_a_pairing_code"
-        ? "That is not a one-time pairing code."
-        : "That pairing code is unknown, expired, or already used.";
-  }
-}
-
-export class ServerAuthForbiddenOperationError extends Schema.TaggedError<ServerAuthForbiddenOperationError>()(
+export class ServerAuthForbiddenOperationError extends Schema.TaggedErrorClass<ServerAuthForbiddenOperationError>()(
   "ServerAuthForbiddenOperationError",
   {},
 ) {
@@ -467,13 +414,10 @@ export class EnvironmentAuth extends Context.Service<
     readonly createBrowserSession: (
       credential: string,
       requestMetadata: AuthClientMetadata,
-      previousSessionToken?: string,
     ) => Effect.Effect<
       {
         readonly response: AuthBrowserSessionResult;
         readonly sessionToken: string;
-        readonly cookieName?: string;
-        readonly expireNormalCookie?: boolean;
       },
       ServerAuthInvalidCredentialError | ServerAuthInternalError
     >;
@@ -545,40 +489,12 @@ export class EnvironmentAuth extends Context.Service<
     readonly issueStartupPairingUrl: (
       baseUrl: string,
     ) => Effect.Effect<string, ServerAuthInternalError>;
-    /** Only bearer `mcp-client` sessions; never cookies or proof-bound tokens. */
-    readonly authenticateMcpClient: (
-      request: HttpServerRequest.HttpServerRequest,
-    ) => Effect.Effect<McpClientSession, ServerAuthCredentialError | ServerAuthInternalError>;
-    readonly issueMcpClientSession: (input: {
-      readonly label: string;
-      readonly access: AuthMcpClientAccess;
-      readonly client: AuthClientMetadata;
-    }) => Effect.Effect<
-      { readonly token: string; readonly expiresAt: DateTime.DateTime },
-      ServerAuthInternalError
-    >;
-    /**
-     * Spends a one-time pairing code as approval for an MCP client with the
-     * given access; the code must hold every scope that access grants.
-     * Proof-bound codes (T3 Connect) are refused without being spent, and
-     * desktop bootstrap grants never qualify.
-     */
-    readonly consumeMcpApprovalCode: (
-      code: string,
-      access: AuthMcpClientAccess,
-    ) => Effect.Effect<void, ServerAuthMcpApprovalCodeError | ServerAuthInternalError>;
-    /** A browser cookie session only; a bearer header never counts as one. */
-    readonly authenticateBrowserSession: (
-      request: HttpServerRequest.HttpServerRequest,
-    ) => Effect.Effect<AuthenticatedSession, ServerAuthCredentialError | ServerAuthInternalError>;
   }
 >()("t3/auth/EnvironmentAuth") {}
 
 type BootstrapExchangeResult = {
   readonly response: AuthBrowserSessionResult;
   readonly sessionToken: string;
-  readonly cookieName?: string;
-  readonly expireNormalCookie?: boolean;
 };
 
 const AUTHORIZATION_PREFIX = "Bearer ";
@@ -609,15 +525,6 @@ export function toBootstrapExchangeError(
   });
 }
 
-const rejectMcpClientAudience = <S extends { readonly subject: string }>(session: S) =>
-  session.subject === MCP_CLIENT_SUBJECT
-    ? Effect.fail(
-        new ServerAuthInvalidCredentialError({
-          diagnostic: "MCP client sessions are only accepted by the MCP endpoint.",
-        }),
-      ).pipe(Effect.tap(() => Effect.logWarning("Rejected an MCP client session outside /mcp.")))
-    : Effect.succeed(session);
-
 const mapSessionVerificationErrors = <A, R>(
   effect: Effect.Effect<A, SessionStore.SessionCredentialError, R>,
 ): Effect.Effect<A, ServerAuthInvalidCredentialError | ServerAuthInternalError, R> =>
@@ -647,35 +554,6 @@ function parseDpopToken(request: HttpServerRequest.HttpServerRequest): string | 
   return token.length > 0 ? token : null;
 }
 
-export function selectRequestCredential(
-  request: HttpServerRequest.HttpServerRequest,
-  cookieName: string,
-  legacyCookieName: string | undefined,
-) {
-  const cookieToken = request.cookies[cookieName];
-  if (cookieToken !== undefined) {
-    return { token: cookieToken, source: "cookie" } as const;
-  }
-
-  const bearerToken = parseBearerToken(request);
-  if (bearerToken !== null) {
-    return { token: bearerToken, source: "bearer" } as const;
-  }
-
-  const dpopToken = parseDpopToken(request);
-  if (dpopToken !== null) {
-    return { token: dpopToken, source: "dpop" } as const;
-  }
-
-  const legacyToken = legacyCookieName ? request.cookies[legacyCookieName] : undefined;
-  if (legacyToken !== undefined) {
-    return { token: legacyToken, source: "legacy-cookie" } as const;
-  }
-
-  return undefined;
-}
-
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
   const policy = yield* EnvironmentAuthPolicy.EnvironmentAuthPolicy;
   const bootstrapCredentials = yield* PairingGrantStore.PairingGrantStore;
@@ -683,8 +561,6 @@ export const make = Effect.gen(function* () {
   const secretStore = yield* ServerSecretStore.ServerSecretStore;
   const crypto = yield* Crypto.Crypto;
   const descriptor = yield* policy.getDescriptor();
-  const config = yield* ServerConfig.ServerConfig;
-  const devAuth = resolveReusableDevAuth(config);
 
   const authenticateToken = (
     token: string,
@@ -702,8 +578,6 @@ export const make = Effect.gen(function* () {
             )
           : Effect.void,
       ),
-      mapSessionVerificationErrors,
-      Effect.flatMap(rejectMcpClientAudience),
       Effect.map((session) => ({
         sessionId: session.sessionId,
         subject: session.subject,
@@ -712,35 +586,26 @@ export const make = Effect.gen(function* () {
         ...(session.proofKeyThumbprint ? { proofKeyThumbprint: session.proofKeyThumbprint } : {}),
         ...(session.expiresAt ? { expiresAt: session.expiresAt } : {}),
       })),
+      mapSessionVerificationErrors,
     );
 
   const authenticateRequest = (
     request: HttpServerRequest.HttpServerRequest,
   ): Effect.Effect<AuthenticatedSession, ServerAuthCredentialError | ServerAuthInternalError> => {
-    const selectedCredential = selectRequestCredential(
-      request,
-      sessions.cookieName,
-      sessions.legacyCookieName,
-    );
+    const cookieToken = request.cookies[sessions.cookieName];
+    const bearerToken = parseBearerToken(request);
     const dpopToken = parseDpopToken(request);
-    const hasAuthorization = request.headers.authorization !== undefined;
-    const devCookieToken = devAuth ? request.cookies[devAuth.cookieName] : undefined;
-    const credential =
-      selectedCredential ??
-      (!hasAuthorization && devCookieToken !== undefined
-        ? { token: devCookieToken, source: "dev-cookie" as const }
-        : undefined);
-    if (!credential?.token) {
+    const credential = cookieToken ?? bearerToken ?? dpopToken;
+    if (!credential) {
       return Effect.fail(new ServerAuthMissingCredentialError({}));
     }
-    return authenticateToken(credential.token).pipe(
+    return authenticateToken(credential).pipe(
       Effect.flatMap((session) => {
         if (session.proofKeyThumbprint) {
-          if (!dpopToken || dpopToken !== credential.token) {
+          if (!dpopToken || dpopToken !== credential) {
             return Effect.fail(
               new ServerAuthInvalidCredentialError({
                 diagnostic: "DPoP-bound access token requires DPoP authorization.",
-                dpopFailureReason: "invalid_proof",
               }),
             );
           }
@@ -758,7 +623,6 @@ export const make = Effect.gen(function* () {
           return Effect.fail(
             new ServerAuthInvalidCredentialError({
               diagnostic: "DPoP authorization requires a proof-bound access token.",
-              dpopFailureReason: "invalid_proof",
             }),
           );
         }
@@ -774,7 +638,7 @@ export const make = Effect.gen(function* () {
           ({
             authenticated: true,
             auth: descriptor,
-            ...authScopeResponse(session.scopes),
+            scopes: session.scopes,
             sessionMethod: session.method,
             ...(session.expiresAt ? { expiresAt: DateTime.toUtc(session.expiresAt) } : {}),
           }) satisfies AuthSessionState,
@@ -788,121 +652,50 @@ export const make = Effect.gen(function* () {
       Effect.withSpan("EnvironmentAuth.getSessionState"),
     );
 
-  const createBrowserSession: EnvironmentAuth["Service"]["createBrowserSession"] = Effect.fn(
-    "EnvironmentAuth.createBrowserSession",
-  )(function* (credential, requestMetadata, previousSessionToken) {
-    if (devAuth?.matches(credential)) {
-      return yield* sessions.verify(credential).pipe(
-        mapSessionVerificationErrors,
-        Effect.flatMap((session) =>
-          DateTime.now.pipe(
-            Effect.map(
-              (now) =>
-                ({
-                  response: {
-                    authenticated: true,
-                    ...authScopeResponse(session.scopes),
-                    sessionMethod: session.method,
-                    expiresAt: DateTime.toUtc(DateTime.add(now, { days: 30 })),
-                  } satisfies AuthBrowserSessionResult,
-                  sessionToken: credential,
-                  cookieName: devAuth.cookieName,
-                  expireNormalCookie: true,
-                }) satisfies BootstrapExchangeResult,
-            ),
+  const createBrowserSession: EnvironmentAuth["Service"]["createBrowserSession"] = (
+    credential,
+    requestMetadata,
+  ) =>
+    bootstrapCredentials.consume(credential).pipe(
+      Effect.mapError(toBootstrapExchangeError),
+      Effect.flatMap((grant) =>
+        sessions
+          .issue({
+            method: "browser-session-cookie",
+            subject: grant.subject,
+            scopes: grant.scopes,
+            client: {
+              ...requestMetadata,
+              ...(grant.label ? { label: grant.label } : {}),
+            },
+          })
+          .pipe(
+            Effect.mapError((cause) => new ServerAuthAuthenticatedSessionIssueError({ cause })),
           ),
-        ),
-        Effect.withSpan("EnvironmentAuth.createBrowserSession"),
-      );
-    }
-    const previousSession =
-      previousSessionToken === undefined
-        ? undefined
-        : yield* sessions.verify(previousSessionToken).pipe(
-            Effect.catchIf(SessionStore.isSessionCredentialInvalidError, () => Effect.void),
-            Effect.mapError((cause) => new ServerAuthSessionCredentialValidationError({ cause })),
-          );
-    const grant = yield* bootstrapCredentials
-      .consume(credential)
-      .pipe(Effect.mapError(toBootstrapExchangeError));
-    const session = yield* sessions
-      .issue({
-        method: "browser-session-cookie",
-        subject: grant.subject,
-        scopes: grant.scopes,
-        ...(previousSession?.method === "browser-session-cookie"
-          ? { replaceSessionId: previousSession.sessionId }
-          : {}),
-        client: {
-          ...requestMetadata,
-          ...(grant.label ? { label: grant.label } : {}),
-        },
-      })
-      .pipe(Effect.mapError((cause) => new ServerAuthAuthenticatedSessionIssueError({ cause })));
-    return {
-      response: {
-        authenticated: true,
-        ...authScopeResponse(session.scopes),
-        sessionMethod: session.method,
-        expiresAt: DateTime.toUtc(session.expiresAt),
-      } satisfies AuthBrowserSessionResult,
-      sessionToken: session.token,
-    } satisfies BootstrapExchangeResult;
-  });
-
-  type ResolvedBootstrapGrant = Pick<
-    PairingGrantStore.BootstrapGrant,
-    "scopes" | "subject" | "label"
-  > & {
-    readonly method: PairingGrantStore.BootstrapGrant["method"] | "reusable-dev-token";
-  };
-  const resolveBootstrapGrant = (
-    credential: string,
-    input?: {
-      readonly proofKeyThumbprint?: string;
-      readonly requestedScopes?: ReadonlyArray<AuthEnvironmentScope>;
-    },
-  ): Effect.Effect<
-    ResolvedBootstrapGrant,
-    ServerAuthInvalidCredentialError | ServerAuthInternalError | ServerAuthScopeNotGrantedError
-  > => {
-    if (!devAuth?.matches(credential)) {
-      return bootstrapCredentials
-        .consume(credential, input)
-        .pipe(
-          Effect.mapError((cause) =>
-            cause._tag === "BootstrapCredentialScopeNotGrantedError"
-              ? new ServerAuthScopeNotGrantedError({})
-              : toBootstrapExchangeError(cause),
-          ),
-        );
-    }
-    return sessions.verify(credential).pipe(
-      mapSessionVerificationErrors,
+      ),
       Effect.map(
         (session) =>
           ({
-            method: "reusable-dev-token",
-            scopes: session.scopes,
-            subject: "reusable-dev-token-child",
-          }) satisfies ResolvedBootstrapGrant,
+            response: {
+              authenticated: true,
+              scopes: session.scopes,
+              sessionMethod: session.method,
+              expiresAt: DateTime.toUtc(session.expiresAt),
+            } satisfies AuthBrowserSessionResult,
+            sessionToken: session.token,
+          }) satisfies BootstrapExchangeResult,
       ),
+      Effect.withSpan("EnvironmentAuth.createBrowserSession"),
     );
-  };
 
   const exchangeBootstrapCredentialForAccessToken: EnvironmentAuth["Service"]["exchangeBootstrapCredentialForAccessToken"] =
-    (credential, requestedScopes, requestMetadata, input) => {
-      return resolveBootstrapGrant(credential, {
-        ...input,
-        ...(requestedScopes !== undefined ? { requestedScopes } : {}),
-      }).pipe(
+    (credential, requestedScopes, requestMetadata, input) =>
+      bootstrapCredentials.consume(credential, input).pipe(
+        Effect.mapError(toBootstrapExchangeError),
         Effect.flatMap((grant) =>
           Effect.gen(function* () {
-            const grantedScopes =
-              requestedScopes === undefined
-                ? grant.scopes
-                : [...new Set(requestedScopes)].filter((scope) => grant.scopes.includes(scope));
-            if (grantedScopes.length === 0) {
+            const grantedScopes = requestedScopes ?? grant.scopes;
+            if (!grantedScopes.every((scope) => grant.scopes.includes(scope))) {
               return yield* new ServerAuthScopeNotGrantedError({});
             }
             return yield* sessions
@@ -916,9 +709,6 @@ export const make = Effect.gen(function* () {
                       ttl: Duration.hours(1),
                     }
                   : {}),
-                // Desktop restarts forget the previous bearer token. Replace
-                // its session, including stale entries left by older versions.
-                replaceActiveForSubjectAndMethod: grant.method === "desktop-bootstrap",
                 client: {
                   ...requestMetadata,
                   ...(grant.label ? { label: grant.label } : {}),
@@ -952,7 +742,6 @@ export const make = Effect.gen(function* () {
         ),
         Effect.withSpan("EnvironmentAuth.exchangeBootstrapCredentialForAccessToken"),
       );
-    };
 
   const issuePairingCredentialForSubject = (input: {
     readonly scopes: ReadonlyArray<AuthEnvironmentScope>;
@@ -1011,7 +800,6 @@ export const make = Effect.gen(function* () {
         ];
         return pairingLinks
           .filter((pairingLink) => !excludedSubjects.includes(pairingLink.subject))
-          .map((link) => ({ ...link, ...authScopeResponse(link.scopes) }))
           .toSorted(
             (left, right) => right.createdAt.epochMilliseconds - left.createdAt.epochMilliseconds,
           );
@@ -1084,42 +872,22 @@ export const make = Effect.gen(function* () {
     }).pipe(Effect.withSpan("EnvironmentAuth.issuePairingCredential"));
 
   const issueStartupPairingCredential: EnvironmentAuth["Service"]["issueStartupPairingCredential"] =
-    () => {
-      const fallback = issuePairingCredentialForSubject({
+    () =>
+      issuePairingCredentialForSubject({
         scopes: AuthAdministrativeScopes,
         subject: INTERNAL_ADMINISTRATIVE_BOOTSTRAP_SUBJECT,
         purpose: "startup",
-      });
-      if (!devAuth) {
-        return fallback.pipe(Effect.withSpan("EnvironmentAuth.issueStartupPairingCredential"));
-      }
-      return sessions.verify(devAuth.credential).pipe(
-        Effect.map(
-          (session) =>
-            ({
-              id: session.sessionId,
-              credential: devAuth.credential,
-              label: "Reusable dev token",
-              expiresAt: DateTime.toUtc(session.expiresAt ?? REUSABLE_DEV_SESSION_EXPIRES_AT),
-            }) satisfies AuthPairingCredentialResult,
-        ),
-        Effect.catch((cause) =>
-          SessionStore.isSessionCredentialInvalidError(cause)
-            ? fallback
-            : Effect.fail(new ServerAuthPairingLinkCreationError({ cause })),
-        ),
-        Effect.withSpan("EnvironmentAuth.issueStartupPairingCredential"),
-      );
-    };
+      }).pipe(Effect.withSpan("EnvironmentAuth.issueStartupPairingCredential"));
 
   const listClientSessions: EnvironmentAuth["Service"]["listClientSessions"] = (currentSessionId) =>
     listSessions().pipe(
       Effect.map((clientSessions) =>
-        clientSessions.map((clientSession): AuthClientSession => ({
-          ...clientSession,
-          ...authScopeResponse(clientSession.scopes),
-          current: clientSession.sessionId === currentSessionId,
-        })),
+        clientSessions.map(
+          (clientSession): AuthClientSession => ({
+            ...clientSession,
+            current: clientSession.sessionId === currentSessionId,
+          }),
+        ),
       ),
       Effect.withSpan("EnvironmentAuth.listClientSessions"),
     );
@@ -1177,8 +945,6 @@ export const make = Effect.gen(function* () {
         const websocketTicket = requestUrl.value.searchParams.get(WEBSOCKET_TICKET_QUERY_PARAM);
         if (websocketTicket && websocketTicket.trim().length > 0) {
           return yield* sessions.verifyWebSocketToken(websocketTicket).pipe(
-            mapSessionVerificationErrors,
-            Effect.flatMap(rejectMcpClientAudience),
             Effect.map((session) => ({
               sessionId: session.sessionId,
               subject: session.subject,
@@ -1186,91 +952,13 @@ export const make = Effect.gen(function* () {
               scopes: session.scopes,
               ...(session.expiresAt ? { expiresAt: session.expiresAt } : {}),
             })),
+            mapSessionVerificationErrors,
           );
         }
       }
 
       return yield* authenticateRequest(request);
     });
-
-  const authenticateMcpClient: EnvironmentAuth["Service"]["authenticateMcpClient"] = (request) => {
-    const token = parseBearerToken(request);
-    if (token === null) return Effect.fail(new ServerAuthMissingCredentialError({}));
-    return sessions.verify(token).pipe(
-      mapSessionVerificationErrors,
-      Effect.flatMap((session) =>
-        session.subject === MCP_CLIENT_SUBJECT && session.method === "bearer-access-token"
-          ? Effect.succeed({
-              sessionId: session.sessionId,
-              label: session.client.label ?? "MCP client",
-              access: session.scopes.includes(AuthOrchestrationOperateScope)
-                ? (session.runtimeModeCeiling ?? "approval-required")
-                : "read-only",
-            } satisfies McpClientSession)
-          : Effect.fail(
-              new ServerAuthInvalidCredentialError({
-                diagnostic: "Only MCP client sessions are accepted here.",
-              }),
-            ),
-      ),
-      Effect.withSpan("EnvironmentAuth.authenticateMcpClient"),
-    );
-  };
-
-  const issueMcpClientSession: EnvironmentAuth["Service"]["issueMcpClientSession"] = (input) =>
-    sessions
-      .issue({
-        subject: MCP_CLIENT_SUBJECT,
-        method: "bearer-access-token",
-        scopes: mcpClientScopes(input.access),
-        ttl: MCP_CLIENT_SESSION_TTL,
-        ...(input.access === "read-only" ? {} : { runtimeModeCeiling: input.access }),
-        client: { ...input.client, label: input.label, deviceType: "bot" },
-      })
-      .pipe(
-        Effect.map((issued) => ({ token: issued.token, expiresAt: issued.expiresAt })),
-        Effect.mapError((cause) => new ServerAuthSessionTokenIssueError({ cause })),
-        Effect.withSpan("EnvironmentAuth.issueMcpClientSession"),
-      );
-
-  const authenticateBrowserSession: EnvironmentAuth["Service"]["authenticateBrowserSession"] = (
-    request,
-  ) => {
-    const token =
-      request.cookies[sessions.cookieName] ??
-      (sessions.legacyCookieName ? request.cookies[sessions.legacyCookieName] : undefined) ??
-      (devAuth ? request.cookies[devAuth.cookieName] : undefined);
-    if (!token) return Effect.fail(new ServerAuthMissingCredentialError({}));
-    return authenticateToken(token).pipe(
-      Effect.filterOrFail(
-        (session) => session.method === "browser-session-cookie" && !session.proofKeyThumbprint,
-        () => new ServerAuthInvalidCredentialError({ diagnostic: "Not a browser session." }),
-      ),
-      Effect.withSpan("EnvironmentAuth.authenticateBrowserSession"),
-    );
-  };
-
-  const consumeMcpApprovalCode: EnvironmentAuth["Service"]["consumeMcpApprovalCode"] = (
-    code,
-    access,
-  ) =>
-    // No proof key: a code bound to a T3 Connect client's key fails without being spent.
-    resolveBootstrapGrant(code.trim()).pipe(
-      Effect.catchTags({
-        ServerAuthInvalidCredentialError: () =>
-          Effect.fail(new ServerAuthMcpApprovalCodeError({ reason: "unknown_or_used" })),
-        ServerAuthScopeNotGrantedError: () =>
-          Effect.fail(new ServerAuthMcpApprovalCodeError({ reason: "insufficient_scope" })),
-      }),
-      Effect.flatMap((grant) =>
-        grant.method !== "one-time-token" && grant.method !== "reusable-dev-token"
-          ? Effect.fail(new ServerAuthMcpApprovalCodeError({ reason: "not_a_pairing_code" }))
-          : mcpClientScopes(access).every((scope) => grant.scopes.includes(scope))
-            ? Effect.void
-            : Effect.fail(new ServerAuthMcpApprovalCodeError({ reason: "insufficient_scope" })),
-      ),
-      Effect.withSpan("EnvironmentAuth.consumeMcpApprovalCode"),
-    );
 
   return EnvironmentAuth.of({
     getDescriptor: () =>
@@ -1294,10 +982,6 @@ export const make = Effect.gen(function* () {
     authenticateWebSocketUpgrade,
     issueWebSocketTicket,
     issueStartupPairingUrl,
-    authenticateMcpClient,
-    issueMcpClientSession,
-    consumeMcpApprovalCode,
-    authenticateBrowserSession,
   });
 });
 
@@ -1307,9 +991,6 @@ export const layer = Layer.effect(EnvironmentAuth, make).pipe(
   Layer.provideMerge(EnvironmentAuthPolicy.layer),
 );
 
-const layerStorage = Layer.mergeAll(ServerSecretStore.layer, SqlitePersistence.layerConfig);
+export const storageLayer = Layer.mergeAll(ServerSecretStore.layer, SqlitePersistenceLayer);
 
-export const layerRuntime = layer.pipe(
-  Layer.provideMerge(layerStorage),
-  Layer.provideMerge(ServerEnvironment.layerIdentity),
-);
+export const runtimeLayer = layer.pipe(Layer.provideMerge(storageLayer));

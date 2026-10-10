@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.GetPersonalizedRankingHttp)`.
  *
- * ### Serving Recommendations
- * **Example:** Rank Items for a User
+ * @binding
+ * @section Serving Recommendations
+ * @example Rank Items for a User
  * ```typescript
  * // init
  * const getPersonalizedRanking = yield* Personalize.GetPersonalizedRanking();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   inputList: ["item-1", "item-2", "item-3"],
  * });
  * ```
- *
- * @binding
  */
 export interface GetPersonalizedRanking extends Binding.Service<
   GetPersonalizedRanking,

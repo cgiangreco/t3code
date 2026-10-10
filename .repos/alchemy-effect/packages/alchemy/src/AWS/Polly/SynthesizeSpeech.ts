@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * of the encoded audio (raw distilled types, no marshalling). Provide the
  * implementation with `Effect.provide(AWS.Polly.SynthesizeSpeechHttp)`.
  *
- * ### Synthesizing Speech
- * **Example:** Synthesize Text to MP3 Bytes
+ * @binding
+ * @section Synthesizing Speech
+ * @example Synthesize Text to MP3 Bytes
  * ```typescript
  * // init
  * const synthesizeSpeech = yield* AWS.Polly.SynthesizeSpeech();
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const chunks = yield* Stream.runCollect(result.AudioStream!);
  * ```
- *
- * @binding
  */
 export interface SynthesizeSpeech extends Binding.Service<
   SynthesizeSpeech,

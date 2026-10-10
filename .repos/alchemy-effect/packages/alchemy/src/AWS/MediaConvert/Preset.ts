@@ -55,8 +55,9 @@ export interface Preset extends Resource<
  * output settings (container, video codec/resolution/bitrate, audio, and
  * captions) that job templates and jobs reference to produce one output.
  *
- * ### Creating a Preset
- * **Example:** MP4 / H.264 Preset
+ * @resource
+ * @section Creating a Preset
+ * @example MP4 / H.264 Preset
  * ```typescript
  * const preset = yield* MediaConvert.Preset("Mp4", {
  *   description: "1080p H.264 MP4",
@@ -85,8 +86,6 @@ export interface Preset extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Preset = Resource<Preset>("AWS.MediaConvert.Preset");
 

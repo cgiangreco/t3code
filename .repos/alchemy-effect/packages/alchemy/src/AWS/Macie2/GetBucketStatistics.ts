@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.GetBucketStatisticsHttp)`.
- * ### S3 Bucket Inventory
- * **Example:** Aggregate Bucket Statistics
+ * @binding
+ * @section S3 Bucket Inventory
+ * @example Aggregate Bucket Statistics
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getBucketStatistics = yield* AWS.Macie2.GetBucketStatistics();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { bucketCount } = yield* getBucketStatistics({});
  * ```
- *
- * @binding
  */
 export interface GetBucketStatistics extends Binding.Service<
   GetBucketStatistics,

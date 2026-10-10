@@ -71,8 +71,11 @@ export type RegionalHostname = Resource<
  *
  * Requires the Data Localization Suite (or Enterprise) entitlement on the
  * zone.
- * ### Regionalizing a Hostname
- * **Example:** Pin a hostname to the EU
+ * @resource
+ * @product Regional Hostnames
+ * @category Domains & DNS
+ * @section Regionalizing a Hostname
+ * @example Pin a hostname to the EU
  * ```typescript
  * const regional = yield* Cloudflare.RegionalHostname.RegionalHostname("eu-only", {
  *   zoneId: zone.zoneId,
@@ -81,7 +84,7 @@ export type RegionalHostname = Resource<
  * });
  * ```
  *
- * **Example:** Move it to the US in place
+ * @example Move it to the US in place
  * ```typescript
  * const regional = yield* Cloudflare.RegionalHostname.RegionalHostname("eu-only", {
  *   zoneId: zone.zoneId,
@@ -91,10 +94,6 @@ export type RegionalHostname = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/data-localization/regional-services/
- *
- * @resource
- * @product Regional Hostnames
- * @category Domains & DNS
  */
 export const RegionalHostname = Resource<RegionalHostname>(TypeId, {
   aliases: ["Cloudflare.RegionalHostname"],
@@ -123,13 +122,15 @@ export const RegionalHostnameProvider = () =>
             Stream.runCollect,
             Effect.map((chunk) =>
               Array.from(chunk).flatMap((page) =>
-                (page.result ?? []).map((item): Attributes => ({
-                  zoneId: zone.id,
-                  hostname: item.hostname,
-                  regionKey: item.regionKey,
-                  routing: item.routing ?? undefined,
-                  createdOn: item.createdOn,
-                })),
+                (page.result ?? []).map(
+                  (item): Attributes => ({
+                    zoneId: zone.id,
+                    hostname: item.hostname,
+                    regionKey: item.regionKey,
+                    routing: item.routing ?? undefined,
+                    createdOn: item.createdOn,
+                  }),
+                ),
               ),
             ),
             // Plan-gated zones (no Data Localization Suite entitlement)

@@ -14,8 +14,9 @@ export interface CancelSubscriptionRequest extends Omit<
  * Cancels a subscription in the bound domain. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.CancelSubscriptionHttp)`.
- * ### Subscription Workflows
- * **Example:** Cancel a Subscription
+ * @binding
+ * @section Subscription Workflows
+ * @example Cancel a Subscription
  * ```typescript
  * // init — bind the operation to the domain
  * const cancelSubscription = yield* AWS.DataZone.CancelSubscription(domain);
@@ -23,8 +24,6 @@ export interface CancelSubscriptionRequest extends Omit<
  * // runtime
  * yield* cancelSubscription({ identifier: subscriptionId });
  * ```
- *
- * @binding
  */
 export interface CancelSubscription extends Binding.Service<
   CancelSubscription,

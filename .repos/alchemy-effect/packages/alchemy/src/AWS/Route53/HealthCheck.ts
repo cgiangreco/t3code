@@ -110,8 +110,9 @@ export interface HealthCheck extends Resource<
  *
  * `HealthCheck` monitors the health of an endpoint and can gate failover and
  * other routing policies on a `Record` via `record.healthCheckId`.
- * ### Creating a Health Check
- * **Example:** HTTP Health Check
+ * @resource
+ * @section Creating a Health Check
+ * @example HTTP Health Check
  * ```typescript
  * const check = yield* HealthCheck("ApiHealth", {
  *   type: "HTTP",
@@ -123,8 +124,8 @@ export interface HealthCheck extends Resource<
  * });
  * ```
  *
- * ### Gating DNS Failover
- * **Example:** Fail Over a Record When the Check Fails
+ * @section Gating DNS Failover
+ * @example Fail Over a Record When the Check Fails
  * ```typescript
  * const check = yield* HealthCheck("PrimaryHealth", {
  *   type: "HTTPS",
@@ -145,8 +146,6 @@ export interface HealthCheck extends Resource<
  *   healthCheckId: check.id,
  * });
  * ```
- *
- * @resource
  */
 export const HealthCheck = Resource<HealthCheck>("AWS.Route53.HealthCheck");
 

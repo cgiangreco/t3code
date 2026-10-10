@@ -21,8 +21,9 @@ export interface ListKnowledgeBaseDocumentsRequest extends Omit<
  * The binding grants the function `bedrock:ListKnowledgeBaseDocuments`
  * scoped to the data source's parent knowledge base.
  *
- * ### Direct Document Ingestion
- * **Example:** List Tracked Documents
+ * @binding
+ * @section Direct Document Ingestion
+ * @example List Tracked Documents
  * ```typescript
  * // init
  * const listDocuments = yield* Bedrock.ListKnowledgeBaseDocuments(dataSource);
@@ -30,8 +31,6 @@ export interface ListKnowledgeBaseDocumentsRequest extends Omit<
  * // runtime
  * const { documentDetails } = yield* listDocuments({ maxResults: 25 });
  * ```
- *
- * @binding
  */
 export interface ListKnowledgeBaseDocuments extends Binding.Service<
   ListKnowledgeBaseDocuments,

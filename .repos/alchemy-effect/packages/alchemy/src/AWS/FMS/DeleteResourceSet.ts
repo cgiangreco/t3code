@@ -13,8 +13,9 @@ export interface DeleteResourceSetRequest
  *
  * Permanently deletes the specified Firewall Manager resource set. Provide the
  * implementation with `Effect.provide(AWS.FMS.DeleteResourceSetHttp)`.
- * ### Resource Sets
- * **Example:** Delete a Resource Set
+ * @binding
+ * @section Resource Sets
+ * @example Delete a Resource Set
  * ```typescript
  * // init — account-level binding takes no resource
  * const deleteResourceSet = yield* AWS.FMS.DeleteResourceSet();
@@ -22,8 +23,6 @@ export interface DeleteResourceSetRequest
  * // runtime
  * yield* deleteResourceSet({ Identifier: resourceSetId });
  * ```
- *
- * @binding
  */
 export interface DeleteResourceSet extends Binding.Service<
   DeleteResourceSet,

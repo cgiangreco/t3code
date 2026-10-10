@@ -19,15 +19,14 @@ export interface BatchDeleteDocumentRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.BatchDeleteDocumentHttp)`.
  *
- * ### Document Ingestion
- * **Example:** Delete Documents from an Index
+ * @binding
+ * @section Document Ingestion
+ * @example Delete Documents from an Index
  * ```typescript
  * const deleteDocuments = yield* AWS.QBusiness.BatchDeleteDocument(index);
  *
  * yield* deleteDocuments({ documents: [{ documentId: "welcome" }] });
  * ```
- *
- * @binding
  */
 export interface BatchDeleteDocument extends Binding.Service<
   BatchDeleteDocument,

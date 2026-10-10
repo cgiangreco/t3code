@@ -14,8 +14,8 @@
         packages = with pkgs; [
           bun
           deno
-          nodejs_latest
-          pnpm
+          (corepack.override {nodejs-slim = nodejs-slim_26;})
+          nodejs_26
           python3
         ];
       };

@@ -36,7 +36,7 @@ test.provider(
     Effect.gen(function* () {
       yield* stack.destroy();
 
-      const imageId = amazonLinux2023();
+      const imageId = (yield* amazonLinux2023()) ?? "ami-00000000000000000";
 
       const deployed = yield* stack.deploy(
         Effect.gen(function* () {
@@ -134,7 +134,7 @@ test.provider(
       yield* assertVolumeGone(volume.volumeId);
       yield* assertEniGone(eni.networkInterfaceId);
     }).pipe(logLevel),
-  { tags: ["provider:aws", "provider:aws:ec2", "live"], timeout: 240_000 },
+  { timeout: 240_000 },
 );
 
 const assertVolumeGone = Effect.fn(function* (volumeId: string) {

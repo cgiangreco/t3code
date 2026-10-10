@@ -14,8 +14,9 @@ export interface GetAttributesRequest extends Omit<
  *
  * Bind this operation to a {@link Domain} inside a function runtime to get a
  * callable that automatically injects the domain name.
- * ### Reading Items
- * **Example:** Read an Item's Attributes
+ * @binding
+ * @section Reading Items
+ * @example Read an Item's Attributes
  * ```typescript
  * const getAttributes = yield* AWS.SimpleDB.GetAttributes(domain);
  *
@@ -25,8 +26,6 @@ export interface GetAttributesRequest extends Omit<
  * });
  * // response.Attributes: [{ Name: "email", Value: "a@b.com" }, ...]
  * ```
- *
- * @binding
  */
 export interface GetAttributes extends Binding.Service<
   GetAttributes,

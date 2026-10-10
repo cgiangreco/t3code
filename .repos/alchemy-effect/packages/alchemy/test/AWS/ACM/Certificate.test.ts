@@ -56,10 +56,7 @@ test.provider.skipIf(!!process.env.FAST)(
 
       yield* stack.destroy();
     }),
-  {
-    tags: ["provider:aws", "provider:aws:acm", "provider:aws:route53", "live"],
-    timeout: 180_000,
-  },
+  { timeout: 180_000 },
 );
 
 // Canonical `list()` test (AWS account/region-scoped collection): request a
@@ -109,7 +106,7 @@ test.provider.skipIf(!!process.env.FAST)(
 
       yield* stack.destroy();
     }),
-  { tags: ["provider:aws", "provider:aws:acm", "live"], timeout: 120_000 },
+  { timeout: 120_000 },
 );
 
 class CertificateNotListed extends Data.TaggedError("CertificateNotListed") {}
@@ -143,7 +140,7 @@ test.provider.skipIf(!!process.env.FAST)(
 
       yield* stack.destroy();
     }),
-  { tags: ["provider:aws", "provider:aws:acm", "live"], timeout: 180_000 },
+  { timeout: 180_000 },
 );
 
 // Regression test for https://github.com/alchemy-run/alchemy/issues/736.
@@ -221,7 +218,7 @@ test.provider.skipIf(!!process.env.FAST)(
       // interrupted deploy leaves behind: `creating`, no attributes, and the
       // props lost in the Output round-trip.
       const state = yield* yield* State;
-      const stage = stack.stage;
+      const stage = "test"; // scratch stacks default to the "test" stage
       const fqns = yield* state.list({ stack: stack.name, stage });
       const rows = yield* Effect.forEach(fqns, (fqn) =>
         state
@@ -265,5 +262,5 @@ test.provider.skipIf(!!process.env.FAST)(
 
       yield* stack.destroy();
     }),
-  { tags: ["provider:aws", "provider:aws:acm", "live"], timeout: 240_000 },
+  { timeout: 240_000 },
 );

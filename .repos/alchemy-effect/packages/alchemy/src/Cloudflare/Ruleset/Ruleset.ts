@@ -78,8 +78,11 @@ export type Ruleset = Resource<
  *
  * This resource owns the entire ruleset for a phase entrypoint. Rules managed
  * elsewhere in the same phase can be overwritten on deploy.
- * ### WAF Rules
- * **Example:** Block probes in the custom firewall phase
+ * @resource
+ * @product Rulesets
+ * @category Rules & Configuration
+ * @section WAF Rules
+ * @example Block probes in the custom firewall phase
  * ```typescript
  * const zone = yield* Cloudflare.Zone.Zone("MyZone", { name: "example.com" });
  * const waf = yield* Cloudflare.Ruleset.Ruleset("WafRules", {
@@ -94,10 +97,6 @@ export type Ruleset = Resource<
  *   ],
  * });
  * ```
- *
- * @resource
- * @product Rulesets
- * @category Rules & Configuration
  */
 export const Ruleset = Resource<Ruleset>("Cloudflare.Ruleset.Ruleset", {
   aliases: ["Cloudflare.Ruleset"],
@@ -157,23 +156,13 @@ export const RulesetProvider = () =>
       return toRulesetAttributes(zoneId, ruleset);
     }),
     delete: Effect.fn(function* ({ olds, output }) {
-      // This resource owns the entire phase entrypoint, so destroy removes
-      // the entrypoint ruleset itself (emptying the rules would leave an
-      // inert-but-listed entrypoint behind on the zone forever). Observe
-      // first so the delete is idempotent and never acts on a stale id.
-      const entrypoint = yield* rulesets
-        .getPhasForZone({
-          zoneId: output.zoneId,
-          rulesetPhase: output.phase ?? olds.phase,
-        })
-        .pipe(
-          Effect.catchTag("RulesetNotFound", () => Effect.succeed(undefined)),
-        );
-      if (entrypoint === undefined) return;
       yield* rulesets
-        .deleteRulesetForZone({
+        .putPhasForZone({
           zoneId: output.zoneId,
-          rulesetId: entrypoint.id,
+          rulesetPhase: olds.phase,
+          name: output.name,
+          description: output.description,
+          rules: [],
         })
         .pipe(Effect.catchTag("RulesetNotFound", () => Effect.void));
     }),
@@ -232,11 +221,7 @@ export const RulesetProvider = () =>
             ),
             Effect.map((items) =>
               items.filter(
-                (item): item is Ruleset["Attributes"] =>
-                  // An entrypoint with zero rules is inert — it's what other
-                  // owners (e.g. Worker redirect cleanup) leave behind after
-                  // removing their rules. Don't surface it as a resource.
-                  item !== undefined && item.rules.length > 0,
+                (item): item is Ruleset["Attributes"] => item !== undefined,
               ),
             ),
             // Plan-gated / partially-provisioned zones reject the route.

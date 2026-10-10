@@ -11,8 +11,9 @@ import type { DBInstance } from "./DBInstance.ts";
  * parameter-group change that requires a restart. The instance identifier
  * is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.DocDB.RebootDBInstanceHttp)`.
- * ### Operating an Instance
- * **Example:** Reboot an Instance
+ * @binding
+ * @section Operating an Instance
+ * @example Reboot an Instance
  * ```typescript
  * // init — bind the operation to the instance
  * const rebootDBInstance = yield* AWS.DocDB.RebootDBInstance(instance);
@@ -20,8 +21,6 @@ import type { DBInstance } from "./DBInstance.ts";
  * // runtime — optionally force a failover during the reboot
  * yield* rebootDBInstance({ ForceFailover: false });
  * ```
- *
- * @binding
  */
 export interface RebootDBInstance extends Binding.Service<
   RebootDBInstance,

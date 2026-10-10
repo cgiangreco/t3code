@@ -20,8 +20,9 @@ export interface RegisterTargetsRequest extends Omit<
  * self-registration data plane for workloads that join a lattice service
  * dynamically. Provide the implementation with
  * `Effect.provide(AWS.VpcLattice.RegisterTargetsHttp)`.
- * ### Managing Targets at Runtime
- * **Example:** Register a target
+ * @binding
+ * @section Managing Targets at Runtime
+ * @example Register a target
  * ```typescript
  * const registerTargets = yield* AWS.VpcLattice.RegisterTargets(targetGroup);
  *
@@ -29,8 +30,6 @@ export interface RegisterTargetsRequest extends Omit<
  *   targets: [{ id: "10.0.1.10", port: 80 }],
  * });
  * ```
- *
- * @binding
  */
 export interface RegisterTargets extends Binding.Service<
   RegisterTargets,

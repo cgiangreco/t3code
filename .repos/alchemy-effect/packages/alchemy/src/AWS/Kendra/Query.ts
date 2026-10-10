@@ -18,8 +18,9 @@ export interface QueryRequest extends Omit<kendra.QueryRequest, "IndexId"> {}
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.QueryHttp)`.
  *
- * ### Querying an Index
- * **Example:** Search an Index
+ * @binding
+ * @section Querying an Index
+ * @example Search an Index
  * ```typescript
  * const query = yield* AWS.Kendra.Query(index);
  *
@@ -28,8 +29,6 @@ export interface QueryRequest extends Omit<kendra.QueryRequest, "IndexId"> {}
  *   console.log(item.Type, item.DocumentTitle?.Text);
  * }
  * ```
- *
- * @binding
  */
 export interface Query extends Binding.Service<
   Query,

@@ -14,14 +14,13 @@ export interface GetInsightsByAssessmentRequest extends Omit<
  *
  * Gets the latest analytics data for the bound assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.GetInsightsByAssessmentHttp)`.
- * ### Insights
- * **Example:** Insights for the Bound Assessment
+ * @binding
+ * @section Insights
+ * @example Insights for the Bound Assessment
  * ```typescript
  * const getInsightsByAssessment = yield* AWS.AuditManager.GetInsightsByAssessment(assessment);
  * const result = yield* getInsightsByAssessment();
  * ```
- *
- * @binding
  */
 export interface GetInsightsByAssessment extends Binding.Service<
   GetInsightsByAssessment,

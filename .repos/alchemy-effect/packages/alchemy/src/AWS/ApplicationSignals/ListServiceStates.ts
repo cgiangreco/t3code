@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * services — visibility into recent changes for troubleshooting and change
  * correlation. Provide the implementation with
  * `Effect.provide(AWS.ApplicationSignals.ListServiceStatesHttp)`.
- * ### Tracking Changes
- * **Example:** List Recent Service States
+ * @binding
+ * @section Tracking Changes
+ * @example List Recent Service States
  * ```typescript
  * // init — account-level, no resource argument
  * const listServiceStates = yield* AWS.ApplicationSignals.ListServiceStates();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   EndTime: new Date(),
  * });
  * ```
- *
- * @binding
  */
 export interface ListServiceStates extends Binding.Service<
   ListServiceStates,

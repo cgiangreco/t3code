@@ -19,8 +19,9 @@ export interface GetMapGlyphsRequest extends Omit<
  * `geo:GetMapGlyphs`), scoped to one {@link LocationMap | Map}. Provide the implementation with
  * `Effect.provide(AWS.Location.GetMapGlyphsHttp)`.
  *
- * ### Serving Map Assets
- * **Example:** Serve Glyphs
+ * @binding
+ * @section Serving Map Assets
+ * @example Serve Glyphs
  * ```typescript
  * const getGlyphs = yield* Location.GetMapGlyphs(map);
  *
@@ -30,8 +31,6 @@ export interface GetMapGlyphsRequest extends Omit<
  * });
  * // glyphs.Blob → protobuf-encoded glyph bytes
  * ```
- *
- * @binding
  */
 export interface GetMapGlyphs extends Binding.Service<
   GetMapGlyphs,

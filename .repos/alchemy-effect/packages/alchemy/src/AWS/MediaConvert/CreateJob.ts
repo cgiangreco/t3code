@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * and grants `mediaconvert:CreateJob` on `*`. Provide the implementation
  * with `Effect.provide(AWS.MediaConvert.CreateJobHttp)`.
  *
- * ### Submitting Jobs
- * **Example:** Transcode an Uploaded File
+ * @binding
+ * @section Submitting Jobs
+ * @example Transcode an Uploaded File
  * ```typescript
  * // init
  * const createJob = yield* AWS.MediaConvert.CreateJob();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *   Settings: { Inputs: [{ FileInput: `s3://${bucket}/${key}` }] },
  * });
  * ```
- *
- * @binding
  */
 export interface CreateJob extends Binding.Service<
   CreateJob,

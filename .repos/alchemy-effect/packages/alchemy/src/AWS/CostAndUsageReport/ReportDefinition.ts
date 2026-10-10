@@ -160,8 +160,9 @@ export interface ReportDefinition extends Resource<
  * Report definitions are free; you pay only for the S3 storage of delivered
  * reports.
  *
- * ### Creating a Report
- * **Example:** Daily CSV report with resource IDs
+ * @resource
+ * @section Creating a Report
+ * @example Daily CSV report with resource IDs
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -194,7 +195,7 @@ export interface ReportDefinition extends Resource<
  * });
  * ```
  *
- * **Example:** Athena-ready Parquet report
+ * @example Athena-ready Parquet report
  * ```typescript
  * const report = yield* AWS.CostAndUsageReport.ReportDefinition("Athena", {
  *   timeUnit: "HOURLY",
@@ -207,8 +208,6 @@ export interface ReportDefinition extends Resource<
  *   s3Region: bucket.region,
  * });
  * ```
- *
- * @resource
  */
 export const ReportDefinition = Resource<ReportDefinition>(
   "AWS.CostAndUsageReport.ReportDefinition",

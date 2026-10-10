@@ -16,8 +16,9 @@ export interface RunMicrovmRequest extends Omit<
  * The response carries the MicroVM `endpoint`; connect to it with an
  * `X-aws-proxy-auth` token from {@link CreateAuthToken}.
  *
- * ### Running MicroVMs
- * **Example:** Run a MicroVM
+ * @binding
+ * @section Running MicroVMs
+ * @example Run a MicroVM
  * ```typescript
  * const runMicrovm = yield* AWS.Lambda.RunMicrovm(Sandbox);
  *
@@ -29,8 +30,6 @@ export interface RunMicrovmRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface RunMicrovm extends Binding.Service<
   RunMicrovm,

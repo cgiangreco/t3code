@@ -13,8 +13,9 @@ import type { User } from "./User.ts";
  * {@link DeleteSshPublicKey}. Importing a key that is already registered
  * fails with the typed `ResourceExistsException`. Provide the
  * implementation with `Effect.provide(AWS.Transfer.ImportSshPublicKeyHttp)`.
- * ### Managing SSH Keys at Runtime
- * **Example:** Rotate a User's Key
+ * @binding
+ * @section Managing SSH Keys at Runtime
+ * @example Rotate a User's Key
  * ```typescript
  * // init — bind the operation to the user
  * const importSshPublicKey = yield* AWS.Transfer.ImportSshPublicKey(user);
@@ -24,8 +25,6 @@ import type { User } from "./User.ts";
  *   SshPublicKeyBody: "ssh-ed25519 AAAA…",
  * });
  * ```
- *
- * @binding
  */
 export interface ImportSshPublicKey extends Binding.Service<
   ImportSshPublicKey,

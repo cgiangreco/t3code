@@ -37,7 +37,7 @@ export class Database extends Context.Service<Database, {
   )
 }
 
-export class DatabaseError extends Schema.TaggedError<DatabaseError>()("DatabaseError", {
+export class DatabaseError extends Schema.TaggedErrorClass<DatabaseError>()("DatabaseError", {
   cause: Schema.Defect()
 }) {}
 

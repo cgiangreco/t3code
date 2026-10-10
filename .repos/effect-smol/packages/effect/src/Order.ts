@@ -31,7 +31,7 @@ import * as Reducer from "./Reducer.ts"
  *
  * **Example** (Defining a custom Order)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const byAge: Order.Order<{ name: string; age: number }> = (self, that) => {
@@ -42,12 +42,12 @@ import * as Reducer from "./Reducer.ts"
  *
  * const person1 = { name: "Alice", age: 30 }
  * const person2 = { name: "Bob", age: 25 }
- * byAge(person1, person2) // => 1
+ * console.log(byAge(person1, person2)) // 1
  * ```
  *
  * @see {@link make} to create an order from a comparison function
  * @see {@link Ordering} for the result type of comparisons
- * @category models
+ * @category type class
  * @since 2.0.0
  */
 export interface Order<in A> {
@@ -66,7 +66,7 @@ export interface Order<in A> {
  * This is type-level only, has no runtime representation, and is used
  * internally by the Effect type system.
  *
- * @category utility types
+ * @category type lambdas
  * @since 2.0.0
  */
 export interface OrderTypeLambda extends TypeLambda {
@@ -90,7 +90,7 @@ export interface OrderTypeLambda extends TypeLambda {
  *
  * **Example** (Creating an Order)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const byAge = Order.make<{ name: string; age: number }>((self, that) => {
@@ -99,8 +99,8 @@ export interface OrderTypeLambda extends TypeLambda {
  *   return 0
  * })
  *
- * byAge({ name: "Alice", age: 30 }, { name: "Bob", age: 25 }) // => 1
- * byAge({ name: "Alice", age: 25 }, { name: "Bob", age: 30 }) // => -1
+ * console.log(byAge({ name: "Alice", age: 30 }, { name: "Bob", age: 25 })) // 1
+ * console.log(byAge({ name: "Alice", age: 25 }, { name: "Bob", age: 30 })) // -1
  * ```
  *
  * @see {@link mapInput} to transform an order by mapping the input type
@@ -128,12 +128,12 @@ export function make<A>(
  *
  * **Example** (Ordering strings)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
- * Order.String("apple", "banana") // => -1
- * Order.String("banana", "apple") // => 1
- * Order.String("apple", "apple") // => 0
+ * console.log(Order.String("apple", "banana")) // -1
+ * console.log(Order.String("banana", "apple")) // 1
+ * console.log(Order.String("apple", "apple")) // 0
  * ```
  *
  * @see {@link mapInput} to compare objects by a string property
@@ -158,15 +158,15 @@ export const String: Order<string> = make((self, that) => self < that ? -1 : 1)
  *
  * **Example** (Ordering numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
- * Order.Number(1, 1) // => 0
- * Order.Number(1, 2) // => -1
- * Order.Number(2, 1) // => 1
+ * console.log(Order.Number(1, 1)) // 0
+ * console.log(Order.Number(1, 2)) // -1
+ * console.log(Order.Number(2, 1)) // 1
  *
- * Order.Number(0, -0) // => 0
- * Order.Number(NaN, 1) // => -1
+ * console.log(Order.Number(0, -0)) // 0
+ * console.log(Order.Number(NaN, 1)) // -1
  * ```
  *
  * @see {@link mapInput} to compare objects by a number property
@@ -194,12 +194,12 @@ export const Number: Order<number> = make((self, that) => {
  *
  * **Example** (Ordering booleans)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
- * Order.Boolean(false, true) // => -1
- * Order.Boolean(true, false) // => 1
- * Order.Boolean(true, true) // => 0
+ * console.log(Order.Boolean(false, true)) // -1
+ * console.log(Order.Boolean(true, false)) // 1
+ * console.log(Order.Boolean(true, true)) // 0
  * ```
  *
  * @see {@link mapInput} to compare objects by a boolean property
@@ -222,12 +222,12 @@ export const Boolean: Order<boolean> = make((self, that) => self < that ? -1 : 1
  *
  * **Example** (Ordering BigInts)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
- * Order.BigInt(1n, 2n) // => -1
- * Order.BigInt(2n, 1n) // => 1
- * Order.BigInt(1n, 1n) // => 0
+ * console.log(Order.BigInt(1n, 2n)) // -1
+ * console.log(Order.BigInt(2n, 1n)) // 1
+ * console.log(Order.BigInt(1n, 1n)) // 0
  * ```
  *
  * @see {@link Number} for regular number comparisons
@@ -252,14 +252,14 @@ export const BigInt: Order<bigint> = make((self, that) => self < that ? -1 : 1)
  *
  * **Example** (Reversing an Order)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const flip = Order.flip(Order.Number)
  *
- * flip(1, 2) // => 1
- * flip(2, 1) // => -1
- * flip(1, 1) // => 0
+ * console.log(flip(1, 2)) // 1
+ * console.log(flip(2, 1)) // -1
+ * console.log(flip(1, 1)) // 0
  * ```
  *
  * @see {@link combine} to combine orders for multi-criteria comparison
@@ -286,7 +286,7 @@ export function flip<A>(O: Order<A>): Order<A> {
  *
  * **Example** (Combining two Orders)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const byAge = Order.mapInput(
@@ -303,8 +303,8 @@ export function flip<A>(O: Order<A>): Order<A> {
  * const person2 = { name: "Bob", age: 30 }
  * const person3 = { name: "Charlie", age: 25 }
  *
- * byAgeAndName(person1, person2) // => -1
- * byAgeAndName(person1, person3) // => 1
+ * console.log(byAgeAndName(person1, person2)) // -1 (Same age, Alice < Bob)
+ * console.log(byAgeAndName(person1, person3)) // 1 (Alice (30) > Charlie (25))
  * ```
  *
  * @see {@link combineAll} to combine multiple orders from a collection
@@ -338,14 +338,14 @@ export const combine: {
  *
  * **Example** (Ordering with an always-equal Order)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const alwaysEqualOrder = Order.alwaysEqual<number>()
  *
- * alwaysEqualOrder(1, 2) // => 0
- * alwaysEqualOrder(2, 1) // => 0
- * alwaysEqualOrder(1, 1) // => 0
+ * console.log(alwaysEqualOrder(1, 2)) // 0
+ * console.log(alwaysEqualOrder(2, 1)) // 0
+ * console.log(alwaysEqualOrder(1, 1)) // 0
  * ```
  *
  * @see {@link combine} to combine with other orders
@@ -368,11 +368,10 @@ export function alwaysEqual<A>(): Order<A> {
  *
  * Applies orders in iteration order and short-circuits on the first non-zero
  * result. It returns `0` only if all orders return `0`.
- * The collection is materialized when the order is created, so it must be finite.
  *
  * **Example** (Combining multiple Orders)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const byAge = Order.mapInput(
@@ -389,7 +388,7 @@ export function alwaysEqual<A>(): Order<A> {
  * const person1 = { name: "Alice", age: 30 }
  * const person2 = { name: "Bob", age: 30 }
  *
- * combinedOrder(person1, person2) // => -1
+ * console.log(combinedOrder(person1, person2)) // -1 (Same age, Alice < Bob)
  * ```
  *
  * @see {@link combine} to combine two orders
@@ -398,10 +397,9 @@ export function alwaysEqual<A>(): Order<A> {
  * @since 2.0.0
  */
 export function combineAll<A>(collection: Iterable<Order<A>>): Order<A> {
-  const orders = Array.from(collection)
   return make((a1, a2) => {
     let out: Ordering = 0
-    for (const O of orders) {
+    for (const O of collection) {
       out = O(a1, a2)
       if (out !== 0) {
         return out
@@ -428,14 +426,14 @@ export function combineAll<A>(collection: Iterable<Order<A>>): Order<A> {
  *
  * **Example** (Mapping Input)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const byLength = Order.mapInput(Order.Number, (s: string) => s.length)
  *
- * byLength("a", "bb") // => -1
- * byLength("bb", "a") // => 1
- * byLength("aa", "bb") // => 0
+ * console.log(byLength("a", "bb")) // -1
+ * console.log(byLength("bb", "a")) // 1
+ * console.log(byLength("aa", "bb")) // 0
  * ```
  *
  * @see {@link combine} to combine mapped orders for multi-criteria comparison
@@ -466,15 +464,15 @@ export const mapInput: {
  *
  * **Example** (Ordering Dates)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const date1 = new Date("2023-01-01")
  * const date2 = new Date("2023-01-02")
  *
- * Order.Date(date1, date2) // => -1
- * Order.Date(date2, date1) // => 1
- * Order.Date(date1, date1) // => 0
+ * console.log(Order.Date(date1, date2)) // -1
+ * console.log(Order.Date(date2, date1)) // 1
+ * console.log(Order.Date(date1, date1)) // 0
  * ```
  *
  * @see {@link mapInput} to compare objects by a date property
@@ -498,14 +496,14 @@ export const Date: Order<Date> = mapInput(Number, (date) => date.getTime())
  *
  * **Example** (Ordering tuples)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const tupleOrder = Order.Tuple([Order.Number, Order.String])
  *
- * tupleOrder([1, "a"], [2, "b"]) // => -1
- * tupleOrder([1, "b"], [1, "a"]) // => 1
- * tupleOrder([1, "a"], [1, "a"]) // => 0
+ * console.log(tupleOrder([1, "a"], [2, "b"])) // -1
+ * console.log(tupleOrder([1, "b"], [1, "a"])) // 1
+ * console.log(tupleOrder([1, "a"], [1, "a"])) // 0
  * ```
  *
  * @see {@link Array} to compare arrays with length consideration
@@ -562,15 +560,15 @@ export {
    *
    * **Example** (Ordering array elements)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import { Order } from "effect"
    *
    * const arrayOrder = Order.Array(Order.Number)
    *
-   * arrayOrder([1, 2], [1, 3]) // => -1
-   * arrayOrder([1, 2], [1, 2, 3]) // => -1
-   * arrayOrder([1, 2, 3], [1, 2]) // => 1
-   * arrayOrder([1, 2], [1, 2]) // => 0
+   * console.log(arrayOrder([1, 2], [1, 3])) // -1
+   * console.log(arrayOrder([1, 2], [1, 2, 3])) // -1 (shorter array is less)
+   * console.log(arrayOrder([1, 2, 3], [1, 2])) // 1 (longer array is greater)
+   * console.log(arrayOrder([1, 2], [1, 2])) // 0
    * ```
    *
    * @see {@link Tuple} for type-safe tuple ordering
@@ -595,7 +593,7 @@ export {
  *
  * **Example** (Ordering structs)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const personOrder = Order.Struct({
@@ -607,9 +605,9 @@ export {
  * const person2 = { name: "Bob", age: 25 }
  * const person3 = { name: "Alice", age: 25 }
  *
- * personOrder(person1, person2) // => -1
- * personOrder(person1, person3) // => 1
- * personOrder(person1, person1) // => 0
+ * console.log(personOrder(person1, person2)) // -1 (Alice < Bob)
+ * console.log(personOrder(person1, person3)) // 1 (same name, 30 > 25)
+ * console.log(personOrder(person1, person1)) // 0
  * ```
  *
  * @see {@link combine} to combine orders manually
@@ -646,14 +644,14 @@ export function Struct<const R extends { readonly [x: string]: Order<any> }>(
  *
  * **Example** (Checking less-than comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const isLessThanNumber = Order.isLessThan(Order.Number)
  *
- * isLessThanNumber(1, 2) // => true
- * isLessThanNumber(2, 1) // => false
- * isLessThanNumber(1, 1) // => false
+ * console.log(isLessThanNumber(1, 2)) // true
+ * console.log(isLessThanNumber(2, 1)) // false
+ * console.log(isLessThanNumber(1, 1)) // false
  * ```
  *
  * @see {@link isLessThanOrEqualTo} for non-strict less than or equal
@@ -680,14 +678,14 @@ export const isLessThan = <A>(O: Order<A>): {
  *
  * **Example** (Checking greater-than comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const isGreaterThanNumber = Order.isGreaterThan(Order.Number)
  *
- * isGreaterThanNumber(2, 1) // => true
- * isGreaterThanNumber(1, 2) // => false
- * isGreaterThanNumber(1, 1) // => false
+ * console.log(isGreaterThanNumber(2, 1)) // true
+ * console.log(isGreaterThanNumber(1, 2)) // false
+ * console.log(isGreaterThanNumber(1, 1)) // false
  * ```
  *
  * @see {@link isGreaterThanOrEqualTo} for non-strict greater than or equal
@@ -714,14 +712,14 @@ export const isGreaterThan = <A>(O: Order<A>): {
  *
  * **Example** (Checking less-than-or-equal comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const isLessThanOrEqualToNumber = Order.isLessThanOrEqualTo(Order.Number)
  *
- * isLessThanOrEqualToNumber(1, 2) // => true
- * isLessThanOrEqualToNumber(1, 1) // => true
- * isLessThanOrEqualToNumber(2, 1) // => false
+ * console.log(isLessThanOrEqualToNumber(1, 2)) // true
+ * console.log(isLessThanOrEqualToNumber(1, 1)) // true
+ * console.log(isLessThanOrEqualToNumber(2, 1)) // false
  * ```
  *
  * @see {@link isLessThan} for strict less than
@@ -749,14 +747,14 @@ export const isLessThanOrEqualTo = <A>(O: Order<A>): {
  *
  * **Example** (Checking greater-than-or-equal comparisons)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const isGreaterThanOrEqualToNumber = Order.isGreaterThanOrEqualTo(Order.Number)
  *
- * isGreaterThanOrEqualToNumber(2, 1) // => true
- * isGreaterThanOrEqualToNumber(1, 1) // => true
- * isGreaterThanOrEqualToNumber(1, 2) // => false
+ * console.log(isGreaterThanOrEqualToNumber(2, 1)) // true
+ * console.log(isGreaterThanOrEqualToNumber(1, 1)) // true
+ * console.log(isGreaterThanOrEqualToNumber(1, 2)) // false
  * ```
  *
  * @see {@link isGreaterThan} for strict greater than
@@ -784,14 +782,14 @@ export const isGreaterThanOrEqualTo = <A>(O: Order<A>): {
  *
  * **Example** (Selecting the minimum value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const minNumber = Order.min(Order.Number)
  *
- * minNumber(1, 2) // => 1
- * minNumber(2, 1) // => 1
- * minNumber(1, 1) // => 1
+ * console.log(minNumber(1, 2)) // 1
+ * console.log(minNumber(2, 1)) // 1
+ * console.log(minNumber(1, 1)) // 1
  * ```
  *
  * @see {@link max} for the maximum of two values
@@ -819,14 +817,14 @@ export const min = <A>(O: Order<A>): {
  *
  * **Example** (Selecting the maximum value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const maxNumber = Order.max(Order.Number)
  *
- * maxNumber(1, 2) // => 2
- * maxNumber(2, 1) // => 2
- * maxNumber(1, 1) // => 1
+ * console.log(maxNumber(1, 2)) // 2
+ * console.log(maxNumber(2, 1)) // 2
+ * console.log(maxNumber(1, 1)) // 1
  * ```
  *
  * @see {@link min} for the minimum of two values
@@ -856,14 +854,14 @@ export const max = <A>(O: Order<A>): {
  *
  * **Example** (Clamping values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const clamp = Order.clamp(Order.Number)({ minimum: 1, maximum: 5 })
  *
- * clamp(3) // => 3
- * clamp(0) // => 1
- * clamp(6) // => 5
+ * console.log(clamp(3)) // 3
+ * console.log(clamp(0)) // 1
+ * console.log(clamp(6)) // 5
  * ```
  *
  * @see {@link min} for the minimum of two values
@@ -907,16 +905,16 @@ export const clamp = <A>(O: Order<A>): {
  *
  * **Example** (Checking ranges)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const betweenNumber = Order.isBetween(Order.Number)
  *
- * betweenNumber(5, { minimum: 1, maximum: 10 }) // => true
- * betweenNumber(1, { minimum: 1, maximum: 10 }) // => true
- * betweenNumber(10, { minimum: 1, maximum: 10 }) // => true
- * betweenNumber(0, { minimum: 1, maximum: 10 }) // => false
- * betweenNumber(11, { minimum: 1, maximum: 10 }) // => false
+ * console.log(betweenNumber(5, { minimum: 1, maximum: 10 })) // true
+ * console.log(betweenNumber(1, { minimum: 1, maximum: 10 })) // true
+ * console.log(betweenNumber(10, { minimum: 1, maximum: 10 })) // true
+ * console.log(betweenNumber(0, { minimum: 1, maximum: 10 })) // false
+ * console.log(betweenNumber(11, { minimum: 1, maximum: 10 })) // false
  * ```
  *
  * @see {@link clamp} to clamp a value to a range
@@ -959,14 +957,14 @@ export const isBetween = <A>(O: Order<A>): {
  *
  * **Example** (Creating a Reducer)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Order } from "effect"
  *
  * const reducer = Order.makeReducer<number>()
  * const orders = [Order.Number, Order.flip(Order.Number)]
  *
  * const combined = reducer.combineAll(orders)
- * combined(1, 2) // => -1
+ * console.log(combined(1, 2)) // -1 (uses first order)
  * ```
  *
  * @see {@link combine} to combine two orders

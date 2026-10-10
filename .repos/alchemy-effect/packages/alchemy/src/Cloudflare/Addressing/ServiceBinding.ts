@@ -68,8 +68,11 @@ export type ServiceBinding = Resource<
  * replacement. Provisioning to the edge is asynchronous: the binding is
  * returned immediately with `provisioning.state: "provisioning"` and flips
  * to `"active"` on Cloudflare's side; the resource does not wait for it.
- * ### Binding a Prefix to a Service
- * **Example:** Bind a /24 to the CDN
+ * @resource
+ * @product Addressing
+ * @category Network
+ * @section Binding a Prefix to a Service
+ * @example Bind a /24 to the CDN
  * ```typescript
  * const binding = yield* Cloudflare.Addressing.ServiceBinding("cdn", {
  *   prefixId: prefix.prefixId,
@@ -79,10 +82,6 @@ export type ServiceBinding = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/byoip/concepts/service-bindings/
- *
- * @resource
- * @product Addressing
- * @category Network
  */
 export const ServiceBinding = Resource<ServiceBinding>(TypeId);
 

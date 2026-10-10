@@ -11,8 +11,9 @@ import type { Workspace } from "./Workspace.ts";
  * `EDITOR`, or `VIEWER` role in the workspace, optionally filtered by user
  * or group id. Provide the implementation with
  * `Effect.provide(AWS.Grafana.ListPermissionsHttp)`.
- * ### Managing Permissions
- * **Example:** List Workspace Role Assignments
+ * @binding
+ * @section Managing Permissions
+ * @example List Workspace Role Assignments
  * ```typescript
  * const listPermissions = yield* Grafana.ListPermissions(workspace);
  *
@@ -21,8 +22,6 @@ import type { Workspace } from "./Workspace.ts";
  *   yield* Effect.logInfo(`${entry.user.id} → ${entry.role}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListPermissions extends Binding.Service<
   ListPermissions,

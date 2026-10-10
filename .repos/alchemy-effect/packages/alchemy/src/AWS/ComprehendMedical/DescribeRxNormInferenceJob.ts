@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * arguments and grants `comprehendmedical:DescribeRxNormInferenceJob` on `*`. Provide the
  * implementation with `Effect.provide(AWS.ComprehendMedical.DescribeRxNormInferenceJobHttp)`.
  *
- * ### Batch RxNorm Inference Jobs
- * **Example:** Poll a Job's Status
+ * @binding
+ * @section Batch RxNorm Inference Jobs
+ * @example Poll a Job's Status
  * ```typescript
  * // init
  * const describeRxNormInferenceJob = yield* AWS.ComprehendMedical.DescribeRxNormInferenceJob();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const status = yield* describeRxNormInferenceJob({ JobId: jobId });
  * console.log(status.ComprehendMedicalAsyncJobProperties?.JobStatus);
  * ```
- *
- * @binding
  */
 export interface DescribeRxNormInferenceJob extends Binding.Service<
   DescribeRxNormInferenceJob,

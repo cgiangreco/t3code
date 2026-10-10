@@ -43,8 +43,9 @@ export interface WriteVectorsClient {
  * pipelines that write embeddings but never query them. Provide the
  * implementation with `Effect.provide(AWS.S3Vectors.VectorsWriteHttp)`.
  *
- * ### Writing Vectors
- * **Example:** Insert Embeddings (write-only)
+ * @binding
+ * @section Writing Vectors
+ * @example Insert Embeddings (write-only)
  * ```typescript
  * // init
  * const vectors = yield* AWS.S3Vectors.VectorsWrite(index);
@@ -54,8 +55,6 @@ export interface WriteVectorsClient {
  *   vectors: [{ key: "doc-1", data: { float32: [0.1, 0.2, 0.3] } }],
  * });
  * ```
- *
- * @binding
  */
 export interface VectorsWrite extends Binding.Service<
   VectorsWrite,

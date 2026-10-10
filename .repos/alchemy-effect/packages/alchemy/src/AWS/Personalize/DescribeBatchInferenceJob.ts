@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.DescribeBatchInferenceJobHttp)`.
  *
- * ### Batch Inference
- * **Example:** Poll a Batch Job
+ * @binding
+ * @section Batch Inference
+ * @example Poll a Batch Job
  * ```typescript
  * // init
  * const describeBatchInferenceJob = yield* Personalize.DescribeBatchInferenceJob();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const done = batchInferenceJob?.status === "ACTIVE";
  * ```
- *
- * @binding
  */
 export interface DescribeBatchInferenceJob extends Binding.Service<
   DescribeBatchInferenceJob,

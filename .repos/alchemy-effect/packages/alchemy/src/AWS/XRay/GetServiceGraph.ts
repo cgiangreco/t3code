@@ -12,8 +12,9 @@ export interface GetServiceGraphRequest extends xray.GetServiceGraphRequest {}
  * provide the implementation with `Effect.provide(XRay.GetServiceGraphHttp)`.
  * The action is account-scoped: X-Ray does not support resource-level
  * permissions for `xray:GetServiceGraph`, so the binding grants it on `*`.
- * ### Service Graphs & Statistics
- * **Example:** Fetch the last 10 minutes of the service graph
+ * @binding
+ * @section Service Graphs & Statistics
+ * @example Fetch the last 10 minutes of the service graph
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -28,8 +29,6 @@ export interface GetServiceGraphRequest extends xray.GetServiceGraphRequest {}
  * });
  * const services = graph.Services ?? [];
  * ```
- *
- * @binding
  */
 export interface GetServiceGraph extends Binding.Service<
   GetServiceGraph,

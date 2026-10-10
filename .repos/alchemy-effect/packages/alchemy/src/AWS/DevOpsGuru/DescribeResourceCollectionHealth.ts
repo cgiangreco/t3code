@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Returns the number of open insights per analyzed CloudFormation stack or app-boundary tag — where the operational pain is concentrated.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.DescribeResourceCollectionHealthHttp)`.
- * ### Coverage Health
- * **Example:** Read Per-Stack Health
+ * @binding
+ * @section Coverage Health
+ * @example Read Per-Stack Health
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeResourceCollectionHealth = yield* AWS.DevOpsGuru.DescribeResourceCollectionHealth();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.log(`${stack.StackName}: ${stack.Insight?.OpenReactiveInsights}`);
  * }
  * ```
- *
- * @binding
  */
 export interface DescribeResourceCollectionHealth extends Binding.Service<
   DescribeResourceCollectionHealth,

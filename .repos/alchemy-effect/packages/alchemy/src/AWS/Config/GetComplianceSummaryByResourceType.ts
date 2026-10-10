@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.GetComplianceSummaryByResourceTypeHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Reading Compliance
- * **Example:** Summarize Resource Compliance
+ * @binding
+ * @section Reading Compliance
+ * @example Summarize Resource Compliance
  * ```typescript
  * // init — grants config:GetComplianceSummaryByResourceType
  * const getComplianceSummaryByResourceType = yield* AWS.Config.GetComplianceSummaryByResourceType();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* getComplianceSummaryByResourceType();
  * console.log(result.ComplianceSummariesByResourceType);
  * ```
- *
- * @binding
  */
 export interface GetComplianceSummaryByResourceType extends Binding.Service<
   GetComplianceSummaryByResourceType,

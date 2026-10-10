@@ -10,15 +10,14 @@ import * as Binding from "../../Binding.ts";
  * removing it from any RAM resource shares); clusters already created from
  * the backup are unaffected. Provide the implementation with
  * `Effect.provide(AWS.CloudHSMV2.DeleteResourcePolicyHttp)`.
- * ### Sharing Backups
- * **Example:** Unshare A Backup
+ * @binding
+ * @section Sharing Backups
+ * @example Unshare A Backup
  * ```typescript
  * const deleteResourcePolicy = yield* AWS.CloudHSMV2.DeleteResourcePolicy();
  *
  * yield* deleteResourcePolicy({ ResourceArn: backupArn });
  * ```
- *
- * @binding
  */
 export interface DeleteResourcePolicy extends Binding.Service<
   DeleteResourcePolicy,

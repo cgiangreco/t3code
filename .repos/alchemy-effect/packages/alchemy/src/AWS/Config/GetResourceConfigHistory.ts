@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.GetResourceConfigHistoryHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Reading Resource Configurations
- * **Example:** Read a Resource's Configuration History
+ * @binding
+ * @section Reading Resource Configurations
+ * @example Read a Resource's Configuration History
  * ```typescript
  * // init — grants config:GetResourceConfigHistory
  * const getResourceConfigHistory = yield* AWS.Config.GetResourceConfigHistory();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.configurationItems?.length);
  * ```
- *
- * @binding
  */
 export interface GetResourceConfigHistory extends Binding.Service<
   GetResourceConfigHistory,

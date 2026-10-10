@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * {@link ListLandingZones}). Useful for drift-monitoring functions that
  * alert when the landing zone drifts out of sync. Provide the
  * implementation with `Effect.provide(AWS.ControlTower.GetLandingZoneHttp)`.
- * ### Inspecting the Landing Zone
- * **Example:** Read the Landing Zone's Drift Status
+ * @binding
+ * @section Inspecting the Landing Zone
+ * @example Read the Landing Zone's Drift Status
  * ```typescript
  * // init — account-level binding takes no resource
  * const getLandingZone = yield* AWS.ControlTower.GetLandingZone();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(landingZone.driftStatus?.status);
  * ```
- *
- * @binding
  */
 export interface GetLandingZone extends Binding.Service<
   GetLandingZone,

@@ -9,15 +9,14 @@ import * as Binding from "../../Binding.ts";
  * authorization is required and whether training-data collection is
  * enabled). Provide the implementation with
  * `Effect.provide(AWS.Chatbot.GetAccountPreferencesHttp)`.
- * ### Account Preferences
- * **Example:** Read the account preferences
+ * @binding
+ * @section Account Preferences
+ * @example Read the account preferences
  * ```typescript
  * const getAccountPreferences = yield* AWS.Chatbot.GetAccountPreferences();
  * const result = yield* getAccountPreferences();
  * const trainingData = result.AccountPreferences?.TrainingDataCollectionEnabled;
  * ```
- *
- * @binding
  */
 export interface GetAccountPreferences extends Binding.Service<
   GetAccountPreferences,

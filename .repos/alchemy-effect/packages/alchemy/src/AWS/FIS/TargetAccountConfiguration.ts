@@ -60,8 +60,9 @@ export interface TargetAccountConfiguration extends Resource<
  *
  * The parent {@link ExperimentTemplate} must declare
  * `experimentOptions: { accountTargeting: "multi-account" }`.
- * ### Registering Target Accounts
- * **Example:** Add a Target Account to a Multi-Account Template
+ * @resource
+ * @section Registering Target Accounts
+ * @example Add a Target Account to a Multi-Account Template
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -80,8 +81,6 @@ export interface TargetAccountConfiguration extends Resource<
  *   description: "the workload account faults are injected into",
  * });
  * ```
- *
- * @resource
  */
 export const TargetAccountConfiguration = Resource<TargetAccountConfiguration>(
   "AWS.FIS.TargetAccountConfiguration",

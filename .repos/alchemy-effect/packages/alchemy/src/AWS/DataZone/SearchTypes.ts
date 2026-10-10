@@ -14,8 +14,9 @@ export interface SearchTypesRequest extends Omit<
  * Searches asset types and form types registered in the bound domain. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.SearchTypesHttp)`.
- * ### Searching the Catalog
- * **Example:** List Managed Asset Types
+ * @binding
+ * @section Searching the Catalog
+ * @example List Managed Asset Types
  * ```typescript
  * // init — bind the operation to the domain
  * const searchTypes = yield* AWS.DataZone.SearchTypes(domain);
@@ -23,8 +24,6 @@ export interface SearchTypesRequest extends Omit<
  * // runtime
  * const result = yield* searchTypes({ searchScope: "ASSET_TYPE", managed: true });
  * ```
- *
- * @binding
  */
 export interface SearchTypes extends Binding.Service<
   SearchTypes,

@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * arguments and grants `comprehendmedical:ListICD10CMInferenceJobs` on `*`. Provide the
  * implementation with `Effect.provide(AWS.ComprehendMedical.ListICD10CMInferenceJobsHttp)`.
  *
- * ### Batch ICD-10-CM Inference Jobs
- * **Example:** List Submitted Jobs
+ * @binding
+ * @section Batch ICD-10-CM Inference Jobs
+ * @example List Submitted Jobs
  * ```typescript
  * // init
  * const listICD10CMInferenceJobs = yield* AWS.ComprehendMedical.ListICD10CMInferenceJobs();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const jobs = yield* listICD10CMInferenceJobs({});
  * console.log(jobs.ComprehendMedicalAsyncJobPropertiesList?.length ?? 0);
  * ```
- *
- * @binding
  */
 export interface ListICD10CMInferenceJobs extends Binding.Service<
   ListICD10CMInferenceJobs,

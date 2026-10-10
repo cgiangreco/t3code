@@ -106,8 +106,9 @@ export interface InfrastructureConfiguration extends Resource<
  * An EC2 Image Builder infrastructure configuration — the environment
  * (instance profile, instance types, network, logging) in which images are
  * built and tested.
- * ### Creating an Infrastructure Configuration
- * **Example:** Minimal Configuration
+ * @resource
+ * @section Creating an Infrastructure Configuration
+ * @example Minimal Configuration
  * ```typescript
  * const role = yield* IAM.Role("BuilderRole", {
  *   assumeRolePolicyDocument: {
@@ -132,8 +133,6 @@ export interface InfrastructureConfiguration extends Resource<
  *   terminateInstanceOnFailure: true,
  * });
  * ```
- *
- * @resource
  */
 export const InfrastructureConfiguration =
   Resource<InfrastructureConfiguration>(

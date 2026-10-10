@@ -3,13 +3,14 @@ import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Schema from "effect/Schema";
+import * as HttpApiError from "effect/unstable/httpapi/HttpApiError";
 import { lt } from "drizzle-orm";
 
-import { DpopVerificationFailureCode, verifyDpopProof } from "@t3tools/shared/dpop";
+import { verifyDpopProof } from "@t3tools/shared/dpop";
 import * as RelayDb from "../db.ts";
 import { relayDpopProofs } from "../persistence/schema.ts";
 
-export class DpopProofReplayPersistenceError extends Schema.TaggedError<DpopProofReplayPersistenceError>()(
+export class DpopProofReplayPersistenceError extends Schema.TaggedErrorClass<DpopProofReplayPersistenceError>()(
   "DpopProofReplayPersistenceError",
   {
     operation: Schema.Literals(["consume", "prune-expired"]),
@@ -25,23 +26,6 @@ export class DpopProofReplayPersistenceError extends Schema.TaggedError<DpopProo
   }
 }
 
-export const DpopProofFailureCode = Schema.Union([
-  DpopVerificationFailureCode,
-  Schema.Literal("replayed"),
-]);
-export type DpopProofFailureCode = typeof DpopProofFailureCode.Type;
-
-export class DpopProofRejected extends Schema.TaggedError<DpopProofRejected>()(
-  "DpopProofRejected",
-  {
-    code: DpopProofFailureCode,
-  },
-) {
-  override get message(): string {
-    return `DPoP proof rejected: ${this.code}`;
-  }
-}
-
 export class DpopProofReplay extends Context.Service<
   DpopProofReplay,
   {
@@ -52,7 +36,7 @@ export class DpopProofReplay extends Context.Service<
       readonly expectedThumbprint?: string;
       readonly expectedAccessToken?: string;
       readonly now: DateTime.DateTime;
-    }) => Effect.Effect<string, DpopProofRejected | DpopProofReplayPersistenceError>;
+    }) => Effect.Effect<string, HttpApiError.Unauthorized | DpopProofReplayPersistenceError>;
     readonly consume: (input: {
       readonly thumbprint: string;
       readonly jti: string;
@@ -114,16 +98,13 @@ const make = Effect.gen(function* () {
     });
     if (!result.ok) {
       yield* Effect.logWarning("relay dpop proof rejected", {
-        code: result.code,
         reason: result.reason,
         method: input.method,
         url: input.url,
         expectedThumbprintPresent: input.expectedThumbprint !== undefined,
         expectedAccessTokenPresent: input.expectedAccessToken !== undefined,
       });
-      return yield* new DpopProofRejected({
-        code: result.code,
-      });
+      return yield* new HttpApiError.Unauthorized({});
     }
     const consumed = yield* consume({
       thumbprint: result.thumbprint,
@@ -137,9 +118,7 @@ const make = Effect.gen(function* () {
         jti: result.jti,
         iat: result.iat,
       });
-      return yield* new DpopProofRejected({
-        code: "replayed",
-      });
+      return yield* new HttpApiError.Unauthorized({});
     }
     yield* Effect.annotateCurrentSpan({
       "relay.dpop.thumbprint": result.thumbprint,

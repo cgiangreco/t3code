@@ -15,8 +15,9 @@ export interface DeleteScheduleRequest extends Omit<
  * deployed Lambda deletes schedules it minted at runtime (cancel a reminder,
  * clean up a completed one-shot). Optionally scoped to a `ScheduleGroup`;
  * without one it covers the default group.
- * ### Deleting Schedules At Runtime
- * **Example:** Cancel A Reminder
+ * @binding
+ * @section Deleting Schedules At Runtime
+ * @example Cancel A Reminder
  * ```typescript
  * const deleteSchedule = yield* AWS.Scheduler.DeleteSchedule();
  *
@@ -27,12 +28,10 @@ export interface DeleteScheduleRequest extends Omit<
  * );
  * ```
  *
- * **Example:** Scope Deletion To A Schedule Group
+ * @example Scope Deletion To A Schedule Group
  * ```typescript
  * const deleteSchedule = yield* AWS.Scheduler.DeleteSchedule(group);
  * ```
- *
- * @binding
  */
 export interface DeleteSchedule extends Binding.Service<
   DeleteSchedule,

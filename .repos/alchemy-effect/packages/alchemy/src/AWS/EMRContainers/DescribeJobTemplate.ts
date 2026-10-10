@@ -10,8 +10,9 @@ import type { JobTemplate } from "./JobTemplate.ts";
  * execution role, release label, job driver, and parameter configuration.
  * The template ID is injected from the binding. Provide the implementation
  * with `Effect.provide(AWS.EMRContainers.DescribeJobTemplateHttp)`.
- * ### Job Templates
- * **Example:** Read The Bound Template
+ * @binding
+ * @section Job Templates
+ * @example Read The Bound Template
  * ```typescript
  * // init — bind the operation to the template
  * const describeJobTemplate =
@@ -23,8 +24,6 @@ import type { JobTemplate } from "./JobTemplate.ts";
  *   `template targets ${jobTemplate?.jobTemplateData.releaseLabel}`,
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeJobTemplate extends Binding.Service<
   DescribeJobTemplate,

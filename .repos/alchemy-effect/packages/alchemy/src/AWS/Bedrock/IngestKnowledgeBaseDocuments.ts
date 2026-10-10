@@ -22,8 +22,9 @@ export interface IngestKnowledgeBaseDocumentsRequest extends Omit<
  * The binding grants the function `bedrock:IngestKnowledgeBaseDocuments`
  * scoped to the data source's parent knowledge base.
  *
- * ### Direct Document Ingestion
- * **Example:** Ingest an Inline Text Document
+ * @binding
+ * @section Direct Document Ingestion
+ * @example Ingest an Inline Text Document
  * ```typescript
  * // init
  * const ingestDocuments =
@@ -48,8 +49,6 @@ export interface IngestKnowledgeBaseDocumentsRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface IngestKnowledgeBaseDocuments extends Binding.Service<
   IngestKnowledgeBaseDocuments,

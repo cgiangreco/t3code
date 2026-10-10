@@ -15,14 +15,13 @@ export interface DeleteAssessmentReportRequest extends Omit<
  * Deletes an assessment report from the bound assessment and its S3
  * destination. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.DeleteAssessmentReportHttp)`.
- * ### Assessment Reports
- * **Example:** Delete an Assessment Report
+ * @binding
+ * @section Assessment Reports
+ * @example Delete an Assessment Report
  * ```typescript
  * const deleteAssessmentReport = yield* AWS.AuditManager.DeleteAssessmentReport(assessment);
  * const result = yield* deleteAssessmentReport({ assessmentReportId });
  * ```
- *
- * @binding
  */
 export interface DeleteAssessmentReport extends Binding.Service<
   DeleteAssessmentReport,

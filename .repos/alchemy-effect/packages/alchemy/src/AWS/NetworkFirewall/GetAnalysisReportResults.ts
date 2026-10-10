@@ -15,8 +15,9 @@ export interface GetAnalysisReportResultsRequest extends Omit<
  *
  * Provide `NetworkFirewall.GetAnalysisReportResultsHttp` on the hosting
  * Lambda Function to satisfy the requirement.
- * ### Analysis Reports
- * **Example:** Read Analysis Report Results
+ * @binding
+ * @section Analysis Reports
+ * @example Read Analysis Report Results
  * ```typescript
  * // init — grants network-firewall:GetAnalysisReportResults on the firewall
  * const getAnalysisReportResults =
@@ -27,8 +28,6 @@ export interface GetAnalysisReportResultsRequest extends Omit<
  *   AnalysisReportId: analysisReportId,
  * });
  * ```
- *
- * @binding
  */
 export interface GetAnalysisReportResults extends Binding.Service<
   GetAnalysisReportResults,

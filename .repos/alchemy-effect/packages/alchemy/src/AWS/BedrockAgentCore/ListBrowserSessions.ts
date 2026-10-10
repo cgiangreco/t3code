@@ -15,8 +15,9 @@ export interface ListBrowserSessionsRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.ListBrowserSessionsHttp`
  * on the Function effect to implement the binding.
  *
- * ### Browser Sessions
- * **Example:** List Sessions
+ * @binding
+ * @section Browser Sessions
+ * @example List Sessions
  * ```typescript
  * // init
  * const listBrowserSessions = yield* AgentCore.ListBrowserSessions(browser);
@@ -29,8 +30,6 @@ export interface ListBrowserSessionsRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface ListBrowserSessions extends Binding.Service<
   ListBrowserSessions,

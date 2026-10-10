@@ -15,8 +15,9 @@ export interface GetAssociatedResourceRequest extends Omit<
  * Reads one resource associated with the bound application, including its
  * application-tag sync status. Provide the implementation with
  * `Effect.provide(AWS.AppRegistry.GetAssociatedResourceHttp)`.
- * ### Reading Associated Resources
- * **Example:** Get an Associated CloudFormation Stack
+ * @binding
+ * @section Reading Associated Resources
+ * @example Get an Associated CloudFormation Stack
  * ```typescript
  * // init — bind the operation to the application
  * const getAssociatedResource =
@@ -29,8 +30,6 @@ export interface GetAssociatedResourceRequest extends Omit<
  * });
  * console.log(result.resource?.arn);
  * ```
- *
- * @binding
  */
 export interface GetAssociatedResource extends Binding.Service<
   GetAssociatedResource,

@@ -141,8 +141,9 @@ export interface Endpoint extends Resource<
  * An AWS Database Migration Service (DMS) endpoint — the source or target
  * database of a replication. Endpoints are metadata-only (they store
  * connection information, not data), so they are free and fast to create.
- * ### Creating Endpoints
- * **Example:** MySQL Source Endpoint
+ * @resource
+ * @section Creating Endpoints
+ * @example MySQL Source Endpoint
  * ```typescript
  * const source = yield* Endpoint("Source", {
  *   endpointType: "source",
@@ -155,7 +156,7 @@ export interface Endpoint extends Resource<
  * });
  * ```
  *
- * **Example:** S3 Target Endpoint
+ * @example S3 Target Endpoint
  * ```typescript
  * const target = yield* Endpoint("Target", {
  *   endpointType: "target",
@@ -167,8 +168,6 @@ export interface Endpoint extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Endpoint = Resource<Endpoint>("AWS.DMS.Endpoint");
 

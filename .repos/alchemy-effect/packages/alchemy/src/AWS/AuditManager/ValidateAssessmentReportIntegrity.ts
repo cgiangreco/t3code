@@ -8,14 +8,13 @@ import * as Binding from "../../Binding.ts";
  * Validates the integrity (checksums) of a generated assessment
  * report in Amazon S3. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.ValidateAssessmentReportIntegrityHttp)`.
- * ### Assessment Reports
- * **Example:** Validate a Generated Report
+ * @binding
+ * @section Assessment Reports
+ * @example Validate a Generated Report
  * ```typescript
  * const validateAssessmentReportIntegrity = yield* AWS.AuditManager.ValidateAssessmentReportIntegrity();
  * const result = yield* validateAssessmentReportIntegrity({ s3RelativePath: "s3://audit-reports/report.zip" });
  * ```
- *
- * @binding
  */
 export interface ValidateAssessmentReportIntegrity extends Binding.Service<
   ValidateAssessmentReportIntegrity,

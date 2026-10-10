@@ -12,15 +12,14 @@ import type { Vault } from "./Vault.ts";
  * inventory).
  * Provide the implementation with
  * `Effect.provide(AWS.Glacier.DescribeVaultHttp)`.
- * ### Inspecting Vaults
- * **Example:** Read the vault's stats
+ * @binding
+ * @section Inspecting Vaults
+ * @example Read the vault's stats
  * ```typescript
  * const describeVault = yield* AWS.Glacier.DescribeVault(vault);
  *
  * const { NumberOfArchives, SizeInBytes } = yield* describeVault();
  * ```
- *
- * @binding
  */
 export interface DescribeVault extends Binding.Service<
   DescribeVault,

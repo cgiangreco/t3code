@@ -171,8 +171,9 @@ export interface AutoScalingGroup extends Resource<
  * {@link ScheduledAction} for time-based capacity changes, and
  * {@link consumeLifecycleActions} to run a Lambda handler while instances
  * pause during launch/terminate transitions.
- * ### Creating an Auto Scaling Group
- * **Example:** Fleet from a Launch Template
+ * @resource
+ * @section Creating an Auto Scaling Group
+ * @example Fleet from a Launch Template
  * ```typescript
  * import { AutoScalingGroup, LaunchTemplate } from "alchemy/AWS/AutoScaling";
  * import { Subnet, Vpc } from "alchemy/AWS/EC2";
@@ -196,7 +197,7 @@ export interface AutoScalingGroup extends Resource<
  * });
  * ```
  *
- * **Example:** Reference an existing Launch Template by name
+ * @example Reference an existing Launch Template by name
  * ```typescript
  * const group = yield* AutoScalingGroup("Fleet", {
  *   launchTemplate: { launchTemplateName: "my-template", version: 2 },
@@ -207,8 +208,8 @@ export interface AutoScalingGroup extends Resource<
  * });
  * ```
  *
- * ### Load Balancing
- * **Example:** Register the fleet with a target group
+ * @section Load Balancing
+ * @example Register the fleet with a target group
  * ```typescript
  * const group = yield* AutoScalingGroup("WebFleet", {
  *   launchTemplate: template,
@@ -221,8 +222,8 @@ export interface AutoScalingGroup extends Resource<
  * });
  * ```
  *
- * ### Scaling
- * **Example:** Track average CPU utilization
+ * @section Scaling
+ * @example Track average CPU utilization
  * ```typescript
  * import { ScalingPolicy } from "alchemy/AWS/AutoScaling";
  *
@@ -232,8 +233,6 @@ export interface AutoScalingGroup extends Resource<
  *   targetValue: 60,
  * });
  * ```
- *
- * @resource
  */
 export const AutoScalingGroup = Resource<AutoScalingGroup>(
   "AWS.AutoScaling.AutoScalingGroup",

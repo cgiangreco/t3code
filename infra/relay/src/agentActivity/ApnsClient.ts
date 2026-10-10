@@ -4,19 +4,17 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
-import * as Headers from "effect/http/Headers";
-import * as HttpClient from "effect/http/HttpClient";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
-import { ApnsEnvironment, type ApnsCredentials } from "../Config.ts";
+import * as Headers from "effect/unstable/http/Headers";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import { ApnsEnvironment as ApnsEnvironmentSchema, type ApnsCredentials } from "../Config.ts";
 import type { ApnsLiveActivityAlert, ApnsNotificationPayload } from "./apnsDeliveryJobs.ts";
-import type { ApnsJwtEncodingError, ApnsJwtSigningError } from "./apnsJwt.ts";
+import { ApnsJwtEncodingError, ApnsJwtSigningError } from "./apnsJwt.ts";
 import * as ApnsProviderTokens from "./ApnsProviderTokens.ts";
 
 export { ApnsJwtEncodingError, ApnsJwtSigningError } from "./apnsJwt.ts";
 
 const LIVE_ACTIVITY_NAME = "AgentActivity";
-// Bound sending and reading separately so neither stage can hold a batch open.
-const APNS_HTTP_STAGE_TIMEOUT = "10 seconds";
 // Updates only flow on domain events, so a healthy agent can be silent for
 // minutes (long tool calls, pending approvals). Two minutes made iOS dim
 // perfectly healthy activities; ten minutes still bounds how long a dead
@@ -53,12 +51,12 @@ export interface ApnsDeliveryResult {
   readonly apnsId: string | null;
 }
 
-export class ApnsHttpRequestError extends Schema.TaggedError<ApnsHttpRequestError>()(
+export class ApnsHttpRequestError extends Schema.TaggedErrorClass<ApnsHttpRequestError>()(
   "ApnsHttpRequestError",
   {
     requestKind: ApnsRequestKindSchema,
     event: Schema.NullOr(ApnsLiveActivityEventSchema),
-    environment: ApnsEnvironment,
+    environment: ApnsEnvironmentSchema,
     bundleId: Schema.String,
     tokenSuffix: Schema.String,
     stage: Schema.Literals(["send", "read-response"]),
@@ -71,7 +69,12 @@ export class ApnsHttpRequestError extends Schema.TaggedError<ApnsHttpRequestErro
   }
 }
 
-export type ApnsError = ApnsJwtEncodingError | ApnsJwtSigningError | ApnsHttpRequestError;
+export const ApnsError = Schema.Union([
+  ApnsJwtEncodingError,
+  ApnsJwtSigningError,
+  ApnsHttpRequestError,
+]);
+export type ApnsError = typeof ApnsError.Type;
 
 const decodeApnsErrorResponseJson = Schema.decodeUnknownOption(
   Schema.fromJsonString(
@@ -168,12 +171,6 @@ function makeLiveActivityRequest(input: MakeLiveActivityRequestInput): ApnsLiveA
   };
 }
 
-function notificationThreadId(notification: ApnsNotificationPayload): string {
-  return notification.threadId.length > 0
-    ? `${notification.environmentId}/${notification.threadId}`
-    : "t3-agent-alerts";
-}
-
 function makePushNotificationRequest(input: {
   readonly token: string;
   readonly notification: ApnsNotificationPayload;
@@ -188,9 +185,6 @@ function makePushNotificationRequest(input: {
           body: input.notification.body,
         },
         sound: "default",
-        // Notification Center stacks alerts by thread so a chatty thread does
-        // not bury the others; a grouped alert for several threads stays alone.
-        "thread-id": notificationThreadId(input.notification),
       },
       environmentId: input.notification.environmentId,
       threadId: input.notification.threadId,
@@ -252,7 +246,6 @@ export const make = Effect.gen(function* () {
       }),
       HttpClientRequest.bodyJson(input.request.payload),
       Effect.flatMap(httpClient.execute),
-      Effect.timeout(APNS_HTTP_STAGE_TIMEOUT),
       Effect.mapError(
         (cause) =>
           new ApnsHttpRequestError({
@@ -268,7 +261,6 @@ export const make = Effect.gen(function* () {
       ),
     );
     const responseText = yield* response.text.pipe(
-      Effect.timeout(APNS_HTTP_STAGE_TIMEOUT),
       Effect.mapError(
         (cause) =>
           new ApnsHttpRequestError({
@@ -314,7 +306,6 @@ export const make = Effect.gen(function* () {
         }),
         HttpClientRequest.bodyJson(input.request.payload),
         Effect.flatMap(httpClient.execute),
-        Effect.timeout(APNS_HTTP_STAGE_TIMEOUT),
         Effect.mapError(
           (cause) =>
             new ApnsHttpRequestError({
@@ -330,7 +321,6 @@ export const make = Effect.gen(function* () {
         ),
       );
       const responseText = yield* response.text.pipe(
-        Effect.timeout(APNS_HTTP_STAGE_TIMEOUT),
         Effect.mapError(
           (cause) =>
             new ApnsHttpRequestError({

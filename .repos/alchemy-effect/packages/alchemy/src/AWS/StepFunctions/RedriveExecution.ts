@@ -13,8 +13,9 @@ export interface RedriveExecutionRequest extends sfn.RedriveExecutionInput {}
  * scoped to executions of the bound {@link StateMachine}. Executions that
  * are still running (or succeeded) fail with the typed
  * `ExecutionNotRedrivable` error.
- * ### Redriving Executions
- * **Example:** Redrive a failed execution
+ * @binding
+ * @section Redriving Executions
+ * @example Redrive a failed execution
  * ```typescript
  * const redriveExecution = yield* StepFunctions.RedriveExecution(machine);
  *
@@ -22,8 +23,6 @@ export interface RedriveExecutionRequest extends sfn.RedriveExecutionInput {}
  *   Effect.catchTag("ExecutionNotRedrivable", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface RedriveExecution extends Binding.Service<
   RedriveExecution,

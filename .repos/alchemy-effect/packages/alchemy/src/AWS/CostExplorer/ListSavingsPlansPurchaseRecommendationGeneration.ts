@@ -14,8 +14,9 @@ export interface ListSavingsPlansPurchaseRecommendationGenerationRequest
  * List your Savings Plans recommendation generations from the past
  * 30 days with their status. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.ListSavingsPlansPurchaseRecommendationGenerationHttp)`.
- * ### Savings Plans
- * **Example:** List Recent Generations
+ * @binding
+ * @section Savings Plans
+ * @example List Recent Generations
  * ```typescript
  * // init — account-level binding takes no resource
  * const listSavingsPlansPurchaseRecommendationGeneration = yield* AWS.CostExplorer.ListSavingsPlansPurchaseRecommendationGeneration();
@@ -24,8 +25,6 @@ export interface ListSavingsPlansPurchaseRecommendationGenerationRequest
  * const result = yield* listSavingsPlansPurchaseRecommendationGeneration();
  * const generations = result.GenerationSummaryList;
  * ```
- *
- * @binding
  */
 export interface ListSavingsPlansPurchaseRecommendationGeneration extends Binding.Service<
   ListSavingsPlansPurchaseRecommendationGeneration,

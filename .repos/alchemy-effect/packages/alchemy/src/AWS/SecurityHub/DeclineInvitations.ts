@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.DeclineInvitationsHttp)`.
- * ### Members & Organization
- * **Example:** Decline Invitations
+ * @binding
+ * @section Members & Organization
+ * @example Decline Invitations
  * ```typescript
  * // init — account-level binding, no resource argument
  * const declineInvitations = yield* AWS.SecurityHub.DeclineInvitations();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* declineInvitations({ AccountIds: ["111122223333"] });
  * ```
- *
- * @binding
  */
 export interface DeclineInvitations extends Binding.Service<
   DeclineInvitations,

@@ -55,8 +55,9 @@ export interface Group extends Resource<
  *
  * `Group` manages a shared authorization container for IAM users, including
  * attached managed policies and embedded inline policies.
- * ### Creating IAM Groups
- * **Example:** Group with an Inline Policy
+ * @resource
+ * @section Creating IAM Groups
+ * @example Group with an Inline Policy
  * ```typescript
  * const group = yield* Group("SupportGroup", {
  *   groupName: "support",
@@ -72,8 +73,6 @@ export interface Group extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Group = Resource<Group>("AWS.IAM.Group");
 

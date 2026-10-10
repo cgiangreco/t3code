@@ -164,7 +164,7 @@ function ActiveSshPasswordPrompt({
             to the local SSH process for this connection attempt and is not saved by T3 Code.
           </DialogDescription>
         </DialogHeader>
-        <DialogPanel scrollFade={false}>
+        <DialogPanel className="space-y-3" scrollFade={false}>
           <form
             className="space-y-3"
             id={formId}

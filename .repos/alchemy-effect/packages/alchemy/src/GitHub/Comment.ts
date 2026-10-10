@@ -83,8 +83,9 @@ export interface Comment extends Resource<
  * Authentication is resolved in order: explicit `token` prop,
  * `GITHUB_ACCESS_TOKEN` env var, `GITHUB_TOKEN` env var. The token needs
  * `repo` scope for private repositories or `public_repo` for public ones.
- * ### Creating Comments
- * **Example:** Comment on an Issue
+ * @resource
+ * @section Creating Comments
+ * @example Comment on an Issue
  * ```typescript
  * const comment = yield* GitHub.Comment("issue-comment", {
  *   owner: "my-org",
@@ -94,7 +95,7 @@ export interface Comment extends Resource<
  * });
  * ```
  *
- * **Example:** Comment on a Pull Request
+ * @example Comment on a Pull Request
  * ```typescript
  * const prComment = yield* GitHub.Comment("pr-comment", {
  *   owner: "my-org",
@@ -104,11 +105,11 @@ export interface Comment extends Resource<
  * });
  * ```
  *
- * ### Updating Comments
+ * @section Updating Comments
  * Deploy with the same logical ID and a different `body` to update the
  * existing comment in place rather than creating a new one.
  *
- * **Example:** Update Comment Content
+ * @example Update Comment Content
  * ```typescript
  * const comment = yield* GitHub.Comment("status-comment", {
  *   owner: "my-org",
@@ -118,8 +119,8 @@ export interface Comment extends Resource<
  * });
  * ```
  *
- * ### Deleting Comments
- * **Example:** Allow Comment Deletion
+ * @section Deleting Comments
+ * @example Allow Comment Deletion
  * ```typescript
  * const comment = yield* GitHub.Comment("temp-comment", {
  *   owner: "my-org",
@@ -130,11 +131,11 @@ export interface Comment extends Resource<
  * });
  * ```
  *
- * ### CI Preview Comments
+ * @section CI Preview Comments
  * A common pattern is posting a preview-deployment URL on every pull request.
  * The comment auto-updates on each push because the logical ID stays the same.
  *
- * **Example:** PR Preview Comment
+ * @example PR Preview Comment
  * ```typescript
  * if (process.env.PULL_REQUEST) {
  *   yield* GitHub.Comment("preview-comment", {
@@ -149,9 +150,6 @@ export interface Comment extends Resource<
  *   });
  * }
  * ```
- *
- * @resource
- * @product Issue
  */
 export const Comment = Resource<Comment>("GitHub.Comment");
 

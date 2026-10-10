@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `name` is injected from the bound {@link Cluster} and `eks:DescribeCluster` is granted on the cluster's ARN.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.DescribeClusterHttp)`.
- * ### Reading Cluster State
- * **Example:** Build Kubernetes Connection Settings at Runtime
+ * @binding
+ * @section Reading Cluster State
+ * @example Build Kubernetes Connection Settings at Runtime
  * ```typescript
  * // init
  * const describeCluster = yield* AWS.EKS.DescribeCluster(cluster);
@@ -21,8 +22,6 @@ import type { Cluster } from "./Cluster.ts";
  * const endpoint = live?.endpoint;
  * const caData = live?.certificateAuthority?.data;
  * ```
- *
- * @binding
  */
 export interface DescribeCluster extends Binding.Service<
   DescribeCluster,

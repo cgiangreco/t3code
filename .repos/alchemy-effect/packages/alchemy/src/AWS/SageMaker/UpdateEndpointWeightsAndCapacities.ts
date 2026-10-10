@@ -17,8 +17,9 @@ export interface UpdateEndpointWeightsAndCapacitiesRequest extends Omit<
  * callable that automatically injects the endpoint name. Only applies to
  * instance-based variants (serverless variants have no weights/capacities);
  * the endpoint transitions through `Updating` back to `InService`.
- * ### Shifting Traffic
- * **Example:** Canary a Variant
+ * @binding
+ * @section Shifting Traffic
+ * @example Canary a Variant
  * ```typescript
  * // init
  * const updateWeights =
@@ -32,8 +33,6 @@ export interface UpdateEndpointWeightsAndCapacitiesRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateEndpointWeightsAndCapacities extends Binding.Service<
   UpdateEndpointWeightsAndCapacities,

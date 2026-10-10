@@ -15,15 +15,14 @@ export interface GetFindingsStatisticsRequest extends Omit<
  * Retrieves aggregate finding statistics for the analyzer (counts by resource
  * type or unused-access age). Provide the implementation with
  * `Effect.provide(AWS.AccessAnalyzer.GetFindingsStatisticsHttp)`.
- * ### Reading Findings
- * **Example:** Get Finding Statistics
+ * @binding
+ * @section Reading Findings
+ * @example Get Finding Statistics
  * ```typescript
  * const getStatistics =
  *   yield* AWS.AccessAnalyzer.GetFindingsStatistics(analyzer);
  * const stats = yield* getStatistics();
  * ```
- *
- * @binding
  */
 export interface GetFindingsStatistics extends Binding.Service<
   GetFindingsStatistics,

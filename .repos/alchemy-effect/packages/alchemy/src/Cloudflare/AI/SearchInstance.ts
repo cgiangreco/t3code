@@ -21,7 +21,7 @@ export type SearchInstanceSourceType = "r2" | "web-crawler";
 /**
  * Generation model used to answer AI Search queries.
  */
-export type SearchModel = Exclude<
+export type Model = Exclude<
   NonNullable<aisearch.CreateInstanceRequest["aiSearchModel"]>,
   ""
 >;
@@ -148,7 +148,7 @@ export type SearchInstanceProps = {
    * Generation model used to answer AI Search queries.
    * @default service default
    */
-  aiSearchModel?: SearchModel;
+  aiSearchModel?: Model;
   /**
    * Whether to rewrite the user query before retrieval.
    * @default false
@@ -157,7 +157,7 @@ export type SearchInstanceProps = {
   /**
    * Model used to rewrite queries when `rewriteQuery` is enabled.
    */
-  rewriteModel?: SearchModel;
+  rewriteModel?: Model;
   /**
    * Whether custom chunking settings are applied during indexing.
    */
@@ -331,8 +331,11 @@ export type SearchInstance = Resource<
  * low-level resource directly when you manage the token yourself, share one
  * token across instances, or group instances under a {@link SearchNamespace}.
  *
- * ### Creating a SearchInstance
- * **Example:** R2-backed instance
+ * @resource
+ * @product AI Search
+ * @category AI
+ * @section Creating a SearchInstance
+ * @example R2-backed instance
  * An R2 source needs a service token to read the bucket. Either pass a
  * `tokenId` (see {@link SearchToken}) or let the {@link Search}
  * construct provision one for you.
@@ -344,7 +347,7 @@ export type SearchInstance = Resource<
  * });
  * ```
  *
- * **Example:** Tuned retrieval settings
+ * @example Tuned retrieval settings
  * ```typescript
  * const instance = yield* Cloudflare.AI.SearchInstance("docs-search", {
  *   source: bucket.bucketName,
@@ -357,7 +360,7 @@ export type SearchInstance = Resource<
  * });
  * ```
  *
- * ### R2 source options
+ * @section R2 source options
  * For an `r2` source, `sourceParams` filters which objects are indexed (all
  * fields optional):
  * - `prefix` — only index keys under this prefix.
@@ -365,7 +368,7 @@ export type SearchInstance = Resource<
  *   path segment, `**` across segments; max 10 each). Only objects matching an
  *   `includeItems` pattern are indexed; `excludeItems` takes precedence.
  * - `r2Jurisdiction` — R2 data-residency jurisdiction of the source bucket.
- * **Example:** Index only part of a bucket
+ * @example Index only part of a bucket
  * ```typescript
  * const instance = yield* Cloudflare.AI.SearchInstance("docs-search", {
  *   source: bucket.bucketName,
@@ -378,17 +381,22 @@ export type SearchInstance = Resource<
  * });
  * ```
  *
- * ### Web-crawler source options
+ * @section Web-crawler source options
  * `sourceParams.webCrawler` tunes how a `web-crawler` source is fetched,
  * parsed, and stored. All fields are optional.
  *
  * `parseType` selects how pages are discovered:
  * - `"sitemap"` (Cloudflare default) — read `<seed>/sitemap.xml` (discovered
  *   via `robots.txt`) and index the URLs it lists.
- * - `"discover"` — start at `source` and follow links.
+ * - `"crawl"` — start at `source` and follow links.
+ * - `"feed-rss"` — treat the seed as an RSS / Atom feed.
  *
- * `crawlOptions` is no longer accepted by the API — Cloudflare removed it;
- * discovery behavior is controlled solely by `parseType`.
+ * `crawlOptions` controls link discovery (mainly for `parseType: "crawl"`):
+ * - `depth` — how many links deep to follow from the seed.
+ * - `includeSubdomains` — also crawl subdomains of the seed host.
+ * - `includeExternalLinks` — follow links off the seed host.
+ * - `maxAge` — skip re-fetching pages younger than this (seconds).
+ * - `source` — where links come from: `"all"`, `"sitemaps"`, or `"links"`.
  *
  * `parseOptions` controls how each page is parsed:
  * - `useBrowserRendering` — render JS in a headless browser before parsing.
@@ -403,22 +411,29 @@ export type SearchInstance = Resource<
  * - `storageId` — R2 bucket name to store crawl output in.
  * - `storageType` — `"r2"`.
  * - `r2Jurisdiction` — R2 data-residency jurisdiction for the store bucket.
- * **Example:** Basic web-crawler instance
+ * @example Basic web-crawler instance
  * ```typescript
  * const instance = yield* Cloudflare.AI.SearchInstance("site-search", {
  *   type: "web-crawler",
  *   source: "https://example.com",
- *   sourceParams: { webCrawler: { parseType: "discover" } },
+ *   sourceParams: { webCrawler: { parseType: "crawl" } },
  * });
  * ```
- * **Example:** Fully-configured crawl
+ * @example Fully-configured crawl
  * ```typescript
  * const instance = yield* Cloudflare.AI.SearchInstance("site-search", {
  *   type: "web-crawler",
  *   source: "https://example.com",
  *   sourceParams: {
  *     webCrawler: {
- *       parseType: "discover",
+ *       parseType: "crawl",
+ *       crawlOptions: {
+ *         depth: 3,
+ *         includeSubdomains: true,
+ *         includeExternalLinks: false,
+ *         maxAge: 86_400,
+ *         source: "all",
+ *       },
  *       parseOptions: {
  *         useBrowserRendering: true,
  *         includeImages: false,
@@ -428,7 +443,7 @@ export type SearchInstance = Resource<
  *   },
  * });
  * ```
- * **Example:** Sitemap source
+ * @example Sitemap and RSS sources
  * ```typescript
  * // Index the URLs listed in one or more sitemaps (the default parse mode).
  * const fromSitemap = yield* Cloudflare.AI.SearchInstance("sitemap-search", {
@@ -441,27 +456,34 @@ export type SearchInstance = Resource<
  *     },
  *   },
  * });
+ *
+ * // Treat the seed as an RSS / Atom feed.
+ * const fromFeed = yield* Cloudflare.AI.SearchInstance("feed-search", {
+ *   type: "web-crawler",
+ *   source: "https://example.com/feed.xml",
+ *   sourceParams: { webCrawler: { parseType: "feed-rss" } },
+ * });
  * ```
- * **Example:** Store crawl output in a specific R2 bucket
+ * @example Store crawl output in a specific R2 bucket
  * ```typescript
  * const instance = yield* Cloudflare.AI.SearchInstance("site-search", {
  *   type: "web-crawler",
  *   source: "https://example.com",
  *   sourceParams: {
  *     webCrawler: {
- *       parseType: "discover",
+ *       parseType: "crawl",
  *       storeOptions: { storageId: "my-crawl-bucket", storageType: "r2" },
  *     },
  *   },
  * });
  * ```
  *
- * ### Grouping under a namespace
+ * @section Grouping under a namespace
  * SearchInstances live in a namespace (the account-provided `default` when
  * unspecified). Pass a {@link SearchNamespace}'s `name` to group related
  * instances — the engine then orders this instance after the namespace on
  * deploy. The namespace is immutable; changing it replaces the instance.
- * **Example:** Place the instance in a custom namespace
+ * @example Place the instance in a custom namespace
  * ```typescript
  * const ns = yield* Cloudflare.AI.SearchNamespace("docs-ns", {});
  * const instance = yield* Cloudflare.AI.SearchInstance("docs-search", {
@@ -470,18 +492,18 @@ export type SearchInstance = Resource<
  * });
  * ```
  *
- * ### Binding to an Effect Worker
+ * @section Binding to an Effect Worker
  * Bind the instance during the Worker's init phase with
  * `Cloudflare.AI.QuerySearch(instance)`, which attaches the
  * single-instance `ai_search` binding and returns an Effect-native client
  * whose `search` / `chatCompletions` methods return `Effect`s. Provide
  * {@link QuerySearchBinding} in the Worker's runtime layer.
- * **Example:** Effect Worker that answers from AI Search
+ * @example Effect Worker that answers from AI Search
  * ```typescript
  * import * as Cloudflare from "alchemy/Cloudflare";
  * import * as Effect from "effect/Effect";
- * import { HttpServerRequest } from "effect/http/HttpServerRequest";
- * import * as HttpServerResponse from "effect/http/HttpServerResponse";
+ * import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+ * import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
  *
  * export default class Api extends Cloudflare.Worker<Api>()(
  *   "api",
@@ -507,11 +529,11 @@ export type SearchInstance = Resource<
  * ) {}
  * ```
  *
- * ### Binding to an Async Worker
+ * @section Binding to an Async Worker
  * For a vanilla `async fetch` Worker, pass the instance under `Worker.env`.
  * The engine attaches the same `ai_search` binding and `InferEnv` types
  * `env.SEARCH` as the runtime `SearchInstance` handle.
- * **Example:** Async Worker via `env`
+ * @example Async Worker via `env`
  * ```typescript
  * export const Api = Cloudflare.Worker("api", {
  *   main: "./worker.ts",
@@ -533,10 +555,6 @@ export type SearchInstance = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ai-search/
- *
- * @resource
- * @product AI Search
- * @category AI
  */
 export const SearchInstance = Resource<SearchInstance>(TypeId, {
   aliases: ["Cloudflare.AiSearch.Instance"],

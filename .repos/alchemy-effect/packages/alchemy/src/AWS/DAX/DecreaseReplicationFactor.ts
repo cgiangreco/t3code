@@ -11,8 +11,9 @@ import type { Cluster } from "./Cluster.ts";
  * of node-count automation (e.g. shrinking a cluster off-peak to cut
  * node-hour cost). Provide the implementation with
  * `Effect.provide(AWS.DAX.DecreaseReplicationFactorHttp)`.
- * ### Scaling a Cluster
- * **Example:** Scale In to One Node
+ * @binding
+ * @section Scaling a Cluster
+ * @example Scale In to One Node
  * ```typescript
  * const decreaseReplicationFactor =
  *   yield* DAX.DecreaseReplicationFactor(cluster);
@@ -22,8 +23,6 @@ import type { Cluster } from "./Cluster.ts";
  * });
  * // result.Cluster?.TotalNodes → 1 once the removal completes
  * ```
- *
- * @binding
  */
 export interface DecreaseReplicationFactor extends Binding.Service<
   DecreaseReplicationFactor,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.ListRecordHistoryHttp)`.
- * ### Tracking Provisioned Products
- * **Example:** List Past Provisioning Records
+ * @binding
+ * @section Tracking Provisioned Products
+ * @example List Past Provisioning Records
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listRecordHistory = yield* AWS.ServiceCatalog.ListRecordHistory();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { RecordDetails } = yield* listRecordHistory();
  * ```
- *
- * @binding
  */
 export interface ListRecordHistory extends Binding.Service<
   ListRecordHistory,

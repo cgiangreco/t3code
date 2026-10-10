@@ -63,16 +63,15 @@ export interface OrganizationalUnit extends Resource<
 
 /**
  * An AWS Organizations organizational unit.
- * ### Creating OUs
- * **Example:** Nested OU
+ * @resource
+ * @section Creating OUs
+ * @example Nested OU
  * ```typescript
  * const workloads = yield* OrganizationalUnit("Workloads", {
  *   parentId: root.rootId,
  *   name: "workloads",
  * });
  * ```
- *
- * @resource
  */
 export const OrganizationalUnit = Resource<OrganizationalUnit>(
   "AWS.Organizations.OrganizationalUnit",

@@ -2,7 +2,6 @@ import { EnvironmentId, ProjectId } from "@t3tools/contracts";
 import { describe, expect, it } from "vite-plus/test";
 
 import type { EnvironmentProject } from "./models.ts";
-import { chooseLoadBalancedEnvironment } from "../load-balancing.ts";
 import {
   buildProjectGroups,
   derivePhysicalProjectKey,
@@ -10,70 +9,6 @@ import {
 } from "./projectGrouping.ts";
 
 const environmentId = EnvironmentId.make("environment");
-
-describe("load balancing shared project machines", () => {
-  const now = 100_000;
-  const resources = {
-    sampledAt: now,
-    cpuUtilization: 0.2,
-    cpuCount: 8,
-    availableMemoryBytes: 8_000,
-    totalMemoryBytes: 16_000,
-  };
-
-  it("compares three machines using free capacity and preference", () => {
-    const candidates = [
-      { environmentId: "busy", resources: { ...resources, cpuUtilization: 0.9 }, weight: 1 },
-      { environmentId: "idle", resources, weight: 1 },
-      { environmentId: "preferred", resources: { ...resources, cpuCount: 4 }, weight: 3 },
-    ];
-    expect(chooseLoadBalancedEnvironment(candidates, now)).toBe("preferred");
-    expect(chooseLoadBalancedEnvironment(candidates.slice(0, 2), now)).toBe("idle");
-  });
-
-  it("rejects stale, unknown, excluded and saturated machines", () => {
-    expect(
-      chooseLoadBalancedEnvironment(
-        [
-          {
-            environmentId: "stale",
-            resources: { ...resources, sampledAt: now - 15_001 },
-            weight: 1,
-          },
-          { environmentId: "unknown", resources: null, weight: 1 },
-          {
-            environmentId: "no-cpu-sample",
-            resources: { ...resources, cpuUtilization: null },
-            weight: 1,
-          },
-          { environmentId: "excluded", resources, weight: 0 },
-          {
-            environmentId: "cpu-full",
-            resources: { ...resources, cpuUtilization: 0.95 },
-            weight: 1,
-          },
-          {
-            environmentId: "memory-full",
-            resources: { ...resources, availableMemoryBytes: 100 },
-            weight: 1,
-          },
-        ],
-        now,
-      ),
-    ).toBeNull();
-  });
-
-  it("uses client receipt time when host clocks differ", () => {
-    const candidate = {
-      environmentId: "different-clock",
-      resources: { ...resources, sampledAt: now + 60_000 },
-      receivedAt: now,
-      weight: 1,
-    };
-    expect(chooseLoadBalancedEnvironment([candidate], now)).toBe("different-clock");
-    expect(chooseLoadBalancedEnvironment([candidate], now + 15_001)).toBeNull();
-  });
-});
 const repositoryIdentity = {
   canonicalKey: "github.com/t3tools/t3code",
   locator: {
@@ -134,67 +69,6 @@ describe("buildProjectGroups", () => {
       ]);
       expect(groups[0]?.memberProjectRefs).toHaveLength(3);
     }
-  });
-
-  it("uses a shared custom title as the repository group's label", () => {
-    const projects = [
-      makeProject("first", "/work/t3code", { title: "Custom project" }),
-      makeProject("second", "/work/t3code-2", { title: "Custom project" }),
-    ];
-
-    expect(buildProjectGroups({ projects, settings: settings("repository") })[0]?.label).toBe(
-      "Custom project",
-    );
-  });
-
-  it("keeps the repository label when shared titles match its repository name", () => {
-    const projects = [
-      makeProject("first", "/work/t3code", { title: "t3code" }),
-      makeProject("second", "/work/t3code-2", { title: "t3code" }),
-    ];
-
-    expect(buildProjectGroups({ projects, settings: settings("repository") })[0]?.label).toBe(
-      "T3 Code",
-    );
-  });
-
-  it("keeps a fork apart from its upstream checkout and labels it by its own remote", () => {
-    const fork = makeProject("fork", "/work/t3code-fork", {
-      repositoryIdentity: {
-        ...repositoryIdentity,
-        origin: {
-          canonicalKey: "github.com/julius/t3code-fork",
-          displayName: "julius/t3code-fork",
-        },
-      },
-    });
-    const forkWorktree = makeProject("fork-2", "/work/t3code-fork-2", {
-      repositoryIdentity: fork.repositoryIdentity,
-    });
-    const projects = [makeProject("t3code", "/work/t3code"), fork, forkWorktree];
-
-    const groups = buildProjectGroups({ projects, settings: settings("repository") });
-    expect(groups.map((group) => group.key)).toEqual([
-      "github.com/t3tools/t3code",
-      "github.com/julius/t3code-fork",
-    ]);
-    expect(groups[1]?.members.map((member) => member.project.id)).toEqual(["fork", "fork-2"]);
-    expect(groups[1]?.label).toBe("julius/t3code-fork");
-  });
-
-  it("labels a fork by its canonical key when its origin has no display name", () => {
-    const identity = {
-      ...repositoryIdentity,
-      origin: { canonicalKey: "internal-host" },
-    };
-    const projects = [
-      makeProject("fork", "/work/fork", { repositoryIdentity: identity }),
-      makeProject("fork-2", "/work/fork-2", { repositoryIdentity: identity }),
-    ];
-
-    const groups = buildProjectGroups({ projects, settings: settings("repository") });
-    expect(groups).toHaveLength(1);
-    expect(groups[0]?.label).toBe("internal-host");
   });
 
   it("keeps physical clones in separate groups when requested", () => {

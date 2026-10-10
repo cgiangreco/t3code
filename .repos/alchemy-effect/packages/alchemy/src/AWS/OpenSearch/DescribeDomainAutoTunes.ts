@@ -8,16 +8,15 @@ import * as Binding from "../../Binding.ts";
  *
  * Lists the Auto-Tune optimizations scheduled for a domain — e.g. to surface upcoming JVM heap or queue tuning actions to operators. Provide the implementation with
  * `Effect.provide(AWS.OpenSearch.DescribeDomainAutoTunesHttp)`.
- * ### Auto-Tune and Scheduled Actions
- * **Example:** List Scheduled Auto-Tune Optimizations
+ * @binding
+ * @section Auto-Tune and Scheduled Actions
+ * @example List Scheduled Auto-Tune Optimizations
  * ```typescript
  * const describeDomainAutoTunes = yield* OpenSearch.DescribeDomainAutoTunes();
  *
  * const result = yield* describeDomainAutoTunes({ DomainName: name });
  * // result.AutoTunes → scheduled optimizations
  * ```
- *
- * @binding
  */
 export interface DescribeDomainAutoTunes extends Binding.Service<
   DescribeDomainAutoTunes,

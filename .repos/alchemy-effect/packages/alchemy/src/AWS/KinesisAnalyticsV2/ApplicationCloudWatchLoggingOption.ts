@@ -51,8 +51,9 @@ export interface ApplicationCloudWatchLoggingOption extends Resource<
  * application's service execution role must be allowed to call
  * `logs:PutLogEvents` / `logs:DescribeLogStreams` (the role auto-created by
  * `Application` already is).
- * ### Attaching Logging
- * **Example:** Deliver application messages to a log stream
+ * @resource
+ * @section Attaching Logging
+ * @example Deliver application messages to a log stream
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -68,8 +69,6 @@ export interface ApplicationCloudWatchLoggingOption extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const ApplicationCloudWatchLoggingOption =
   Resource<ApplicationCloudWatchLoggingOption>(

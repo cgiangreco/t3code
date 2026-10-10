@@ -16,8 +16,9 @@ export interface StartFlowCaptureRequest extends Omit<
  *
  * Provide `NetworkFirewall.StartFlowCaptureHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Flow Operations
- * **Example:** Capture Flows to a Host
+ * @binding
+ * @section Flow Operations
+ * @example Capture Flows to a Host
  * ```typescript
  * // init — grants network-firewall:StartFlowCapture on the firewall
  * const startFlowCapture = yield* AWS.NetworkFirewall.StartFlowCapture(firewall);
@@ -27,8 +28,6 @@ export interface StartFlowCaptureRequest extends Omit<
  *   FlowFilters: [{ SourceAddress: { AddressDefinition: "10.0.1.10/32" } }],
  * });
  * ```
- *
- * @binding
  */
 export interface StartFlowCapture extends Binding.Service<
   StartFlowCapture,

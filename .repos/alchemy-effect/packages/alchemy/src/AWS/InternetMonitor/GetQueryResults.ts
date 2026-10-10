@@ -15,8 +15,9 @@ export interface GetQueryResultsRequest extends Omit<
  *
  * Provide `InternetMonitor.GetQueryResultsHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Querying Measurements
- * **Example:** Read Query Results
+ * @binding
+ * @section Querying Measurements
+ * @example Read Query Results
  * ```typescript
  * // init — grants internetmonitor:GetQueryResults on the monitor
  * const getQueryResults = yield* AWS.InternetMonitor.GetQueryResults(monitor);
@@ -24,8 +25,6 @@ export interface GetQueryResultsRequest extends Omit<
  * // runtime
  * const { Fields, Data } = yield* getQueryResults({ QueryId: queryId });
  * ```
- *
- * @binding
  */
 export interface GetQueryResults extends Binding.Service<
   GetQueryResults,

@@ -14,8 +14,9 @@ export interface AcceptPredictionsRequest extends Omit<
  * Accepts ML-generated metadata predictions (business-name suggestions) on an asset in the bound domain. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.AcceptPredictionsHttp)`.
- * ### Publishing Assets
- * **Example:** Accept All Predictions
+ * @binding
+ * @section Publishing Assets
+ * @example Accept All Predictions
  * ```typescript
  * // init — bind the operation to the domain
  * const acceptPredictions = yield* AWS.DataZone.AcceptPredictions(domain);
@@ -23,8 +24,6 @@ export interface AcceptPredictionsRequest extends Omit<
  * // runtime
  * yield* acceptPredictions({ identifier: assetId, acceptRule: { rule: "ALL" } });
  * ```
- *
- * @binding
  */
 export interface AcceptPredictions extends Binding.Service<
   AcceptPredictions,

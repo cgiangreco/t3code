@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * The binding takes no arguments and grants the action on `*` (the action
  * has no resource-level IAM).
  *
- * ### Real-Time Analysis
- * **Example:** Check a Document for PII
+ * @binding
+ * @section Real-Time Analysis
+ * @example Check a Document for PII
  * ```typescript
  * // init
  * const containsPiiEntities = yield* AWS.Comprehend.ContainsPiiEntities();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.Labels: [{ Name: "NAME" }, { Name: "EMAIL" }]
  * ```
- *
- * @binding
  */
 export interface ContainsPiiEntities extends Binding.Service<
   ContainsPiiEntities,

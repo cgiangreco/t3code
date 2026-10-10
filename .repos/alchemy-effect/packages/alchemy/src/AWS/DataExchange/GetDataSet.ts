@@ -11,8 +11,9 @@ import type { DataSet } from "./DataSet.ts";
  * injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.GetDataSetHttp)`.
- * ### Reading Data Sets
- * **Example:** Read The Bound Data Set
+ * @binding
+ * @section Reading Data Sets
+ * @example Read The Bound Data Set
  * ```typescript
  * // init — bind the operation to the data set
  * const getDataSet = yield* AWS.DataExchange.GetDataSet(dataSet);
@@ -21,8 +22,6 @@ import type { DataSet } from "./DataSet.ts";
  * const detail = yield* getDataSet();
  * yield* Effect.log(`data set ${detail.Name} (${detail.AssetType})`);
  * ```
- *
- * @binding
  */
 export interface GetDataSet extends Binding.Service<
   GetDataSet,

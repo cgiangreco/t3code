@@ -16,8 +16,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StartSegmentDetectionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Start Segment Detection
+ * @binding
+ * @section Video Analysis
+ * @example Start Segment Detection
  * ```typescript
  * // init
  * const startSegmentDetection = yield* AWS.Rekognition.StartSegmentDetection();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // started.JobId
  * ```
- *
- * @binding
  */
 export interface StartSegmentDetection extends Binding.Service<
   StartSegmentDetection,

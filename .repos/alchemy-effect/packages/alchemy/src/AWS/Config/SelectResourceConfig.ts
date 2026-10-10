@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.SelectResourceConfigHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Querying with SQL
- * **Example:** Query Resource State with SQL
+ * @binding
+ * @section Querying with SQL
+ * @example Query Resource State with SQL
  * ```typescript
  * // init — grants config:SelectResourceConfig
  * const selectResourceConfig = yield* AWS.Config.SelectResourceConfig();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.Results);
  * ```
- *
- * @binding
  */
 export interface SelectResourceConfig extends Binding.Service<
   SelectResourceConfig,

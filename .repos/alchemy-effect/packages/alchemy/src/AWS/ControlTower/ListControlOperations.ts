@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * control, or target. Useful for governance dashboards that surface
  * in-flight or failed guardrail deployments. Provide the implementation
  * with `Effect.provide(AWS.ControlTower.ListControlOperationsHttp)`.
- * ### Polling Asynchronous Operations
- * **Example:** List Failed Control Operations
+ * @binding
+ * @section Polling Asynchronous Operations
+ * @example List Failed Control Operations
  * ```typescript
  * // init — account-level binding takes no resource
  * const listControlOperations = yield* AWS.ControlTower.ListControlOperations();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.controlOperations.length);
  * ```
- *
- * @binding
  */
 export interface ListControlOperations extends Binding.Service<
   ListControlOperations,

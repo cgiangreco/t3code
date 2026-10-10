@@ -6,6 +6,7 @@ import {
   parseScopedProjectKey,
   parseScopedThreadKey,
   scopedProjectKey,
+  scopedRefKey,
   scopedThreadKey,
   scopeProjectRef,
   scopeThreadRef,
@@ -39,6 +40,8 @@ describe("scoped refs", () => {
   const threadRef = scopeThreadRef(environmentId, ThreadId.make("thread-1"));
 
   it("builds stable scoped project and thread keys", () => {
+    expect(scopedRefKey(projectRef)).toBe("environment-test:project-1");
+    expect(scopedRefKey(threadRef)).toBe("environment-test:thread-1");
     expect(scopedProjectKey(projectRef)).toBe("environment-test:project-1");
     expect(scopedThreadKey(threadRef)).toBe("environment-test:thread-1");
   });

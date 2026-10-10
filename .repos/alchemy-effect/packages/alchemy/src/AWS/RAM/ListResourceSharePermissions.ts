@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * are chosen per request at runtime, so the binding takes no resource
  * argument. Provide the implementation with
  * `Effect.provide(AWS.RAM.ListResourceSharePermissionsHttp)`.
- * ### Managed Permissions
- * **Example:** List the Permissions on a Share
+ * @binding
+ * @section Managed Permissions
+ * @example List the Permissions on a Share
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listResourceSharePermissions = yield* AWS.RAM.ListResourceSharePermissions();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   resourceShareArn: share.resourceShareArn,
  * });
  * ```
- *
- * @binding
  */
 export interface ListResourceSharePermissions extends Binding.Service<
   ListResourceSharePermissions,

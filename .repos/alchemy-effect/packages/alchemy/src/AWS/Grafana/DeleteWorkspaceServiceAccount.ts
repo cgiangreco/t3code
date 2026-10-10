@@ -12,16 +12,15 @@ import type { Workspace } from "./Workspace.ts";
  * minted for the account stop working immediately. Provide the
  * implementation with
  * `Effect.provide(AWS.Grafana.DeleteWorkspaceServiceAccountHttp)`.
- * ### Managing Service Accounts
- * **Example:** Delete a Service Account
+ * @binding
+ * @section Managing Service Accounts
+ * @example Delete a Service Account
  * ```typescript
  * const deleteServiceAccount =
  *   yield* Grafana.DeleteWorkspaceServiceAccount(workspace);
  *
  * yield* deleteServiceAccount({ serviceAccountId: account.id });
  * ```
- *
- * @binding
  */
 export interface DeleteWorkspaceServiceAccount extends Binding.Service<
   DeleteWorkspaceServiceAccount,

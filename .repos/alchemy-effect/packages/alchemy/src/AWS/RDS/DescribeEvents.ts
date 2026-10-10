@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * lifecycle notifications from the last 14 days) — the pull-based
  * counterpart to {@link consumeRdsEvents}. Provide the implementation with
  * `Effect.provide(AWS.RDS.DescribeEventsHttp)`.
- * ### Monitoring Databases
- * **Example:** List Recent Events for a Cluster
+ * @binding
+ * @section Monitoring Databases
+ * @example List Recent Events for a Cluster
  * ```typescript
  * const describeEvents = yield* AWS.RDS.DescribeEvents();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   SourceIdentifier: clusterId,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeEvents extends Binding.Service<
   DescribeEvents,

@@ -18,8 +18,9 @@ export interface BatchRemoveChannelRoleFromAccessorsRequest extends Omit<
  * output's `errors` list rather than failing the whole call.
  * Provide the implementation with
  * `Effect.provide(AWS.RePostSpace.BatchRemoveChannelRoleFromAccessorsHttp)`.
- * ### Managing Roles
- * **Example:** Remove a channel role from users
+ * @binding
+ * @section Managing Roles
+ * @example Remove a channel role from users
  * ```typescript
  * const removeChannelRole =
  *   yield* AWS.RePostSpace.BatchRemoveChannelRoleFromAccessors(space);
@@ -30,8 +31,6 @@ export interface BatchRemoveChannelRoleFromAccessorsRequest extends Omit<
  *   channelRole: "EXPERT",
  * });
  * ```
- *
- * @binding
  */
 export interface BatchRemoveChannelRoleFromAccessors extends Binding.Service<
   BatchRemoveChannelRoleFromAccessors,

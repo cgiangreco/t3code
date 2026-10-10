@@ -55,8 +55,9 @@ export interface BotVersion extends Resource<
  * Versions are immutable: any prop change replaces the resource with a newly
  * created version.
  *
- * ### Creating a Version
- * **Example:** Version a Built Locale
+ * @resource
+ * @section Creating a Version
+ * @example Version a Built Locale
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -70,8 +71,6 @@ export interface BotVersion extends Resource<
  *   botVersion: version.botVersion,
  * });
  * ```
- *
- * @resource
  */
 export const BotVersion = Resource<BotVersion>("AWS.LexV2.BotVersion");
 

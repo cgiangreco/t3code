@@ -9,8 +9,9 @@ import type { WorkGroup } from "./WorkGroup.ts";
  * Lists recent query execution IDs in the bound workgroup (newest first) —
  * the workgroup name is injected automatically. Provide the implementation
  * with `Effect.provide(AWS.Athena.ListQueryExecutionsHttp)`.
- * ### Inspecting Query Executions
- * **Example:** List Recent Executions in the Workgroup
+ * @binding
+ * @section Inspecting Query Executions
+ * @example List Recent Executions in the Workgroup
  * ```typescript
  * // init — bind the operation to the workgroup
  * const listQueryExecutions = yield* AWS.Athena.ListQueryExecutions(workGroup);
@@ -19,8 +20,6 @@ import type { WorkGroup } from "./WorkGroup.ts";
  * const res = yield* listQueryExecutions({ MaxResults: 10 });
  * console.log(res.QueryExecutionIds);
  * ```
- *
- * @binding
  */
 export interface ListQueryExecutions extends Binding.Service<
   ListQueryExecutions,

@@ -243,8 +243,11 @@ export type GatewayDynamicRouting = Resource<
  * new version and deploys it; the reconciler also re-deploys when the live
  * deployed version drifts from the desired graph. Renames are applied in
  * place; only moving the route to a different gateway forces a replacement.
- * ### Creating a Route
- * **Example:** Route all traffic to one model
+ * @resource
+ * @product AI Gateway
+ * @category AI
+ * @section Creating a Route
+ * @example Route all traffic to one model
  * ```typescript
  * const gateway = yield* Cloudflare.AI.Gateway("Gateway");
  *
@@ -271,8 +274,8 @@ export type GatewayDynamicRouting = Resource<
  * });
  * ```
  *
- * ### Updating a Route
- * **Example:** Change the model — creates and deploys a new version
+ * @section Updating a Route
+ * @example Change the model — creates and deploys a new version
  * ```typescript
  * const route = yield* Cloudflare.AI.GatewayDynamicRouting("Llama", {
  *   gatewayId: gateway.gatewayId,
@@ -298,10 +301,6 @@ export type GatewayDynamicRouting = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ai-gateway/features/dynamic-routing/
- *
- * @resource
- * @product AI Gateway
- * @category AI
  */
 export const GatewayDynamicRouting = Resource<GatewayDynamicRouting>(TypeId, {
   aliases: ["Cloudflare.AiGateway.DynamicRouting"],

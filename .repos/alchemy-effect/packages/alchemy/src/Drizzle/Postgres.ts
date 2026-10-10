@@ -1,15 +1,12 @@
-// `@effect/sql-pg` (and pg underneath) are optional peers — value imports
-// are deferred to first use so `alchemy/Drizzle` resolves without them
-// installed.
-import type * as PgClient from "@effect/sql-pg/PgClient";
+import * as PgClient from "@effect/sql-pg/PgClient";
 import type { AnyRelations, EmptyRelations } from "drizzle-orm";
 import type { EffectPgDatabase } from "drizzle-orm/effect-postgres";
+import * as PgDrizzle from "drizzle-orm/effect-postgres";
 import type { EffectDrizzlePgConfig } from "drizzle-orm/pg-core/effect/utils";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import type * as Redacted from "effect/Redacted";
 import { makeExecutionMemo } from "../Runtime/ExecutionMemo.ts";
-import { resolveConnectionOptions } from "../SQL/PostgresTls.ts";
 import { proxyChain } from "../Util/proxy-chain.ts";
 
 /**
@@ -59,15 +56,8 @@ export const Postgres = <
   Effect.map(
     makeExecutionMemo(
       Effect.gen(function* () {
-        const [PgClient, PgDrizzle] = yield* Effect.promise(() =>
-          Promise.all([
-            import("@effect/sql-pg/PgClient"),
-            import("drizzle-orm/effect-postgres"),
-          ]),
-        );
-        const url = yield* connectionString;
         const pgCtx = yield* Layer.build(
-          PgClient.layer(resolveConnectionOptions(url)),
+          PgClient.layer({ url: yield* connectionString }),
         );
         return yield* PgDrizzle.makeWithDefaults(config).pipe(
           Effect.provideContext(pgCtx),

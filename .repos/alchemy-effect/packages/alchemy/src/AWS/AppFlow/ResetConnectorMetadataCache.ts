@@ -19,8 +19,9 @@ export interface ResetConnectorMetadataCacheRequest extends Omit<
  * `appflow:ResetConnectorMetadataCache` is granted on the profile. Provide
  * the implementation with
  * `Effect.provide(AWS.AppFlow.ResetConnectorMetadataCacheHttp)`.
- * ### Discovering Connector Entities
- * **Example:** Refresh Cached Entity Metadata
+ * @binding
+ * @section Discovering Connector Entities
+ * @example Refresh Cached Entity Metadata
  * ```typescript
  * // init — bind the operation to the connector profile
  * const resetConnectorMetadataCache =
@@ -30,8 +31,6 @@ export interface ResetConnectorMetadataCacheRequest extends Omit<
  * yield* resetConnectorMetadataCache();
  * const fresh = yield* listConnectorEntities();
  * ```
- *
- * @binding
  */
 export interface ResetConnectorMetadataCache extends Binding.Service<
   ResetConnectorMetadataCache,

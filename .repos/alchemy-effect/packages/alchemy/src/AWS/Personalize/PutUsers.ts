@@ -19,8 +19,9 @@ export interface PutUsersRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.PutUsersHttp)`.
  *
- * ### Incremental Imports
- * **Example:** Upsert a User
+ * @binding
+ * @section Incremental Imports
+ * @example Upsert a User
  * ```typescript
  * // init
  * const putUsers = yield* Personalize.PutUsers(usersDataset);
@@ -32,8 +33,6 @@ export interface PutUsersRequest extends Omit<
  *   }],
  * });
  * ```
- *
- * @binding
  */
 export interface PutUsers extends Binding.Service<
   PutUsers,

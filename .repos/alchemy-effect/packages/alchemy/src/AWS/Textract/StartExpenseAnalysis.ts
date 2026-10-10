@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Poll the returned `JobId` with `GetExpenseAnalysis`. The caller needs
  * `s3:GetObject` on the input bucket.
  *
- * ### Asynchronous Expense Analysis
- * **Example:** Start an Expense Analysis Job
+ * @binding
+ * @section Asynchronous Expense Analysis
+ * @example Start an Expense Analysis Job
  * ```typescript
  * // init
  * const startExpenseAnalysis = yield* AWS.Textract.StartExpenseAnalysis();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   DocumentLocation: { S3Object: { Bucket: bucketName, Name: "invoice.pdf" } },
  * });
  * ```
- *
- * @binding
  */
 export interface StartExpenseAnalysis extends Binding.Service<
   StartExpenseAnalysis,

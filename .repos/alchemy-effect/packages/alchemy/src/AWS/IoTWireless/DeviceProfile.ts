@@ -65,8 +65,9 @@ export interface DeviceProfile extends Resource<
  *
  * Device profiles are immutable after creation: any change to `name`,
  * `loRaWAN`, or `sidewalk` replaces the profile. Only tags update in place.
- * ### Creating Device Profiles
- * **Example:** US915 OTAA Device Profile
+ * @resource
+ * @section Creating Device Profiles
+ * @example US915 OTAA Device Profile
  * ```typescript
  * import * as IoTWireless from "alchemy/AWS/IoTWireless";
  *
@@ -81,14 +82,12 @@ export interface DeviceProfile extends Resource<
  * });
  * ```
  *
- * **Example:** Sidewalk Device Profile
+ * @example Sidewalk Device Profile
  * ```typescript
  * const profile = yield* IoTWireless.DeviceProfile("SidewalkModel", {
  *   sidewalk: {},
  * });
  * ```
- *
- * @resource
  */
 export const DeviceProfile = Resource<DeviceProfile>(
   "AWS.IoTWireless.DeviceProfile",

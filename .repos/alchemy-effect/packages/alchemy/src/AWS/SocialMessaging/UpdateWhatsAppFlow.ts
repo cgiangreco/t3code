@@ -22,8 +22,9 @@ export interface UpdateWhatsAppFlowRequest extends Omit<
  * into every request.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.UpdateWhatsAppFlowHttp)`.
- * ### Managing WhatsApp Flows
- * **Example:** Rename a Flow
+ * @binding
+ * @section Managing WhatsApp Flows
+ * @example Rename a Flow
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const updateFlow = yield* AWS.SocialMessaging.UpdateWhatsAppFlow(account);
@@ -34,8 +35,6 @@ export interface UpdateWhatsAppFlowRequest extends Omit<
  *   flowName: "appointment-booking-v2",
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateWhatsAppFlow extends Binding.Service<
   UpdateWhatsAppFlow,

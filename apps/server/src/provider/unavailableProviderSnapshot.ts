@@ -18,7 +18,7 @@ import {
 import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 
-import { buildServerProvider } from "@t3tools/provider-core/server/snapshotProbe";
+import { buildServerProvider } from "./providerSnapshot.ts";
 
 export interface UnavailableProviderSnapshotInput {
   readonly driverKind: ProviderDriverKind | string;

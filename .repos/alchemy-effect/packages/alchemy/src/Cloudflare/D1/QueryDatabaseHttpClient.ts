@@ -1,7 +1,7 @@
 import type * as runtime from "@cloudflare/workers-types";
 import * as d1 from "@distilled.cloud/cloudflare/d1";
 import * as Effect from "effect/Effect";
-import type * as HttpClient from "effect/http/HttpClient";
+import type * as HttpClient from "effect/unstable/http/HttpClient";
 import type { Credentials } from "../Credentials.ts";
 import {
   type QueryDatabaseClient,
@@ -43,19 +43,9 @@ export interface D1Auth {
 export const makeHttpQueryDatabaseClient = (
   auth: D1Auth,
   databaseId: Effect.Effect<string>,
-): QueryDatabaseClient =>
-  makeQueryDatabaseClientFrom(
-    Effect.map(databaseId, (id) => makeHttpD1Database(auth, id)),
-  );
-
-/**
- * Build a {@link QueryDatabaseClient} from a deferred `D1Database` — shared
- * by the cloud HTTP transport above and the local-simulator gateway
- * transport (`QueryDatabaseLocal` with a `dev:` id).
- */
-export const makeQueryDatabaseClientFrom = (
-  rawEff: Effect.Effect<runtime.D1Database>,
 ): QueryDatabaseClient => {
+  const rawEff = Effect.map(databaseId, (id) => makeHttpD1Database(auth, id));
+
   return {
     raw: rawEff,
     prepare: (query: string) => new PreparedStatement(query, [], rawEff),
@@ -88,9 +78,7 @@ const runQuery = (
     .pipe(Effect.runPromise);
 
 const toResult = <T>(
-  r:
-    | { results?: unknown; success?: boolean | null; meta?: unknown }
-    | undefined,
+  r: d1.QueryDatabaseResponse["result"][number] | undefined,
 ): runtime.D1Result<T> =>
   ({
     results: (r?.results ?? []) as T[],
@@ -118,40 +106,16 @@ const normalizeBind = (value: unknown): unknown => {
   return value;
 };
 
-/** A `D1Database` facade over the cloud HTTP query API. */
-export const makeHttpD1Database = (
+const makeHttpD1Database = (
   auth: D1Auth,
   databaseId: string,
-): runtime.D1Database =>
-  makeD1DatabaseFromTransport((body) => runQuery(auth, databaseId, body));
-
-/**
- * The transport a {@link runtime.D1Database} facade is built over: run one
- * query (or batch) and return the D1 result envelope(s). Two transports
- * exist — the cloud HTTP API (`runQuery`) and the local-simulator gateway
- * (`withLocalD1Query`).
- */
-export type D1QueryTransport = (
-  body:
-    | { sql: string; params?: unknown[] }
-    | { batch: { sql: string; params?: unknown[] }[] },
-) => Promise<{
-  result: Array<{
-    results?: unknown;
-    success?: boolean | null;
-    meta?: unknown;
-  }>;
-}>;
-
-export const makeD1DatabaseFromTransport = (
-  transport: D1QueryTransport,
 ): runtime.D1Database => {
   const makeStatement = (
     query: string,
     binds: ReadonlyArray<unknown>,
   ): runtime.D1PreparedStatement => {
     const exec = async () => {
-      const res = await transport({
+      const res = await runQuery(auth, databaseId, {
         sql: query,
         params: binds.length ? binds.map(normalizeBind) : undefined,
       });
@@ -160,9 +124,9 @@ export const makeD1DatabaseFromTransport = (
     return {
       bind: (...values: unknown[]) => makeStatement(query, values),
       first: (async (column?: string) => {
-        const first = (
-          (await exec())?.results as Record<string, unknown>[] | undefined
-        )?.[0];
+        const first = (await exec())?.results?.[0] as
+          | Record<string, unknown>
+          | undefined;
         if (first == null) return null;
         return column !== undefined ? (first[column] ?? null) : first;
       }) as runtime.D1PreparedStatement["first"],
@@ -190,17 +154,15 @@ export const makeD1DatabaseFromTransport = (
   return {
     prepare: (query: string) => makeStatement(query, []),
     exec: async (query: string) => {
-      const res = await transport({ sql: query });
-      const meta = res.result[res.result.length - 1]?.meta as
-        | { duration?: number }
-        | undefined;
+      const res = await runQuery(auth, databaseId, { sql: query });
+      const meta = res.result[res.result.length - 1]?.meta;
       return {
         count: res.result.length,
         duration: meta?.duration ?? 0,
       } as runtime.D1ExecResult;
     },
     batch: async <T = unknown>(statements: runtime.D1PreparedStatement[]) => {
-      const res = await transport({
+      const res = await runQuery(auth, databaseId, {
         batch: statements.map((s) => ({
           sql: (s as any).__query as string,
           params: ((s as any).__params as unknown[]).length

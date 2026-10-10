@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * `servicequotas:GetServiceQuota` (the action has no resource-level IAM).
  * Pass the raw distilled request — no marshalling.
  *
- * ### Reading Quotas
- * **Example:** Read the Lambda concurrent-executions quota
+ * @binding
+ * @section Reading Quotas
+ * @example Read the Lambda concurrent-executions quota
  * ```typescript
  * // init
  * const getServiceQuota = yield* AWS.ServiceQuotas.GetServiceQuota();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const applied = Quota?.Value;
  * ```
- *
- * @binding
  */
 export interface GetServiceQuota extends Binding.Service<
   GetServiceQuota,

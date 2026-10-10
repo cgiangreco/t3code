@@ -1,17 +1,18 @@
-import { ProcessSignalActions } from "./ProcessSignalActions";
-import { resolveUsageAccess } from "@t3tools/client-runtime/state/usage-access";
-import { environmentSession } from "../../state/session";
-import { AuthOrchestrationOperateScope } from "@t3tools/contracts";
-import { readEnvironmentScope, useEnvironmentScope } from "../../state/session";
-import { AuthEnvironmentMaintainScope } from "@t3tools/contracts";
-import { RefreshIcon } from "~/components/ui/refresh-icon";
-import { AlertTriangleIcon, CopyIcon, FolderOpenIcon, InfoIcon } from "lucide-react";
-import { ChevronDown, ChevronRight } from "lucide";
+import {
+  AlertTriangleIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  FolderOpenIcon,
+  InfoIcon,
+  RefreshCwIcon,
+} from "lucide-react";
+import { useAtomValue } from "@effect/atom-react";
 import {
   isAtomCommandInterrupted,
   squashAtomCommandFailure,
 } from "@t3tools/client-runtime/state/runtime";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type {
   ServerProcessDiagnosticsEntry,
   ServerProcessResourceHistorySummary,
@@ -21,23 +22,24 @@ import * as DateTime from "effect/DateTime";
 import * as Option from "effect/Option";
 
 import { cn } from "../../lib/utils";
-import { ensureLocalApi } from "../../localApi";
-import { useOpenInPreferredEditor } from "../../editorPreferences";
+import { resolveAndPersistPreferredEditor } from "../../editorPreferences";
 import { formatRelativeTimeLabel, getRelativeTimeState } from "../../timestampFormat";
 import { useEnvironmentQuery } from "../../state/query";
-import { serverEnvironment } from "../../state/server";
+import {
+  primaryServerAvailableEditorsAtom,
+  primaryServerObservabilityAtom,
+  serverEnvironment,
+} from "../../state/server";
+import { shellEnvironment } from "../../state/shell";
+import { usePrimaryEnvironment } from "../../state/environments";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import { Button } from "../ui/button";
-import { MorphIcon } from "~/components/MorphIcon";
 import { ScrollArea } from "../ui/scroll-area";
-import { Toggle, ToggleGroup } from "../ui/toggle-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { toastManager } from "../ui/toast";
-import { ExpandableText } from "./ExpandableText";
 import { ResourceTelemetryDiagnostics } from "./ResourceTelemetryDiagnostics";
 import { SettingsPageContainer, SettingsSection, useRelativeTimeTick } from "./settingsLayout";
 import { useAtomCommand } from "../../state/use-atom-command";
-import { useSettingsScope } from "./SettingsScopeContext";
 
 const NUMBER_FORMAT = new Intl.NumberFormat();
 
@@ -93,7 +95,7 @@ function StatBlock({
 }) {
   return (
     <div className="min-w-0 border-border/60 px-4 py-3 sm:px-5">
-      <div className="flex min-w-0 items-center gap-1.5 text-2xs font-medium uppercase tracking-widest text-muted-foreground/70">
+      <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
         <span className="min-w-0 truncate">{label}</span>
         {tooltip ? (
           <Tooltip>
@@ -101,21 +103,26 @@ function StatBlock({
               render={
                 <button
                   type="button"
-                  className="cursor-pointer inline-flex size-3.5 shrink-0 items-center justify-center rounded-sm text-muted-foreground/60 hover:text-foreground"
+                  className="inline-flex size-3.5 shrink-0 items-center justify-center rounded-sm text-muted-foreground/60 hover:text-foreground"
                   aria-label={`${label} details`}
                 >
                   <InfoIcon className="size-3" />
                 </button>
               }
             />
-            <TooltipPopup side="top">{tooltip}</TooltipPopup>
+            <TooltipPopup
+              side="top"
+              className="max-w-[min(300px,calc(100vw-2rem))] whitespace-normal text-left text-[11px] leading-relaxed text-wrap"
+            >
+              {tooltip}
+            </TooltipPopup>
           </Tooltip>
         ) : null}
       </div>
       <div
         className={cn(
           "mt-1 truncate font-mono text-lg font-semibold tabular-nums text-foreground",
-          tone === "warning" && "text-warning-foreground",
+          tone === "warning" && "text-amber-600 dark:text-amber-400",
           tone === "danger" && "text-destructive",
         )}
       >
@@ -153,6 +160,43 @@ function EmptyRows({ label }: { label: string }) {
   return <div className="px-4 py-4 text-xs text-muted-foreground sm:px-5">{label}</div>;
 }
 
+function ExpandableText({
+  text,
+  className,
+  collapsedClassName = "line-clamp-3",
+  expandLabel = "Show full error",
+}: {
+  text: string;
+  className?: string;
+  collapsedClassName?: string;
+  expandLabel?: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const canExpand = text.length > 180 || text.includes("\n");
+
+  return (
+    <div className={cn("min-w-0", className)}>
+      <div
+        className={cn(
+          "whitespace-pre-wrap break-words",
+          !expanded && canExpand ? collapsedClassName : null,
+        )}
+      >
+        {text}
+      </div>
+      {canExpand ? (
+        <button
+          type="button"
+          className="mt-1 text-[11px] font-medium text-foreground/70 underline-offset-2 hover:text-foreground hover:underline"
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? "Show less" : expandLabel}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function DiagnosticsTable({
   headers,
   children,
@@ -166,11 +210,10 @@ function DiagnosticsTable({
 }) {
   return (
     <ScrollArea
-      radius="none"
       chainVerticalScroll
       scrollFade
       hideScrollbars
-      className="w-full max-w-full"
+      className="w-full max-w-full rounded-none"
     >
       <table
         className={cn("w-full text-left text-xs", minTableWidth, columnWidths && "table-fixed")}
@@ -182,7 +225,7 @@ function DiagnosticsTable({
             ))}
           </colgroup>
         ) : null}
-        <thead className="border-b border-border/60 text-2xs uppercase tracking-widest text-muted-foreground/70">
+        <thead className="border-b border-border/60 text-[11px] uppercase tracking-[0.08em] text-muted-foreground/70">
           <tr>
             {headers.map((header, index) => (
               <th
@@ -214,26 +257,29 @@ function TraceIdCell({ traceId }: { traceId: string }) {
       <Tooltip>
         <TooltipTrigger
           render={
-            <span className="min-w-0 flex-1 truncate font-mono text-2xs">
+            <span className="min-w-0 flex-1 truncate font-mono text-[11px]">
               {shortenTraceId(traceId)}
             </span>
           }
         />
-        <TooltipPopup side="top" variant="code">
+        <TooltipPopup
+          side="top"
+          className="max-w-[min(520px,calc(100vw-2rem))] break-all font-mono text-[11px]"
+        >
           {traceId}
         </TooltipPopup>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger
           render={
-            <Button
-              size="icon-micro"
-              variant="ghost-muted"
+            <button
+              type="button"
+              className="inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground"
               aria-label={copied ? "Copied trace ID" : "Copy trace ID"}
               onClick={() => copyToClipboard(traceId)}
             >
               <CopyIcon className="size-3" />
-            </Button>
+            </button>
           }
         />
         <TooltipPopup side="top">{copied ? "Copied" : "Copy full trace ID"}</TooltipPopup>
@@ -267,6 +313,7 @@ function ProcessNameCell({
 }) {
   const name = formatProcessName(process.command);
   const hasChildren = process.childPids.length > 0;
+  const ChevronIcon = isExpanded ? ChevronDownIcon : ChevronRightIcon;
 
   return (
     <div
@@ -274,23 +321,26 @@ function ProcessNameCell({
       style={{ paddingLeft: `${Math.min(process.depth, 6) * 10}px` }}
     >
       {hasChildren ? (
-        <Button
-          size="icon-micro"
-          variant="ghost-muted"
+        <button
+          type="button"
+          className="inline-flex size-5 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground"
           aria-label={isExpanded ? `Collapse ${name}` : `Expand ${name}`}
           onClick={() => onToggle(process.pid)}
         >
-          <MorphIcon className="size-3.5" icon={isExpanded ? ChevronDown : ChevronRight} />
-        </Button>
+          <ChevronIcon className="size-3.5" />
+        </button>
       ) : (
         <span className="size-5 shrink-0" aria-hidden="true" />
       )}
-      <span className="size-1.5 shrink-0 rounded-full bg-success/80" />
+      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500/80" />
       <Tooltip>
         <TooltipTrigger
           render={<span className="min-w-0 truncate font-medium text-foreground">{name}</span>}
         />
-        <TooltipPopup side="top" variant="code">
+        <TooltipPopup
+          side="top"
+          className="max-w-[min(440px,calc(100vw-2rem))] whitespace-normal break-words text-left font-mono text-[11px] leading-relaxed text-wrap"
+        >
           {process.command}
         </TooltipPopup>
       </Tooltip>
@@ -298,15 +348,58 @@ function ProcessNameCell({
   );
 }
 
+function ProcessSignalActions({
+  process,
+  isSignaling,
+  onSignal,
+}: {
+  process: ServerProcessDiagnosticsEntry;
+  isSignaling: boolean;
+  onSignal: (pid: number, signal: ServerProcessSignal) => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-1.5">
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              disabled={isSignaling}
+              className="text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline disabled:pointer-events-none disabled:opacity-50"
+              onClick={() => onSignal(process.pid, "SIGINT")}
+            >
+              INT
+            </button>
+          }
+        />
+        <TooltipPopup side="top">Send SIGINT</TooltipPopup>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              disabled={isSignaling}
+              className="text-[11px] font-medium text-destructive underline-offset-2 hover:underline disabled:pointer-events-none disabled:opacity-50"
+              onClick={() => onSignal(process.pid, "SIGKILL")}
+            >
+              KILL
+            </button>
+          }
+        />
+        <TooltipPopup side="top">Send SIGKILL</TooltipPopup>
+      </Tooltip>
+    </div>
+  );
+}
+
 function ProcessDiagnosticsTable({
   processes,
-  canMaintainEnvironment,
   signalingPid,
   onSignal,
   emptyLabel,
 }: {
   processes: ReadonlyArray<ServerProcessDiagnosticsEntry>;
-  canMaintainEnvironment: boolean;
   signalingPid: number | null;
   onSignal: (pid: number, signal: ServerProcessSignal) => void;
   emptyLabel?: string;
@@ -344,86 +437,87 @@ function ProcessDiagnosticsTable({
   }, []);
 
   return (
-    <div className="border-t border-border/60">
-      <ScrollArea
-        radius="none"
-        chainVerticalScroll
-        scrollFade
-        hideScrollbars
-        className="max-h-[min(64vh,44rem)] w-full max-w-full"
-      >
-        <table className="w-full min-w-[1040px] table-fixed text-left text-xs">
-          <colgroup>
-            <col className="w-[24%]" />
-            <col className="w-[8%]" />
-            <col className="w-[10%]" />
-            <col className="w-[33%]" />
-            <col className="w-[8%]" />
-            <col className="w-[11%]" />
-            <col className="w-[6%]" />
-          </colgroup>
-          <thead className="sticky top-0 z-10 border-b border-border/60 bg-card text-2xs uppercase tracking-widest text-muted-foreground/70">
+    <ScrollArea
+      chainVerticalScroll
+      scrollFade
+      hideScrollbars
+      className="max-h-[min(64vh,44rem)] w-full max-w-full rounded-none border-t border-border/60"
+    >
+      <table className="w-full min-w-[1040px] table-fixed text-left text-xs">
+        <colgroup>
+          <col className="w-[24%]" />
+          <col className="w-[8%]" />
+          <col className="w-[10%]" />
+          <col className="w-[33%]" />
+          <col className="w-[8%]" />
+          <col className="w-[11%]" />
+          <col className="w-[6%]" />
+        </colgroup>
+        <thead className="sticky top-0 z-10 border-b border-border/60 bg-card text-[11px] uppercase tracking-[0.08em] text-muted-foreground/70">
+          <tr>
+            <th className="px-4 py-2 font-semibold sm:pl-5">Name</th>
+            <th className="px-3 py-2 text-right font-semibold">CPU</th>
+            <th className="px-3 py-2 text-right font-semibold">Memory</th>
+            <th className="px-3 py-2 font-semibold">Command</th>
+            <th className="px-3 py-2 text-right font-semibold">PID</th>
+            <th className="px-3 py-2 font-semibold">Type</th>
+            <th className="p-2 text-right font-semibold sm:pr-4">Kill</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border/50">
+          {visibleProcesses.length === 0 ? (
             <tr>
-              <th className="px-4 py-2 font-semibold sm:pl-5">Name</th>
-              <th className="px-3 py-2 text-right font-semibold">CPU</th>
-              <th className="px-3 py-2 text-right font-semibold">Memory</th>
-              <th className="px-3 py-2 font-semibold">Command</th>
-              <th className="px-3 py-2 text-right font-semibold">PID</th>
-              <th className="px-3 py-2 font-semibold">Type</th>
-              <th className="p-2 text-right font-semibold sm:pr-4">Kill</th>
+              <td colSpan={7} className="px-4 py-4 text-xs text-muted-foreground sm:px-5">
+                {emptyLabel ?? "No live descendant processes found."}
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-border/50">
-            {visibleProcesses.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-4 text-xs text-muted-foreground sm:px-5">
-                  {emptyLabel ?? "No live descendant processes found."}
-                </td>
-              </tr>
-            ) : null}
-            {visibleProcesses.map((process) => (
-              <tr key={process.pid} className="hover:bg-muted/20">
-                <td className="px-4 py-2 align-middle sm:pl-5">
-                  <ProcessNameCell
-                    process={process}
-                    isExpanded={!collapsedPids.has(process.pid)}
-                    onToggle={toggleProcess}
+          ) : null}
+          {visibleProcesses.map((process) => (
+            <tr key={process.pid} className="hover:bg-muted/20">
+              <td className="px-4 py-2 align-middle sm:pl-5">
+                <ProcessNameCell
+                  process={process}
+                  isExpanded={!collapsedPids.has(process.pid)}
+                  onToggle={toggleProcess}
+                />
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {process.cpuPercent.toFixed(1)}%
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {formatBytes(process.rssBytes)}
+              </td>
+              <td className="px-3 py-2 align-middle text-muted-foreground">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<span className="block truncate">{process.command}</span>}
                   />
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {process.cpuPercent.toFixed(1)}%
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {formatBytes(process.rssBytes)}
-                </td>
-                <td className="px-3 py-2 align-middle text-muted-foreground">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={<span className="block truncate">{process.command}</span>}
-                    />
-                    <TooltipPopup side="top" variant="code">
-                      {process.command}
-                    </TooltipPopup>
-                  </Tooltip>
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums text-muted-foreground">
-                  {process.pid}
-                </td>
-                <td className="truncate px-3 py-2 align-middle text-muted-foreground">
-                  {formatProcessType(process)}
-                </td>
-                <td className="p-2 align-middle sm:pr-4">
-                  <ProcessSignalActions
-                    disabled={!canMaintainEnvironment || signalingPid === process.pid}
-                    onSignal={(signal) => onSignal(process.pid, signal)}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </ScrollArea>
-    </div>
+                  <TooltipPopup
+                    side="top"
+                    className="max-w-[min(440px,calc(100vw-2rem))] whitespace-normal break-words text-left font-mono text-[11px] leading-relaxed text-wrap"
+                  >
+                    {process.command}
+                  </TooltipPopup>
+                </Tooltip>
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums text-muted-foreground">
+                {process.pid}
+              </td>
+              <td className="truncate px-3 py-2 align-middle text-muted-foreground">
+                {formatProcessType(process)}
+              </td>
+              <td className="p-2 align-middle sm:pr-4">
+                <ProcessSignalActions
+                  process={process}
+                  isSignaling={signalingPid === process.pid}
+                  onSignal={onSignal}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </ScrollArea>
   );
 }
 
@@ -465,14 +559,17 @@ function ResourceHistoryProcessNameCell({
       <span
         className={cn(
           "size-1.5 shrink-0 rounded-full",
-          process.isServerRoot ? "bg-warning/90" : "bg-success/80",
+          process.isServerRoot ? "bg-amber-500/90" : "bg-emerald-500/80",
         )}
       />
       <Tooltip>
         <TooltipTrigger
           render={<span className="min-w-0 truncate font-medium text-foreground">{name}</span>}
         />
-        <TooltipPopup side="top" variant="code">
+        <TooltipPopup
+          side="top"
+          className="max-w-[min(440px,calc(100vw-2rem))] whitespace-normal break-words text-left font-mono text-[11px] leading-relaxed text-wrap"
+        >
           {process.command}
         </TooltipPopup>
       </Tooltip>
@@ -537,23 +634,21 @@ function ResourceHistoryWindowSelector({
   onSelect: (windowMs: number) => void;
 }) {
   return (
-    <ToggleGroup
-      aria-label="Process history period"
-      variant="segmented"
-      value={[String(selectedWindowMs)]}
-      onValueChange={(next) => {
-        const selected = RESOURCE_HISTORY_WINDOWS.find(
-          (option) => String(option.windowMs) === next[0],
-        );
-        if (selected) onSelect(selected.windowMs);
-      }}
-    >
+    <div className="flex items-center rounded-md border border-border/60 p-0.5">
       {RESOURCE_HISTORY_WINDOWS.map((option) => (
-        <Toggle key={option.windowMs} value={String(option.windowMs)}>
+        <button
+          key={option.windowMs}
+          type="button"
+          className={cn(
+            "h-6 rounded-sm px-2 text-[11px] font-medium text-muted-foreground hover:text-foreground",
+            selectedWindowMs === option.windowMs && "bg-muted text-foreground",
+          )}
+          onClick={() => onSelect(option.windowMs)}
+        >
           {option.label}
-        </Toggle>
+        </button>
       ))}
-    </ToggleGroup>
+    </div>
   );
 }
 
@@ -570,90 +665,91 @@ function ProcessResourceHistoryTable({
   }, null);
 
   return (
-    <div className="border-t border-border/60">
-      <ScrollArea
-        chainVerticalScroll
-        scrollFade
-        hideScrollbars
-        className="max-h-[min(64vh,44rem)] w-full max-w-full"
-      >
-        <table className="w-full min-w-[980px] table-fixed text-left text-xs">
-          <colgroup>
-            <col className="w-[24%]" />
-            <col className="w-[10%]" />
-            <col className="w-[10%]" />
-            <col className="w-[10%]" />
-            <col className="w-[10%]" />
-            <col className="w-[10%]" />
-            <col className="w-[16%]" />
-            <col className="w-[10%]" />
-          </colgroup>
-          <thead className="sticky top-0 z-10 border-b border-border/60 bg-card text-2xs uppercase tracking-widest text-muted-foreground/70">
+    <ScrollArea
+      chainVerticalScroll
+      scrollFade
+      hideScrollbars
+      className="max-h-[min(64vh,44rem)] w-full max-w-full border-t border-border/60"
+    >
+      <table className="w-full min-w-[980px] table-fixed text-left text-xs">
+        <colgroup>
+          <col className="w-[24%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[16%]" />
+          <col className="w-[10%]" />
+        </colgroup>
+        <thead className="sticky top-0 z-10 border-b border-border/60 bg-card text-[11px] uppercase tracking-[0.08em] text-muted-foreground/70">
+          <tr>
+            <th className="px-4 py-2 font-semibold sm:pl-5">Process</th>
+            <th className="px-3 py-2 text-right font-semibold">CPU Time</th>
+            <th className="px-3 py-2 text-right font-semibold">Current</th>
+            <th className="px-3 py-2 text-right font-semibold">Average</th>
+            <th className="px-3 py-2 text-right font-semibold">Peak</th>
+            <th className="px-3 py-2 text-right font-semibold">Max Mem</th>
+            <th className="px-3 py-2 font-semibold">Command</th>
+            <th className="px-3 py-2 text-right font-semibold sm:pr-5">PID</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border/50">
+          {processes.length === 0 ? (
             <tr>
-              <th className="px-4 py-2 font-semibold sm:pl-5">Process</th>
-              <th className="px-3 py-2 text-right font-semibold">CPU Time</th>
-              <th className="px-3 py-2 text-right font-semibold">Current</th>
-              <th className="px-3 py-2 text-right font-semibold">Average</th>
-              <th className="px-3 py-2 text-right font-semibold">Peak</th>
-              <th className="px-3 py-2 text-right font-semibold">Max Mem</th>
-              <th className="px-3 py-2 font-semibold">Command</th>
-              <th className="px-3 py-2 text-right font-semibold sm:pr-5">PID</th>
+              <td colSpan={8} className="px-4 py-4 text-xs text-muted-foreground sm:px-5">
+                {emptyLabel}
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-border/50">
-            {processes.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-4 text-xs text-muted-foreground sm:px-5">
-                  {emptyLabel}
-                </td>
-              </tr>
-            ) : null}
-            {processes.map((process) => (
-              <tr key={process.processKey} className="hover:bg-muted/20">
-                <td className="px-4 py-2 align-middle sm:pl-5">
-                  <ResourceHistoryProcessNameCell
-                    process={process}
-                    visualDepth={
-                      process.isServerRoot || shallowestChildDepth === null
-                        ? 0
-                        : Math.max(1, process.depth - shallowestChildDepth + 1)
-                    }
+          ) : null}
+          {processes.map((process) => (
+            <tr key={process.processKey} className="hover:bg-muted/20">
+              <td className="px-4 py-2 align-middle sm:pl-5">
+                <ResourceHistoryProcessNameCell
+                  process={process}
+                  visualDepth={
+                    process.isServerRoot || shallowestChildDepth === null
+                      ? 0
+                      : Math.max(1, process.depth - shallowestChildDepth + 1)
+                  }
+                />
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {formatCpuTime(process.cpuSecondsApprox)}
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {process.currentCpuPercent.toFixed(1)}%
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {process.avgCpuPercent.toFixed(1)}%
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {process.maxCpuPercent.toFixed(1)}%
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
+                {formatBytes(process.maxRssBytes)}
+              </td>
+              <td className="px-3 py-2 align-middle text-muted-foreground">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={<span className="block truncate">{process.command}</span>}
                   />
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {formatCpuTime(process.cpuSecondsApprox)}
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {process.currentCpuPercent.toFixed(1)}%
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {process.avgCpuPercent.toFixed(1)}%
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {process.maxCpuPercent.toFixed(1)}%
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums">
-                  {formatBytes(process.maxRssBytes)}
-                </td>
-                <td className="px-3 py-2 align-middle text-muted-foreground">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={<span className="block truncate">{process.command}</span>}
-                    />
-                    <TooltipPopup side="top" variant="code">
-                      {process.command}
-                    </TooltipPopup>
-                  </Tooltip>
-                </td>
-                <td className="px-3 py-2 text-right align-middle font-mono tabular-nums text-muted-foreground sm:pr-5">
-                  {process.pid}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </ScrollArea>
-    </div>
+                  <TooltipPopup
+                    side="top"
+                    className="max-w-[min(440px,calc(100vw-2rem))] whitespace-normal break-words text-left font-mono text-[11px] leading-relaxed text-wrap"
+                  >
+                    {process.command}
+                  </TooltipPopup>
+                </Tooltip>
+              </td>
+              <td className="px-3 py-2 text-right align-middle font-mono tabular-nums text-muted-foreground sm:pr-5">
+                {process.pid}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </ScrollArea>
   );
 }
 
@@ -662,15 +758,15 @@ function DiagnosticsLastChecked({ checkedAt }: { checkedAt: DateTime.Utc | null 
   const relative = getRelativeTimeState(checkedAt ? DateTime.formatIso(checkedAt) : null);
 
   if (relative.status === "missing") {
-    return <span className="text-2xs text-muted-foreground/50">Checking</span>;
+    return <span className="text-[11px] text-muted-foreground/50">Checking</span>;
   }
 
   if (relative.status === "invalid") {
-    return <span className="text-2xs text-muted-foreground/50">Checked unavailable</span>;
+    return <span className="text-[11px] text-muted-foreground/50">Checked unavailable</span>;
   }
 
   return (
-    <span className="text-2xs text-muted-foreground/60">
+    <span className="text-[11px] text-muted-foreground/60">
       {relative.suffix ? (
         <>
           Checked <span className="font-mono tabular-nums">{relative.value}</span> {relative.suffix}
@@ -697,12 +793,13 @@ function DiagnosticsRefreshButton({
         render={
           <Button
             size="icon-xs"
-            variant="ghost-muted"
+            variant="ghost"
+            className="size-5 rounded-sm p-0 text-muted-foreground hover:text-foreground"
             disabled={isPending}
             onClick={onClick}
             aria-label={label}
           >
-            <RefreshIcon refreshing={isPending} />
+            <RefreshCwIcon className={cn("size-3", isPending && "animate-spin")} />
           </Button>
         }
       />
@@ -712,33 +809,22 @@ function DiagnosticsRefreshButton({
 }
 
 export function DiagnosticsSettingsPanel() {
-  const { environment } = useSettingsScope();
-  // The boundary only mounts this page when the selection resolves to one
-  // connected environment, so the representative is the one to inspect.
-  const environmentId = environment?.environmentId ?? null;
-  const canMaintainEnvironment = useEnvironmentScope(environmentId, AuthEnvironmentMaintainScope);
-  const observability = environment?.serverConfig?.observability;
-  const availableEditors = environment?.serverConfig?.availableEditors;
-  const canOpenHostEditor = useEnvironmentScope(environmentId, AuthOrchestrationOperateScope);
-  const session = useEnvironmentQuery(
-    environmentId === null ? null : environmentSession.sessionStateAtom(environmentId),
-  );
-  const diagnosticsAccess = resolveUsageAccess({
-    connectionPhase: environment?.connection.phase ?? "available",
-    session: session.data,
-    hasSessionError: session.error !== null,
-  });
-  const canReadDiagnostics = diagnosticsAccess.canReadDiagnostics;
+  const observability = useAtomValue(primaryServerObservabilityAtom);
+  const availableEditors = useAtomValue(primaryServerAvailableEditorsAtom);
+  const primaryEnvironment = usePrimaryEnvironment();
+  const environmentId = primaryEnvironment?.environmentId ?? null;
   const signalServerProcess = useAtomCommand(serverEnvironment.signalProcess, {
     reportFailure: false,
   });
-  const openInEditor = useOpenInPreferredEditor(environmentId, availableEditors ?? []);
+  const openInEditor = useAtomCommand(shellEnvironment.openInEditor, {
+    reportFailure: false,
+  });
   const [resourceWindowMs, setResourceWindowMs] = useState(15 * 60_000);
   const selectedResourceWindow =
     RESOURCE_HISTORY_WINDOWS.find((option) => option.windowMs === resourceWindowMs) ??
     RESOURCE_HISTORY_WINDOWS[1];
   const { data, error, isPending, refresh } = useEnvironmentQuery(
-    environmentId === null || !canReadDiagnostics
+    environmentId === null
       ? null
       : serverEnvironment.traceDiagnostics({ environmentId, input: {} }),
   );
@@ -748,7 +834,7 @@ export function DiagnosticsSettingsPanel() {
     isPending: isProcessPending,
     refresh: refreshProcesses,
   } = useEnvironmentQuery(
-    environmentId === null || !canReadDiagnostics
+    environmentId === null
       ? null
       : serverEnvironment.processDiagnostics({ environmentId, input: {} }),
   );
@@ -758,7 +844,7 @@ export function DiagnosticsSettingsPanel() {
     isPending: isResourcePending,
     refresh: refreshResources,
   } = useEnvironmentQuery(
-    environmentId === null || !canReadDiagnostics
+    environmentId === null
       ? null
       : serverEnvironment.processResourceHistory({
           environmentId,
@@ -771,34 +857,31 @@ export function DiagnosticsSettingsPanel() {
   const [isOpeningLogsDirectory, setIsOpeningLogsDirectory] = useState(false);
   const [openLogsDirectoryError, setOpenLogsDirectoryError] = useState<string | null>(null);
   const [signalingPid, setSignalingPid] = useState<number | null>(null);
-  const signalingPidRef = useRef<number | null>(null);
-  const environmentIdRef = useRef(environmentId);
-  const processDataRef = useRef(processData);
-  useEffect(() => {
-    processDataRef.current = processData;
-  }, [processData]);
-  useEffect(() => {
-    environmentIdRef.current = environmentId;
-    return () => {
-      environmentIdRef.current = null;
-    };
-  }, [environmentId]);
 
   const openLogsDirectory = useCallback(() => {
     const logsDirectoryPath = observability?.logsDirectoryPath ?? null;
     if (!logsDirectoryPath) return;
 
-    if (
-      environmentId === null ||
-      !readEnvironmentScope(environmentId, AuthOrchestrationOperateScope)
-    ) {
+    const editor = resolveAndPersistPreferredEditor(availableEditors ?? []);
+    if (!editor) {
+      setOpenLogsDirectoryError("No available editors found.");
+      return;
+    }
+    if (environmentId === null) {
+      setOpenLogsDirectoryError("No environment is selected.");
       return;
     }
 
     setIsOpeningLogsDirectory(true);
     setOpenLogsDirectoryError(null);
     void (async () => {
-      const result = await openInEditor(logsDirectoryPath);
+      const result = await openInEditor({
+        environmentId,
+        input: {
+          cwd: logsDirectoryPath,
+          editor,
+        },
+      });
       setIsOpeningLogsDirectory(false);
       if (result._tag === "Failure" && !isAtomCommandInterrupted(result)) {
         const error = squashAtomCommandFailure(result);
@@ -807,70 +890,33 @@ export function DiagnosticsSettingsPanel() {
         );
       }
     })();
-  }, [environmentId, observability?.logsDirectoryPath, openInEditor]);
+  }, [availableEditors, environmentId, observability?.logsDirectoryPath, openInEditor]);
 
   const isInitialLoading = isPending && data === null;
   const isProcessInitialLoading = isProcessPending && processData === null;
   const signalProcess = useCallback(
-    async (pid: number, signal: ServerProcessSignal) => {
-      const targetEnvironmentId = environmentIdRef.current;
-      const process = processDataRef.current?.processes.find((entry) => entry.pid === pid);
+    (pid: number, signal: ServerProcessSignal) => {
       if (
-        targetEnvironmentId === null ||
-        process === undefined ||
-        !readEnvironmentScope(targetEnvironmentId, AuthEnvironmentMaintainScope)
-      )
-        return;
-      if (signalingPidRef.current !== null) return;
-      signalingPidRef.current = pid;
-      setSignalingPid(pid);
-      const clearSignaling = () => {
-        signalingPidRef.current = null;
-        setSignalingPid(null);
-      };
-      if (signal === "SIGKILL") {
-        let confirmed = false;
-        try {
-          confirmed = await ensureLocalApi().dialogs.confirm(
-            `Send SIGKILL to process ${pid}? This cannot be handled by the process.`,
-            { variant: "destructive" },
-          );
-        } catch (error) {
-          clearSignaling();
-          toastManager.add({
-            type: "error",
-            title: "Could not confirm signal",
-            description: error instanceof Error ? error.message : `Failed to send ${signal}.`,
-          });
-          return;
-        }
-        if (!confirmed) {
-          clearSignaling();
-          return;
-        }
-      }
-      const currentEnvironmentId = environmentIdRef.current;
-      if (
-        currentEnvironmentId === null ||
-        currentEnvironmentId !== targetEnvironmentId ||
-        !readEnvironmentScope(currentEnvironmentId, AuthEnvironmentMaintainScope)
+        signal === "SIGKILL" &&
+        !window.confirm(`Send SIGKILL to process ${pid}? This cannot be handled by the process.`)
       ) {
-        clearSignaling();
         return;
       }
-      if (
-        processDataRef.current?.processes.find((entry) => entry.pid === pid)?.startTimeMs !==
-        process.startTimeMs
-      ) {
-        clearSignaling();
+      if (environmentId === null) {
+        return;
+      }
+      const process = processData?.processes.find((entry) => entry.pid === pid);
+      if (process === undefined) {
         return;
       }
 
-      try {
+      setSignalingPid(pid);
+      void (async () => {
         const result = await signalServerProcess({
-          environmentId: targetEnvironmentId,
+          environmentId,
           input: { pid, startTimeMs: process.startTimeMs, signal },
         });
+        setSignalingPid(null);
         if (result._tag === "Failure") {
           if (!isAtomCommandInterrupted(result)) {
             const error = squashAtomCommandFailure(result);
@@ -903,11 +949,9 @@ export function DiagnosticsSettingsPanel() {
           return;
         }
         refreshProcesses();
-      } finally {
-        clearSignaling();
-      }
+      })();
     },
-    [refreshProcesses, signalServerProcess],
+    [environmentId, processData?.processes, refreshProcesses, signalServerProcess],
   );
 
   const processDiagnosticsError = processData ? Option.getOrNull(processData.error) : null;
@@ -917,23 +961,9 @@ export function DiagnosticsSettingsPanel() {
     ? Option.getOrElse(data.partialFailure, () => false)
     : false;
 
-  if (!canReadDiagnostics) {
-    return (
-      <SettingsPageContainer>
-        <p className="text-sm text-muted-foreground">
-          {environmentId === null
-            ? "Connect an environment to see diagnostics."
-            : diagnosticsAccess.isPending
-              ? "Checking diagnostics access…"
-              : diagnosticsAccess.error}
-        </p>
-      </SettingsPageContainer>
-    );
-  }
-
   return (
-    <SettingsPageContainer width="expanded" className="gap-10">
-      <ResourceTelemetryDiagnostics environmentId={environmentId} />
+    <SettingsPageContainer className="max-w-6xl gap-10">
+      <ResourceTelemetryDiagnostics />
 
       <SettingsSection
         title="Live Processes"
@@ -986,7 +1016,6 @@ export function DiagnosticsSettingsPanel() {
         ) : null}
         <ProcessDiagnosticsTable
           processes={processData?.processes ?? []}
-          canMaintainEnvironment={canMaintainEnvironment}
           signalingPid={signalingPid}
           onSignal={signalProcess}
           emptyLabel={
@@ -1071,16 +1100,13 @@ export function DiagnosticsSettingsPanel() {
                 render={
                   <Button
                     size="icon-xs"
-                    variant="ghost-muted"
-                    disabled={
-                      !canOpenHostEditor ||
-                      !observability?.logsDirectoryPath ||
-                      isOpeningLogsDirectory
-                    }
+                    variant="ghost"
+                    className="size-5 rounded-sm p-0 text-muted-foreground hover:text-foreground"
+                    disabled={!observability?.logsDirectoryPath || isOpeningLogsDirectory}
                     onClick={openLogsDirectory}
                     aria-label="Open logs folder"
                   >
-                    <FolderOpenIcon />
+                    <FolderOpenIcon className="size-3" />
                   </Button>
                 }
               />
@@ -1129,7 +1155,9 @@ export function DiagnosticsSettingsPanel() {
               <div
                 className={cn(
                   "flex items-start gap-2",
-                  traceDiagnosticsPartialFailure ? "text-warning-foreground" : "text-destructive",
+                  traceDiagnosticsPartialFailure
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-destructive",
                 )}
               >
                 <AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0" />
@@ -1237,11 +1265,10 @@ export function DiagnosticsSettingsPanel() {
       <SettingsSection title="Span Logs">
         {data && data.latestWarningAndErrorLogs.length > 0 ? (
           <ScrollArea
-            radius="none"
             chainVerticalScroll
             scrollFade
             hideScrollbars
-            className="w-full max-w-full"
+            className="w-full max-w-full rounded-none"
           >
             <table className="w-full min-w-[920px] table-fixed text-left text-xs">
               <colgroup>
@@ -1251,7 +1278,7 @@ export function DiagnosticsSettingsPanel() {
                 <col className="w-[26%]" />
                 <col className="w-[30%]" />
               </colgroup>
-              <thead className="border-b border-border/60 text-2xs uppercase tracking-widest text-muted-foreground/70">
+              <thead className="border-b border-border/60 text-[11px] uppercase tracking-[0.08em] text-muted-foreground/70">
                 <tr>
                   <th className="whitespace-nowrap px-4 py-2.5 font-semibold sm:pl-5">Time</th>
                   <th className="whitespace-nowrap px-4 py-2.5 font-semibold">Level</th>
@@ -1270,7 +1297,7 @@ export function DiagnosticsSettingsPanel() {
                       {formatRelativeNoWrap(event.seenAt)}
                     </td>
                     <td className="px-4 py-3 align-top">
-                      <span className="inline-flex rounded bg-muted px-1.5 py-0.5 font-mono text-2xs font-medium uppercase text-foreground/80">
+                      <span className="inline-flex rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] font-medium uppercase text-foreground/80">
                         {event.level}
                       </span>
                     </td>

@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Enumerates the resource types FIS experiments can target
  * (`aws:ec2:instance`, `aws:ecs:task`, `aws:rds:cluster`, …). Provide the
  * implementation with `Effect.provide(AWS.FIS.ListTargetResourceTypesHttp)`.
- * ### Browsing the Action Catalog
- * **Example:** List Targetable Resource Types
+ * @binding
+ * @section Browsing the Action Catalog
+ * @example List Targetable Resource Types
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listTargetResourceTypes = yield* AWS.FIS.ListTargetResourceTypes();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const { targetResourceTypes } = yield* listTargetResourceTypes();
  * console.log((targetResourceTypes ?? []).map((t) => t.resourceType));
  * ```
- *
- * @binding
  */
 export interface ListTargetResourceTypes extends Binding.Service<
   ListTargetResourceTypes,

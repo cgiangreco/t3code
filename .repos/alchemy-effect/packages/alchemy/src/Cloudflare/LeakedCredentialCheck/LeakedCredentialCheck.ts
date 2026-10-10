@@ -68,8 +68,11 @@ export type LeakedCredentialCheck = Resource<
  *
  * Only one `LeakedCredentialCheck` resource per zone makes sense — two
  * instances managing the same zone would fight over the singleton.
- * ### Managing the check
- * **Example:** Enable Leaked Credential Checks on a zone
+ * @resource
+ * @product Leaked Credential Checks
+ * @category Application Security
+ * @section Managing the check
+ * @example Enable Leaked Credential Checks on a zone
  * ```typescript
  * const zone = yield* Cloudflare.Zone.Zone("Site", { name: "example.com" });
  *
@@ -78,7 +81,7 @@ export type LeakedCredentialCheck = Resource<
  * });
  * ```
  *
- * **Example:** Explicitly pin the check off
+ * @example Explicitly pin the check off
  * ```typescript
  * yield* Cloudflare.LeakedCredentialCheck.LeakedCredentialCheck("Lcc", {
  *   zoneId: zone.zoneId,
@@ -87,10 +90,6 @@ export type LeakedCredentialCheck = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/waf/detections/leaked-credentials/
- *
- * @resource
- * @product Leaked Credential Checks
- * @category Application Security
  */
 export const LeakedCredentialCheck = Resource<LeakedCredentialCheck>(TypeId, {
   aliases: ["Cloudflare.LeakedCredentialCheck"],

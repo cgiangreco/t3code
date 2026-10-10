@@ -175,8 +175,9 @@ export interface Dataset extends Resource<
  * Glue Data Catalog table, or JDBC query) plus parsing options. The dataset
  * definition itself stores no data and is free; it is consumed by DataBrew
  * projects and jobs.
- * ### Creating Datasets
- * **Example:** CSV Dataset from S3
+ * @resource
+ * @section Creating Datasets
+ * @example CSV Dataset from S3
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -192,7 +193,7 @@ export interface Dataset extends Resource<
  * });
  * ```
  *
- * **Example:** JSON Dataset
+ * @example JSON Dataset
  * ```typescript
  * const dataset = yield* AWS.DataBrew.Dataset("Events", {
  *   format: "JSON",
@@ -203,8 +204,8 @@ export interface Dataset extends Resource<
  * });
  * ```
  *
- * ### Glue Data Catalog
- * **Example:** Dataset from a Catalog Table
+ * @section Glue Data Catalog
+ * @example Dataset from a Catalog Table
  * ```typescript
  * const dataset = yield* AWS.DataBrew.Dataset("Curated", {
  *   input: {
@@ -215,8 +216,6 @@ export interface Dataset extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Dataset = Resource<Dataset>("AWS.DataBrew.Dataset");
 

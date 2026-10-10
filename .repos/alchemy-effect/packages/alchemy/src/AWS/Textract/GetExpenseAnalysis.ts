@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * results of an asynchronous expense-analysis job started with
  * `StartExpenseAnalysis`.
  *
- * ### Asynchronous Expense Analysis
- * **Example:** Poll an Expense Analysis Job
+ * @binding
+ * @section Asynchronous Expense Analysis
+ * @example Poll an Expense Analysis Job
  * ```typescript
  * // init
  * const getExpenseAnalysis = yield* AWS.Textract.GetExpenseAnalysis();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* getExpenseAnalysis({ JobId: jobId });
  * const documents = result.ExpenseDocuments;
  * ```
- *
- * @binding
  */
 export interface GetExpenseAnalysis extends Binding.Service<
   GetExpenseAnalysis,

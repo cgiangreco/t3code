@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * Snapshot identifiers are runtime data, so the grant spans the account's
  * `cluster-snapshot` ARNs. Provide the implementation with
  * `Effect.provide(AWS.DocDB.DeleteDBClusterSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Prune an Expired Snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Prune an Expired Snapshot
  * ```typescript
  * const deleteSnapshot = yield* DocDB.DeleteDBClusterSnapshot();
  *
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   Effect.catchTag("DBClusterSnapshotNotFoundFault", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteDBClusterSnapshot extends Binding.Service<
   DeleteDBClusterSnapshot,

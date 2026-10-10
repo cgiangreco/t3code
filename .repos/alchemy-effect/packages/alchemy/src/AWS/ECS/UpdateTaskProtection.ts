@@ -26,8 +26,9 @@ export interface UpdateTaskProtectionRequest extends Omit<
  * it processes long-running work so deployments and scale-in don't terminate
  * it. The cluster ARN is injected automatically and the host is granted
  * `ecs:UpdateTaskProtection` on the cluster's tasks.
- * ### Task Protection
- * **Example:** Protect a Task While It Works
+ * @binding
+ * @section Task Protection
+ * @example Protect a Task While It Works
  * ```typescript
  * const updateTaskProtection = yield* AWS.ECS.UpdateTaskProtection(cluster);
  *
@@ -37,8 +38,6 @@ export interface UpdateTaskProtectionRequest extends Omit<
  *   expiresIn: "30 minutes",
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateTaskProtection extends Binding.Service<
   UpdateTaskProtection,

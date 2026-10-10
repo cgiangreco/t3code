@@ -49,8 +49,9 @@ export interface ResolverRuleAssociation extends Resource<
  * An association between a Route 53 Resolver rule and a VPC. Once
  * associated, Resolver applies the rule to DNS queries that originate in
  * that VPC.
- * ### Associating Rules
- * **Example:** Attach a Forwarding Rule to a VPC
+ * @resource
+ * @section Associating Rules
+ * @example Attach a Forwarding Rule to a VPC
  * ```typescript
  * import * as Route53Resolver from "alchemy/AWS/Route53Resolver";
  *
@@ -62,8 +63,6 @@ export interface ResolverRuleAssociation extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const ResolverRuleAssociation = Resource<ResolverRuleAssociation>(
   "AWS.Route53Resolver.ResolverRuleAssociation",

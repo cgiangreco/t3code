@@ -50,8 +50,9 @@ export interface ClusterPolicy extends Resource<
  * `dsql:DbConnect` / `dsql:DbConnectAdmin` behind VPC or Organization
  * conditions). A cluster has at most one.
  *
- * ### Creating a Cluster Policy
- * **Example:** Block Connections from Outside a VPC
+ * @resource
+ * @section Creating a Cluster Policy
+ * @example Block Connections from Outside a VPC
  * ```typescript
  * const cluster = yield* DSQL.Cluster("AppDb", {});
  * const policy = yield* DSQL.ClusterPolicy("VpcOnly", {
@@ -71,7 +72,7 @@ export interface ClusterPolicy extends Resource<
  * });
  * ```
  *
- * **Example:** Restrict Access to an AWS Organization
+ * @example Restrict Access to an AWS Organization
  * ```typescript
  * const policy = yield* DSQL.ClusterPolicy("OrgOnly", {
  *   clusterId: cluster.clusterId,
@@ -91,8 +92,6 @@ export interface ClusterPolicy extends Resource<
  *   }),
  * });
  * ```
- *
- * @resource
  */
 export const ClusterPolicy = Resource<ClusterPolicy>("AWS.DSQL.ClusterPolicy");
 

@@ -12,8 +12,11 @@ import type { SendError, SendMessage, SendOptions } from "./QueueTypes.ts";
  * The Cloudflare Worker queue binding is producer-only — `send` for a
  * single message and `sendBatch` for many in one call. Messages can be
  * any JSON-serializable value.
- * ### Sending Messages
- * **Example:** Producer route
+ * @binding
+ * @product Queues
+ * @category Storage & Databases
+ * @section Sending Messages
+ * @example Producer route
  * ```typescript
  * const queue = yield* Cloudflare.Queues.WriteQueue(Queue);
  *
@@ -25,7 +28,7 @@ import type { SendError, SendMessage, SendOptions } from "./QueueTypes.ts";
  * };
  * ```
  *
- * **Example:** Sending a batch
+ * @example Sending a batch
  * ```typescript
  * yield* queue.sendBatch([
  *   { body: { event: "click", id: 1 } },
@@ -41,10 +44,6 @@ import type { SendError, SendMessage, SendOptions } from "./QueueTypes.ts";
  * `WriteQueue` is a single identifier that is simultaneously the binding's
  * Context tag, its type, and the callable —
  * `yield* Cloudflare.Queues.WriteQueue(queue)`.
- *
- * @binding
- * @product Queues
- * @category Storage & Databases
  */
 export interface WriteQueue extends Binding.Service<
   WriteQueue,

@@ -1,82 +1,53 @@
 import {
-  putRemoteDpopTokenInCatalog,
+  ConnectionPersistenceError,
+  ConnectionRegistrationStore,
+  ConnectionTargetStore,
   registerConnectionInCatalog,
   removeConnectionFromCatalog,
-  setConnectionEnabledInCatalog,
-  setRoutesInCatalog,
   removeCatalogValue,
   replaceCatalogValue,
-  Persistence,
 } from "@t3tools/client-runtime/platform";
 import { TokenStore } from "@t3tools/client-runtime/authorization";
 import {
   ConnectionTransientError,
   CredentialStore,
   ProfileStore,
-  GitHubRoutingPermissions,
-  makeGitHubRoutingPermissions,
 } from "@t3tools/client-runtime/connection";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
-
 import * as CatalogStore from "./catalog-store";
 
 function targetPersistenceError(
-  operation:
-    | "list-targets"
-    | "list-disabled-targets"
-    | "register-connection"
-    | "set-connection-routes"
-    | "remove-connection"
-    | "set-connection-enabled",
+  operation: "list-targets" | "register-connection" | "remove-connection",
   error: ConnectionTransientError,
 ) {
-  return new Persistence.ConnectionPersistenceError({
+  return new ConnectionPersistenceError({
     operation,
     message: error.message,
   });
 }
 
-export const layer = Layer.effectContext(
+export const connectionStorageLayer = Layer.effectContext(
   Effect.gen(function* () {
     const catalog = yield* CatalogStore.make();
-    const githubRoutingPermissions = yield* makeGitHubRoutingPermissions({
-      read: catalog.read.pipe(Effect.map((document) => document.githubRoutingPermissions ?? [])),
-      write: (githubRoutingPermissions) =>
-        catalog.update((document) => ({ ...document, githubRoutingPermissions })),
-    });
 
-    const targetStore = Persistence.ConnectionTargetStore.of({
+    const targetStore = ConnectionTargetStore.of({
       list: catalog.read.pipe(
         Effect.map((document) => document.targets),
         Effect.mapError((error) => targetPersistenceError("list-targets", error)),
       ),
-      listDisabled: catalog.read.pipe(
-        Effect.map((document) => document.disabledEnvironmentIds),
-        Effect.mapError((error) => targetPersistenceError("list-disabled-targets", error)),
-      ),
     });
-    const registrationStore = Persistence.ConnectionRegistrationStore.of({
-      register: (registration, routes) =>
+    const registrationStore = ConnectionRegistrationStore.of({
+      register: (registration) =>
         catalog
-          .update((document) => registerConnectionInCatalog(document, registration, routes))
+          .update((document) => registerConnectionInCatalog(document, registration))
           .pipe(Effect.mapError((error) => targetPersistenceError("register-connection", error))),
-      setRoutes: (environmentId, routes) =>
+      remove: (target) =>
         catalog
-          .update((document) => setRoutesInCatalog(document, environmentId, routes))
-          .pipe(Effect.mapError((error) => targetPersistenceError("set-connection-routes", error))),
-      remove: (environmentId) =>
-        catalog
-          .update((document) => removeConnectionFromCatalog(document, environmentId))
+          .update((document) => removeConnectionFromCatalog(document, target))
           .pipe(Effect.mapError((error) => targetPersistenceError("remove-connection", error))),
-      setEnabled: (environmentId, enabled) =>
-        catalog
-          .update((document) => setConnectionEnabledInCatalog(document, environmentId, enabled))
-          .pipe(
-            Effect.mapError((error) => targetPersistenceError("set-connection-enabled", error)),
-          ),
     });
     const profileStore = ProfileStore.make({
       get: (connectionId) =>
@@ -138,7 +109,15 @@ export const layer = Layer.effectContext(
             ),
           ),
         ),
-      put: (token) => catalog.update((document) => putRemoteDpopTokenInCatalog(document, token)),
+      put: (token) =>
+        catalog.update((document) => ({
+          ...document,
+          remoteDpopTokens: replaceCatalogValue(
+            document.remoteDpopTokens,
+            (value) => value.environmentId,
+            token,
+          ),
+        })),
       remove: (environmentId) =>
         catalog.update((document) => ({
           ...document,
@@ -149,9 +128,8 @@ export const layer = Layer.effectContext(
           ),
         })),
     });
-    return Context.make(Persistence.ConnectionTargetStore, targetStore).pipe(
-      Context.add(GitHubRoutingPermissions, githubRoutingPermissions),
-      Context.add(Persistence.ConnectionRegistrationStore, registrationStore),
+    return Context.make(ConnectionTargetStore, targetStore).pipe(
+      Context.add(ConnectionRegistrationStore, registrationStore),
       Context.add(ProfileStore.ConnectionProfileStore, profileStore),
       Context.add(CredentialStore.ConnectionCredentialStore, credentialStore),
       Context.add(TokenStore.RemoteDpopAccessTokenStore, remoteTokenStore),

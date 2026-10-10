@@ -17,8 +17,9 @@ export interface DescribePackageVersionRequest extends Omit<
  *
  * Reads a single package version's description — status, revision, origin, and license metadata. Provide the implementation with
  * `Effect.provide(AWS.CodeArtifact.DescribePackageVersionHttp)`.
- * ### Inspecting Package Versions
- * **Example:** Describe a Package Version
+ * @binding
+ * @section Inspecting Package Versions
+ * @example Describe a Package Version
  * ```typescript
  * const describeVersion = yield* AWS.CodeArtifact.DescribePackageVersion(repo);
  *
@@ -30,8 +31,6 @@ export interface DescribePackageVersionRequest extends Omit<
  * });
  * console.log(res.packageVersion?.status);
  * ```
- *
- * @binding
  */
 export interface DescribePackageVersion extends Binding.Service<
   DescribePackageVersion,

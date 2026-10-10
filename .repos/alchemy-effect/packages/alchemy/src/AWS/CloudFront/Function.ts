@@ -82,8 +82,9 @@ export interface Function extends Resource<
  *
  * CloudFront Functions are lightweight JavaScript handlers that run at the
  * edge and can be attached to distribution cache behaviors.
- * ### Creating Functions
- * **Example:** Viewer Request Function
+ * @resource
+ * @section Creating Functions
+ * @example Viewer Request Function
  * ```typescript
  * const fn = yield* Function("RouterRequestFunction", {
  *   code: `
@@ -96,8 +97,6 @@ export interface Function extends Resource<
  * `,
  * });
  * ```
- *
- * @resource
  */
 export const Function = Resource<Function>("AWS.CloudFront.Function");
 
@@ -234,7 +233,9 @@ export const FunctionProvider = () =>
                     Effect.retry({
                       while: (error) =>
                         error._tag === "InvalidArgument" &&
-                        isKeyValueStoreAssociationPending(error),
+                        isKeyValueStoreAssociationPending(
+                          error as { Message?: string },
+                        ),
                       schedule: cappedCloudFrontRetrySchedule,
                     }),
                   );
@@ -267,7 +268,9 @@ export const FunctionProvider = () =>
                 Effect.retry({
                   while: (error) =>
                     error._tag === "InvalidArgument" &&
-                    isKeyValueStoreAssociationPending(error),
+                    isKeyValueStoreAssociationPending(
+                      error as { Message?: string },
+                    ),
                   schedule: cappedCloudFrontRetrySchedule,
                 }),
               );
@@ -330,8 +333,8 @@ const isFunctionDeletePending = (error: {
 }): error is cloudfront.FunctionInUse | cloudfront.PreconditionFailed =>
   error._tag === "FunctionInUse" || error._tag === "PreconditionFailed";
 
-const isKeyValueStoreAssociationPending = (error: { message?: string }) => {
-  const message = error.message ?? "";
+const isKeyValueStoreAssociationPending = (error: { Message?: string }) => {
+  const message = error.Message ?? "";
   return (
     message.includes("KeyValueStoreAssociationArn") &&
     message.includes("cannot be associated before the resource is provisioned")

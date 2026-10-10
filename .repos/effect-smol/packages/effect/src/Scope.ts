@@ -25,27 +25,28 @@ const CloseableTypeId = effect.ScopeCloseableTypeId
  *
  * **Example** (Managing scoped resources)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Exit, Scope } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const scope = yield* Scope.make("sequential")
  *
- *   const initial = [scope.strategy, scope.state._tag]
- *   yield* Scope.close(scope, Exit.void)
- *   return [initial, scope.state._tag]
- * })
+ *   // Scope has a strategy and state
+ *   console.log(scope.strategy) // "sequential"
+ *   console.log(scope.state._tag) // "Open"
  *
- * Effect.runSync(program) // => [["sequential", "Empty"], "Closed"]
+ *   // Close the scope
+ *   yield* Scope.close(scope, Exit.void)
+ *   console.log(scope.state._tag) // "Closed"
+ * })
  * ```
  *
- * @category services
+ * @category models
  * @since 2.0.0
  */
 export interface Scope {
   readonly [TypeId]: typeof TypeId
   readonly strategy: "sequential" | "parallel"
-  readonly parent: Scope | undefined
   state: State.Open | State.Closed | State.Empty
 }
 /**
@@ -54,18 +55,18 @@ export interface Scope {
  *
  * **Example** (Closing a scope)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const cleanups: Array<string> = []
  * const program = Effect.gen(function*() {
  *   const scope = yield* Scope.make()
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => cleanups.push("Cleanup!")))
+ *
+ *   // Add a finalizer
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup!"))
+ *
+ *   // Scope can be closed
  *   yield* Scope.close(scope, Exit.void)
  * })
- *
- * Effect.runSync(program)
- * cleanups // => ["Cleanup!"]
  * ```
  *
  * @category models
@@ -76,43 +77,57 @@ export interface Closeable extends Scope {
 }
 
 /**
- * Scope states: `Empty` has no finalizers, `Open` has at least one, and
- * `Closed` holds the exit value.
+ * The `State` namespace contains the concrete states of a scope: `Empty`
+ * before any finalizers are registered, `Open` with registered finalizers, and
+ * `Closed` with the exit value used to close the scope.
  *
  * **Example** (Checking scope states)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Exit, Scope } from "effect"
  *
+ * // Example of checking scope states
  * const program = Effect.gen(function*() {
  *   const scope = yield* Scope.make()
- *   const before = scope.state._tag
- *   yield* Scope.close(scope, Exit.void)
- *   return [before, scope.state._tag]
- * })
  *
- * Effect.runSync(program) // => ["Empty", "Closed"]
+ *   // When open, the scope accepts finalizers
+ *   if (scope.state._tag === "Open") {
+ *     console.log("Scope is open")
+ *   }
+ *
+ *   yield* Scope.close(scope, Exit.void)
+ *
+ *   // When closed, the scope no longer accepts finalizers
+ *   if (scope.state._tag === "Closed") {
+ *     console.log("Scope is closed")
+ *   }
+ * })
  * ```
  *
  * @since 4.0.0
  */
 export declare namespace State {
   /**
-   * Represents an open scope with no finalizers currently registered.
+   * Represents an open scope with no registered finalizers yet.
    *
    * **Details**
    *
-   * Adding a finalizer moves it to `Open`; removing the last one returns it
-   * to `Empty`.
+   * Adding the first finalizer transitions the scope to `Open`; closing an
+   * empty scope transitions directly to `Closed` without producing a finalizer
+   * effect.
    *
    * **Example** (Inspecting an empty scope state)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import { Scope } from "effect"
    *
    * const scope = Scope.makeUnsafe()
    *
-   * scope.state._tag // => "Empty"
+   * // When scope is open, you can check its state
+   * if (scope.state._tag === "Open") {
+   *   console.log("Scope is open and accepting finalizers")
+   *   console.log(scope.state.finalizers.size) // Number of registered finalizers
+   * }
    * ```
    *
    * @category models
@@ -125,24 +140,18 @@ export declare namespace State {
    * Represents an open scope state where finalizers can be added and
    * the scope is still accepting new resources.
    *
-   * **Details**
-   *
-   * Stores one finalizer inline and allocates the `finalizers` map when a
-   * second is added.
-   *
    * **Example** (Inspecting an open scope state)
    *
-   * ```ts import.meta.vitest
-   * import { Effect, Scope } from "effect"
+   * ```ts
+   * import { Scope } from "effect"
    *
    * const scope = Scope.makeUnsafe()
    *
-   * Effect.runSync(Scope.addFinalizer(scope, Effect.void))
-   * const state = scope.state
-   * if (state._tag !== "Open") throw new Error("unexpected state")
-   *
-   * state._tag // => "Open"
-   * state.finalizer !== undefined // => true
+   * // When scope is open, you can check its state
+   * if (scope.state._tag === "Open") {
+   *   console.log("Scope is open and accepting finalizers")
+   *   console.log(scope.state.finalizers.size) // Number of registered finalizers
+   * }
    * ```
    *
    * @category models
@@ -150,9 +159,7 @@ export declare namespace State {
    */
   export type Open = {
     readonly _tag: "Open"
-    finalizerKey: {} | undefined
-    finalizer: ((exit: Exit<any, any>) => Effect<void>) | undefined
-    finalizers: Map<{}, (exit: Exit<any, any>) => Effect<void>> | undefined
+    readonly finalizers: Map<{}, (exit: Exit<any, any>) => Effect<void>>
   }
   /**
    * Represents a closed scope state where finalizers have been executed
@@ -160,20 +167,21 @@ export declare namespace State {
    *
    * **Example** (Inspecting a closed scope state)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import { Effect, Exit, Scope } from "effect"
    *
    * const program = Effect.gen(function*() {
    *   const scope = yield* Scope.make()
    *
+   *   // Close the scope
    *   yield* Scope.close(scope, Exit.succeed("Done"))
-   *   if (scope.state._tag === "Closed") {
-   *     return scope.state.exit
-   *   }
-   *   return Exit.die("unexpected state")
-   * })
    *
-   * Effect.runSync(program) // => Exit.succeed("Done")
+   *   // Check if scope is closed
+   *   if (scope.state._tag === "Closed") {
+   *     console.log("Scope is closed")
+   *     console.log(scope.state.exit) // The exit value used to close the scope
+   *   }
+   * })
    * ```
    *
    * @category models
@@ -195,17 +203,19 @@ export declare namespace State {
  *
  * **Example** (Accessing the scope service)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Scope } from "effect"
  *
- * const cleanups: Array<string> = []
  * const program = Effect.gen(function*() {
+ *   // Access the scope from the context
  *   const scope = yield* Scope.Scope
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => cleanups.push("Cleanup")))
+ *
+ *   // Use the scope for resource management
+ *   yield* Scope.addFinalizer(scope, Effect.log("Cleanup"))
  * })
  *
- * Effect.runSync(Effect.scoped(program))
- * cleanups // => ["Cleanup"]
+ * // Provide a scope to the program
+ * const scoped = Effect.scoped(program)
  * ```
  *
  * @category services
@@ -218,19 +228,21 @@ export const Scope: Context.Service<Scope, Scope> = effect.scopeTag
  *
  * **Example** (Creating a scope)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const cleanups: Array<string> = []
  * const program = Effect.gen(function*() {
+ *   // Create a scope with sequential cleanup
  *   const scope = yield* Scope.make("sequential")
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => cleanups.push("Cleanup 1")))
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => cleanups.push("Cleanup 2")))
- *   yield* Scope.close(scope, Exit.void)
- * })
  *
- * Effect.runSync(program)
- * cleanups // => ["Cleanup 2", "Cleanup 1"]
+ *   // Add finalizers
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup 1"))
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup 2"))
+ *
+ *   // Close the scope (finalizers run in reverse order)
+ *   yield* Scope.close(scope, Exit.void)
+ *   // Output: "Cleanup 2", then "Cleanup 1"
+ * })
  * ```
  *
  * @category constructors
@@ -250,18 +262,17 @@ export const make: (finalizerStrategy?: "sequential" | "parallel") => Effect<Clo
  *
  * **Example** (Creating a scope synchronously)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
+ * // Create a scope immediately
  * const scope = Scope.makeUnsafe("sequential")
- * const cleanups: Array<string> = []
+ *
+ * // Use it in an Effect program
  * const program = Effect.gen(function*() {
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => cleanups.push("Cleanup")))
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup"))
  *   yield* Scope.close(scope, Exit.void)
  * })
- *
- * Effect.runSync(program)
- * cleanups // => ["Cleanup"]
  * ```
  *
  * @category constructors
@@ -283,24 +294,21 @@ export const makeUnsafe: (finalizerStrategy?: "sequential" | "parallel") => Clos
  *
  * **Example** (Providing a scope)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Scope } from "effect"
  *
- * const events: Array<string> = []
+ * // An effect that requires a Scope
  * const program = Effect.gen(function*() {
  *   const scope = yield* Scope.Scope
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("cleanup")))
- *   events.push("working")
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup"))
+ *   yield* Console.log("Working...")
  * })
  *
+ * // Provide a scope to the program
  * const withScope = Effect.gen(function*() {
  *   const scope = yield* Scope.make()
  *   yield* Scope.provide(scope)(program)
- *   yield* Scope.close(scope, Exit.void)
  * })
- *
- * Effect.runSync(withScope)
- * events // => ["working", "cleanup"]
  * ```
  *
  * @category combinators
@@ -327,18 +335,29 @@ export const provide: {
  *
  * **Example** (Adding an exit-aware finalizer)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const exits: Array<Exit.Exit<unknown, unknown>> = []
  * const withResource = Effect.gen(function*() {
  *   const scope = yield* Scope.make()
- *   yield* Scope.addFinalizerExit(scope, (exit) => Effect.sync(() => exits.push(exit)))
+ *
+ *   // Add a finalizer for cleanup
+ *   yield* Scope.addFinalizerExit(
+ *     scope,
+ *     (exit) =>
+ *       Console.log(
+ *         `Cleaning up resource. Exit: ${
+ *           Exit.isSuccess(exit) ? "Success" : "Failure"
+ *         }`
+ *       )
+ *   )
+ *
+ *   // Use the resource
+ *   yield* Console.log("Using resource")
+ *
+ *   // Close the scope
  *   yield* Scope.close(scope, Exit.void)
  * })
- *
- * Effect.runSync(withResource)
- * exits // => [Exit.void]
  * ```
  *
  * @category combinators
@@ -358,21 +377,23 @@ export const addFinalizerExit: (scope: Scope, finalizer: (exit: Exit<any, any>) 
  *
  * **Example** (Adding finalizers)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const events: Array<string> = []
  * const program = Effect.gen(function*() {
  *   const scope = yield* Scope.make()
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("cleanup 1")))
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("cleanup 2")))
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("cleanup 3")))
- *   events.push("work")
+ *
+ *   // Add simple finalizers
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup task 1"))
+ *   yield* Scope.addFinalizer(scope, Console.log("Cleanup task 2"))
+ *   yield* Scope.addFinalizer(scope, Effect.log("Cleanup task 3"))
+ *
+ *   // Do some work
+ *   yield* Console.log("Doing work...")
+ *
+ *   // Close the scope
  *   yield* Scope.close(scope, Exit.void)
  * })
- *
- * Effect.runSync(program)
- * events // => ["work", "cleanup 3", "cleanup 2", "cleanup 1"]
  * ```
  *
  * @category combinators
@@ -391,21 +412,25 @@ export const addFinalizer: (scope: Scope, finalizer: Effect<unknown>) => Effect<
  *
  * **Example** (Creating a child scope)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const cleanups: Array<string> = []
  * const nestedScopes = Effect.gen(function*() {
  *   const parentScope = yield* Scope.make("sequential")
- *   yield* Scope.addFinalizer(parentScope, Effect.sync(() => cleanups.push("parent")))
+ *
+ *   // Add finalizer to parent
+ *   yield* Scope.addFinalizer(parentScope, Console.log("Parent cleanup"))
+ *
+ *   // Create child scope
  *   const childScope = yield* Scope.fork(parentScope, "parallel")
- *   yield* Scope.addFinalizer(childScope, Effect.sync(() => cleanups.push("child")))
+ *
+ *   // Add finalizer to child
+ *   yield* Scope.addFinalizer(childScope, Console.log("Child cleanup"))
+ *
+ *   // Close child first, then parent
  *   yield* Scope.close(childScope, Exit.void)
  *   yield* Scope.close(parentScope, Exit.void)
  * })
- *
- * Effect.runSync(nestedScopes)
- * cleanups // => ["child", "parent"]
  * ```
  *
  * @category combinators
@@ -432,21 +457,21 @@ export const fork: (
  *
  * **Example** (Creating a child scope synchronously)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const cleanups: Array<string> = []
  * const program = Effect.gen(function*() {
  *   const parentScope = Scope.makeUnsafe("sequential")
  *   const childScope = Scope.forkUnsafe(parentScope, "parallel")
- *   yield* Scope.addFinalizer(parentScope, Effect.sync(() => cleanups.push("parent")))
- *   yield* Scope.addFinalizer(childScope, Effect.sync(() => cleanups.push("child")))
+ *
+ *   // Add finalizers to both scopes
+ *   yield* Scope.addFinalizer(parentScope, Console.log("Parent cleanup"))
+ *   yield* Scope.addFinalizer(childScope, Console.log("Child cleanup"))
+ *
+ *   // Close child first, then parent
  *   yield* Scope.close(childScope, Exit.void)
  *   yield* Scope.close(parentScope, Exit.void)
  * })
- *
- * Effect.runSync(program)
- * cleanups // => ["child", "parent"]
  * ```
  *
  * @category combinators
@@ -466,32 +491,33 @@ export const forkUnsafe: (scope: Scope, finalizerStrategy?: "sequential" | "para
  *
  * Finalizers run in the scope's configured order and receive the supplied
  * `Exit`.
- * By default, finalizers run uninterruptibly, so interrupting the closing fiber
- * waits for them to finish; a finalizer can explicitly restore interruptibility.
  *
  * **Example** (Running scope finalizers)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Scope } from "effect"
+ * ```ts
+ * import { Console, Effect, Exit, Scope } from "effect"
  *
- * const events: Array<string> = []
  * const resourceManagement = Effect.gen(function*() {
  *   const scope = yield* Scope.make("sequential")
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("database")))
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("file")))
- *   yield* Scope.addFinalizer(scope, Effect.sync(() => events.push("memory")))
- *   events.push("work")
- *   yield* Scope.close(scope, Exit.succeed("Success!"))
- * })
  *
- * Effect.runSync(resourceManagement)
- * events // => ["work", "memory", "file", "database"]
+ *   // Add multiple finalizers
+ *   yield* Scope.addFinalizer(scope, Console.log("Close database connection"))
+ *   yield* Scope.addFinalizer(scope, Console.log("Close file handle"))
+ *   yield* Scope.addFinalizer(scope, Console.log("Release memory"))
+ *
+ *   // Do some work...
+ *   yield* Console.log("Performing operations...")
+ *
+ *   // Close scope - finalizers run in reverse order of registration
+ *   yield* Scope.close(scope, Exit.succeed("Success!"))
+ *   // Output: "Release memory", "Close file handle", "Close database connection"
+ * })
  * ```
  *
  * @category combinators
  * @since 2.0.0
  */
-export const close: <A, E>(self: Closeable, exit: Exit<A, E>) => Effect<void> = effect.scopeClose
+export const close: <A, E>(self: Scope, exit: Exit<A, E>) => Effect<void> = effect.scopeClose
 
 /**
  * Closes a scope unsafely with the provided exit value.
@@ -509,16 +535,14 @@ export const close: <A, E>(self: Closeable, exit: Exit<A, E>) => Effect<void> = 
  *
  * **Gotchas**
  *
- * Ignoring the returned effect skips registered finalizers. The caller must
- * run the returned effect uninterruptibly: the scope is already closed, so
- * interruption during finalization can permanently skip remaining finalizers.
+ * Ignoring the returned effect skips registered finalizers.
  *
  * @see {@link close} for the usual effectful close operation that always returns an `Effect`
  *
  * @category unsafe
  * @since 4.0.0
  */
-export const closeUnsafe: <A, E>(self: Closeable, exit_: Exit<A, E>) => Effect<void, never, never> | undefined =
+export const closeUnsafe: <A, E>(self: Scope, exit_: Exit<A, E>) => Effect<void, never, never> | undefined =
   effect.scopeCloseUnsafe
 
 /**

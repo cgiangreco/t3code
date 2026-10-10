@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.CreateBatchInferenceJobHttp)`.
  *
- * ### Batch Inference
- * **Example:** Score Users in Batch
+ * @binding
+ * @section Batch Inference
+ * @example Score Users in Batch
  * ```typescript
  * // init
  * const createBatchInferenceJob = yield* Personalize.CreateBatchInferenceJob();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *   roleArn: batchRoleArn,
  * });
  * ```
- *
- * @binding
  */
 export interface CreateBatchInferenceJob extends Binding.Service<
   CreateBatchInferenceJob,

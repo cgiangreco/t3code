@@ -106,8 +106,11 @@ export type TcpFlowProtectionRule = Resource<
  * `read` scans for an existing rule with the same scope + name and reports
  * it as `Unowned`, so the engine refuses to take it over unless `--adopt`
  * (or `adopt(true)`) is set.
- * ### Creating a rule
- * **Example:** Global TCP flow protection in monitoring mode
+ * @resource
+ * @product DDoS Protection
+ * @category Network
+ * @section Creating a rule
+ * @example Global TCP flow protection in monitoring mode
  * ```typescript
  * const rule = yield* Cloudflare.DdosProtection.TcpFlowProtectionRule("GlobalFlow", {
  *   scope: "global",
@@ -117,7 +120,7 @@ export type TcpFlowProtectionRule = Resource<
  * });
  * ```
  *
- * **Example:** Region-scoped rule
+ * @example Region-scoped rule
  * ```typescript
  * yield* Cloudflare.DdosProtection.TcpFlowProtectionRule("WeurFlow", {
  *   scope: "region",
@@ -129,10 +132,6 @@ export type TcpFlowProtectionRule = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ddos-protection/advanced-ddos-systems/overview/advanced-tcp-protection/
- *
- * @resource
- * @product DDoS Protection
- * @category Network
  */
 export const TcpFlowProtectionRule = Resource<TcpFlowProtectionRule>(TypeId);
 

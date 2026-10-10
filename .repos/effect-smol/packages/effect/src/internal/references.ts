@@ -14,13 +14,11 @@ export const CurrentErrorReporters = Context.Reference<ReadonlySet<ErrorReporter
 
 /** @internal */
 export const CurrentStackFrame = Context.Reference<StackFrame | undefined>("effect/References/CurrentStackFrame", {
-  fiberCached: true,
   defaultValue: constUndefined
 })
 
 /** @internal */
 export const TracerEnabled = Context.Reference<boolean>("effect/References/TracerEnabled", {
-  fiberCached: true,
   defaultValue: constTrue
 })
 
@@ -49,13 +47,13 @@ export const CurrentLogAnnotations = Context.Reference<ReadonlyRecord<string, un
 /** @internal */
 export const CurrentLogLevel: Context.Reference<Severity> = Context.Reference<Severity>(
   "effect/References/CurrentLogLevel",
-  { fiberCached: true, defaultValue: () => "Info" }
+  { defaultValue: () => "Info" }
 )
 
 /** @internal */
 export const MinimumLogLevel = Context.Reference<
   LogLevel
->("effect/References/MinimumLogLevel", { fiberCached: true, defaultValue: () => "Info" })
+>("effect/References/MinimumLogLevel", { defaultValue: () => "Info" })
 
 /** @internal */
 export const UnhandledLogLevel: Context.Reference<Severity | undefined> = Context.Reference(

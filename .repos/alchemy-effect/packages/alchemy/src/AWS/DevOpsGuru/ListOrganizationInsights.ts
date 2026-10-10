@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Lists insights across the organization's accounts filtered by status and type (management or delegated-administrator account).
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.ListOrganizationInsightsHttp)`.
- * ### Organization Visibility
- * **Example:** List Insights Across Accounts
+ * @binding
+ * @section Organization Visibility
+ * @example List Insights Across Accounts
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listOrganizationInsights = yield* AWS.DevOpsGuru.ListOrganizationInsights();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * yield* Effect.log(`org ongoing: ${ReactiveInsights?.length}`);
  * ```
- *
- * @binding
  */
 export interface ListOrganizationInsights extends Binding.Service<
   ListOrganizationInsights,

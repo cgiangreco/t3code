@@ -1,12 +1,7 @@
-import { vi } from "vite-plus/test";
 import {
   EnvironmentId,
-  AuthSourceControlWriteScope,
-  ThreadId,
-  ProjectId,
   WS_METHODS,
   type GitActionProgressEvent,
-  type GitRunStackedActionInput,
   type GitRunStackedActionResult,
 } from "@t3tools/contracts";
 import { describe, expect, it } from "@effect/vitest";
@@ -17,7 +12,7 @@ import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 import * as Stream from "effect/Stream";
 import * as SubscriptionRef from "effect/SubscriptionRef";
-import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
+import { AsyncResult, Atom, AtomRegistry } from "effect/unstable/reactivity";
 
 import {
   AVAILABLE_CONNECTION_STATE,
@@ -89,7 +84,6 @@ function session(client: WsRpcProtocolClient): RpcSession {
   return {
     client,
     initialConfig: Effect.never,
-    subscribeServerConfig: (input) => client.subscribeServerConfig(input),
     ready: Effect.void,
     probe: Effect.void,
     closed: Effect.never,
@@ -102,14 +96,14 @@ function progress<T extends GitActionProgressEvent>(event: T): T {
 
 function cacheStore(onClearVcsRefs: (environmentId: EnvironmentId) => void) {
   return Persistence.EnvironmentCacheStore.of({
-    loadShell: () => Effect.succeedNone,
+    loadShell: () => Effect.succeed(Option.none()),
     saveShell: () => Effect.void,
-    loadThread: () => Effect.succeedNone,
+    loadThread: () => Effect.succeed(Option.none()),
     saveThread: () => Effect.void,
     removeThread: () => Effect.void,
-    loadServerConfig: () => Effect.succeedNone,
+    loadServerConfig: () => Effect.succeed(Option.none()),
     saveServerConfig: () => Effect.void,
-    loadVcsRefs: () => Effect.succeedNone,
+    loadVcsRefs: () => Effect.succeed(Option.none()),
     saveVcsRefs: () => Effect.void,
     removeVcsRefs: () => Effect.void,
     clearVcsRefs: (environmentId) => Effect.sync(() => onClearVcsRefs(environmentId)),
@@ -209,7 +203,7 @@ describe("vcsActionState", () => {
     });
   });
 
-  it("keeps running presentation state until the finished action settles", () => {
+  it("clears running presentation state once the action finishes", () => {
     const initial = beginVcsActionState({
       operation: "run_change_request",
       label: "Running source control action",
@@ -238,18 +232,18 @@ describe("vcsActionState", () => {
     );
 
     expect(finished).toMatchObject({
-      isRunning: true,
+      isRunning: false,
       operation: "run_change_request",
       actionId,
       action,
-      currentLabel: "Pushing...",
-      currentPhaseLabel: "Pushing...",
+      currentLabel: null,
+      currentPhaseLabel: null,
       lastOutputLine: null,
       error: null,
     });
   });
 
-  it("keeps running presentation state and retains a terminal action error until settle", () => {
+  it("retains a terminal action error for presentation", () => {
     const initial = beginVcsActionState({
       operation: "run_change_request",
       label: "Running source control action",
@@ -268,7 +262,7 @@ describe("vcsActionState", () => {
     );
 
     expect(failed).toMatchObject({
-      isRunning: true,
+      isRunning: false,
       operation: "run_change_request",
       actionId,
       action,
@@ -589,20 +583,14 @@ describe("vcsActionState", () => {
         const targetKey = { environmentId, cwd };
         const successfulActionId = "invalidate-success";
         const failedActionId = "invalidate-failure";
-        const interruptedActionId = "invalidate-interrupted";
         const successfulTransportActionId = createVcsActionTransportId(
           targetKey,
           successfulActionId,
         );
         const failedTransportActionId = createVcsActionTransportId(targetKey, failedActionId);
-        const interruptedTransportActionId = createVcsActionTransportId(
-          targetKey,
-          interruptedActionId,
-        );
-        const rpcInputs = new Array<GitRunStackedActionInput>();
         const client = {
-          [WS_METHODS.gitRunStackedAction]: (input: GitRunStackedActionInput) =>
-            (rpcInputs.push(input), input.actionId === successfulTransportActionId)
+          [WS_METHODS.gitRunStackedAction]: (input: { readonly actionId: string }) =>
+            input.actionId === successfulTransportActionId
               ? Stream.make(
                   progress({
                     kind: "action_finished",
@@ -612,18 +600,16 @@ describe("vcsActionState", () => {
                     result,
                   }),
                 )
-              : input.actionId === interruptedTransportActionId
-                ? Stream.fromEffect(Effect.interrupt)
-                : Stream.make(
-                    progress({
-                      kind: "action_failed",
-                      actionId: failedTransportActionId,
-                      cwd,
-                      action,
-                      phase: "push",
-                      message: "push failed after creating the branch",
-                    }),
-                  ),
+              : Stream.make(
+                  progress({
+                    kind: "action_failed",
+                    actionId: failedTransportActionId,
+                    cwd,
+                    action,
+                    phase: "push",
+                    message: "push failed after creating the branch",
+                  }),
+                ),
         } as unknown as WsRpcProtocolClient;
         const supervisor = EnvironmentSupervisor.EnvironmentSupervisor.of({
           target,
@@ -665,25 +651,16 @@ describe("vcsActionState", () => {
         const state = vcsRefsCacheStateAtom({ environmentId });
 
         expect(registry.get(state).revision).toBe(0);
-        const threadId = ThreadId.make("thread-stacked-action");
-        const projectId = ProjectId.make("project-stacked-action");
         const successfulResult = yield* Effect.promise(() =>
           manager.runStackedAction(targetKey).run(registry, {
             actionId: successfulActionId,
             action,
-            threadId,
-            projectId,
           }),
         );
 
         expect(AsyncResult.isSuccess(successfulResult)).toBe(true);
-        expect(registry.get(manager.stateAtom(targetKey))).toEqual(EMPTY_VCS_ACTION_STATE);
         expect(registry.get(state).revision).toBe(1);
         expect(removed).toEqual([`${environmentId}:*`]);
-        // The server links a created pull request to this thread, so the id must ride along.
-        expect(rpcInputs).toEqual([
-          { actionId: successfulTransportActionId, cwd, action, threadId, projectId },
-        ]);
 
         const failedResult = yield* Effect.promise(() =>
           manager.runStackedAction(targetKey).run(registry, {
@@ -693,50 +670,9 @@ describe("vcsActionState", () => {
         );
 
         expect(AsyncResult.isFailure(failedResult)).toBe(true);
-        expect(registry.get(manager.stateAtom(targetKey))).toMatchObject({
-          isRunning: false,
-          operation: "run_change_request",
-          actionId: failedActionId,
-          error: "Source control action 'commit_push' failed during push.",
-        });
         expect(registry.get(state).revision).toBe(2);
         expect(removed).toEqual([`${environmentId}:*`, `${environmentId}:*`]);
-
-        const interruptedResult = yield* Effect.promise(() =>
-          manager.runStackedAction(targetKey).run(registry, {
-            actionId: interruptedActionId,
-            action,
-          }),
-        );
-
-        expect(AsyncResult.isFailure(interruptedResult)).toBe(true);
-        if (AsyncResult.isFailure(interruptedResult)) {
-          expect(Cause.hasInterruptsOnly(interruptedResult.cause)).toBe(true);
-        }
-        expect(registry.get(manager.stateAtom(targetKey))).toEqual(EMPTY_VCS_ACTION_STATE);
-        expect(registry.get(state).revision).toBe(3);
-        expect(removed).toEqual([`${environmentId}:*`, `${environmentId}:*`, `${environmentId}:*`]);
       }),
     ),
   );
 });
-
-// Transport fixtures have a source-control-only session; authorization edge cases
-// are exercised by commandPermissions.test.ts.
-vi.mock("./session.ts", () => ({
-  createEnvironmentSessionAtoms: () => ({ sessionStateAtom: grantedSessions }),
-}));
-const grantedSessions = Atom.family((_id: EnvironmentId) =>
-  Atom.make(
-    AsyncResult.success({
-      authenticated: true,
-      auth: {
-        policy: "remote-reachable",
-        bootstrapMethods: [],
-        sessionMethods: [],
-        sessionCookieName: "test",
-      },
-      scopes: [AuthSourceControlWriteScope],
-    }),
-  ),
-);

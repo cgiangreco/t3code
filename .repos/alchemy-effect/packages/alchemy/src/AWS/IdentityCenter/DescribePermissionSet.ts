@@ -10,8 +10,9 @@ import type { Instance } from "./Instance.ts";
  * Reads a permission set's details (name, description, session duration, relay state) from the bound Identity Center instance. The instance's
  * `InstanceArn` is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IdentityCenter.DescribePermissionSetHttp)`.
- * ### Reading Permission Sets
- * **Example:** Read a Permission Set
+ * @binding
+ * @section Reading Permission Sets
+ * @example Read a Permission Set
  * ```typescript
  * // init — bind the operation to the Identity Center instance
  * const describePermissionSet = yield* AWS.IdentityCenter.DescribePermissionSet(instance);
@@ -22,8 +23,6 @@ import type { Instance } from "./Instance.ts";
  * });
  * console.log(PermissionSet?.Name, PermissionSet?.SessionDuration);
  * ```
- *
- * @binding
  */
 export interface DescribePermissionSet extends Binding.Service<
   DescribePermissionSet,

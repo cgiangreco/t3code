@@ -9,7 +9,6 @@ import {
   extractValue,
   getKvsEtag,
   isKvsPreconditionFailed,
-  cappedKvsRetrySchedule,
   retryForKvsReadiness,
   withKvsRegionFn,
 } from "./common.ts";
@@ -46,8 +45,9 @@ export interface KvEntries extends Resource<
  * Entries are stored with a `{namespace}:{key}` prefix to allow multiple
  * logical groups within a single store. Updates use batched optimistic
  * concurrency with automatic ETag retry.
- * ### Managing Entries
- * **Example:** Basic Entries
+ * @resource
+ * @section Managing Entries
+ * @example Basic Entries
  * ```typescript
  * const entries = yield* KvEntries("Routes", {
  *   store: store.keyValueStoreArn,
@@ -59,7 +59,7 @@ export interface KvEntries extends Resource<
  * });
  * ```
  *
- * **Example:** Purge Stale Keys
+ * @example Purge Stale Keys
  * ```typescript
  * const entries = yield* KvEntries("Routes", {
  *   store: store.keyValueStoreArn,
@@ -68,8 +68,6 @@ export interface KvEntries extends Resource<
  *   purge: true,
  * });
  * ```
- *
- * @resource
  */
 export const KvEntries = Resource<KvEntries>("AWS.CloudFront.KvEntries");
 
@@ -129,7 +127,7 @@ export const KvEntriesProvider = () =>
       ) {
         let remainingPuts = puts;
         let remainingDeletes = deletes;
-        let currentEtag: string | undefined = etag;
+        let currentEtag = etag ?? (yield* getKvsEtag(store));
 
         while (remainingPuts.length > 0 || remainingDeletes.length > 0) {
           const batchPuts = remainingPuts.slice(0, BATCH_SIZE);
@@ -138,28 +136,20 @@ export const KvEntriesProvider = () =>
             BATCH_SIZE - batchPuts.length,
           );
 
-          // A precondition failure means a concurrent writer (another
-          // KvEntries / KvRoutesUpdate on the same store) advanced the
-          // etag between our read and this batch — the retry MUST re-read
-          // the etag or it can never succeed. `stale` drops the cached
-          // etag on the failed attempt so the retried generator fetches a
-          // fresh one.
-          let stale = currentEtag;
-          const resp = yield* Effect.gen(function* () {
-            const attemptEtag = stale ?? (yield* getKvsEtag(store));
-            stale = undefined;
-            return yield* sendBatch(
-              store,
-              attemptEtag,
-              batchPuts,
-              batchDeletes,
-            );
-          }).pipe(
+          const resp = yield* sendBatch(
+            store,
+            currentEtag,
+            batchPuts,
+            batchDeletes,
+          ).pipe(
             Effect.retry({
               while: (error) =>
                 error._tag === "ValidationException" &&
                 isKvsPreconditionFailed(error),
-              schedule: cappedKvsRetrySchedule,
+              schedule: Schedule.max([
+                Schedule.exponential("100 millis"),
+                Schedule.recurs(24),
+              ]),
             }),
           );
 

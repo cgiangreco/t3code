@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — Organizations is a management-account-scoped
  * global service, so the binding takes no resource argument. Provide the
  * implementation with `Effect.provide(AWS.Organizations.DescribeHandshakeHttp)`.
- * ### Handshakes & Invitations
- * **Example:** Read a Handshake
+ * @binding
+ * @section Handshakes & Invitations
+ * @example Read a Handshake
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeHandshake = yield* AWS.Organizations.DescribeHandshake();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { Handshake } = yield* describeHandshake({ HandshakeId: handshakeId });
  * ```
- *
- * @binding
  */
 export interface DescribeHandshake extends Binding.Service<
   DescribeHandshake,

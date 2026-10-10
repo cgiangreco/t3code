@@ -1,17 +1,15 @@
 import type { UserInputQuestion } from "@t3tools/contracts";
 
 export interface PendingUserInputDraftAnswer {
-  selectedOptionValues?: string[];
+  selectedOptionLabels?: string[];
   customAnswer?: string;
-  attachmentCount?: number;
-  attachmentsBlocked?: boolean;
 }
 
 export interface PendingUserInputProgress {
   questionIndex: number;
   activeQuestion: UserInputQuestion | null;
   activeDraft: PendingUserInputDraftAnswer | undefined;
-  selectedOptionValues: string[];
+  selectedOptionLabels: string[];
   customAnswer: string;
   resolvedAnswer: string | string[] | null;
   usingCustomAnswer: boolean;
@@ -30,107 +28,77 @@ function normalizeDraftAnswer(value: string | undefined): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function normalizeSelectedOptionValues(value: string[] | undefined): string[] {
+function normalizeSelectedOptionLabels(value: string[] | undefined): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
 
-  // Provider option IDs must stay unchanged, including whitespace.
-  return Array.from(new Set(value.filter((entry) => typeof entry === "string")));
+  const normalized: string[] = [];
+  for (const entry of value) {
+    if (typeof entry !== "string") continue;
+    const trimmed = entry.trim();
+    if (trimmed.length > 0) {
+      normalized.push(trimmed);
+    }
+  }
+
+  return Array.from(new Set(normalized));
 }
 
 export function resolvePendingUserInputAnswer(
   question: UserInputQuestion,
   draft: PendingUserInputDraftAnswer | undefined,
 ): string | string[] | null {
-  if (draft?.attachmentsBlocked) return null;
-  const customAnswer =
-    question.allowCustomAnswer === false
-      ? null
-      : question.initialAnswer !== undefined
-        ? (draft?.customAnswer ?? null)
-        : normalizeDraftAnswer(draft?.customAnswer);
-  if (customAnswer !== null && customAnswer.length > 0) {
+  const customAnswer = normalizeDraftAnswer(draft?.customAnswer);
+  if (customAnswer) {
     return customAnswer;
   }
 
-  const selectedOptionValues = normalizeSelectedOptionValues(draft?.selectedOptionValues).filter(
-    (value) => question.options.some((option) => (option.value ?? option.label) === value),
-  );
+  const selectedOptionLabels = normalizeSelectedOptionLabels(draft?.selectedOptionLabels);
   if (question.multiSelect) {
-    return selectedOptionValues.length > 0
-      ? selectedOptionValues
-      : (customAnswer ??
-          (question.allowCustomAnswer !== false && (draft?.attachmentCount ?? 0) > 0 ? "" : null));
+    return selectedOptionLabels.length > 0 ? selectedOptionLabels : null;
   }
 
-  return (
-    selectedOptionValues[0] ??
-    customAnswer ??
-    (question.allowCustomAnswer !== false && (draft?.attachmentCount ?? 0) > 0 ? "" : null)
-  );
+  return selectedOptionLabels[0] ?? null;
 }
 
 export function setPendingUserInputCustomAnswer(
   draft: PendingUserInputDraftAnswer | undefined,
   customAnswer: string,
-  question?: Pick<UserInputQuestion, "initialAnswer">,
 ): PendingUserInputDraftAnswer {
-  const selectedOptionValues =
-    question?.initialAnswer !== undefined || customAnswer.trim().length > 0
+  const selectedOptionLabels =
+    customAnswer.trim().length > 0
       ? undefined
-      : normalizeSelectedOptionValues(draft?.selectedOptionValues);
+      : normalizeSelectedOptionLabels(draft?.selectedOptionLabels);
 
   return {
     customAnswer,
-    ...(selectedOptionValues && selectedOptionValues.length > 0 ? { selectedOptionValues } : {}),
+    ...(selectedOptionLabels && selectedOptionLabels.length > 0 ? { selectedOptionLabels } : {}),
   };
-}
-
-const DISPLACED_ANSWER_SEPARATOR = "\n\n";
-
-/**
- * Selecting an option replaces the custom answer, because a non-empty custom
- * answer outranks selected options in `resolvePendingUserInputAnswer`. Text the
- * user typed into the answer field must not vanish on that click: it moves back
- * into the thread draft, after whatever was already waiting there.
- */
-export function carryDisplacedCustomAnswerIntoPrompt(
-  prompt: string,
-  customAnswer: string | undefined,
-): string {
-  const displaced = customAnswer?.trim() ?? "";
-  if (displaced.length === 0) {
-    return prompt;
-  }
-  if (prompt.trim().length === 0) {
-    return displaced;
-  }
-  return `${prompt.trimEnd()}${DISPLACED_ANSWER_SEPARATOR}${displaced}`;
 }
 
 export function togglePendingUserInputOptionSelection(
   question: UserInputQuestion,
   draft: PendingUserInputDraftAnswer | undefined,
-  optionValue: string,
+  optionLabel: string,
 ): PendingUserInputDraftAnswer {
   if (question.multiSelect) {
-    const selectedOptionValues = normalizeSelectedOptionValues(draft?.selectedOptionValues);
-    const nextSelectedOptionValues = selectedOptionValues.includes(optionValue)
-      ? selectedOptionValues.filter((value) => value !== optionValue)
-      : [...selectedOptionValues, optionValue];
+    const selectedOptionLabels = normalizeSelectedOptionLabels(draft?.selectedOptionLabels);
+    const nextSelectedOptionLabels = selectedOptionLabels.includes(optionLabel)
+      ? selectedOptionLabels.filter((label) => label !== optionLabel)
+      : [...selectedOptionLabels, optionLabel];
 
     return {
       customAnswer: "",
-      ...(nextSelectedOptionValues.length > 0
-        ? { selectedOptionValues: nextSelectedOptionValues }
+      ...(nextSelectedOptionLabels.length > 0
+        ? { selectedOptionLabels: nextSelectedOptionLabels }
         : {}),
     };
   }
 
   return {
     customAnswer: "",
-    selectedOptionValues: [optionValue],
+    selectedOptionLabels: [optionLabel],
   };
 }
 
@@ -142,7 +110,7 @@ export function buildPendingUserInputAnswers(
 
   for (const question of questions) {
     const answer = resolvePendingUserInputAnswer(question, draftAnswers[question.id]);
-    if (answer === null) {
+    if (!answer) {
       return null;
     }
     answers[question.id] = answer;
@@ -156,9 +124,7 @@ export function countAnsweredPendingUserInputQuestions(
   draftAnswers: Record<string, PendingUserInputDraftAnswer>,
 ): number {
   return questions.reduce((count, question) => {
-    return resolvePendingUserInputAnswer(question, draftAnswers[question.id]) !== null
-      ? count + 1
-      : count;
+    return resolvePendingUserInputAnswer(question, draftAnswers[question.id]) ? count + 1 : count;
   }, 0);
 }
 
@@ -167,7 +133,7 @@ export function findFirstUnansweredPendingUserInputQuestionIndex(
   draftAnswers: Record<string, PendingUserInputDraftAnswer>,
 ): number {
   const unansweredIndex = questions.findIndex(
-    (question) => resolvePendingUserInputAnswer(question, draftAnswers[question.id]) === null,
+    (question) => !resolvePendingUserInputAnswer(question, draftAnswers[question.id]),
   );
 
   return unansweredIndex === -1 ? Math.max(questions.length - 1, 0) : unansweredIndex;
@@ -185,8 +151,7 @@ export function derivePendingUserInputProgress(
   const resolvedAnswer = activeQuestion
     ? resolvePendingUserInputAnswer(activeQuestion, activeDraft)
     : null;
-  const customAnswer =
-    activeQuestion?.allowCustomAnswer === false ? "" : (activeDraft?.customAnswer ?? "");
+  const customAnswer = activeDraft?.customAnswer ?? "";
   const answeredQuestionCount = countAnsweredPendingUserInputQuestions(questions, draftAnswers);
   const isLastQuestion =
     questions.length === 0 ? true : normalizedQuestionIndex >= questions.length - 1;
@@ -195,14 +160,13 @@ export function derivePendingUserInputProgress(
     questionIndex: normalizedQuestionIndex,
     activeQuestion,
     activeDraft,
-    selectedOptionValues: normalizeSelectedOptionValues(activeDraft?.selectedOptionValues),
+    selectedOptionLabels: normalizeSelectedOptionLabels(activeDraft?.selectedOptionLabels),
     customAnswer,
     resolvedAnswer,
-    usingCustomAnswer:
-      (activeQuestion?.initialAnswer !== undefined ? customAnswer : customAnswer.trim()).length > 0,
+    usingCustomAnswer: customAnswer.trim().length > 0,
     answeredQuestionCount,
     isLastQuestion,
     isComplete: buildPendingUserInputAnswers(questions, draftAnswers) !== null,
-    canAdvance: resolvedAnswer !== null,
+    canAdvance: Boolean(resolvedAnswer),
   };
 }

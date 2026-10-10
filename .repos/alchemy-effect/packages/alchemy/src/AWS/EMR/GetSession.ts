@@ -5,16 +5,15 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:GetSession` — reads an interactive session of the bound cluster — state, engine configuration, and timeline.
- * ### Interactive Sessions
- * **Example:** Poll a Session's State
+ * @binding
+ * @section Interactive Sessions
+ * @example Poll a Session's State
  * ```typescript
  * const getSession = yield* AWS.EMR.GetSession(cluster);
  *
  * const { Session } = yield* getSession({ SessionId: sessionId });
  * // Session.State: SUBMITTED | STARTING | IDLE | BUSY | …
  * ```
- *
- * @binding
  */
 export interface GetSession extends Binding.Service<
   GetSession,

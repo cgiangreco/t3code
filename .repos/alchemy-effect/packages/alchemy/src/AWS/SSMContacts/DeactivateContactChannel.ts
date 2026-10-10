@@ -11,15 +11,14 @@ import type { ContactChannel } from "./ContactChannel.ts";
  * injected as `ContactChannelId`.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMContacts.DeactivateContactChannelHttp)`.
- * ### Activating Contact Channels
- * **Example:** Deactivate a Channel
+ * @binding
+ * @section Activating Contact Channels
+ * @example Deactivate a Channel
  * ```typescript
  * const deactivateContactChannel = yield* AWS.SSMContacts.DeactivateContactChannel(email);
  *
  * yield* deactivateContactChannel();
  * ```
- *
- * @binding
  */
 export interface DeactivateContactChannel extends Binding.Service<
   DeactivateContactChannel,

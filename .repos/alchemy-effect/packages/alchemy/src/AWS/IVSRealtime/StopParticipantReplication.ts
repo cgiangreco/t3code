@@ -16,8 +16,9 @@ export interface StopParticipantReplicationRequest extends Omit<
  * Stop replicating a participant's media from the bound source stage into
  * the bound destination stage.
  *
- * ### Replicating Participants
- * **Example:** Stop a replication
+ * @binding
+ * @section Replicating Participants
+ * @example Stop a replication
  * ```typescript
  * // init — bound to (source, destination)
  * const stopParticipantReplication =
@@ -26,8 +27,6 @@ export interface StopParticipantReplicationRequest extends Omit<
  * // runtime
  * yield* stopParticipantReplication({ participantId: "abcDEF123" });
  * ```
- *
- * @binding
  */
 export interface StopParticipantReplication extends Binding.Service<
   StopParticipantReplication,

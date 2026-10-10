@@ -19,8 +19,9 @@ export interface PutObjectRetentionRequest extends Omit<
  * bypassing a GOVERNANCE retention additionally requires
  * `s3:BypassGovernanceRetention`. Provide the implementation with
  * `Effect.provide(AWS.S3.PutObjectRetentionHttp)`.
- * ### Object Lock
- * **Example:** Retain an Object in GOVERNANCE Mode
+ * @binding
+ * @section Object Lock
+ * @example Retain an Object in GOVERNANCE Mode
  * ```typescript
  * const putObjectRetention = yield* AWS.S3.PutObjectRetention(bucket);
  *
@@ -32,8 +33,6 @@ export interface PutObjectRetentionRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface PutObjectRetention extends Binding.Service<
   PutObjectRetention,

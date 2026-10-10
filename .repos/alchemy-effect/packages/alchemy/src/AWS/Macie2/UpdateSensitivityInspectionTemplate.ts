@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.UpdateSensitivityInspectionTemplateHttp)`.
- * ### Automated Discovery
- * **Example:** Tune the Inspection Template
+ * @binding
+ * @section Automated Discovery
+ * @example Tune the Inspection Template
  * ```typescript
  * // init — account-level binding, no resource argument
  * const updateSensitivityInspectionTemplate = yield* AWS.Macie2.UpdateSensitivityInspectionTemplate();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   includes: { managedDataIdentifierIds: ["CREDIT_CARD_NUMBER"] },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateSensitivityInspectionTemplate extends Binding.Service<
   UpdateSensitivityInspectionTemplate,

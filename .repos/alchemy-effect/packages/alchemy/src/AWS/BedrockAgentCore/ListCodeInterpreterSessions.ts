@@ -15,8 +15,9 @@ export interface ListCodeInterpreterSessionsRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.ListCodeInterpreterSessionsHttp`
  * on the Function effect to implement the binding.
  *
- * ### Inspecting Sessions
- * **Example:** List Sessions
+ * @binding
+ * @section Inspecting Sessions
+ * @example List Sessions
  * ```typescript
  * // init
  * const listCodeInterpreterSessions = yield* AgentCore.ListCodeInterpreterSessions(codeInterpreter);
@@ -29,8 +30,6 @@ export interface ListCodeInterpreterSessionsRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface ListCodeInterpreterSessions extends Binding.Service<
   ListCodeInterpreterSessions,

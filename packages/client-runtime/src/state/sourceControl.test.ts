@@ -1,7 +1,5 @@
-import { vi } from "vite-plus/test";
 import {
   EnvironmentId,
-  AuthSourceControlWriteScope,
   WS_METHODS,
   type SourceControlPublishRepositoryResult,
 } from "@t3tools/contracts";
@@ -10,7 +8,7 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as SubscriptionRef from "effect/SubscriptionRef";
-import { AsyncResult, Atom, AtomRegistry } from "effect/reactivity";
+import { AsyncResult, Atom, AtomRegistry } from "effect/unstable/reactivity";
 
 import {
   AVAILABLE_CONNECTION_STATE,
@@ -52,7 +50,6 @@ function session(client: WsRpcProtocolClient): RpcSession {
   return {
     client,
     initialConfig: Effect.never,
-    subscribeServerConfig: (input) => client.subscribeServerConfig(input),
     ready: Effect.void,
     probe: Effect.void,
     closed: Effect.never,
@@ -103,14 +100,14 @@ describe("source control environment atoms", () => {
         } as unknown as EnvironmentRegistry.EnvironmentRegistry["Service"]);
         const removed = new Array<string>();
         const cache = Persistence.EnvironmentCacheStore.of({
-          loadShell: () => Effect.succeedNone,
+          loadShell: () => Effect.succeed(Option.none()),
           saveShell: () => Effect.void,
-          loadThread: () => Effect.succeedNone,
+          loadThread: () => Effect.succeed(Option.none()),
           saveThread: () => Effect.void,
           removeThread: () => Effect.void,
-          loadServerConfig: () => Effect.succeedNone,
+          loadServerConfig: () => Effect.succeed(Option.none()),
           saveServerConfig: () => Effect.void,
-          loadVcsRefs: () => Effect.succeedNone,
+          loadVcsRefs: () => Effect.succeed(Option.none()),
           saveVcsRefs: () => Effect.void,
           removeVcsRefs: (environmentId, cwd) =>
             Effect.sync(() => {
@@ -170,23 +167,3 @@ describe("source control environment atoms", () => {
     ),
   );
 });
-
-// Transport fixtures have a source-control-only session; authorization edge cases
-// are exercised by commandPermissions.test.ts.
-vi.mock("./session.ts", () => ({
-  createEnvironmentSessionAtoms: () => ({ sessionStateAtom: grantedSessions }),
-}));
-const grantedSessions = Atom.family((_id: EnvironmentId) =>
-  Atom.make(
-    AsyncResult.success({
-      authenticated: true,
-      auth: {
-        policy: "remote-reachable",
-        bootstrapMethods: [],
-        sessionMethods: [],
-        sessionCookieName: "test",
-      },
-      scopes: [AuthSourceControlWriteScope],
-    }),
-  ),
-);

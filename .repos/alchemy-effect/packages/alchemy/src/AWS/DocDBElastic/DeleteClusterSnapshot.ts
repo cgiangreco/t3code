@@ -10,16 +10,15 @@ import * as Binding from "../../Binding.ts";
  * prunes on-demand backups past a retention horizon. Provide the
  * implementation with
  * `Effect.provide(AWS.DocDBElastic.DeleteClusterSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Prune an Old Snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Prune an Old Snapshot
  * ```typescript
  * const deleteSnapshot = yield* DocDBElastic.DeleteClusterSnapshot();
  *
  * const result = yield* deleteSnapshot({ snapshotArn });
  * // result.snapshot.status → "DELETING"
  * ```
- *
- * @binding
  */
 export interface DeleteClusterSnapshot extends Binding.Service<
   DeleteClusterSnapshot,

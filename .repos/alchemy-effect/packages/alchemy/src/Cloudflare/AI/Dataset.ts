@@ -127,8 +127,11 @@ export type Dataset = Resource<
  * provider, model, success, cost, tokens, etc.) and serve as the input to AI
  * Gateway evaluations. Name, enablement, and filters are all mutable in
  * place; only moving the dataset to a different gateway forces a replacement.
- * ### Creating a Dataset
- * **Example:** Capture successful requests
+ * @resource
+ * @product AI Gateway
+ * @category AI
+ * @section Creating a Dataset
+ * @example Capture successful requests
  * ```typescript
  * const gateway = yield* Cloudflare.AI.Gateway("Gateway");
  *
@@ -138,7 +141,7 @@ export type Dataset = Resource<
  * });
  * ```
  *
- * **Example:** Capture logs for a specific model
+ * @example Capture logs for a specific model
  * ```typescript
  * const dataset = yield* Cloudflare.AI.Dataset("LlamaLogs", {
  *   gatewayId: gateway.gatewayId,
@@ -150,8 +153,8 @@ export type Dataset = Resource<
  * });
  * ```
  *
- * ### Updating a Dataset
- * **Example:** Disable collection without deleting
+ * @section Updating a Dataset
+ * @example Disable collection without deleting
  * ```typescript
  * const dataset = yield* Cloudflare.AI.Dataset("SuccessLogs", {
  *   gatewayId: gateway.gatewayId,
@@ -161,10 +164,6 @@ export type Dataset = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ai-gateway/evaluations/set-up-evaluations/
- *
- * @resource
- * @product AI Gateway
- * @category AI
  */
 export const Dataset = Resource<Dataset>(TypeId, {
   aliases: ["Cloudflare.AiGateway.Dataset"],

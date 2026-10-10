@@ -21,8 +21,9 @@ export interface GetVehicleStatusRequest extends Omit<
  * implementation with
  * `Effect.provide(AWS.IoTFleetWise.GetVehicleStatusHttp)`.
  *
- * ### Vehicle Status
- * **Example:** Check Campaign Deployment on a Vehicle
+ * @binding
+ * @section Vehicle Status
+ * @example Check Campaign Deployment on a Vehicle
  * ```typescript
  * const getVehicleStatus = yield* IoTFleetWise.GetVehicleStatus(vehicle);
  *
@@ -31,8 +32,6 @@ export interface GetVehicleStatusRequest extends Omit<
  *   console.log(campaign.campaignName, campaign.status);
  * }
  * ```
- *
- * @binding
  */
 export interface GetVehicleStatus extends Binding.Service<
   GetVehicleStatus,

@@ -1,14 +1,3 @@
-import { AtomRegistry } from "effect/reactivity";
-
-import {
-  disposeOnFoundationReplace,
-  type FoundationHotModule,
-} from "../lib/foundation-fast-refresh";
-
-declare const module: { readonly hot?: FoundationHotModule } | undefined;
+import { AtomRegistry } from "effect/unstable/reactivity";
 
 export const appAtomRegistry = AtomRegistry.make();
-
-disposeOnFoundationReplace(typeof module === "undefined" ? undefined : module.hot, () =>
-  appAtomRegistry.dispose(),
-);

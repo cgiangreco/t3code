@@ -11,8 +11,9 @@ import type { FileSystem } from "./FileSystem.ts";
  * {@link FileSystem}. A file system that has never had a backup policy
  * fails with the typed `PolicyNotFound`. Provide the implementation with
  * `Effect.provide(AWS.EFS.DescribeBackupPolicyHttp)`.
- * ### Backup Policy
- * **Example:** Read the backup policy status
+ * @binding
+ * @section Backup Policy
+ * @example Read the backup policy status
  * ```typescript
  * const describeBackupPolicy = yield* AWS.EFS.DescribeBackupPolicy(files);
  *
@@ -21,8 +22,6 @@ import type { FileSystem } from "./FileSystem.ts";
  *   Effect.catchTag("PolicyNotFound", () => Effect.succeed("DISABLED")),
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeBackupPolicy extends Binding.Service<
   DescribeBackupPolicy,

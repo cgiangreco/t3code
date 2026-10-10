@@ -11,8 +11,9 @@ export interface SendTaskFailureRequest extends sfn.SendTaskFailureInput {}
  * Fails a callback-pattern task (`.waitForTaskToken`) or an
  * {@link Activity} task. Bind without arguments for task tokens issued by
  * service-integration Task states, or pass an `Activity` to scope access.
- * ### Callback Pattern
- * **Example:** Fail a waiting task
+ * @binding
+ * @section Callback Pattern
+ * @example Fail a waiting task
  * ```typescript
  * const sendTaskFailure = yield* StepFunctions.SendTaskFailure();
  *
@@ -22,8 +23,6 @@ export interface SendTaskFailureRequest extends sfn.SendTaskFailureInput {}
  *   cause: "the reviewer rejected the request",
  * });
  * ```
- *
- * @binding
  */
 export interface SendTaskFailure extends Binding.Service<
   SendTaskFailure,

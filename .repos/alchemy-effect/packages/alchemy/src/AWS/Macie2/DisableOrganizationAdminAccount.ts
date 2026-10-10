@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.DisableOrganizationAdminAccountHttp)`.
- * ### Organization & Members
- * **Example:** Remove the Delegated Administrator
+ * @binding
+ * @section Organization & Members
+ * @example Remove the Delegated Administrator
  * ```typescript
  * // init — account-level binding, no resource argument
  * const disableOrganizationAdminAccount = yield* AWS.Macie2.DisableOrganizationAdminAccount();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* disableOrganizationAdminAccount({ adminAccountId });
  * ```
- *
- * @binding
  */
 export interface DisableOrganizationAdminAccount extends Binding.Service<
   DisableOrganizationAdminAccount,

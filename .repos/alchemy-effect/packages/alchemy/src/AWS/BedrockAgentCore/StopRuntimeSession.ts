@@ -15,8 +15,9 @@ export interface StopRuntimeSessionRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.StopRuntimeSessionHttp`
  * on the Function effect to implement the binding.
  *
- * ### Runtime Sessions
- * **Example:** Stop a Runtime Session
+ * @binding
+ * @section Runtime Sessions
+ * @example Stop a Runtime Session
  * ```typescript
  * // init
  * const stopRuntimeSession = yield* AgentCore.StopRuntimeSession(runtime);
@@ -29,8 +30,6 @@ export interface StopRuntimeSessionRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface StopRuntimeSession extends Binding.Service<
   StopRuntimeSession,

@@ -11,8 +11,9 @@ export interface StopExecutionRequest extends sfn.StopExecutionInput {}
  * Bind this operation to a {@link StateMachine} inside a function runtime to
  * cancel that machine's running executions. Not supported by `EXPRESS`
  * workflows.
- * ### Stopping Executions
- * **Example:** Cancel a running execution
+ * @binding
+ * @section Stopping Executions
+ * @example Cancel a running execution
  * ```typescript
  * const stopExecution = yield* StepFunctions.StopExecution(machine);
  *
@@ -22,8 +23,6 @@ export interface StopExecutionRequest extends sfn.StopExecutionInput {}
  *   cause: "user requested cancellation",
  * });
  * ```
- *
- * @binding
  */
 export interface StopExecution extends Binding.Service<
   StopExecution,

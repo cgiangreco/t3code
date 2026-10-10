@@ -10,9 +10,8 @@ export interface ListManagedMicrovmImagesRequest
  *
  * Lists the AWS-managed base MicroVM images available for use as
  * `baseImage`. Bind with no resource: `yield* AWS.Lambda.ListManagedMicrovmImages()`.
- * ### Managed Base Images
- *
  * @binding
+ * @section Managed Base Images
  */
 export interface ListManagedMicrovmImages extends Binding.Service<
   ListManagedMicrovmImages,

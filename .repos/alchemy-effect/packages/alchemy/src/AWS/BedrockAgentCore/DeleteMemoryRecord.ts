@@ -15,8 +15,9 @@ export interface DeleteMemoryRecordRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.DeleteMemoryRecordHttp`
  * on the Function effect to implement the binding.
  *
- * ### Deleting Memory Records
- * **Example:** Delete a Record by Id
+ * @binding
+ * @section Deleting Memory Records
+ * @example Delete a Record by Id
  * ```typescript
  * // init
  * const deleteMemoryRecord = yield* AgentCore.DeleteMemoryRecord(memory);
@@ -29,8 +30,6 @@ export interface DeleteMemoryRecordRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface DeleteMemoryRecord extends Binding.Service<
   DeleteMemoryRecord,

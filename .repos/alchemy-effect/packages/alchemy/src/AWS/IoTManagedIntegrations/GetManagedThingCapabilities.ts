@@ -13,8 +13,9 @@ import type { ManagedThing } from "./ManagedThing.ts";
  * against. Provide the implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.GetManagedThingCapabilitiesHttp)`.
  *
- * ### Reading Device State
- * **Example:** Inspect the Device Capability Report
+ * @binding
+ * @section Reading Device State
+ * @example Inspect the Device Capability Report
  * ```typescript
  * const getCapabilities =
  *   yield* IoTManagedIntegrations.GetManagedThingCapabilities(thing);
@@ -22,8 +23,6 @@ import type { ManagedThing } from "./ManagedThing.ts";
  * const { CapabilityReport } = yield* getCapabilities();
  * // CapabilityReport?.endpoints[0].capabilities
  * ```
- *
- * @binding
  */
 export interface GetManagedThingCapabilities extends Binding.Service<
   GetManagedThingCapabilities,

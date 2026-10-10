@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * with `consumeImageEvents` to automatically retry transient build failures.
  * The idempotency `clientToken` is generated automatically. Provide the
  * implementation with `Effect.provide(AWS.ImageBuilder.RetryImageHttp)`.
- * ### Running Builds
- * **Example:** Retry a Failed Build
+ * @binding
+ * @section Running Builds
+ * @example Retry a Failed Build
  * ```typescript
  * // init — account-level binding, no resource argument
  * const retryImage = yield* AWS.ImageBuilder.RetryImage();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* retryImage({ imageBuildVersionArn });
  * ```
- *
- * @binding
  */
 export interface RetryImage extends Binding.Service<
   RetryImage,

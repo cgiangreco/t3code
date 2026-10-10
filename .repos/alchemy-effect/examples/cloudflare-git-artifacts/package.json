@@ -14,7 +14,7 @@
     "dev": "alchemy dev",
     "destroy": "alchemy destroy",
     "logs": "alchemy logs",
-    "tail": "alchemy logs --tail",
+    "tail": "alchemy tail",
     "test": "bun test"
   },
   "dependencies": {

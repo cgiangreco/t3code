@@ -11,8 +11,9 @@ import type { DataLake } from "./DataLake.ts";
  * collection problems. Bind the account's {@link DataLake}.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityLake.ListDataLakeExceptionsHttp)`.
- * ### Monitoring the data lake
- * **Example:** List current exceptions
+ * @binding
+ * @section Monitoring the data lake
+ * @example List current exceptions
  * ```typescript
  * // init
  * const listExceptions = yield* AWS.SecurityLake.ListDataLakeExceptions(lake);
@@ -20,8 +21,6 @@ import type { DataLake } from "./DataLake.ts";
  * // runtime
  * const { exceptions } = yield* listExceptions();
  * ```
- *
- * @binding
  */
 export interface ListDataLakeExceptions extends Binding.Service<
   ListDataLakeExceptions,

@@ -11,14 +11,13 @@ export interface ListSMSSandboxPhoneNumbersRequest
  * An account-scoped operation — lists the destination phone numbers
  * registered (verified or pending) in the account's SMS sandbox.
  * Provide the `ListSMSSandboxPhoneNumbersHttp` layer on the Function to implement the binding.
- * ### SMS Sandbox
- * **Example:** List Sandbox Numbers
+ * @binding
+ * @section SMS Sandbox
+ * @example List Sandbox Numbers
  * ```typescript
  * const listSandboxNumbers = yield* SNS.ListSMSSandboxPhoneNumbers();
  * const { PhoneNumbers } = yield* listSandboxNumbers();
  * ```
- *
- * @binding
  */
 export interface ListSMSSandboxPhoneNumbers extends Binding.Service<
   ListSMSSandboxPhoneNumbers,

@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * The binding takes no arguments and grants the action on `*` (the action
  * has no resource-level IAM).
  *
- * ### Real-Time Analysis
- * **Example:** Sentiment per Entity
+ * @binding
+ * @section Real-Time Analysis
+ * @example Sentiment per Entity
  * ```typescript
  * // init
  * const detectTargetedSentiment = yield* AWS.Comprehend.DetectTargetedSentiment();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.Entities[…].Mentions[…].MentionSentiment.Sentiment
  * ```
- *
- * @binding
  */
 export interface DetectTargetedSentiment extends Binding.Service<
   DetectTargetedSentiment,

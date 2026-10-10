@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.GetComplianceDetailsByResourceHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Reading Compliance
- * **Example:** Read a Resource's Evaluation Results
+ * @binding
+ * @section Reading Compliance
+ * @example Read a Resource's Evaluation Results
  * ```typescript
  * // init — grants config:GetComplianceDetailsByResource
  * const getComplianceDetailsByResource = yield* AWS.Config.GetComplianceDetailsByResource();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.EvaluationResults);
  * ```
- *
- * @binding
  */
 export interface GetComplianceDetailsByResource extends Binding.Service<
   GetComplianceDetailsByResource,

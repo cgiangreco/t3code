@@ -9,16 +9,15 @@ import type { AddressList } from "./AddressList.ts";
  * Lists the import jobs created against the bound address list. The
  * address list id is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.MailManager.ListAddressListImportJobsHttp)`.
- * ### Bulk Importing Members
- * **Example:** List Import Jobs
+ * @binding
+ * @section Bulk Importing Members
+ * @example List Import Jobs
  * ```typescript
  * const listImportJobs = yield* MailManager.ListAddressListImportJobs(blockList);
  *
  * // runtime
  * const { ImportJobs } = yield* listImportJobs({});
  * ```
- *
- * @binding
  */
 export interface ListAddressListImportJobs extends Binding.Service<
   ListAddressListImportJobs,

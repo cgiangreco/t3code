@@ -12,8 +12,9 @@ export interface OverrideStageConditionRequest extends Omit<
  * Runtime binding for `codepipeline:OverrideStageCondition` — overrides a
  * stage condition (e.g. a failing `BEFORE_ENTRY` or `ON_SUCCESS` check) so
  * the execution can proceed (V2 pipelines).
- * ### Operating Stages
- * **Example:** Override a Failing Entry Condition
+ * @binding
+ * @section Operating Stages
+ * @example Override a Failing Entry Condition
  * ```typescript
  * const overrideCondition =
  *   yield* AWS.CodePipeline.OverrideStageCondition(pipeline);
@@ -24,8 +25,6 @@ export interface OverrideStageConditionRequest extends Omit<
  *   conditionType: "BEFORE_ENTRY",
  * });
  * ```
- *
- * @binding
  */
 export interface OverrideStageCondition extends Binding.Service<
   OverrideStageCondition,

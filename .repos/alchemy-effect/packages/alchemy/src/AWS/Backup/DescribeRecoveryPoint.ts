@@ -20,8 +20,9 @@ export interface DescribeRecoveryPointRequest extends Omit<
  * {@link BackupVault} — status, lifecycle, size, and restorability. Provide
  * the implementation with
  * `Effect.provide(AWS.Backup.DescribeRecoveryPointHttp)`.
- * ### Recovery Points
- * **Example:** Inspect A Recovery Point
+ * @binding
+ * @section Recovery Points
+ * @example Inspect A Recovery Point
  * ```typescript
  * const describeRecoveryPoint = yield* AWS.Backup.DescribeRecoveryPoint(vault);
  *
@@ -30,8 +31,6 @@ export interface DescribeRecoveryPointRequest extends Omit<
  * });
  * yield* Effect.log(`status: ${point.Status}`);
  * ```
- *
- * @binding
  */
 export interface DescribeRecoveryPoint extends Binding.Service<
   DescribeRecoveryPoint,

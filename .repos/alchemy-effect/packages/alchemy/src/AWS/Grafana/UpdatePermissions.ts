@@ -11,8 +11,9 @@ import type { Workspace } from "./Workspace.ts";
  * Center users and groups in the workspace. Rejected instructions come back
  * in the response's `errors` list rather than failing the call. Provide the
  * implementation with `Effect.provide(AWS.Grafana.UpdatePermissionsHttp)`.
- * ### Managing Permissions
- * **Example:** Grant a User the Editor Role
+ * @binding
+ * @section Managing Permissions
+ * @example Grant a User the Editor Role
  * ```typescript
  * const updatePermissions = yield* Grafana.UpdatePermissions(workspace);
  *
@@ -27,8 +28,6 @@ import type { Workspace } from "./Workspace.ts";
  * });
  * // errors → [] when every instruction applied
  * ```
- *
- * @binding
  */
 export interface UpdatePermissions extends Binding.Service<
   UpdatePermissions,

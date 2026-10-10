@@ -21,8 +21,9 @@ export interface CreatePrefetchScheduleRequest extends Omit<
  * scoped to that configuration's prefetch-schedule ARN space. Provide the
  * implementation with `Effect.provide(AWS.MediaTailor.CreatePrefetchScheduleHttp)`.
  *
- * ### Prefetching Ads
- * **Example:** Prefetch ads for an upcoming break
+ * @binding
+ * @section Prefetching Ads
+ * @example Prefetch ads for an upcoming break
  * ```typescript
  * const createPrefetchSchedule = yield* AWS.MediaTailor.CreatePrefetchSchedule(config);
  *
@@ -32,8 +33,6 @@ export interface CreatePrefetchScheduleRequest extends Omit<
  *   Consumption: { EndTime: breakEnd },
  * });
  * ```
- *
- * @binding
  */
 export interface CreatePrefetchSchedule extends Binding.Service<
   CreatePrefetchSchedule,

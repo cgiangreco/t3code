@@ -18,8 +18,9 @@ export interface CancelFlowExecutionsRequest extends Omit<
  * `invalidExecutions`. The flow name is injected automatically and
  * `appflow:CancelFlowExecutions` is granted on the flow. Provide the
  * implementation with `Effect.provide(AWS.AppFlow.CancelFlowExecutionsHttp)`.
- * ### Running Flows
- * **Example:** Cancel Specific Flow Runs
+ * @binding
+ * @section Running Flows
+ * @example Cancel Specific Flow Runs
  * ```typescript
  * // init — bind the operation to the flow
  * const cancelFlowExecutions = yield* AWS.AppFlow.CancelFlowExecutions(flow);
@@ -30,8 +31,6 @@ export interface CancelFlowExecutionsRequest extends Omit<
  * });
  * // result.invalidExecutions lists ids that could not be canceled
  * ```
- *
- * @binding
  */
 export interface CancelFlowExecutions extends Binding.Service<
   CancelFlowExecutions,

@@ -15,8 +15,9 @@ export interface ListTagsForResourceRequest extends Omit<
  *
  * Provide `CloudWatch.ListTagsForResourceHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Reading Tags
- * **Example:** Read the Tags on an Alarm
+ * @binding
+ * @section Reading Tags
+ * @example Read the Tags on an Alarm
  * ```typescript
  * // init — grants cloudwatch:ListTagsForResource on the alarm's ARN
  * const listTagsForResource = yield* AWS.CloudWatch.ListTagsForResource(alarm);
@@ -25,8 +26,6 @@ export interface ListTagsForResourceRequest extends Omit<
  * const result = yield* listTagsForResource();
  * const tags = result.Tags ?? [];
  * ```
- *
- * @binding
  */
 export interface ListTagsForResource extends Binding.Service<
   ListTagsForResource,

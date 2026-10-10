@@ -15,14 +15,13 @@ export interface UpdateAssessmentStatusRequest extends Omit<
  * Sets the bound assessment's status — mark it `INACTIVE` to
  * complete it and stop evidence collection. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.UpdateAssessmentStatusHttp)`.
- * ### Assessment Workflow
- * **Example:** Complete an Assessment
+ * @binding
+ * @section Assessment Workflow
+ * @example Complete an Assessment
  * ```typescript
  * const updateAssessmentStatus = yield* AWS.AuditManager.UpdateAssessmentStatus(assessment);
  * const result = yield* updateAssessmentStatus({ status: "INACTIVE" });
  * ```
- *
- * @binding
  */
 export interface UpdateAssessmentStatus extends Binding.Service<
   UpdateAssessmentStatus,

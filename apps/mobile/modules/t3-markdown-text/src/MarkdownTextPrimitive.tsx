@@ -1,16 +1,5 @@
-import React, { type Ref } from "react";
-import {
-  findNodeHandle,
-  Platform,
-  processColor,
-  StyleSheet,
-  Text as RNText,
-  type ColorValue,
-  type TextInstance,
-  type TextProps,
-  type ViewStyle,
-} from "react-native";
-import { setMarkdownSelectionHandleColor } from "./T3MarkdownTextSelectionModule";
+import React from "react";
+import { Platform, StyleSheet, Text as RNText, type TextProps, type ViewStyle } from "react-native";
 import T3MarkdownTextRunNativeComponent from "./T3MarkdownTextRunNativeComponent";
 import T3MarkdownTextNativeComponent from "./T3MarkdownTextNativeComponent";
 import { flattenStyles } from "./util";
@@ -20,10 +9,10 @@ const TextAncestorContext = React.createContext<[boolean, ViewStyle]>([
   StyleSheet.create({}),
 ]);
 
-const textDefaults = {
+const textDefaults: TextProps = {
   allowFontScaling: true,
   selectable: true,
-} satisfies TextProps;
+};
 
 const useTextAncestorContext = () => React.useContext(TextAncestorContext);
 
@@ -35,21 +24,8 @@ export type SelectionChangeEvent = {
   nativeEvent: { target: number; start: number; end: number };
 };
 
-export type ContextMenuActionEvent = {
-  nativeEvent: { target: number; actionIdentifier: string };
-};
-
-/**
- * `onTextLayout` is not offered: the native view reports plain line strings
- * while the React Native Text fallback reports measured `TextLayoutLine`s.
- */
-export type MarkdownTextPrimitiveProps = Omit<TextProps, "onTextLayout"> & {
-  nativeTextRef?: Ref<TextInstance>;
-  selectionHandleColor?: ColorValue;
+export type MarkdownTextPrimitiveProps = TextProps & {
   uiTextView?: boolean;
-  contextMenuConfig?: string;
-  contextClipboardConfig?: string;
-  onContextMenuAction?: (event: ContextMenuActionEvent) => void;
   /**
    * Fired when the native text selection changes. Only fires on iOS when
    * `uiTextView` is true. Note: fires on every selection-edge adjustment
@@ -59,12 +35,7 @@ export type MarkdownTextPrimitiveProps = Omit<TextProps, "onTextLayout"> & {
   onSelectionChange?: (event: SelectionChangeEvent) => void;
 };
 
-function MarkdownTextPrimitiveChild({
-  style,
-  children,
-  nativeTextRef: _nativeTextRef,
-  ...rest
-}: MarkdownTextPrimitiveProps) {
+function MarkdownTextPrimitiveChild({ style, children, ...rest }: MarkdownTextPrimitiveProps) {
   const [isAncestor, rootStyle] = useTextAncestorContext();
 
   // Flatten the styles, and apply the root styles when needed
@@ -98,14 +69,16 @@ function MarkdownTextPrimitiveChild({
   });
 
   if (!isAncestor) {
-    // Press handlers are delivered by the text runs; the container never sees them.
-    const { onPress: _onPress, onLongPress: _onLongPress, ...containerProps } = rest;
     return (
       <TextAncestorContext.Provider value={contextValue}>
         <T3MarkdownTextNativeComponent
           {...textDefaults}
-          {...containerProps}
+          {...rest}
+          // ellipsizeMode={rest.ellipsizeMode ?? rest.lineBreakMode ?? 'tail'}
           style={[flattenedStyle]}
+          // @ts-expect-error Weirdness
+          onPress={undefined}
+          onLongPress={undefined}
         >
           {nativeChildren}
         </T3MarkdownTextNativeComponent>
@@ -116,64 +89,21 @@ function MarkdownTextPrimitiveChild({
   return <>{nativeChildren}</>;
 }
 
-function MarkdownTextPrimitiveInner({ nativeTextRef, ...props }: MarkdownTextPrimitiveProps) {
+function MarkdownTextPrimitiveInner(props: MarkdownTextPrimitiveProps) {
   const [isAncestor] = useTextAncestorContext();
 
   // Even if the uiTextView prop is set, we can still default to using
   // normal selection (i.e. base RN text) if the text doesn't need to be
   // selectable
   if ((!props.selectable || !props.uiTextView) && !isAncestor) {
-    return <RNText ref={nativeTextRef} {...props} />;
+    return <RNText {...props} />;
   }
   return <MarkdownTextPrimitiveChild {...props} />;
 }
 
-function AndroidMarkdownText({
-  nativeTextRef,
-  selectionHandleColor,
-  onLayout,
-  contextClipboardConfig: _contextClipboardConfig,
-  ...props
-}: MarkdownTextPrimitiveProps) {
-  const textRef = React.useRef<TextInstance | null>(null);
-  React.useImperativeHandle<TextInstance | null, TextInstance | null>(
-    nativeTextRef,
-    () => textRef.current,
-    [],
-  );
-  const color = processColor(selectionHandleColor);
-  const applyHandleColor = React.useCallback(() => {
-    if (!textRef.current || typeof color !== "number") return;
-    const reactTag = findNodeHandle(textRef.current);
-    if (reactTag != null) setMarkdownSelectionHandleColor(reactTag, color);
-  }, [color]);
-
-  // RN's selectionColor only sets the highlight. Retint mounted handles when
-  // the theme changes, and after layout when the native view first exists.
-  React.useEffect(applyHandleColor, [applyHandleColor]);
-
-  return (
-    <RNText
-      ref={textRef}
-      {...props}
-      onLayout={(event) => {
-        applyHandleColor();
-        onLayout?.(event);
-      }}
-    />
-  );
-}
-
-export function MarkdownTextPrimitive({
-  selectionHandleColor,
-  ...props
-}: MarkdownTextPrimitiveProps) {
-  if (Platform.OS === "android" && selectionHandleColor !== undefined) {
-    return <AndroidMarkdownText {...props} selectionHandleColor={selectionHandleColor} />;
-  }
+export function MarkdownTextPrimitive(props: MarkdownTextPrimitiveProps) {
   if (Platform.OS !== "ios") {
-    const { nativeTextRef, contextClipboardConfig: _contextClipboardConfig, ...textProps } = props;
-    return <RNText ref={nativeTextRef} {...textProps} />;
+    return <RNText {...props} />;
   }
   return <MarkdownTextPrimitiveInner {...props} />;
 }

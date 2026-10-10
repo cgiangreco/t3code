@@ -16,8 +16,9 @@ export interface GetQAppSessionMetadataRequest extends Omit<
  *
  * Retrieves a Q App session's metadata — name, sharing configuration, and ownership. Provide the implementation with
  * `Effect.provide(AWS.QApps.GetQAppSessionMetadataHttp)`.
- * ### Sessions
- * **Example:** Read Session Sharing Configuration
+ * @binding
+ * @section Sessions
+ * @example Read Session Sharing Configuration
  * ```typescript
  * // init — bind the operation to the Q App
  * const getQAppSessionMetadata = yield* AWS.QApps.GetQAppSessionMetadata(app);
@@ -26,8 +27,6 @@ export interface GetQAppSessionMetadataRequest extends Omit<
  * const metadata = yield* getQAppSessionMetadata({ sessionId });
  * console.log(metadata.sharingConfiguration.enabled);
  * ```
- *
- * @binding
  */
 export interface GetQAppSessionMetadata extends Binding.Service<
   GetQAppSessionMetadata,

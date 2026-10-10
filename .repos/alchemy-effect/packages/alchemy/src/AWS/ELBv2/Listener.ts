@@ -99,8 +99,9 @@ export interface Listener extends Resource<
  * connection requests using its configured protocol and port, then routes them
  * to target groups via its default actions (and any attached
  * {@link ListenerRule}s).
- * ### Creating a Listener
- * **Example:** Basic HTTP forward listener
+ * @resource
+ * @section Creating a Listener
+ * @example Basic HTTP forward listener
  * ```typescript
  * const listener = yield* Listener("http", {
  *   loadBalancerArn: lb.loadBalancerArn,
@@ -110,7 +111,7 @@ export interface Listener extends Resource<
  * });
  * ```
  *
- * **Example:** HTTPS listener with certificate and SSL policy
+ * @example HTTPS listener with certificate and SSL policy
  * ```typescript
  * const listener = yield* Listener("https", {
  *   loadBalancerArn: lb.loadBalancerArn,
@@ -124,8 +125,8 @@ export interface Listener extends Resource<
  * });
  * ```
  *
- * ### Default Actions
- * **Example:** Redirect HTTP to HTTPS
+ * @section Default Actions
+ * @example Redirect HTTP to HTTPS
  * ```typescript
  * const redirect = yield* Listener("redirect", {
  *   loadBalancerArn: lb.loadBalancerArn,
@@ -137,7 +138,7 @@ export interface Listener extends Resource<
  * });
  * ```
  *
- * **Example:** Fixed response
+ * @example Fixed response
  * ```typescript
  * const maintenance = yield* Listener("maintenance", {
  *   loadBalancerArn: lb.loadBalancerArn,
@@ -148,7 +149,7 @@ export interface Listener extends Resource<
  * });
  * ```
  *
- * **Example:** Weighted forward with stickiness
+ * @example Weighted forward with stickiness
  * ```typescript
  * const weighted = yield* Listener("weighted", {
  *   loadBalancerArn: lb.loadBalancerArn,
@@ -166,8 +167,8 @@ export interface Listener extends Resource<
  * });
  * ```
  *
- * ### Mutual TLS
- * **Example:** mTLS verify mode with a trust store
+ * @section Mutual TLS
+ * @example mTLS verify mode with a trust store
  * ```typescript
  * const mtls = yield* Listener("mtls", {
  *   loadBalancerArn: lb.loadBalancerArn,
@@ -180,8 +181,6 @@ export interface Listener extends Resource<
  *   mutualAuthentication: { mode: "verify", trustStoreArn: trustStore.trustStoreArn },
  * });
  * ```
- *
- * @resource
  */
 export const Listener = Resource<Listener>("AWS.ELBv2.Listener");
 

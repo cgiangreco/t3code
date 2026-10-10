@@ -60,8 +60,9 @@ export interface ApiDestinationProps {
  *
  * API destinations do not support tags, so ownership is tracked by the
  * deterministic physical name.
- * ### Connecting to APIs
- * **Example:** Webhook API Destination
+ * @resource
+ * @section Connecting to APIs
+ * @example Webhook API Destination
  * ```typescript
  * const destination = yield* AWS.EventBridge.ApiDestination("Webhook", {
  *   connectionArn: connection.connectionArn,
@@ -70,7 +71,7 @@ export interface ApiDestinationProps {
  * });
  * ```
  *
- * **Example:** Rate-Limited API Destination as a Rule Target
+ * @example Rate-Limited API Destination as a Rule Target
  * ```typescript
  * const destination = yield* AWS.EventBridge.ApiDestination("SlowApi", {
  *   connectionArn: connection.connectionArn,
@@ -88,8 +89,6 @@ export interface ApiDestinationProps {
  *   }],
  * });
  * ```
- *
- * @resource
  */
 export interface ApiDestination extends Resource<
   "AWS.EventBridge.ApiDestination",

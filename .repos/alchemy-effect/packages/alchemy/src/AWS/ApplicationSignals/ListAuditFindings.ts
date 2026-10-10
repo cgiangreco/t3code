@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * causes (performance issues, anomalies, potential problems) for the given
  * audit targets. Provide the implementation with
  * `Effect.provide(AWS.ApplicationSignals.ListAuditFindingsHttp)`.
- * ### Auditing Services
- * **Example:** List Audit Findings for a Service
+ * @binding
+ * @section Auditing Services
+ * @example List Audit Findings for a Service
  * ```typescript
  * // init — account-level, no resource argument
  * const listAuditFindings = yield* AWS.ApplicationSignals.ListAuditFindings();
@@ -33,8 +34,6 @@ import * as Binding from "../../Binding.ts";
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface ListAuditFindings extends Binding.Service<
   ListAuditFindings,

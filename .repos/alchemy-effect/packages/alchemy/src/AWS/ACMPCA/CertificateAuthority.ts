@@ -220,8 +220,9 @@ export interface CertificateAuthority extends Resource<
  * for as long as they exist, so destroy test CAs promptly. Deletion
  * places the CA in the `DELETED` state for a configurable 7-30 day
  * restoration window.
- * ### Creating a Certificate Authority
- * **Example:** Root CA
+ * @resource
+ * @section Creating a Certificate Authority
+ * @example Root CA
  * ```typescript
  * import * as ACMPCA from "alchemy/AWS/ACMPCA";
  *
@@ -230,7 +231,7 @@ export interface CertificateAuthority extends Resource<
  * });
  * ```
  *
- * **Example:** ECDSA Subordinate CA
+ * @example ECDSA Subordinate CA
  * ```typescript
  * const ca = yield* ACMPCA.CertificateAuthority("IssuingCA", {
  *   type: "SUBORDINATE",
@@ -244,7 +245,7 @@ export interface CertificateAuthority extends Resource<
  * });
  * ```
  *
- * **Example:** Short-Lived Certificate Mode
+ * @example Short-Lived Certificate Mode
  * ```typescript
  * const ca = yield* ACMPCA.CertificateAuthority("ShortLivedCA", {
  *   subject: { commonName: "ephemeral.example.com" },
@@ -252,8 +253,8 @@ export interface CertificateAuthority extends Resource<
  * });
  * ```
  *
- * ### Revocation
- * **Example:** CA with CRL published to S3
+ * @section Revocation
+ * @example CA with CRL published to S3
  * ```typescript
  * const ca = yield* ACMPCA.CertificateAuthority("RootCA", {
  *   subject: { commonName: "corp.example.com" },
@@ -267,16 +268,16 @@ export interface CertificateAuthority extends Resource<
  * });
  * ```
  *
- * ### Granting ACM Access
- * **Example:** Allow ACM to auto-renew certificates issued by this CA
+ * @section Granting ACM Access
+ * @example Allow ACM to auto-renew certificates issued by this CA
  * ```typescript
  * const permission = yield* ACMPCA.Permission("AcmRenewal", {
  *   certificateAuthorityArn: ca.certificateAuthorityArn,
  * });
  * ```
  *
- * ### Reacting to CA Events
- * **Example:** Consume ACM PCA Events from EventBridge
+ * @section Reacting to CA Events
+ * @example Consume ACM PCA Events from EventBridge
  * ```typescript
  * // ACM PCA emits lifecycle events (certificate issuance, expiry, CRL and
  * // audit-report generation) on the default EventBridge bus under the
@@ -291,8 +292,6 @@ export interface CertificateAuthority extends Resource<
  *     Stream.runForEach(events, (event) => Effect.log(event.detail)),
  * );
  * ```
- *
- * @resource
  */
 export const CertificateAuthority = Resource<CertificateAuthority>(
   "AWS.ACMPCA.CertificateAuthority",

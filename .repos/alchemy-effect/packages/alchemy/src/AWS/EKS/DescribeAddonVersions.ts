@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * `eks:DescribeAddonVersions` is granted on `*` — the operation is account-scoped and takes no resource.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.DescribeAddonVersionsHttp)`.
- * ### Version Catalogs
- * **Example:** Find Compatible vpc-cni Versions
+ * @binding
+ * @section Version Catalogs
+ * @example Find Compatible vpc-cni Versions
  * ```typescript
  * // init
  * const describeAddonVersions = yield* AWS.EKS.DescribeAddonVersions();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   kubernetesVersion: "1.31",
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeAddonVersions extends Binding.Service<
   DescribeAddonVersions,

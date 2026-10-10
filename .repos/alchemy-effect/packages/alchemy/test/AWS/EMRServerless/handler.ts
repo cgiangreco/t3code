@@ -1,14 +1,12 @@
 import * as EMRServerless from "@/AWS/EMRServerless";
 import * as IAM from "@/AWS/IAM";
 import * as Lambda from "@/AWS/Lambda";
-import type * as emr from "@distilled.cloud/aws/emr-serverless";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import path from "pathe";
 
 const main = path.resolve(import.meta.dirname, "handler.ts");
@@ -19,24 +17,9 @@ const main = path.resolve(import.meta.dirname, "handler.ts");
 const FAKE_JOB_RUN_ID = "00abcdefabcdef01";
 const FAKE_SESSION_ID = "00abcdefabcdef01";
 
-// Session authorization can lag behind other EMR APIs on a fresh Lambda role.
-const sessionAuthorizationPolicy = {
-  while: (
-    error:
-      | emr.GetSessionEndpointError
-      | emr.StartSessionError
-      | emr.ListSessionsError,
-  ) => error._tag === "AccessDeniedException",
-  schedule: Schedule.spaced("3 seconds"),
-  times: 8,
-};
-
 /** Deterministic names shared with the test for out-of-band verification. */
-const stageSuffix = process.env.ALCHEMY_TEST_STAGE
-  ? `-${process.env.ALCHEMY_TEST_STAGE}`
-  : "";
-export const BINDINGS_APP_NAME = `alchemy-test-emrs-bind${stageSuffix}`;
-export const BINDINGS_ROLE_NAME = `alchemy-test-emrs-bind-role${stageSuffix}`;
+export const BINDINGS_APP_NAME = "alchemy-test-emrs-bind";
+export const BINDINGS_ROLE_NAME = "alchemy-test-emrs-bind-role";
 
 export class EmrServerlessTestFunction extends Lambda.Function<Lambda.Function>()(
   "EmrServerlessTestFunction",
@@ -45,7 +28,7 @@ export class EmrServerlessTestFunction extends Lambda.Function<Lambda.Function>(
 export default EmrServerlessTestFunction.make(
   {
     main,
-    functionUrl: true,
+    url: true,
     timeout: Duration.seconds(30),
   },
   Effect.gen(function* () {
@@ -154,9 +137,7 @@ export default EmrServerlessTestFunction.make(
           });
         }
         if (request.method === "GET" && pathname === "/sessions") {
-          return yield* probe(
-            listSessions().pipe(Effect.retry(sessionAuthorizationPolicy)),
-          );
+          return yield* probe(listSessions());
         }
 
         // Typed not-found probes on nonexistent sub-resources.
@@ -181,9 +162,7 @@ export default EmrServerlessTestFunction.make(
         }
         if (request.method === "GET" && pathname === "/session-endpoint") {
           return yield* probe(
-            getSessionEndpoint({ sessionId: FAKE_SESSION_ID }).pipe(
-              Effect.retry(sessionAuthorizationPolicy),
-            ),
+            getSessionEndpoint({ sessionId: FAKE_SESSION_ID }),
           );
         }
         if (request.method === "POST" && pathname === "/session-terminate") {
@@ -209,11 +188,7 @@ export default EmrServerlessTestFunction.make(
               { status: 400 },
             );
           }
-          return yield* probe(
-            startSession({ executionRoleArn: roleArn }).pipe(
-              Effect.retry(sessionAuthorizationPolicy),
-            ),
-          );
+          return yield* probe(startSession({ executionRoleArn: roleArn }));
         }
 
         // Application control.
@@ -278,7 +253,6 @@ export default EmrServerlessTestFunction.make(
           return yield* HttpServerResponse.json({
             jobRunId: jobRun.jobRunId,
             state: jobRun.state,
-            stateDetails: jobRun.stateDetails,
           });
         }
 

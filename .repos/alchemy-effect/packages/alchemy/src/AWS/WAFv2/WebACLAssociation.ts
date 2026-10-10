@@ -56,8 +56,9 @@ export interface WebACLAssociation extends Resource<
  * CloudFront distributions are protected by setting
  * `Distribution.webAclId` instead — never through this resource.
  *
- * ### Associating Web ACLs
- * **Example:** Protect a Cognito User Pool
+ * @resource
+ * @section Associating Web ACLs
+ * @example Protect a Cognito User Pool
  * ```typescript
  * const pool = yield* AWS.Cognito.UserPool("Users", {});
  *
@@ -70,8 +71,6 @@ export interface WebACLAssociation extends Resource<
  *   resourceArn: pool.userPoolArn,
  * });
  * ```
- *
- * @resource
  */
 export const WebACLAssociation = Resource<WebACLAssociation>(
   "AWS.WAFv2.WebACLAssociation",

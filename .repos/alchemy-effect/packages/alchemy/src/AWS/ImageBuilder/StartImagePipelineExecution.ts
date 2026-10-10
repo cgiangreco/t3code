@@ -12,8 +12,9 @@ import type { ImagePipeline } from "./ImagePipeline.ts";
  * created, for use with `GetImage` / `CancelImageCreation`. Provide the
  * implementation with
  * `Effect.provide(AWS.ImageBuilder.StartImagePipelineExecutionHttp)`.
- * ### Running Builds
- * **Example:** Start a Build of the Bound Pipeline
+ * @binding
+ * @section Running Builds
+ * @example Start a Build of the Bound Pipeline
  * ```typescript
  * // init — bind the operation to the pipeline
  * const startBuild = yield* AWS.ImageBuilder.StartImagePipelineExecution(
@@ -24,8 +25,6 @@ import type { ImagePipeline } from "./ImagePipeline.ts";
  * const { imageBuildVersionArn } = yield* startBuild();
  * yield* Effect.log(`building ${imageBuildVersionArn}`);
  * ```
- *
- * @binding
  */
 export interface StartImagePipelineExecution extends Binding.Service<
   StartImagePipelineExecution,

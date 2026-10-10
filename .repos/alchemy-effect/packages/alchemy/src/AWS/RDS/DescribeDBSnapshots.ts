@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Lists the account's DB instance snapshots — the discovery half of a
  * snapshot-rotation or verification function. Provide the implementation with
  * `Effect.provide(AWS.RDS.DescribeDBSnapshotsHttp)`.
- * ### Managing Instance Snapshots
- * **Example:** List an Instance's Manual Snapshots
+ * @binding
+ * @section Managing Instance Snapshots
+ * @example List an Instance's Manual Snapshots
  * ```typescript
  * const describeDBSnapshots = yield* AWS.RDS.DescribeDBSnapshots();
  *
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   SnapshotType: "manual",
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeDBSnapshots extends Binding.Service<
   DescribeDBSnapshots,

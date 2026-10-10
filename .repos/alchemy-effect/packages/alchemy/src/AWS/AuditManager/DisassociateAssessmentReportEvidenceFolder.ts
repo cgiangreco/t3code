@@ -15,14 +15,13 @@ export interface DisassociateAssessmentReportEvidenceFolderRequest extends Omit<
  * Removes an evidence folder from the (in-progress) assessment
  * report of the bound assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.DisassociateAssessmentReportEvidenceFolderHttp)`.
- * ### Assessment Reports
- * **Example:** Exclude an Evidence Folder from the Report
+ * @binding
+ * @section Assessment Reports
+ * @example Exclude an Evidence Folder from the Report
  * ```typescript
  * const disassociateAssessmentReportEvidenceFolder = yield* AWS.AuditManager.DisassociateAssessmentReportEvidenceFolder(assessment);
  * const result = yield* disassociateAssessmentReportEvidenceFolder({ evidenceFolderId });
  * ```
- *
- * @binding
  */
 export interface DisassociateAssessmentReportEvidenceFolder extends Binding.Service<
   DisassociateAssessmentReportEvidenceFolder,

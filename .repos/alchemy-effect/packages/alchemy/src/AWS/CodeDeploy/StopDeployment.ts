@@ -7,8 +7,9 @@ import type { DeploymentGroup } from "./DeploymentGroup.ts";
  * Runtime binding for `codedeploy:StopDeployment` — attempts to stop an
  * ongoing deployment of the bound deployment group (optionally rolling
  * back).
- * ### Controlling Deployments
- * **Example:** Stop and Roll Back
+ * @binding
+ * @section Controlling Deployments
+ * @example Stop and Roll Back
  * ```typescript
  * const stopDeployment = yield* AWS.CodeDeploy.StopDeployment(group);
  *
@@ -17,8 +18,6 @@ import type { DeploymentGroup } from "./DeploymentGroup.ts";
  *   autoRollbackEnabled: true,
  * });
  * ```
- *
- * @binding
  */
 export interface StopDeployment extends Binding.Service<
   StopDeployment,

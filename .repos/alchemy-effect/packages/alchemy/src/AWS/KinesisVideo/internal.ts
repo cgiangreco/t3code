@@ -82,12 +82,11 @@ export const retryWhileNotFound = <A, E extends { _tag: string }, R>(
 const untilConverged = <A, E, R>(
   self: Effect.Effect<A, E, R>,
   done: (a: A) => boolean,
-  times = 30,
 ): Effect.Effect<A, E, R> =>
   Effect.repeat(self, {
     schedule: Schedule.spaced("2 seconds"),
     until: done,
-    times,
+    times: 30,
   });
 
 /**
@@ -168,8 +167,6 @@ export const waitForStreamGone = Effect.fn(
       ),
     ),
     (i) => i === undefined,
-    // full purge can take noticeably longer than activation (~90s bound)
-    45,
   );
   if (info !== undefined) {
     return yield* Effect.fail(
@@ -196,7 +193,6 @@ export const waitForChannelGone = Effect.fn(
       ),
     ),
     (i) => i === undefined,
-    45,
   );
   if (info !== undefined) {
     return yield* Effect.fail(

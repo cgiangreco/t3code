@@ -39,7 +39,7 @@ describe("SchemaRepresentation.toJson", () => {
           representation: { _tag: "Reference", $ref: "" },
           references: {}
         }),
-      `Expected a value with a length of at least 1\n  at ["representation"]["$ref"]`
+      `Expected a value with a length of at least 1, got ""\n  at ["representation"]["$ref"]`
     )
   })
 
@@ -54,7 +54,7 @@ describe("SchemaRepresentation.toJson", () => {
           } as never,
           references: {}
         }),
-      `Expected no excess property\n  at ["representation"]["checks"][0]`
+      `Unexpected key with value null\n  at ["representation"]["checks"][0]`
     )
   })
 
@@ -69,7 +69,7 @@ describe("SchemaRepresentation.toJson", () => {
     )
   })
 
-  it("removes live callbacks and preserves JSON annotations from a custom filter", () => {
+  it("removes live callbacks from a custom filter", () => {
     const filter = Schema.makeFilter<string>(() => true, {
       description: "custom",
       callback: () => "live",
@@ -79,8 +79,7 @@ describe("SchemaRepresentation.toJson", () => {
         schemas: [Schema.Number.ast]
       },
       toCode: () => ({ runtime: "Custom" }),
-      toJsonSchema: () => ({ minLength: 1 }),
-      arbitraryConstraint: { minLength: 1 }
+      toJsonSchema: () => ({ minLength: 1 })
     }).abort()
 
     assert.deepStrictEqual(
@@ -96,8 +95,7 @@ describe("SchemaRepresentation.toJson", () => {
               schemas: [{ _tag: "Number", checks: [] }]
             },
             annotations: {
-              description: "custom",
-              arbitraryConstraint: { minLength: 1 }
+              description: "custom"
             },
             aborted: true
           }]
@@ -181,7 +179,7 @@ describe("SchemaRepresentation.toJson", () => {
           },
           checks: []
         }],
-        options: { mode: "anyOf" },
+        mode: "anyOf",
         checks: []
       },
       {
@@ -191,7 +189,7 @@ describe("SchemaRepresentation.toJson", () => {
           annotations: { title: "nested" },
           checks: []
         }],
-        options: { mode: "anyOf" },
+        mode: "anyOf",
         checks: []
       }
     )

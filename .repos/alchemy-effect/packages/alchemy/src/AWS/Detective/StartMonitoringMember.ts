@@ -11,8 +11,9 @@ import type { Graph } from "./Graph.ts";
  * limit). The graph ARN is injected from the bound {@link Graph}.
  * Provide the implementation with
  * `Effect.provide(AWS.Detective.StartMonitoringMemberHttp)`.
- * ### Administering Member Accounts
- * **Example:** Resume Ingest For A Member
+ * @binding
+ * @section Administering Member Accounts
+ * @example Resume Ingest For A Member
  * ```typescript
  * // init
  * const startMonitoringMember =
@@ -21,8 +22,6 @@ import type { Graph } from "./Graph.ts";
  * // runtime
  * yield* startMonitoringMember({ AccountId: "111122223333" });
  * ```
- *
- * @binding
  */
 export interface StartMonitoringMember extends Binding.Service<
   StartMonitoringMember,

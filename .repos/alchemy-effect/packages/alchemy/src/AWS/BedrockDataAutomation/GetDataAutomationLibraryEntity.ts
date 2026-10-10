@@ -20,8 +20,9 @@ export interface GetDataAutomationLibraryEntityRequest extends Omit<
  *
  * Provide the implementation with
  * `Effect.provide(AWS.BedrockDataAutomation.GetDataAutomationLibraryEntityHttp)`.
- * ### Library Entities
- * **Example:** Read A Vocabulary Entity
+ * @binding
+ * @section Library Entities
+ * @example Read A Vocabulary Entity
  * ```typescript
  * // deploy time — bind the library
  * const getEntity =
@@ -33,8 +34,6 @@ export interface GetDataAutomationLibraryEntityRequest extends Omit<
  *   entityId,
  * });
  * ```
- *
- * @binding
  */
 export interface GetDataAutomationLibraryEntity extends Binding.Service<
   GetDataAutomationLibraryEntity,

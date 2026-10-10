@@ -13,7 +13,7 @@ import * as ec2 from "@distilled.cloud/aws/ec2";
 import { expect } from "alchemy-test";
 import * as Effect from "effect/Effect";
 import * as Schedule from "effect/Schedule";
-import { getAutoScalingTestSubnetId, getTestAmiId } from "./TestNetwork.ts";
+import { getAutoScalingTestSubnetId } from "./TestNetwork.ts";
 
 const { test } = Test.make({ providers: AWS.providers() });
 
@@ -59,7 +59,7 @@ test.provider(
 
       // Launch templates do not validate the AMI at creation time; fall back to
       // a syntactically valid id if the lookup returns nothing.
-      const imageId = amazonLinux2023();
+      const imageId = (yield* amazonLinux2023()) ?? "ami-00000000000000000";
 
       const policy = yield* stack.deploy(
         Effect.gen(function* () {
@@ -99,15 +99,7 @@ test.provider(
       yield* assertPolicyGone(policy.policyName);
       yield* assertGroupGone("alchemy-test-policy-asg-list");
     }),
-  {
-    tags: [
-      "provider:aws",
-      "provider:aws:autoscaling",
-      "provider:aws:ec2",
-      "live",
-    ],
-    timeout: 240_000,
-  },
+  { timeout: 240_000 },
 );
 
 // Regression test for https://github.com/alchemy-run/alchemy/issues/736.
@@ -156,10 +148,9 @@ test.provider(
       yield* cleanupRecoveryLt;
       yield* stack.destroy();
 
-      // The launch template is created out-of-band with the raw SDK, so the
-      // AMI id must be a plain string — `amazonLinux2023()` returns an
-      // Output, which only resolves inside `stack.deploy`.
-      const imageId = yield* getTestAmiId;
+      // Launch templates do not validate the AMI at creation time; fall back
+      // to a syntactically valid id if the lookup returns nothing.
+      const imageId = (yield* amazonLinux2023()) ?? "ami-00000000000000000";
       yield* ec2.createLaunchTemplate({
         LaunchTemplateName: recoveryLtName,
         LaunchTemplateData: { ImageId: imageId, InstanceType: "t3.micro" },
@@ -213,7 +204,7 @@ test.provider(
       // Output-valued `autoScalingGroup` lost in the round-trip.
       const wedgeRow = Effect.gen(function* () {
         const state = yield* yield* State;
-        const stage = stack.stage;
+        const stage = "test"; // scratch stacks default to the "test" stage
         const fqns = yield* state.list({ stack: stack.name, stage });
         const rows = yield* Effect.forEach(fqns, (fqn) =>
           state
@@ -303,13 +294,5 @@ test.provider(
       yield* assertGroupGone(recoveryAsgName);
       yield* cleanupRecoveryLt;
     }).pipe(Effect.ensuring(cleanupRecoveryLt)),
-  {
-    tags: [
-      "provider:aws",
-      "provider:aws:autoscaling",
-      "provider:aws:ec2",
-      "live",
-    ],
-    timeout: 240_000,
-  },
+  { timeout: 240_000 },
 );

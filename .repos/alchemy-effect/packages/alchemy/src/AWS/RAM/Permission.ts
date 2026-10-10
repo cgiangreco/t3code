@@ -92,8 +92,9 @@ export interface Permission extends Resource<
  * receive on resources of a given type when you attach the permission to a
  * {@link ResourceShare} via `permissionArns`.
  *
- * ### Creating a Permission
- * **Example:** Least-privilege AppSync API sharing
+ * @resource
+ * @section Creating a Permission
+ * @example Least-privilege AppSync API sharing
  * ```typescript
  * const permission = yield* Permission("SourceGraphQLOnly", {
  *   resourceType: "appsync:Apis",
@@ -103,7 +104,7 @@ export interface Permission extends Resource<
  * });
  * ```
  *
- * **Example:** Attach a permission to a resource share
+ * @example Attach a permission to a resource share
  * ```typescript
  * const share = yield* ResourceShare("ApiShare", {
  *   resourceArns: [api.apiArn],
@@ -112,8 +113,8 @@ export interface Permission extends Resource<
  * });
  * ```
  *
- * ### Updating the Policy
- * **Example:** Add an action (creates a new default version)
+ * @section Updating the Policy
+ * @example Add an action (creates a new default version)
  * ```typescript
  * const permission = yield* Permission("SourceGraphQLOnly", {
  *   resourceType: "appsync:Apis",
@@ -122,8 +123,6 @@ export interface Permission extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Permission = Resource<Permission>("AWS.RAM.Permission");
 

@@ -19,8 +19,9 @@ export interface CalculateRouteRequest extends Omit<
  * `geo:CalculateRoute`), scoped to one {@link RouteCalculator}. Provide the implementation with
  * `Effect.provide(AWS.Location.CalculateRouteHttp)`.
  *
- * ### Calculating Routes
- * **Example:** Calculate a Route
+ * @binding
+ * @section Calculating Routes
+ * @example Calculate a Route
  * ```typescript
  * const calculateRoute = yield* Location.CalculateRoute(calculator);
  *
@@ -30,8 +31,6 @@ export interface CalculateRouteRequest extends Omit<
  * });
  * // route.Summary.Distance, route.Summary.DurationSeconds
  * ```
- *
- * @binding
  */
 export interface CalculateRoute extends Binding.Service<
   CalculateRoute,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.CompareFacesHttp)`.
  *
- * ### Image Analysis
- * **Example:** Compare Two Face Images
+ * @binding
+ * @section Image Analysis
+ * @example Compare Two Face Images
  * ```typescript
  * // init
  * const compareFaces = yield* AWS.Rekognition.CompareFaces();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const matches = result.FaceMatches ?? [];
  * ```
- *
- * @binding
  */
 export interface CompareFaces extends Binding.Service<
   CompareFaces,

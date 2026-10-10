@@ -92,7 +92,7 @@ export interface LayerRef<in out I, in out E = never> {
  *
  * **Example** (Sharing one layer-built service)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Context, Effect, Layer, LayerRef } from "effect"
  *
  * class Database extends Context.Service<Database, {
@@ -121,8 +121,6 @@ export interface LayerRef<in out I, in out E = never> {
  *     return result
  *   })
  * )
- *
- * await Effect.runPromise(program) // => "result"
  * ```
  *
  * @see {@link Service} for defining a reusable service class around a `LayerRef`
@@ -272,7 +270,7 @@ export interface TagClass<
  *
  * **Example** (Defining a refreshable service)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Context, Effect, Layer, LayerRef } from "effect"
  *
  * class Database extends Context.Service<Database, {
@@ -295,8 +293,6 @@ export interface TagClass<
  *   Effect.provide(DatabaseRef.get),
  *   Effect.provide(DatabaseRef.layer)
  * )
- *
- * await Effect.runPromise(program) // => "result"
  * ```
  *
  * @see {@link make} for creating a `LayerRef` value without defining a service class
@@ -349,13 +345,11 @@ export const Service = <Self>() =>
   [Preload] extends [true] ? E : never,
   Deps[number]
 > => {
+  const Err = globalThis.Error as any
   const limit = getStackTraceLimit()
-  let creationError: Error | undefined
-  if (limit !== 0) {
-    setStackTraceLimit(2)
-    creationError = new globalThis.Error()
-    setStackTraceLimit(limit)
-  }
+  setStackTraceLimit(2)
+  const creationError = new Err()
+  setStackTraceLimit(limit)
 
   function TagClass() {}
   const TagClass_ = TagClass as any as Mutable<TagClass<Self, Id, any, any, any, any, any>>
@@ -363,7 +357,7 @@ export const Service = <Self>() =>
   TagClass.key = id
   Object.defineProperty(TagClass, "stack", {
     get() {
-      return creationError?.stack
+      return creationError.stack
     }
   })
 

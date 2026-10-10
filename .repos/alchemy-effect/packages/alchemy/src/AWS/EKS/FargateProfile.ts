@@ -81,8 +81,9 @@ export interface FargateProfile extends Resource<
  * flight.
  *
  * **Fargate pods must run in private subnets** — pass private subnet IDs only.
- * ### Creating Fargate Profiles
- * **Example:** Run the `default` Namespace on Fargate
+ * @resource
+ * @section Creating Fargate Profiles
+ * @example Run the `default` Namespace on Fargate
  * ```typescript
  * const profile = yield* FargateProfile("DefaultFargate", {
  *   clusterName: cluster.clusterName,
@@ -92,7 +93,7 @@ export interface FargateProfile extends Resource<
  * });
  * ```
  *
- * **Example:** Select Pods by Namespace and Labels
+ * @example Select Pods by Namespace and Labels
  * ```typescript
  * const profile = yield* FargateProfile("BatchFargate", {
  *   clusterName: cluster.clusterName,
@@ -103,8 +104,6 @@ export interface FargateProfile extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const FargateProfile = Resource<FargateProfile>(
   "AWS.EKS.FargateProfile",

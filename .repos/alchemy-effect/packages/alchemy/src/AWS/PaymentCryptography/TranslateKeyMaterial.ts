@@ -16,8 +16,9 @@ export interface TranslateKeyMaterialRequest
  * supplies the full request; bind every {@link Key} the request references
  * so the Function is granted the action on each. Provide
  * `TranslateKeyMaterialHttp` on the Function to satisfy this service.
- * ### Key Material Translation
- * **Example:** Translate an ECDH-wrapped key to a KEK-wrapped TR-31 block
+ * @binding
+ * @section Key Material Translation
+ * @example Translate an ECDH-wrapped key to a KEK-wrapped TR-31 block
  * ```typescript
  * // init — grant on every key the request references
  * const translateKeyMaterial =
@@ -38,8 +39,6 @@ export interface TranslateKeyMaterialRequest
  *   OutgoingKeyMaterial: { Tr31KeyBlock: { WrappingKeyIdentifier: yield* kekArn } },
  * });
  * ```
- *
- * @binding
  */
 export interface TranslateKeyMaterial extends Binding.Service<
   TranslateKeyMaterial,

@@ -15,8 +15,9 @@ export interface RegisterInstanceRequest extends Omit<
  *
  * The response carries an `OperationId`; registration completes
  * asynchronously on the Cloud Map side.
- * ### Registering Instances
- * **Example:** Self-register on Startup
+ * @binding
+ * @section Registering Instances
+ * @example Self-register on Startup
  * ```typescript
  * const registerInstance = yield* AWS.CloudMap.RegisterInstance(service);
  *
@@ -25,8 +26,6 @@ export interface RegisterInstanceRequest extends Omit<
  *   Attributes: { AWS_INSTANCE_IPV4: "10.0.1.10" },
  * });
  * ```
- *
- * @binding
  */
 export interface RegisterInstance extends Binding.Service<
   RegisterInstance,

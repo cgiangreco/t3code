@@ -1,6 +1,4 @@
 /**
- * Coordinates source parsing, validation, example checking, and Markdown generation.
- *
  * @since 0.6.0
  */
 
@@ -12,9 +10,9 @@ import * as Fiber from "effect/Fiber"
 import * as FileSystem from "effect/FileSystem"
 import { pipe } from "effect/Function"
 import * as Path from "effect/Path"
-import * as ChildProcess from "effect/process/ChildProcess"
 import * as Stream from "effect/Stream"
 import * as String from "effect/String"
+import * as ChildProcess from "effect/unstable/process/ChildProcess"
 import * as Glob from "glob"
 import * as Checker from "./Checker.ts"
 import * as Configuration from "./Configuration.ts"
@@ -171,9 +169,8 @@ const extractPrefixedNestedNamespaces = (
 }
 
 /**
- * Fence metadata that excludes an example from docgen type checking.
+ * The metadata key for skipping type-checking.
  *
- * @category constants
  * @since 0.6.0
  */
 export const SKIP_TYPE_CHECKING_FENCE_METADATA = "skip-type-checking"
@@ -220,8 +217,6 @@ const getExampleFiles = (modules: ReadonlyArray<Domain.Module>) =>
     const config = yield* Configuration.Configuration
     const path = yield* Path.Path
     let warnings: Array<string> = []
-    // Flattened module paths can collide, so give every emitted example a unique prefix.
-    let fileIndex = 0
     const files = Array.flatMap(modules, (module) => {
       const prefix = module.path.join("-")
 
@@ -248,7 +243,7 @@ const getExampleFiles = (modules: ReadonlyArray<Domain.Module>) =>
                 path.join(
                   config.outDir,
                   "examples",
-                  `${fileIndex++}-${prefix}-${exampleId}-${namedDoc.name}-${i}.ts`
+                  `${prefix}-${exampleId}-${namedDoc.name}-${i}.ts`
                 ),
                 example,
                 true // make the file overwritable
@@ -264,7 +259,6 @@ const getExampleFiles = (modules: ReadonlyArray<Domain.Module>) =>
       const classExamples = Array.flatMap(module.classes, (c) =>
         Array.flatten([
           getFiles("class")(c),
-          Array.flatMap(c.properties, getFiles(`${c.name}-property`)),
           Array.flatMap(
             c.methods,
             getFiles(`${c.name}-method`)
@@ -552,13 +546,12 @@ const getModuleMarkdownOutputPath = (module: Domain.Module) => {
     return path.normalize(path.join(
       config.outDir,
       "modules",
-      `${path.relative(config.srcDir, module.path.join(path.sep))}.md`
+      `${module.path.slice(1).join(path.sep)}.md`
     ))
   })
 }
 
-/** @internal */
-export const getModuleMarkdownFiles = (modules: ReadonlyArray<Domain.Module>) =>
+const getModuleMarkdownFiles = (modules: ReadonlyArray<Domain.Module>) =>
   Effect.forEach(modules, (module, i) =>
     Effect.gen(function*() {
       const outputPath = yield* getModuleMarkdownOutputPath(module)

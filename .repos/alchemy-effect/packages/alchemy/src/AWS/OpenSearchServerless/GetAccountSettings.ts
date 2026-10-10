@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * Reads the account-level OpenSearch Serverless settings — the OCU capacity
  * limits that cap the account's spend. Provide the implementation with
  * `Effect.provide(AWS.OpenSearchServerless.GetAccountSettingsHttp)`.
- * ### Account Settings
- * **Example:** Read the account's OCU capacity limits
+ * @binding
+ * @section Account Settings
+ * @example Read the account's OCU capacity limits
  * ```typescript
  * const getAccountSettings = yield* AWS.OpenSearchServerless.GetAccountSettings();
  *
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const limits = settings.accountSettingsDetail?.capacityLimits;
  * yield* Effect.log(`max indexing OCUs: ${limits?.maxIndexingCapacityInOCU}`);
  * ```
- *
- * @binding
  */
 export interface GetAccountSettings extends Binding.Service<
   GetAccountSettings,

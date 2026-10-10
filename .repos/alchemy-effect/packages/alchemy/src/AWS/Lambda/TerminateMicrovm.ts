@@ -11,14 +11,13 @@ export interface TerminateMicrovmRequest
  *
  * Bind it to a {@link MicrovmImage} to get a callable that terminates a running
  * MicroVM by `microvmIdentifier`. Idempotent.
- * ### Lifecycle
- * **Example:** Terminate a MicroVM
+ * @binding
+ * @section Lifecycle
+ * @example Terminate a MicroVM
  * ```typescript
  * const terminateMicrovm = yield* AWS.Lambda.TerminateMicrovm(Sandbox);
  * yield* terminateMicrovm({ microvmIdentifier: id });
  * ```
- *
- * @binding
  */
 export interface TerminateMicrovm extends Binding.Service<
   TerminateMicrovm,

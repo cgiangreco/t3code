@@ -19,8 +19,9 @@ import type { SignalingChannel } from "./SignalingChannel.ts";
  * `MediaStorageConfiguration` linking the channel to a stream); without it
  * the endpoint discovery fails with the typed `SignalingEndpointUnavailable`
  * error.
- * ### WebRTC Storage
- * **Example:** Join a Storage Session as Master
+ * @binding
+ * @section WebRTC Storage
+ * @example Join a Storage Session as Master
  * ```typescript
  * // init
  * const joinStorage = yield* AWS.KinesisVideo.JoinStorageSession(channel);
@@ -28,8 +29,6 @@ import type { SignalingChannel } from "./SignalingChannel.ts";
  * // runtime
  * yield* joinStorage();
  * ```
- *
- * @binding
  */
 export interface JoinStorageSession extends Binding.Service<
   JoinStorageSession,

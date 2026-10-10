@@ -12,15 +12,14 @@ import type { Collection } from "./Collection.ts";
  * principal must also be granted `aoss:DescribeIndex` on the index pattern by
  * a data {@link AccessPolicy}. Provide the implementation with
  * `Effect.provide(AWS.OpenSearchServerless.GetIndexHttp)`.
- * ### Managing Indexes at Runtime
- * **Example:** Read an index's schema
+ * @binding
+ * @section Managing Indexes at Runtime
+ * @example Read an index's schema
  * ```typescript
  * const getIndex = yield* AWS.OpenSearchServerless.GetIndex(collection);
  *
  * const { indexSchema } = yield* getIndex({ indexName: "tenant-42" });
  * ```
- *
- * @binding
  */
 export interface GetIndex extends Binding.Service<
   GetIndex,

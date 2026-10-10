@@ -17,9 +17,11 @@ import type { SearchNamespace } from "./SearchNamespace.ts";
  *
  * Provide {@link QuerySearchNamespaceBinding} in the Worker's runtime layer.
  *
+ * @binding
+ * @category AI
  *
- * ### Querying a namespace
- * **Example:** Select an instance at runtime
+ * @section Querying a namespace
+ * @example Select an instance at runtime
  * ```typescript
  * const ns = yield* Cloudflare.AI.QuerySearchNamespace(namespace);
  *
@@ -32,9 +34,6 @@ import type { SearchNamespace } from "./SearchNamespace.ts";
  *   }),
  * };
  * ```
- *
- * @binding
- * @category AI
  */
 export interface QuerySearchNamespace extends Binding.Service<
   QuerySearchNamespace,

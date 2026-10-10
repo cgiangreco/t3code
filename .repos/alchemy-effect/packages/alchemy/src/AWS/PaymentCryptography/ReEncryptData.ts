@@ -17,8 +17,9 @@ export interface ReEncryptDataRequest extends Omit<
  * plain symmetric-to-symmetric re-encryption with
  * `ValidationException: KeyUsages not allowed for this operation`. Provide
  * `ReEncryptDataHttp` on the Function to satisfy this service.
- * ### Re-Encrypting Data
- * **Example:** Translate DUKPT terminal ciphertext to a working key
+ * @binding
+ * @section Re-Encrypting Data
+ * @example Translate DUKPT terminal ciphertext to a working key
  * ```typescript
  * // init — incoming BDK, outgoing symmetric data key
  * const reEncrypt = yield* PaymentCryptography.ReEncryptData(bdk, workingKey);
@@ -34,8 +35,6 @@ export interface ReEncryptDataRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface ReEncryptData extends Binding.Service<
   ReEncryptData,

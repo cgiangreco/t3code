@@ -17,8 +17,9 @@ export interface UploadLayerPartRequest extends Omit<
  *
  * Uploads one chunk of a layer blob to an open upload in the bound repository (non-final parts must be at least 5 MiB). Provide the implementation with
  * `Effect.provide(AWS.ECR.UploadLayerPartHttp)`.
- * ### Pushing Images
- * **Example:** Upload a Single-Part Layer
+ * @binding
+ * @section Pushing Images
+ * @example Upload a Single-Part Layer
  * ```typescript
  * const uploadPart = yield* AWS.ECR.UploadLayerPart(repository);
  *
@@ -29,8 +30,6 @@ export interface UploadLayerPartRequest extends Omit<
  *   layerPartBlob: blob,
  * });
  * ```
- *
- * @binding
  */
 export interface UploadLayerPart extends Binding.Service<
   UploadLayerPart,

@@ -20,8 +20,9 @@ export interface GetExecutionRequest extends Omit<
  * inside a function runtime. Useful for delivery monitors that alert when a
  * refresh fails. Provide the implementation with
  * `Effect.provide(AWS.BCMDataExports.GetExecutionHttp)`.
- * ### Monitoring Executions
- * **Example:** Check an Execution's Status
+ * @binding
+ * @section Monitoring Executions
+ * @example Check an Execution's Status
  * ```typescript
  * // init — bind the operation to the export
  * const getExecution = yield* AWS.BCMDataExports.GetExecution(cur);
@@ -30,8 +31,6 @@ export interface GetExecutionRequest extends Omit<
  * const result = yield* getExecution({ ExecutionId: executionId });
  * const status = result.ExecutionStatus?.StatusCode;
  * ```
- *
- * @binding
  */
 export interface GetExecution extends Binding.Service<
   GetExecution,

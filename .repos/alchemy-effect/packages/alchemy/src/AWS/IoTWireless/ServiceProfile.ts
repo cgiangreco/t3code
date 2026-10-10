@@ -60,15 +60,16 @@ export interface ServiceProfile extends Resource<
  *
  * Service profiles are immutable after creation: any change to `name` or
  * `loRaWAN` replaces the profile. Only tags update in place.
- * ### Creating Service Profiles
- * **Example:** Default Service Profile
+ * @resource
+ * @section Creating Service Profiles
+ * @example Default Service Profile
  * ```typescript
  * import * as IoTWireless from "alchemy/AWS/IoTWireless";
  *
  * const profile = yield* IoTWireless.ServiceProfile("Fleet");
  * ```
  *
- * **Example:** Service Profile with Gateway Metadata
+ * @example Service Profile with Gateway Metadata
  * ```typescript
  * const profile = yield* IoTWireless.ServiceProfile("Fleet", {
  *   loRaWAN: { AddGwMetadata: true, DrMin: 0, DrMax: 10 },
@@ -76,8 +77,8 @@ export interface ServiceProfile extends Resource<
  * });
  * ```
  *
- * ### Referencing from Devices
- * **Example:** Wire a device to the profile
+ * @section Referencing from Devices
+ * @example Wire a device to the profile
  * ```typescript
  * const device = yield* IoTWireless.WirelessDevice("Sensor", {
  *   type: "LoRaWAN",
@@ -90,8 +91,6 @@ export interface ServiceProfile extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const ServiceProfile = Resource<ServiceProfile>(
   "AWS.IoTWireless.ServiceProfile",

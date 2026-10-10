@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * apply an engine patch during the next maintenance window, or immediately.
  * Provide the implementation with
  * `Effect.provide(AWS.Neptune.ApplyPendingMaintenanceActionHttp)`.
- * ### Maintenance
- * **Example:** Apply Maintenance at the Next Window
+ * @binding
+ * @section Maintenance
+ * @example Apply Maintenance at the Next Window
  * ```typescript
  * const applyPendingMaintenanceAction =
  *   yield* AWS.Neptune.ApplyPendingMaintenanceAction();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   OptInType: "next-maintenance",
  * });
  * ```
- *
- * @binding
  */
 export interface ApplyPendingMaintenanceAction extends Binding.Service<
   ApplyPendingMaintenanceAction,

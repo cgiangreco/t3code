@@ -13,9 +13,8 @@ export interface GetMicrovmImageBuildRequest extends Omit<
  *
  * Bind it to a {@link MicrovmImage} to read a per-architecture build's state and
  * snapshot info (the `imageIdentifier` is injected).
- * ### Image Builds
- *
  * @binding
+ * @section Image Builds
  */
 export interface GetMicrovmImageBuild extends Binding.Service<
   GetMicrovmImageBuild,

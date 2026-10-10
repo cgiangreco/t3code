@@ -14,14 +14,13 @@ export interface ListEndpointsByPlatformApplicationRequest extends Omit<
  * Bind this operation to a {@link PlatformApplication} to page through its
  * registered device endpoints.
  * Provide the `ListEndpointsByPlatformApplicationHttp` layer on the Function to implement the binding.
- * ### Mobile Push
- * **Example:** List Device Endpoints
+ * @binding
+ * @section Mobile Push
+ * @example List Device Endpoints
  * ```typescript
  * const listEndpoints = yield* SNS.ListEndpointsByPlatformApplication(app);
  * const { Endpoints } = yield* listEndpoints();
  * ```
- *
- * @binding
  */
 export interface ListEndpointsByPlatformApplication extends Binding.Service<
   ListEndpointsByPlatformApplication,

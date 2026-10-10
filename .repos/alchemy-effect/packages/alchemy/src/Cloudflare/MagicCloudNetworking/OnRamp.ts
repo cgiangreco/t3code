@@ -192,8 +192,11 @@ export type OnRamp = Resource<
  * Magic Cloud Networking is an entitlement-gated add-on (Magic WAN family).
  * On accounts without the entitlement every API call fails with the typed
  * `FeatureNotEnabled` error (Cloudflare code 1012, "feature not enabled").
- * ### Connecting a single VPC
- * **Example:** AWS VPC on-ramp
+ * @resource
+ * @product Magic Cloud Networking
+ * @category Network
+ * @section Connecting a single VPC
+ * @example AWS VPC on-ramp
  * ```typescript
  * const onramp = yield* Cloudflare.MagicCloudNetworking.OnRamp("ProdVpc", {
  *   cloudType: "AWS",
@@ -206,8 +209,8 @@ export type OnRamp = Resource<
  * });
  * ```
  *
- * ### Hub topologies
- * **Example:** Transit Gateway hub with attached VPCs
+ * @section Hub topologies
+ * @example Transit Gateway hub with attached VPCs
  * ```typescript
  * yield* Cloudflare.MagicCloudNetworking.OnRamp("TgwHub", {
  *   cloudType: "AWS",
@@ -221,8 +224,8 @@ export type OnRamp = Resource<
  * });
  * ```
  *
- * ### Destroy behavior
- * **Example:** Tear down cloud-side resources on destroy
+ * @section Destroy behavior
+ * @example Tear down cloud-side resources on destroy
  * ```typescript
  * yield* Cloudflare.MagicCloudNetworking.OnRamp("ProdVpc", {
  *   cloudType: "AWS",
@@ -237,10 +240,6 @@ export type OnRamp = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/magic-cloud-networking/
- *
- * @resource
- * @product Magic Cloud Networking
- * @category Network
  */
 export const OnRamp = Resource<OnRamp>(TypeId);
 

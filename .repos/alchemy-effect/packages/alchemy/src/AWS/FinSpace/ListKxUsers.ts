@@ -7,15 +7,14 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:ListKxUsers` — lists the kdb users of the bound environment.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.ListKxUsersHttp)`.
- * ### Managing kdb Users
- * **Example:** List Users
+ * @binding
+ * @section Managing kdb Users
+ * @example List Users
  * ```typescript
  * const listUsers = yield* AWS.FinSpace.ListKxUsers(kdb);
  *
  * const { users } = yield* listUsers();
  * ```
- *
- * @binding
  */
 export interface ListKxUsers extends Binding.Service<
   ListKxUsers,

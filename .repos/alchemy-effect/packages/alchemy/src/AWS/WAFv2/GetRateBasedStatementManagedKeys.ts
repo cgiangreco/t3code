@@ -16,8 +16,9 @@ export interface GetRateBasedStatementManagedKeysRequest extends Omit<
  *
  * Provide `WAFv2.GetRateBasedStatementManagedKeysHttp` on the hosting
  * Lambda Function to satisfy the requirement.
- * ### Inspecting Traffic
- * **Example:** Read the Currently Rate-Limited Addresses
+ * @binding
+ * @section Inspecting Traffic
+ * @example Read the Currently Rate-Limited Addresses
  * ```typescript
  * // init — grants wafv2:GetRateBasedStatementManagedKeys on the web ACL
  * const getManagedKeys = yield* AWS.WAFv2.GetRateBasedStatementManagedKeys(acl);
@@ -26,8 +27,6 @@ export interface GetRateBasedStatementManagedKeysRequest extends Omit<
  * const { ManagedKeysIPV4 } = yield* getManagedKeys({ RuleName: "rate-limit" });
  * const blocked = ManagedKeysIPV4?.Addresses ?? [];
  * ```
- *
- * @binding
  */
 export interface GetRateBasedStatementManagedKeys extends Binding.Service<
   GetRateBasedStatementManagedKeys,

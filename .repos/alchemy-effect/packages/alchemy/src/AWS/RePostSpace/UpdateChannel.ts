@@ -16,8 +16,9 @@ export interface UpdateChannelRequest extends Omit<
  * description.
  * Provide the implementation with
  * `Effect.provide(AWS.RePostSpace.UpdateChannelHttp)`.
- * ### Managing Channels
- * **Example:** Rename a channel
+ * @binding
+ * @section Managing Channels
+ * @example Rename a channel
  * ```typescript
  * const updateChannel = yield* AWS.RePostSpace.UpdateChannel(space);
  *
@@ -26,8 +27,6 @@ export interface UpdateChannelRequest extends Omit<
  *   channelName: "Networking & DNS",
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateChannel extends Binding.Service<
   UpdateChannel,

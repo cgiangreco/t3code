@@ -13,8 +13,9 @@ export interface StartApplicationRequest extends Omit<
  * bound Flink application, optionally restoring from a snapshot via
  * `RunConfiguration`. The returned `OperationId` can be polled with
  * {@link DescribeApplicationOperation}.
- * ### Operating the Application
- * **Example:** Start the Flink job from its latest snapshot
+ * @binding
+ * @section Operating the Application
+ * @example Start the Flink job from its latest snapshot
  * ```typescript
  * const startApplication = yield* AWS.KinesisAnalyticsV2.StartApplication(app);
  *
@@ -26,8 +27,6 @@ export interface StartApplicationRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface StartApplication extends Binding.Service<
   StartApplication,

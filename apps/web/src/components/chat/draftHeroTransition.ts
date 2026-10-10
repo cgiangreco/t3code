@@ -1,8 +1,8 @@
 export const DRAFT_HERO_TRANSITION_ANIMATION_ID = "t3-draft-hero-transition";
+export const DRAFT_HERO_TRANSITION_DURATION_MS = 180;
 export const DRAFT_HERO_TRANSITION_EASING = "cubic-bezier(0.4, 0, 0.2, 1)";
 export const MOBILE_COMPOSER_VIEW_TRANSITION_NAME = "t3-mobile-composer";
 export const MOBILE_DRAFT_HEADLINE_VIEW_TRANSITION_NAME = "t3-mobile-draft-headline";
-const MOBILE_COMPOSER_TRANSITION_DURATION_PROPERTY = "--mobile-composer-transition-duration";
 
 type ComposerViewTransition = {
   readonly finished: Promise<void>;
@@ -39,7 +39,6 @@ export async function waitForDraftHeroTransition(): Promise<void> {
 
 export async function runMobileComposerTransition(
   update: () => void | Promise<void>,
-  options: { active: boolean; durationMs: number },
 ): Promise<void> {
   if (typeof document === "undefined" || typeof window === "undefined") {
     await update();
@@ -50,12 +49,7 @@ export async function runMobileComposerTransition(
   const mobileViewport = window.matchMedia?.("(max-width: 639px)").matches ?? false;
   const prefersReducedMotion =
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-  if (
-    !options.active ||
-    !mobileViewport ||
-    prefersReducedMotion ||
-    !transitionDocument.startViewTransition
-  ) {
+  if (!mobileViewport || prefersReducedMotion || !transitionDocument.startViewTransition) {
     await update();
     return;
   }
@@ -67,10 +61,6 @@ export async function runMobileComposerTransition(
     await update();
   };
   let transitionFinished: Promise<void> | null = null;
-  transitionDocument.documentElement.style.setProperty(
-    MOBILE_COMPOSER_TRANSITION_DURATION_PROPERTY,
-    `${String(options.durationMs)}ms`,
-  );
   transitionDocument.documentElement.dataset.mobileComposerRouteTransition = "true";
   try {
     const transition = transitionDocument.startViewTransition(runUpdate);
@@ -88,8 +78,5 @@ export async function runMobileComposerTransition(
       activeMobileComposerTransition = null;
     }
     delete transitionDocument.documentElement.dataset.mobileComposerRouteTransition;
-    transitionDocument.documentElement.style.removeProperty(
-      MOBILE_COMPOSER_TRANSITION_DURATION_PROPERTY,
-    );
   }
 }

@@ -15,14 +15,13 @@ export interface CreateAssessmentReportRequest extends Omit<
  * Creates an assessment report — a finalized document generated from
  * the bound assessment's evidence — in the assessment's S3 destination. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.CreateAssessmentReportHttp)`.
- * ### Assessment Reports
- * **Example:** Generate an Assessment Report
+ * @binding
+ * @section Assessment Reports
+ * @example Generate an Assessment Report
  * ```typescript
  * const createAssessmentReport = yield* AWS.AuditManager.CreateAssessmentReport(assessment);
  * const result = yield* createAssessmentReport({ name: "quarterly-report" });
  * ```
- *
- * @binding
  */
 export interface CreateAssessmentReport extends Binding.Service<
   CreateAssessmentReport,

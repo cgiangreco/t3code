@@ -11,12 +11,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-maps:GetStaticMap`. Requests and responses are raw distilled types;
  * the image payload is returned as `Blob` (`Uint8Array`).
  *
- * ### Rendering Static Maps
+ * @binding
+ * @section Rendering Static Maps
  * Provide the `GetStaticMapHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoMaps.GetStaticMapHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Render a static map centered on a point
+ * @example Render a static map centered on a point
  * ```typescript
  * // init
  * const getStaticMap = yield* AWS.GeoMaps.GetStaticMap();
@@ -31,8 +32,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const bytes = image.Blob; // Uint8Array | undefined (PNG)
  * ```
- *
- * @binding
  */
 export interface GetStaticMap extends Binding.Service<
   GetStaticMap,

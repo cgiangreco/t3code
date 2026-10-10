@@ -65,8 +65,9 @@ export interface SignalCatalog extends Resource<
  * provider follows the ambient region when supported and pins `us-east-1`
  * otherwise. Access to the service is allowlist-gated by AWS — accounts
  * without access receive `AccessDeniedException` on every operation.
- * ### Creating a Signal Catalog
- * **Example:** Catalog with a Branch and a Sensor
+ * @resource
+ * @section Creating a Signal Catalog
+ * @example Catalog with a Branch and a Sensor
  * ```typescript
  * const catalog = yield* SignalCatalog("Signals", {
  *   nodes: [
@@ -82,7 +83,7 @@ export interface SignalCatalog extends Resource<
  * });
  * ```
  *
- * **Example:** Catalog with Attributes
+ * @example Catalog with Attributes
  * ```typescript
  * const catalog = yield* SignalCatalog("Signals", {
  *   description: "vehicle signals",
@@ -98,8 +99,6 @@ export interface SignalCatalog extends Resource<
  *   tags: { team: "telemetry" },
  * });
  * ```
- *
- * @resource
  */
 export const SignalCatalog = Resource<SignalCatalog>(
   "AWS.IoTFleetWise.SignalCatalog",

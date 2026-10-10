@@ -16,8 +16,9 @@ export interface UploadPartRequest extends Omit<
  * `CreateMultipartUpload`. Keep each part's returned `ETag` — the final
  * `CompleteMultipartUpload` call needs the full `{ ETag, PartNumber }` list.
  * Provide the implementation with `Effect.provide(AWS.S3.UploadPartHttp)`.
- * ### Multipart Uploads
- * **Example:** Upload a Part
+ * @binding
+ * @section Multipart Uploads
+ * @example Upload a Part
  * ```typescript
  * // init — bind the operation to the bucket
  * const uploadPart = yield* AWS.S3.UploadPart(bucket);
@@ -31,8 +32,6 @@ export interface UploadPartRequest extends Omit<
  * });
  * parts.push({ ETag: part.ETag, PartNumber: 1 });
  * ```
- *
- * @binding
  */
 export interface UploadPart extends Binding.Service<
   UploadPart,

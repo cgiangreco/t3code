@@ -157,8 +157,9 @@ export interface Assessment extends Resource<
  * Audit Manager must be registered in the account (`RegisterAccount`)
  * before assessments can be created.
  * :::
- * ### Creating Assessments
- * **Example:** Assessment from a Custom Framework
+ * @resource
+ * @section Creating Assessments
+ * @example Assessment from a Custom Framework
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -183,8 +184,6 @@ export interface Assessment extends Resource<
  *   roles: [{ roleType: "PROCESS_OWNER", roleArn: owner.roleArn }],
  * });
  * ```
- *
- * @resource
  */
 export const Assessment = Resource<Assessment>("AWS.AuditManager.Assessment");
 

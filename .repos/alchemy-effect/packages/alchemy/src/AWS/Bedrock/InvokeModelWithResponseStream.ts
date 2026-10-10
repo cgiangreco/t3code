@@ -41,8 +41,9 @@ export interface InvokeModelWithResponseStreamRequest extends Omit<
  * console (Model access) before invoking, otherwise calls fail with
  * `AccessDeniedException`.
  *
- * ### Streaming a Model Response
- * **Example:** Aggregate Streamed Chunks
+ * @binding
+ * @section Streaming a Model Response
+ * @example Aggregate Streamed Chunks
  * ```typescript
  * // init
  * const invokeModelStream = yield* Bedrock.InvokeModelWithResponseStream(
@@ -60,8 +61,6 @@ export interface InvokeModelWithResponseStreamRequest extends Omit<
  * const events = yield* Stream.runCollect(result.body);
  * // each chunk's bytes is a model-specific JSON event
  * ```
- *
- * @binding
  */
 export interface InvokeModelWithResponseStream extends Binding.Service<
   InvokeModelWithResponseStream,

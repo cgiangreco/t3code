@@ -20,8 +20,9 @@ export interface RestoreTableRequest extends Omit<
  * keyspace names. `RestoreTable` is asynchronous — the response returns the
  * new table's ARN while it provisions in the `RESTORING` state. Provide the
  * `RestoreTableHttp` layer on the Function to satisfy the binding.
- * ### Backup and Restore
- * **Example:** Restore to the Current Time
+ * @binding
+ * @section Backup and Restore
+ * @example Restore to the Current Time
  * ```typescript
  * const restore = yield* AWS.Keyspaces.RestoreTable(sourceTable, keyspace);
  *
@@ -30,15 +31,13 @@ export interface RestoreTableRequest extends Omit<
  * });
  * ```
  *
- * **Example:** Restore to a Point in Time
+ * @example Restore to a Point in Time
  * ```typescript
  * const { restoredTableARN } = yield* restore({
  *   targetTableName: "orders_before_incident",
  *   restoreTimestamp: new Date("2026-07-14T12:00:00Z"),
  * });
  * ```
- *
- * @binding
  */
 export interface RestoreTable extends Binding.Service<
   RestoreTable,

@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * entities checked are chosen per request at runtime, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.Signer.GetRevocationStatusHttp)`.
- * ### Revoking Signatures
- * **Example:** Verify a Signature Before Trusting It
+ * @binding
+ * @section Revoking Signatures
+ * @example Verify a Signature Before Trusting It
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getRevocationStatus = yield* AWS.Signer.GetRevocationStatus();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const trusted = (revokedEntities ?? []).length === 0;
  * ```
- *
- * @binding
  */
 export interface GetRevocationStatus extends Binding.Service<
   GetRevocationStatus,

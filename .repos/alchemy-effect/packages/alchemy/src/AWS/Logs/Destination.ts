@@ -54,8 +54,9 @@ export interface Destination extends Resource<
  * forwards log events to a Kinesis stream. Producers in other accounts create
  * subscription filters whose `destinationArn` points at this destination;
  * the `accessPolicy` controls which accounts may subscribe.
- * ### Cross-Account Log Fan-Out
- * **Example:** Kinesis-Backed Destination
+ * @resource
+ * @section Cross-Account Log Fan-Out
+ * @example Kinesis-Backed Destination
  * ```typescript
  * const destination = yield* Destination("CentralLogs", {
  *   targetArn: stream.streamArn,
@@ -73,8 +74,6 @@ export interface Destination extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Destination = Resource<Destination>("AWS.Logs.Destination");
 

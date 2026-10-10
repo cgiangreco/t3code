@@ -20,7 +20,6 @@ export interface IncomingShareInboxDependencies {
   }) => Promise<{
     readonly draft: IncomingShareDraft;
     readonly cleanup: () => Promise<void>;
-    readonly rollback?: () => Promise<void>;
   }>;
   readonly cleanupReplayedPayloads?: (payloads: ReadonlyArray<SharePayload>) => Promise<void>;
   readonly idForPayloads: (payloads: ReadonlyArray<SharePayload>) => Promise<string>;
@@ -117,14 +116,7 @@ export class IncomingShareInbox {
       // The durable inbox write is the transaction boundary. Never clear the
       // native handoff first: a process termination must leave one recoverable
       // copy on one side of the boundary.
-      try {
-        await this.dependencies.writeDraft(draft);
-      } catch (error) {
-        if (built.rollback) {
-          await this.cleanup(built.rollback);
-        }
-        throw error;
-      }
+      await this.dependencies.writeDraft(draft);
       await this.cleanup(built.cleanup);
       this.clearNativePayloads();
       return sortAndDedupeIncomingShares([draft, ...persisted]);

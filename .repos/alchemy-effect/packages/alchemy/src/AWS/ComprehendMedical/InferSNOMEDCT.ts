@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * arguments and grants `comprehendmedical:InferSNOMEDCT` on `*`. Provide the
  * implementation with `Effect.provide(AWS.ComprehendMedical.InferSNOMEDCTHttp)`.
  *
- * ### Linking Concepts to SNOMED CT
- * **Example:** Infer SNOMED CT Concepts for a Clinical Note
+ * @binding
+ * @section Linking Concepts to SNOMED CT
+ * @example Infer SNOMED CT Concepts for a Clinical Note
  * ```typescript
  * // init
  * const inferSNOMEDCT = yield* AWS.ComprehendMedical.InferSNOMEDCT();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const concepts = (result.Entities ?? []).flatMap((e) => e.SNOMEDCTConcepts ?? []);
  * ```
- *
- * @binding
  */
 export interface InferSNOMEDCT extends Binding.Service<
   InferSNOMEDCT,

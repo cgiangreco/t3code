@@ -82,8 +82,9 @@ export interface ListenerRule extends Resource<
  * and route requests to target groups (or other actions) based on conditions
  * such as host header, path pattern, HTTP header, query string, request method,
  * and source IP.
- * ### Creating a Rule
- * **Example:** Path-based routing
+ * @resource
+ * @section Creating a Rule
+ * @example Path-based routing
  * ```typescript
  * const rule = yield* ListenerRule("api", {
  *   listenerArn: listener.listenerArn,
@@ -95,7 +96,7 @@ export interface ListenerRule extends Resource<
  * });
  * ```
  *
- * **Example:** Host-header routing
+ * @example Host-header routing
  * ```typescript
  * const rule = yield* ListenerRule("admin", {
  *   listenerArn: listener.listenerArn,
@@ -107,8 +108,8 @@ export interface ListenerRule extends Resource<
  * });
  * ```
  *
- * ### Conditions
- * **Example:** Combining query-string and HTTP-header conditions
+ * @section Conditions
+ * @example Combining query-string and HTTP-header conditions
  * ```typescript
  * const rule = yield* ListenerRule("beta", {
  *   listenerArn: listener.listenerArn,
@@ -120,8 +121,6 @@ export interface ListenerRule extends Resource<
  *   actions: [{ type: "fixedResponse", statusCode: "200", messageBody: "beta" }],
  * });
  * ```
- *
- * @resource
  */
 export const ListenerRule = Resource<ListenerRule>("AWS.ELBv2.ListenerRule");
 

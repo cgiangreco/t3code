@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.ListStandardsControlAssociationsHttp)`.
- * ### Standards & Controls
- * **Example:** List a Control's Associations
+ * @binding
+ * @section Standards & Controls
+ * @example List a Control's Associations
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listStandardsControlAssociations = yield* AWS.SecurityHub.ListStandardsControlAssociations();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const { StandardsControlAssociationSummaries } =
  *   yield* listStandardsControlAssociations({ SecurityControlId: "IAM.1" });
  * ```
- *
- * @binding
  */
 export interface ListStandardsControlAssociations extends Binding.Service<
   ListStandardsControlAssociations,

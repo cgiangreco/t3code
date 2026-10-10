@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `name` is injected from the bound {@link Cluster} and `eks:ListUpdates` is granted on the cluster's ARN and sub-resource ARNs.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.ListUpdatesHttp)`.
- * ### Tracking Updates
- * **Example:** List Cluster Updates
+ * @binding
+ * @section Tracking Updates
+ * @example List Cluster Updates
  * ```typescript
  * // init
  * const listUpdates = yield* AWS.EKS.ListUpdates(cluster);
@@ -19,8 +20,6 @@ import type { Cluster } from "./Cluster.ts";
  * // runtime
  * const { updateIds } = yield* listUpdates();
  * ```
- *
- * @binding
  */
 export interface ListUpdates extends Binding.Service<
   ListUpdates,

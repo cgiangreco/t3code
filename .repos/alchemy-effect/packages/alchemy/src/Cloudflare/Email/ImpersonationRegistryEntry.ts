@@ -81,8 +81,11 @@ export type ImpersonationRegistryEntry = Resource<
  * Office365/Google integrations and are not exposed as inputs. Requires
  * the Email Security enterprise add-on; accounts without the entitlement
  * receive the typed `EmailSecurityNotEntitled` error.
- * ### Registering Protected Identities
- * **Example:** Protect an executive's display name
+ * @resource
+ * @product Email Security
+ * @category Email
+ * @section Registering Protected Identities
+ * @example Protect an executive's display name
  * ```typescript
  * yield* Cloudflare.Email.ImpersonationRegistryEntry("Ceo", {
  *   name: "Jane Smith",
@@ -91,7 +94,7 @@ export type ImpersonationRegistryEntry = Resource<
  * });
  * ```
  *
- * **Example:** Match several legitimate addresses with a regex
+ * @example Match several legitimate addresses with a regex
  * ```typescript
  * yield* Cloudflare.Email.ImpersonationRegistryEntry("Finance", {
  *   name: "Accounts Payable",
@@ -101,10 +104,6 @@ export type ImpersonationRegistryEntry = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/email-security/
- *
- * @resource
- * @product Email Security
- * @category Email
  */
 export const ImpersonationRegistryEntry = Resource<ImpersonationRegistryEntry>(
   EmailSecurityImpersonationRegistryEntryTypeId,
@@ -142,15 +141,7 @@ export const ImpersonationRegistryEntryProvider = () =>
               ),
             ),
           ),
-          // Email Security is a paid add-on gated by both account
-          // entitlement and token scope: an unentitled account answers
-          // `EmailSecurityNotEntitled`, while a credential lacking the
-          // Email Security scope (e.g. Cloudflare OAuth) answers a bare
-          // `Forbidden`. Neither can enumerate, so both mean "none
-          // visible" — matching `Domain.list()`. Returning `[]` is the
-          // safe direction for the callers of `list` (orphan detection
-          // never deletes what it cannot see).
-          Effect.catchTag(["EmailSecurityNotEntitled", "Forbidden"], () =>
+          Effect.catchTag("EmailSecurityNotEntitled", () =>
             Effect.succeed([] as ImpersonationRegistryEntryAttributes[]),
           ),
         );

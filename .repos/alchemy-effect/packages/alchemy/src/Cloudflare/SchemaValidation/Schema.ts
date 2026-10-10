@@ -68,7 +68,7 @@ export interface SchemaAttributes {
   /** Human-readable name of the schema. */
   name: string;
   /** The kind of the schema. */
-  kind: "openapi_v3" | (string & {});
+  kind: "openapi_v3";
   /** The raw schema source as stored by Cloudflare. */
   source: string;
   /** Whether the schema is enabled for validation. */
@@ -94,8 +94,11 @@ export type SchemaValidationSchema = Resource<
  * delete those operations). The schema body is immutable: changing `source`
  * uploads a new schema and deletes the old one (replacement). Only the
  * `validationEnabled` flag is mutable in place.
- * ### Uploading a Schema
- * **Example:** Upload an OpenAPI v3 schema
+ * @resource
+ * @product Schema Validation
+ * @category Application Security
+ * @section Uploading a Schema
+ * @example Upload an OpenAPI v3 schema
  * ```typescript
  * const schema = yield* Cloudflare.SchemaValidation.SchemaValidationSchema("ApiSchema", {
  *   zoneId: zone.zoneId,
@@ -115,7 +118,7 @@ export type SchemaValidationSchema = Resource<
  * });
  * ```
  *
- * **Example:** Upload a schema without enabling validation
+ * @example Upload a schema without enabling validation
  * ```typescript
  * const schema = yield* Cloudflare.SchemaValidation.SchemaValidationSchema("DraftSchema", {
  *   zoneId: zone.zoneId,
@@ -124,8 +127,8 @@ export type SchemaValidationSchema = Resource<
  * });
  * ```
  *
- * ### Toggling validation
- * **Example:** Enable a previously-disabled schema in place
+ * @section Toggling validation
+ * @example Enable a previously-disabled schema in place
  * ```typescript
  * // Enabling (false → true) patches the schema in place. Disabling an
  * // enabled schema is rejected by Cloudflare, so `true` → `false` (like a
@@ -138,10 +141,6 @@ export type SchemaValidationSchema = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api-shield/security/schema-validation/
- *
- * @resource
- * @product Schema Validation
- * @category Application Security
  */
 export const SchemaValidationSchema = Resource<SchemaValidationSchema>(TypeId);
 

@@ -68,8 +68,9 @@ export interface VirtualMFADevice extends Resource<
  * `VirtualMFADevice` creates a software MFA device and can optionally activate
  * it for a user during creation when the initial authentication codes are
  * provided.
- * ### Managing MFA Devices
- * **Example:** Create and Activate a Virtual MFA Device
+ * @resource
+ * @section Managing MFA Devices
+ * @example Create and Activate a Virtual MFA Device
  * ```typescript
  * const user = yield* User("AdminUser", {
  *   userName: "admin-user",
@@ -81,8 +82,6 @@ export interface VirtualMFADevice extends Resource<
  *   authenticationCode2: "654321",
  * });
  * ```
- *
- * @resource
  */
 export const VirtualMFADevice = Resource<VirtualMFADevice>(
   "AWS.IAM.VirtualMFADevice",

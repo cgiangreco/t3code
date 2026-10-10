@@ -200,8 +200,9 @@ export interface KxCluster extends Resource<
  * while it exists. Live lifecycle tests are gated behind
  * `AWS_TEST_FINSPACE=1`.
  * :::
- * ### Creating kdb Clusters
- * **Example:** HDB Cluster on Dedicated Capacity
+ * @resource
+ * @section Creating kdb Clusters
+ * @example HDB Cluster on Dedicated Capacity
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -221,8 +222,6 @@ export interface KxCluster extends Resource<
  *   databases: [{ databaseName: db.databaseName }],
  * });
  * ```
- *
- * @resource
  */
 export const KxCluster = Resource<KxCluster>("AWS.FinSpace.KxCluster");
 

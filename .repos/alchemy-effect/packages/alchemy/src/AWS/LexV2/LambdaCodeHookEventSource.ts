@@ -38,15 +38,14 @@ export const isCodeHookEvent = (event: any): event is CodeHookEvent =>
  * `lexv2.amazonaws.com`; at runtime it dispatches matching code hook events
  * (matched on the bot id, alias id, and locale) to the registered handler
  * and returns the handler's response to Lex.
- * ### Handling Code Hooks
- * **Example:** Fulfill an intent
+ * @binding
+ * @section Handling Code Hooks
+ * @example Fulfill an intent
  * ```typescript
  * yield* LexV2.onCodeHook(alias, { localeId: "en_US" }, (event) =>
  *   Effect.succeed(LexV2.fulfillIntent(event, { message: "Done!" })),
  * );
  * ```
- *
- * @binding
  */
 export const LambdaCodeHookEventSource = Layer.effect(
   CodeHookEventSource,

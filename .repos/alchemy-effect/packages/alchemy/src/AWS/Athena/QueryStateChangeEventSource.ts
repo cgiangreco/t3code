@@ -80,8 +80,8 @@ export interface QueryStateChangesProps extends EventRouteProps {
  * host-specific implementation layer (e.g. `AWS.Lambda.EventSource`) on the
  * Function effect.
  *
- * ### Consuming Query State Changes
- * **Example:** React to Terminal Query Outcomes
+ * @section Consuming Query State Changes
+ * @example React to Terminal Query Outcomes
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

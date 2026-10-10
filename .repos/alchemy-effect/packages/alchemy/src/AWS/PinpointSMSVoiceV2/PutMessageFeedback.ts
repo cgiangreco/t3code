@@ -14,8 +14,9 @@ import * as Binding from "../../Binding.ts";
  * deploy-time grant is `sms-voice:PutMessageFeedback` on `*`. Provide
  * the implementation with
  * `Effect.provide(AWS.PinpointSMSVoiceV2.PutMessageFeedbackHttp)`.
- * ### Message Feedback
- * **Example:** Confirm an OTP Was Used
+ * @binding
+ * @section Message Feedback
+ * @example Confirm an OTP Was Used
  * ```typescript
  * // init — bind the account-level operation
  * const putFeedback = yield* AWS.PinpointSMSVoiceV2.PutMessageFeedback();
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  *   MessageFeedbackStatus: "RECEIVED",
  * });
  * ```
- *
- * @binding
  */
 export interface PutMessageFeedback extends Binding.Service<
   PutMessageFeedback,

@@ -21,15 +21,14 @@ export interface ListPartsRequest extends Omit<
  * crashed uploader.
  * Provide the implementation with
  * `Effect.provide(AWS.Glacier.ListPartsHttp)`.
- * ### Uploading Archives
- * **Example:** List a multipart upload's parts
+ * @binding
+ * @section Uploading Archives
+ * @example List a multipart upload's parts
  * ```typescript
  * const listParts = yield* AWS.Glacier.ListParts(vault);
  *
  * const { Parts } = yield* listParts({ uploadId });
  * ```
- *
- * @binding
  */
 export interface ListParts extends Binding.Service<
   ListParts,

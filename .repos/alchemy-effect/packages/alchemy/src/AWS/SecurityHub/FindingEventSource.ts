@@ -65,8 +65,8 @@ export interface FindingEventSourceProps extends EventRouteProps {
  * Provide the host-specific implementation layer (e.g.
  * `AWS.Lambda.EventSource`) on the Function effect.
  *
- * ### Consuming Findings
- * **Example:** Alert on Critical Findings
+ * @section Consuming Findings
+ * @example Alert on Critical Findings
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -139,8 +139,8 @@ export interface CustomActionEventSourceProps extends EventRouteProps {
  * selected findings; this subscribes the host Function to those events.
  * Define the action with {@link ActionTarget}.
  *
- * ### Consuming Custom Actions
- * **Example:** Handle an Escalation Action
+ * @section Consuming Custom Actions
+ * @example Handle an Escalation Action
  * ```typescript
  * yield* AWS.SecurityHub.consumeCustomActions(
  *   { actionArns: [escalate.actionTargetArn] },

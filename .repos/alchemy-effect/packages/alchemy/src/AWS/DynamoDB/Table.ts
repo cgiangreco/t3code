@@ -75,58 +75,6 @@ export interface KinesisStreamingDestination {
   approximateCreationDateTimePrecision?: DynamoDB.ApproximateCreationDateTimePrecision;
 }
 
-/**
- * One or more attribute names forming an index key. DynamoDB's wire format
- * flattens both key segments into a single ordered `KeySchema` list, but
- * semantically a key is two ordered segments — this type captures one of
- * them. Order is significant: partition attributes are hashed together in
- * declaration order, and sort attributes are queried left-to-right.
- */
-export type IndexKey = string | string[];
-
-export interface LocalSecondaryIndexProps {
-  /**
-   * Name of the index, unique within the table.
-   */
-  indexName: string;
-  /**
-   * Sort key attribute name. An LSI always shares the table's partition
-   * key, so only the sort key is declared; multi-attribute keys are not
-   * supported on LSIs.
-   */
-  sortKey: string;
-  /**
-   * Attributes projected from the table into the index.
-   */
-  projection: DynamoDB.Projection;
-}
-
-export interface GlobalSecondaryIndexProps {
-  /**
-   * Name of the index, unique within the table.
-   */
-  indexName: string;
-  /**
-   * Partition key attribute name(s). Up to four attributes may be listed;
-   * they are hashed together in declaration order and every one must be
-   * specified with an equality condition when querying the index.
-   */
-  partitionKey: IndexKey;
-  /**
-   * Optional sort key attribute name(s). Up to four attributes may be
-   * listed; items sort by each attribute in declaration order and queries
-   * narrow them left-to-right (no gaps, inequality last).
-   */
-  sortKey?: IndexKey;
-  /**
-   * Attributes projected from the table into the index.
-   */
-  projection: DynamoDB.Projection;
-  provisionedThroughput?: DynamoDB.ProvisionedThroughput;
-  onDemandThroughput?: DynamoDB.OnDemandThroughput;
-  warmThroughput?: DynamoDB.WarmThroughput;
-}
-
 export type TableProps = {
   /**
    * Name of the table. If omitted, Alchemy generates a deterministic physical
@@ -141,10 +89,6 @@ export type TableProps = {
   tableName?: string;
   /**
    * Partition key attribute name for the table.
-   *
-   * Base-table primary keys are always a single partition attribute plus an
-   * optional single sort attribute — DynamoDB supports multi-attribute keys
-   * only on global secondary indexes (see `globalSecondaryIndexes`).
    */
   partitionKey: string;
   /**
@@ -155,20 +99,8 @@ export type TableProps = {
    * Attribute definitions used by the primary key and any secondary indexes.
    */
   attributes: Record<string, ScalarAttributeType>;
-  /**
-   * Local secondary indexes, created with the table. An LSI always shares
-   * the table's partition key and declares a single sort key. Changing this
-   * property replaces the table.
-   */
-  localSecondaryIndexes?: LocalSecondaryIndexProps[];
-  /**
-   * Global secondary indexes. GSIs support multi-attribute keys: up to four
-   * partition attributes (hashed together as the composite partition key)
-   * and up to four sort attributes (sorted and queried left-to-right).
-   * Attribute order is significant — reordering defines a different index
-   * and replaces the table. Every key attribute must appear in `attributes`.
-   */
-  globalSecondaryIndexes?: GlobalSecondaryIndexProps[];
+  localSecondaryIndexes?: DynamoDB.LocalSecondaryIndex[];
+  globalSecondaryIndexes?: DynamoDB.GlobalSecondaryIndex[];
   billingMode?: DynamoDB.BillingMode;
   deletionProtectionEnabled?: boolean;
   onDemandThroughput?: DynamoDB.OnDemandThroughput;
@@ -252,8 +184,9 @@ export interface Table extends Resource<
  * `Table` owns the lifecycle of the physical table while the binding contract
  * allows runtime-specific integrations such as Lambda table event sources to
  * request stream configuration without forcing a circular input prop.
- * ### Creating Tables
- * **Example:** Basic Table
+ * @resource
+ * @section Creating Tables
+ * @example Basic Table
  * ```typescript
  * import * as DynamoDB from "alchemy/AWS/DynamoDB";
  *
@@ -265,7 +198,7 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * **Example:** Table with Sort Key and TTL
+ * @example Table with Sort Key and TTL
  * ```typescript
  * const table = yield* DynamoDB.Table("SessionsTable", {
  *   partitionKey: "userId",
@@ -282,7 +215,7 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * **Example:** Table with Global Secondary Index
+ * @example Table with Global Secondary Index
  * ```typescript
  * const table = yield* DynamoDB.Table("OrdersTable", {
  *   partitionKey: "pk",
@@ -294,61 +227,22 @@ export interface Table extends Resource<
  *     gsi1sk: "S",
  *   },
  *   globalSecondaryIndexes: [{
- *     indexName: "GSI1",
- *     partitionKey: "gsi1pk",
- *     sortKey: "gsi1sk",
- *     projection: { ProjectionType: "ALL" },
+ *     IndexName: "GSI1",
+ *     KeySchema: [
+ *       { AttributeName: "gsi1pk", KeyType: "HASH" },
+ *       { AttributeName: "gsi1sk", KeyType: "RANGE" },
+ *     ],
+ *     Projection: { ProjectionType: "ALL" },
  *   }],
  * });
  * ```
  *
- * **Example:** Multi-Attribute GSI Keys
- * GSI partition and sort keys may be composed of up to four attributes each,
- * indexing natural domain attributes directly instead of synthetic
- * concatenated keys. Partition attributes are hashed together (queries must
- * specify all of them with equality); sort attributes are queried
- * left-to-right in declaration order.
- * ```typescript
- * const matches = yield* DynamoDB.Table("TournamentMatches", {
- *   partitionKey: "matchId",
- *   attributes: {
- *     matchId: "S",
- *     tournamentId: "S",
- *     region: "S",
- *     round: "S",
- *   },
- *   globalSecondaryIndexes: [{
- *     indexName: "TournamentRegionIndex",
- *     partitionKey: ["tournamentId", "region"],
- *     sortKey: ["round", "matchId"],
- *     projection: { ProjectionType: "ALL" },
- *   }],
- * });
- *
- * // init
- * const query = yield* AWS.DynamoDB.Query(matches);
- *
- * // runtime: query with every partition attribute, then narrow the sort
- * // attributes left-to-right
- * const response = yield* query({
- *   IndexName: "TournamentRegionIndex",
- *   KeyConditionExpression:
- *     "tournamentId = :t AND #r = :r AND round = :round",
- *   ExpressionAttributeNames: { "#r": "region" },
- *   ExpressionAttributeValues: {
- *     ":t": { S: "WINTER2024" },
- *     ":r": { S: "NA-EAST" },
- *     ":round": { S: "SEMIFINALS" },
- *   },
- * });
- * ```
- *
- * ### Runtime Operations
+ * @section Runtime Operations
  * Bind DynamoDB operations in the init phase and use them in runtime
  * handlers. Bindings inject the table name and grant scoped IAM
  * permissions automatically.
  *
- * **Example:** Read and write items
+ * @example Read and write items
  * ```typescript
  * // init
  * const getItem = yield* AWS.DynamoDB.GetItem(table);
@@ -368,8 +262,8 @@ export interface Table extends Resource<
  * };
  * ```
  *
- * ### Table Features
- * **Example:** Resource Policy
+ * @section Table Features
+ * @example Resource Policy
  * ```typescript
  * const table = yield* DynamoDB.Table("SharedTable", {
  *   partitionKey: "pk",
@@ -386,7 +280,7 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * **Example:** Kinesis Streaming Destination
+ * @example Kinesis Streaming Destination
  * ```typescript
  * import * as Kinesis from "alchemy/AWS/Kinesis";
  *
@@ -401,7 +295,7 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * **Example:** Contributor Insights
+ * @example Contributor Insights
  * ```typescript
  * const table = yield* DynamoDB.Table("HotKeyTable", {
  *   partitionKey: "pk",
@@ -410,12 +304,12 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * ### DynamoDB Streams
+ * @section DynamoDB Streams
  * Process change data capture events from a DynamoDB table using a
  * Lambda event source mapping. The stream is enabled automatically
  * through the binding contract.
  *
- * **Example:** Process table changes
+ * @example Process table changes
  * ```typescript
  * // init
  * yield* DynamoDB.consumeTableChanges(
@@ -426,8 +320,6 @@ export interface Table extends Resource<
  *   }),
  * );
  * ```
- *
- * @resource
  */
 export const Table = Resource<Table>("AWS.DynamoDB.Table");
 
@@ -464,79 +356,6 @@ export const TableProvider = () =>
             ]
           : []),
       ];
-
-      const toKeyAttributeNames = (key: IndexKey | undefined) =>
-        key === undefined ? [] : typeof key === "string" ? [key] : key;
-
-      // AWS's wire format flattens an index key into one ordered KeySchema
-      // list and validates that all HASH elements precede all RANGE
-      // elements; deriving the list from the two typed segments makes the
-      // invalid orderings unrepresentable in props.
-      const toIndexKeySchema = (
-        partitionKey: IndexKey,
-        sortKey: IndexKey | undefined,
-      ): DynamoDB.KeySchemaElement[] => [
-        ...toKeyAttributeNames(partitionKey).map((name) => ({
-          AttributeName: name,
-          KeyType: "HASH" as const,
-        })),
-        ...toKeyAttributeNames(sortKey).map((name) => ({
-          AttributeName: name,
-          KeyType: "RANGE" as const,
-        })),
-      ];
-
-      // Pre-typed-props state may persist index props in the legacy wire
-      // shape ({ IndexName, KeySchema, ... }). Tolerate it when converting
-      // `olds` so upgrading alchemy never plans a spurious table
-      // replacement over a shape-only difference.
-      const isLegacyWireIndex = (
-        index: unknown,
-      ): index is DynamoDB.GlobalSecondaryIndex =>
-        typeof index === "object" && index !== null && "KeySchema" in index;
-
-      const toWireGlobalSecondaryIndex = (
-        index: GlobalSecondaryIndexProps,
-      ): DynamoDB.GlobalSecondaryIndex =>
-        isLegacyWireIndex(index)
-          ? index
-          : {
-              IndexName: index.indexName,
-              KeySchema: toIndexKeySchema(index.partitionKey, index.sortKey),
-              Projection: index.projection,
-              ProvisionedThroughput: index.provisionedThroughput,
-              OnDemandThroughput: index.onDemandThroughput,
-              WarmThroughput: index.warmThroughput,
-            };
-
-      const toWireLocalSecondaryIndex = (
-        tablePartitionKey: string,
-        index: LocalSecondaryIndexProps,
-      ): DynamoDB.LocalSecondaryIndex =>
-        isLegacyWireIndex(index)
-          ? index
-          : {
-              IndexName: index.indexName,
-              KeySchema: toIndexKeySchema(tablePartitionKey, index.sortKey),
-              Projection: index.projection,
-            };
-
-      const toWireGlobalSecondaryIndexes = (
-        indexes: readonly GlobalSecondaryIndexProps[] | undefined,
-      ) =>
-        indexes === undefined || indexes.length === 0
-          ? undefined
-          : indexes.map(toWireGlobalSecondaryIndex);
-
-      const toWireLocalSecondaryIndexes = (
-        tablePartitionKey: string,
-        indexes: readonly LocalSecondaryIndexProps[] | undefined,
-      ) =>
-        indexes === undefined || indexes.length === 0
-          ? undefined
-          : indexes.map((index) =>
-              toWireLocalSecondaryIndex(tablePartitionKey, index),
-            );
 
       const toAttributeDefinitions = (
         attrs: Record<string, ScalarAttributeType>,
@@ -1370,25 +1189,14 @@ export const TableProvider = () =>
           (indexes ?? []).map((index) => [index.IndexName!, index]),
         ) as Record<string, T>;
 
-      // KeySchema order is significant with multi-attribute keys: partition
-      // attributes are hashed together in declaration order and sort key
-      // attributes are queried left-to-right. Only the HASH/RANGE grouping is
-      // normalized (DescribeTable reports all HASH elements before all RANGE
-      // elements regardless of how the request interleaved them); the relative
-      // order within each group must be preserved — reordering attributes
-      // defines a different index.
-      const normalizeKeySchema = (
+      const sortKeySchema = (
         keySchema: readonly DynamoDB.KeySchemaElement[] | undefined,
-      ) => {
-        const elements = (keySchema ?? []).map((element) => ({
-          AttributeName: element.AttributeName,
-          KeyType: element.KeyType,
-        }));
-        return [
-          ...elements.filter((element) => element.KeyType === "HASH"),
-          ...elements.filter((element) => element.KeyType === "RANGE"),
-        ];
-      };
+      ) =>
+        [...(keySchema ?? [])].sort((a, b) =>
+          `${a.KeyType}:${a.AttributeName}`.localeCompare(
+            `${b.KeyType}:${b.AttributeName}`,
+          ),
+        );
 
       const normalizeProjection = (
         projection: DynamoDB.Projection | undefined,
@@ -1401,8 +1209,8 @@ export const TableProvider = () =>
         left: DynamoDB.GlobalSecondaryIndex,
         right: DynamoDB.GlobalSecondaryIndex,
       ) =>
-        JSON.stringify(normalizeKeySchema(left.KeySchema)) ===
-          JSON.stringify(normalizeKeySchema(right.KeySchema)) &&
+        JSON.stringify(sortKeySchema(left.KeySchema)) ===
+          JSON.stringify(sortKeySchema(right.KeySchema)) &&
         JSON.stringify(normalizeProjection(left.Projection)) ===
           JSON.stringify(normalizeProjection(right.Projection));
 
@@ -1584,23 +1392,8 @@ export const TableProvider = () =>
                   // we give up), skip it rather than failing the whole
                   // enumeration. Our own table is ACTIVE by the time list()
                   // runs, so it always hydrates via the retry above.
-                  //
-                  // `AccessDeniedException` is the same case seen from the
-                  // other side: enumerating an account walks tables we do not
-                  // own, and one can deny the tag read outright (a restrictive
-                  // resource policy live; a peer test's table under the local
-                  // emulator). A table we cannot read is not ours to return.
-                  // `TableNotFoundException` completes the set: a peer can
-                  // delete a table between `listTables` and our describes, and
-                  // that is what DynamoDB raises for a table that vanished.
-                  Effect.catchTag(
-                    [
-                      "ValidationException",
-                      "AccessDeniedException",
-                      "TableNotFoundException",
-                      "ResourceNotFoundException",
-                    ],
-                    () => Effect.succeed(undefined),
+                  Effect.catchTag("ValidationException", () =>
+                    Effect.succeed(undefined),
                   ),
                 ),
               { concurrency: 8 },
@@ -1656,32 +1449,17 @@ export const TableProvider = () =>
               return replace;
             }
           }
-          // Compare secondary indexes in the wire shape so legacy state
-          // (persisted before the typed index props) diffs cleanly against
-          // the new prop shape.
           if (
             havePropsChanged(
-              {
-                localSecondaryIndexes:
-                  toWireLocalSecondaryIndexes(
-                    olds.partitionKey,
-                    olds.localSecondaryIndexes,
-                  ) ?? [],
-              },
-              {
-                localSecondaryIndexes:
-                  toWireLocalSecondaryIndexes(
-                    news.partitionKey,
-                    news.localSecondaryIndexes,
-                  ) ?? [],
-              },
+              { localSecondaryIndexes: olds.localSecondaryIndexes ?? [] },
+              { localSecondaryIndexes: news.localSecondaryIndexes ?? [] },
             )
           ) {
             return replace;
           }
           const { requiresReplacement } = diffGlobalSecondaryIndexes(
-            toWireGlobalSecondaryIndexes(olds.globalSecondaryIndexes),
-            toWireGlobalSecondaryIndexes(news.globalSecondaryIndexes),
+            olds.globalSecondaryIndexes,
+            news.globalSecondaryIndexes,
           );
           if (requiresReplacement) {
             return replace;
@@ -1720,13 +1498,8 @@ export const TableProvider = () =>
                 TableClass: news.tableClass,
                 KeySchema: toKeySchema(news),
                 AttributeDefinitions: toAttributeDefinitions(news.attributes),
-                LocalSecondaryIndexes: toWireLocalSecondaryIndexes(
-                  news.partitionKey,
-                  news.localSecondaryIndexes,
-                ),
-                GlobalSecondaryIndexes: toWireGlobalSecondaryIndexes(
-                  news.globalSecondaryIndexes,
-                ),
+                LocalSecondaryIndexes: news.localSecondaryIndexes,
+                GlobalSecondaryIndexes: news.globalSecondaryIndexes,
                 BillingMode: news.billingMode ?? "PAY_PER_REQUEST",
                 SSESpecification: news.sseSpecification,
                 StreamSpecification: desiredStreamSpecification,
@@ -1756,7 +1529,7 @@ export const TableProvider = () =>
               yield* waitForGlobalSecondaryIndexesStable(
                 session,
                 tableName,
-                news.globalSecondaryIndexes?.map((index) => index.indexName) ??
+                news.globalSecondaryIndexes?.map((index) => index.IndexName) ??
                   [],
               );
             }
@@ -1818,7 +1591,7 @@ export const TableProvider = () =>
               state.table.GlobalSecondaryIndexes as
                 | readonly DynamoDB.GlobalSecondaryIndex[]
                 | undefined,
-              toWireGlobalSecondaryIndexes(news.globalSecondaryIndexes),
+              news.globalSecondaryIndexes,
             );
 
           for (const globalSecondaryIndexUpdate of globalSecondaryIndexUpdates) {
@@ -1840,7 +1613,7 @@ export const TableProvider = () =>
 
           if (globalSecondaryIndexUpdates.length > 0) {
             const expectedNames =
-              news.globalSecondaryIndexes?.map((index) => index.indexName) ??
+              news.globalSecondaryIndexes?.map((index) => index.IndexName) ??
               [];
             yield* session.note(
               `Table ${tableName}: waiting for GSIs to stabilize (${expectedNames.join(", ") || "none"})`,
@@ -2148,45 +1921,29 @@ export const TableProvider = () =>
           // cleanup and strands the rules — CloudWatch rejects direct
           // deletion of DynamoDB-managed rules with AccessDenied, so only
           // AWS support can remove them afterwards.
-          //
-          // Observe existence first: `waitForContributorInsightsSettled`
-          // retries `ResourceNotFoundException` as a control-plane blip (its
-          // reconcile-side callers run right after the table was created),
-          // so a table that is already gone would otherwise spin through the
-          // full ~90s settle budget before this delete can notice.
-          const tableExists = yield* dynamodb
-            .describeTable({ TableName: output.tableName })
-            .pipe(
-              Effect.as(true),
-              Effect.catchTag("ResourceNotFoundException", () =>
-                Effect.succeed(false),
-              ),
+          yield* Effect.gen(function* () {
+            const insightsStatus = yield* waitForContributorInsightsSettled(
+              session,
+              output.tableName,
             );
-          if (tableExists) {
-            yield* Effect.gen(function* () {
-              const insightsStatus = yield* waitForContributorInsightsSettled(
+            if (insightsStatus !== "DISABLED") {
+              yield* session.note(
+                `Table ${output.tableName}: disabling Contributor Insights before delete`,
+              );
+              yield* updateTableContributorInsights(output.tableName, false);
+              yield* waitForContributorInsightsSettled(
                 session,
                 output.tableName,
               );
-              if (insightsStatus !== "DISABLED") {
-                yield* session.note(
-                  `Table ${output.tableName}: disabling Contributor Insights before delete`,
-                );
-                yield* updateTableContributorInsights(output.tableName, false);
-                yield* waitForContributorInsightsSettled(
-                  session,
-                  output.tableName,
-                );
-              }
-              yield* waitForContributorInsightsRulesDeleted(
-                session,
-                output.tableName,
-              );
-            }).pipe(
-              // Table vanished mid-teardown — nothing left to tear down.
-              Effect.catchTag("ResourceNotFoundException", () => Effect.void),
+            }
+            yield* waitForContributorInsightsRulesDeleted(
+              session,
+              output.tableName,
             );
-          }
+          }).pipe(
+            // Table already gone — nothing to tear down.
+            Effect.catchTag("ResourceNotFoundException", () => Effect.void),
+          );
 
           let deleteAttempt = 0;
 

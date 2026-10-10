@@ -1,6 +1,5 @@
 import * as Containers from "@distilled.cloud/cloudflare/containers";
 import * as Redacted from "effect/Redacted";
-import type * as Bundle from "../../Bundle/Bundle.ts";
 import * as ProviderLayer from "../../Local/ProviderLayer.ts";
 import {
   type Main,
@@ -8,7 +7,7 @@ import {
   type PlatformServices,
 } from "../../Platform.ts";
 import { Resource } from "../../Resource.ts";
-import type { ProcessServices } from "../../Server/Process.ts";
+import * as Server from "../../Server/index.ts";
 import type { Providers } from "../Providers.ts";
 import type { InlineDockerfile } from "../../Docker/Dockerfile.ts";
 import { ContainerTypeId } from "./Container.ts";
@@ -80,13 +79,6 @@ export interface ContainerApplicationPropsBase extends PlatformProps {
    */
   name?: string;
   /**
-   * Name of the exported Durable Object class this container backs when the
-   * Container is bound on an **async** Worker's `env`. Defaults to the
-   * binding name (the `env` key). Ignored by the Effect-native path, where
-   * the class name comes from the hosting Durable Object.
-   */
-  className?: string;
-  /**
    * Initial number of instances to maintain. Matches wrangler, which forces
    * this to 0 whenever {@link maxInstances} is set (pure scale-from-zero).
    * @default 0
@@ -108,8 +100,7 @@ export interface ContainerApplicationPropsBase extends PlatformProps {
   /**
    * Instance type for each deployment. Defaults to wrangler's `"lite"` tier
    * (1/16 vCPU, 256 MiB, 2 GB disk) when no explicit {@link vcpu}/{@link memory}/
-   * {@link memoryMib}/{@link disk} is set. (`"dev"` is wrangler's deprecated
-   * alias for `"lite"`.)
+   * {@link disk} is set. (`"dev"` is wrangler's deprecated alias for `"lite"`.)
    * @default "lite"
    */
   instanceType?: ContainerApplication.InstanceType;
@@ -133,12 +124,6 @@ export interface ContainerApplicationPropsBase extends PlatformProps {
    * Memory allocation override for each deployment.
    */
   memory?: string;
-  /**
-   * Memory allocation override for each deployment, in MiB.
-   * Custom sizing requires at least 1 {@link vcpu} and 3072 MiB of memory
-   * per vCPU for the first 4 vCPUs.
-   */
-  memoryMib?: number;
   /**
    * Disk allocation override for each deployment.
    */
@@ -192,68 +177,6 @@ export interface ContainerApplicationPropsBase extends PlatformProps {
    * @default "registry.cloudflare.com"
    */
   registryId?: string;
-  /**
-   * Image publication configuration. Builds are cached by default in a
-   * repository named after the application's physical name. Generated names
-   * include the stage and resource instance, so updates within that stage can
-   * reuse images. Replacement or destroy/recreate can select a new repository.
-   * Set `repository` to share finished images and build layers across stages.
-   *
-   * @example
-   * ```typescript
-   * // Default: cached in this application's generated repository.
-   * const app = yield* Cloudflare.Container("Web", { context: "./web" }).Application;
-   * // Repository: registry.cloudflare.com/<account-id>/<app.applicationName>
-   * ```
-   */
-  publish?: {
-    /**
-     * Destination repository name within the current Cloudflare account's
-     * container registry, for example `"web"`. This is not a source image,
-     * registry hostname, account ID, tag, or fully qualified image reference.
-     * Alchemy lowercases the name and adds the registry host and account ID:
-     * `registry.cloudflare.com/<account-id>/web` with the default `registryId`.
-     * The container application's name is independent of this repository name.
-     * Omitting `publish` uses the application's physical name instead and still
-     * enables caching. Generated names are scoped to the stage and resource
-     * instance; an explicit repository allows cross-stage reuse.
-     *
-     * For Dockerfile and Effect-native builds, Alchemy publishes a content-hash
-     * tag and an inline layer-cache tag, then deploys an immutable manifest
-     * digest. The build hash and manifest digest are different identifiers.
-     * Builds targeting this repository import reusable layers from its shared
-     * `:buildcache` tag, even when their full input hashes differ. The tag points
-     * to the latest exported inline cache, not an aggregate of all historical
-     * images. A finished-image cache hit leaves this layer-cache tag unchanged.
-     *
-     * Applications and stages in the same account can share `"web"`. Matching
-     * build inputs reuse the published image; changed inputs produce another
-     * hash tag in the same repository. Finished-image cache reuse applies to
-     * builds, not to re-publishing remote images. Pin base images and downloaded
-     * dependencies: changes outside the build context cannot invalidate its
-     * content hash.
-     *
-     * External remote images are re-published into this repository without
-     * building them. Images already in the target registry keep their existing
-     * repository; setting this option does not copy them into another one.
-     *
-     * @example
-     * ```typescript
-     * const app = yield* Cloudflare.Container("WebProduction", {
-     *   context: "./web",
-     *   publish: { repository: "web" },
-     * }).Application;
-     *
-     * // Published build:
-     * // registry.cloudflare.com/<account-id>/web:<build-hash>
-     * // Shared build-layer cache:
-     * // registry.cloudflare.com/<account-id>/web:buildcache
-     * // Deployed image (app.configuration.image):
-     * // registry.cloudflare.com/<account-id>/web@sha256:<manifest-digest>
-     * ```
-     */
-    repository: string;
-  };
   /**
    * Environment variables passed to the container runtime.
    */
@@ -330,13 +253,6 @@ export interface EffectfulContainerProps extends ContainerApplicationPropsBase {
    * redundant install step.
    */
   autoInstallExternals?: boolean;
-  /**
-   * Bundler configuration for {@link main}. Unused code is tree-shaken.
-   * `effect`, alchemy, and `@distilled.cloud` are marked pure so unused
-   * parts prune more aggressively. List extra packages with
-   * `pure.packages`, or disable with `pure: false`.
-   */
-  build?: Bundle.BundleConfig;
 }
 
 /**
@@ -370,12 +286,6 @@ export interface RemoteContainerProps extends ContainerApplicationPropsBase {
    * The pre-built image to pull and re-push.
    *
    * E.g. `ghcr.io/alpine/alpine:latest`
-   *
-   * When the reference already points at the target registry (the
-   * {@link ContainerApplicationPropsBase.registryId | registryId} host,
-   * `registry.cloudflare.com` by default) — e.g. a digest reference pushed
-   * by CI like `registry.cloudflare.com/<accountId>/app@sha256:...` — it is
-   * deployed as-is and the docker pull/push round-trip is skipped entirely.
    */
   image: string;
 }
@@ -407,13 +317,12 @@ export interface AnyContainerApplicationProps extends ContainerApplicationPropsB
   runtime?: "bun" | "node";
   external?: string[];
   autoInstallExternals?: boolean;
-  build?: Bundle.BundleConfig;
 }
 
 export type ContainerServices =
   | ContainerApplication
   | PlatformServices
-  | ProcessServices;
+  | Server.ProcessServices;
 
 export type ContainerShape = Main<ContainerServices>;
 
@@ -429,14 +338,17 @@ export type ContainerShape = Main<ContainerServices>;
  * resource directly. The same props shape (`main`, `instanceType`, `instances`,
  * etc.) is accepted by the `Cloudflare.Container(...)` class form shown below.
  *
+ * @resource
+ * @product Containers
+ * @category Workers & Compute
  * @internal
- * ### Defining a Container Application
+ * @section Defining a Container Application
  * Point `main` at the container's entrypoint file; Alchemy bundles it and uses
  * it as the image's entrypoint. The application name is derived deterministically
  * from the stack, stage, and logical ID unless you set an explicit `name`, and
  * `handler` selects which export to run when it isn't the default.
  *
- * **Example:** Minimal container
+ * @example Minimal container
  * ```typescript
  * import * as Cloudflare from "alchemy/Cloudflare";
  *
@@ -450,7 +362,7 @@ export type ContainerShape = Main<ContainerServices>;
  * one instance. Reach for the other props only when you need to scale, expose
  * ports, or customize the build.
  *
- * **Example:** Named container with a non-default handler export
+ * @example Named container with a non-default handler export
  * ```typescript
  * export class Worker extends Cloudflare.Container<Worker>()("Worker", {
  *   main: import.meta.url,
@@ -463,14 +375,14 @@ export type ContainerShape = Main<ContainerServices>;
  * useful for adopting an existing application, while `handler` runs the named
  * `runWorker` export rather than the module's default.
  *
- * ### Image Sources
+ * @section Image Sources
  * The image is resolved from exactly one of three props, checked in order:
  * `main` (bundle an Effect program into a generated image), then `image`
  * (pull and re-push a remote image), then `context` / `dockerfile` (build
  * your own Dockerfile). Only `main` injects an Effect runtime; the other two
  * ship an arbitrary image unchanged.
  *
- * **Example:** Build your own Dockerfile (`context` / `dockerfile`)
+ * @example Build your own Dockerfile (`context` / `dockerfile`)
  * ```typescript
  * export class Web extends Cloudflare.Container<Web>()("Web", {
  *   context: `${import.meta.dirname}/context`,
@@ -482,7 +394,7 @@ export type ContainerShape = Main<ContainerServices>;
  * bundling. `dockerfile` is resolved relative to `context` and defaults to
  * `<context>/Dockerfile`.
  *
- * **Example:** Remote image (`image`)
+ * @example Remote image (`image`)
  * ```typescript
  * export class Echo extends Cloudflare.Container<Echo>()("Echo", {
  *   image: "mendhak/http-https-echo:latest",
@@ -492,14 +404,14 @@ export type ContainerShape = Main<ContainerServices>;
  * Alchemy pulls the pre-built public image and re-pushes it to Cloudflare's
  * managed registry instead of building anything.
  *
- * ### Bundling & Dependencies
+ * @section Bundling & Dependencies
  * By default the entrypoint is bundled for the `bun` runtime. Use `runtime` to
  * switch to Node, `external` to keep native/precompiled packages out of the
  * bundle (auto-installed in the image unless `autoInstallExternals` is `false`),
  * `image` (or an inline `dockerfile`) to pick the environment the generated
  * Dockerfile starts `FROM`, and `registryId` to override the registry host.
  *
- * **Example:** Node runtime with external native deps
+ * @example Node runtime with external native deps
  * ```typescript
  * export class ImageApi extends Cloudflare.Container<ImageApi>()("ImageApi", {
  *   main: import.meta.url,
@@ -513,7 +425,7 @@ export type ContainerShape = Main<ContainerServices>;
  * because `autoInstallExternals` is `true`, Alchemy runs `npm install sharp`
  * inside the image so the dependency is present at runtime.
  *
- * **Example:** Custom environment image and registry
+ * @example Custom environment image and registry
  * ```typescript
  * export class Custom extends Cloudflare.Container<Custom>()("Custom", {
  *   main: import.meta.url,
@@ -528,7 +440,7 @@ export type ContainerShape = Main<ContainerServices>;
  * `autoInstallExternals: false` skips the redundant install step when the
  * environment already ships your `external` packages.
  *
- * **Example:** Inline environment Dockerfile (extra build steps)
+ * @example Inline environment Dockerfile (extra build steps)
  * ```typescript
  * import * as Dockerfile from "alchemy/Docker/Dockerfile";
  *
@@ -548,37 +460,12 @@ export type ContainerShape = Main<ContainerServices>;
  * environment can run extra build steps (system packages, config) while the
  * bundled program is still layered on top.
  *
- * ### Bundling & Tree-shaking
- * `main` is bundled with rolldown at deploy time. Unused code is
- * tree-shaken. `effect`, alchemy, and `@distilled.cloud` are marked
- * pure so unused parts prune more aggressively. Your app is not
- * marked pure.
- *
- * **Example:** Mark additional packages as pure
- * Only list packages with no top-level side effects.
- * ```typescript
- * {
- *   main: import.meta.url,
- *   build: {
- *     pure: { packages: ["my-lib", "@my-scope/*"] },
- *   },
- * }
- * ```
- *
- * **Example:** Turn it off
- * ```typescript
- * {
- *   main: import.meta.url,
- *   build: { pure: false },
- * }
- * ```
- *
- * ### Scaling & Instance Types
+ * @section Scaling & Instance Types
  * Control the desired and maximum instance counts with `instances`/`maxInstances`
  * and pick a compute size with `instanceType`. For finer control, override
  * `vcpu`, `memory`, and `disk` directly.
  *
- * **Example:** Autoscaling with a larger instance type
+ * @example Autoscaling with a larger instance type
  * ```typescript
  * export class Sandbox extends Cloudflare.Container<Sandbox>()("Sandbox", {
  *   main: import.meta.url,
@@ -592,7 +479,7 @@ export type ContainerShape = Main<ContainerServices>;
  * load, each on the `standard-1` size. Use a larger `instanceType` (or the
  * explicit overrides below) when the default `dev` size is too small.
  *
- * **Example:** Explicit CPU, memory, and disk overrides
+ * @example Explicit CPU, memory, and disk overrides
  * ```typescript
  * export class Heavy extends Cloudflare.Container<Heavy>()("Heavy", {
  *   main: import.meta.url,
@@ -606,12 +493,12 @@ export type ContainerShape = Main<ContainerServices>;
  * `instanceType`, which is handy when a workload needs, say, extra disk for
  * scratch space without bumping every other dimension.
  *
- * ### Runtime Configuration
+ * @section Runtime Configuration
  * Inject configuration with `environmentVariables` (plain values) and `secrets`
  * (references to stored secrets), and override the image's `command` or
  * `entrypoint`. `labels` attach metadata to the deployment.
  *
- * **Example:** Environment variables, secrets, and a command override
+ * @example Environment variables, secrets, and a command override
  * ```typescript
  * export class Api extends Cloudflare.Container<Api>()("Api", {
  *   main: import.meta.url,
@@ -627,7 +514,7 @@ export type ContainerShape = Main<ContainerServices>;
  * overrides the container's startup command and `labels` tag the deployment for
  * organization.
  *
- * **Example:** Passing env and selecting runtime exports
+ * @example Passing env and selecting runtime exports
  * ```typescript
  * export class Job extends Cloudflare.Container<Job>()("Job", {
  *   main: import.meta.url,
@@ -640,11 +527,11 @@ export type ContainerShape = Main<ContainerServices>;
  * the deployment-level `environmentVariables`), and `exports` declares which
  * symbols from the entrypoint module the runtime should wire up.
  *
- * ### Networking & Health Checks
+ * @section Networking & Health Checks
  * Configure outbound/inbound networking with `network` and `dns`, expose
  * `ports`, and gate readiness with `checks`.
  *
- * **Example:** Ports, network mode, DNS, and a health check
+ * @example Ports, network mode, DNS, and a health check
  * ```typescript
  * export class Web extends Cloudflare.Container<Web>()("Web", {
  *   main: import.meta.url,
@@ -660,11 +547,11 @@ export type ContainerShape = Main<ContainerServices>;
  * and `checks` tells Cloudflare how to probe the container before routing
  * traffic to it.
  *
- * ### Observability & Access
+ * @section Observability & Access
  * Turn on log shipping with `observability` and install `sshPublicKeyIds` for
  * interactive access to running instances.
  *
- * **Example:** Enable logs and grant SSH access
+ * @example Enable logs and grant SSH access
  * ```typescript
  * export class Api extends Cloudflare.Container<Api>()("Api", {
  *   main: import.meta.url,
@@ -678,11 +565,11 @@ export type ContainerShape = Main<ContainerServices>;
  * and `sshPublicKeyIds` authorizes the listed keys to connect to instances for
  * debugging.
  *
- * ### Scheduling & Placement
+ * @section Scheduling & Placement
  * Influence where and how Cloudflare schedules instances with `schedulingPolicy`,
  * `constraints`, and `affinities`.
  *
- * **Example:** Pin scheduling policy and placement
+ * @example Pin scheduling policy and placement
  * ```typescript
  * export class Edge extends Cloudflare.Container<Edge>()("Edge", {
  *   main: import.meta.url,
@@ -697,11 +584,11 @@ export type ContainerShape = Main<ContainerServices>;
  * `affinities.colocation` keeps related instances in the same datacenter to
  * reduce inter-instance latency.
  *
- * ### Rollouts
+ * @section Rollouts
  * When an update changes the configuration, `rollout` controls how the new
  * version is rolled out across instances.
  *
- * **Example:** Progressive rollout on update
+ * @example Progressive rollout on update
  * ```typescript
  * export class Api extends Cloudflare.Container<Api>()("Api", {
  *   main: import.meta.url,
@@ -713,19 +600,7 @@ export type ContainerShape = Main<ContainerServices>;
  *
  * A `rolling` strategy with `stepPercentage: 25` replaces instances in 25%
  * increments so the application stays available during the update; the default
- * `immediate` strategy swaps everything at once. Steps advance automatically
- * as new instances become healthy; each replaced instance receives `SIGTERM`
- * and has 15 minutes to shut down cleanly before `SIGKILL`.
- *
- * Rollouts replace instances — they do not split requests between two image
- * versions (request-level traffic splitting exists one layer up, on the
- * Worker, via `version.traffic`). The fronting Worker and Durable Object cut
- * over immediately while instances roll, so keep the Worker-to-container
- * protocol compatible across both image versions until a rollout completes.
- *
- * @resource
- * @product Containers
- * @category Workers & Compute
+ * `immediate` strategy swaps everything at once.
  */
 export interface ContainerApplication<Shape = unknown> extends Resource<
   ContainerTypeId,
@@ -787,13 +662,11 @@ export interface ContainerApplication<Shape = unknown> extends Resource<
      */
     version: number;
     /**
-     * Internal hashes of the built image and desired application
-     * configuration, used to skip unchanged builds and updates.
+     * Internal cache of the built image hash, used to skip rebuilds when the
+     * bundled program and Dockerfile are unchanged.
      */
     hash?: {
       image: string;
-      digest?: string;
-      configuration?: string;
     };
     dev: DevContainerImage | undefined;
   },
@@ -842,12 +715,7 @@ export declare namespace DevContainerImage {
 }
 
 export const ContainerProvider = () =>
-  // `{ Type }` instead of `ContainerPlatform` — importing the platform here
-  // would create a module cycle (ContainerPlatform.ts imports this file).
-  ProviderLayer.dual(
-    { Type: ContainerTypeId },
-    {
-      live: () => LiveContainerProvider(),
-      local: () => LocalContainerProvider(),
-    },
-  );
+  ProviderLayer.select({
+    live: () => LiveContainerProvider(),
+    local: () => LocalContainerProvider(),
+  });

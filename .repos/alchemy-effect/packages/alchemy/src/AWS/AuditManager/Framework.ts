@@ -100,8 +100,9 @@ export interface Framework extends Resource<
  * Audit Manager must be registered in the account (`RegisterAccount`)
  * before frameworks can be created.
  * :::
- * ### Creating Frameworks
- * **Example:** Framework from a Custom Control
+ * @resource
+ * @section Creating Frameworks
+ * @example Framework from a Custom Control
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -121,8 +122,6 @@ export interface Framework extends Resource<
  *   }],
  * });
  * ```
- *
- * @resource
  */
 export const Framework = Resource<Framework>("AWS.AuditManager.Framework");
 

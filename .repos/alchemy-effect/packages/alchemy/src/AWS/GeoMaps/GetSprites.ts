@@ -11,12 +11,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-maps:GetSprites`. Requests and responses are raw distilled types; the
  * sprite payload is returned as `Blob` (`Uint8Array`).
  *
- * ### Fetching Sprites
+ * @binding
+ * @section Fetching Sprites
  * Provide the `GetSpritesHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoMaps.GetSpritesHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Fetch the Standard style's sprite sheet
+ * @example Fetch the Standard style's sprite sheet
  * ```typescript
  * // init
  * const getSprites = yield* AWS.GeoMaps.GetSprites();
@@ -30,8 +31,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const bytes = sprites.Blob; // Uint8Array | undefined (PNG or JSON)
  * ```
- *
- * @binding
  */
 export interface GetSprites extends Binding.Service<
   GetSprites,

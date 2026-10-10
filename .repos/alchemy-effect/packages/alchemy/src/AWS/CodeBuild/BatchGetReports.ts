@@ -6,15 +6,14 @@ import type { ReportGroup } from "./ReportGroup.ts";
 /**
  * Runtime binding for `codebuild:BatchGetReports` — reads one or more
  * reports of the bound report group by report ARN.
- * ### Reading Reports
- * **Example:** Read Report Summaries
+ * @binding
+ * @section Reading Reports
+ * @example Read Report Summaries
  * ```typescript
  * const batchGetReports = yield* AWS.CodeBuild.BatchGetReports(reportGroup);
  *
  * const { reports } = yield* batchGetReports({ reportArns });
  * ```
- *
- * @binding
  */
 export interface BatchGetReports extends Binding.Service<
   BatchGetReports,

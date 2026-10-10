@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `clusterName` is injected from the bound {@link Cluster} and `eks:ListInsights` is granted on the cluster's ARN.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.ListInsightsHttp)`.
- * ### Cluster Insights
- * **Example:** List Upgrade-Blocking Insights
+ * @binding
+ * @section Cluster Insights
+ * @example List Upgrade-Blocking Insights
  * ```typescript
  * // init
  * const listInsights = yield* AWS.EKS.ListInsights(cluster);
@@ -21,8 +22,6 @@ import type { Cluster } from "./Cluster.ts";
  *   filter: { statuses: ["ERROR", "WARNING"] },
  * });
  * ```
- *
- * @binding
  */
 export interface ListInsights extends Binding.Service<
   ListInsights,

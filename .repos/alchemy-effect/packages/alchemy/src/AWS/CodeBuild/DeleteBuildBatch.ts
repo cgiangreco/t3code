@@ -6,15 +6,14 @@ import type { Project } from "./Project.ts";
 /**
  * Runtime binding for `codebuild:DeleteBuildBatch` — deletes a batch build
  * of the bound project (and its child builds) by batch id.
- * ### Batch Builds
- * **Example:** Delete a Batch Build
+ * @binding
+ * @section Batch Builds
+ * @example Delete a Batch Build
  * ```typescript
  * const deleteBuildBatch = yield* AWS.CodeBuild.DeleteBuildBatch(project);
  *
  * yield* deleteBuildBatch({ id: batchId });
  * ```
- *
- * @binding
  */
 export interface DeleteBuildBatch extends Binding.Service<
   DeleteBuildBatch,

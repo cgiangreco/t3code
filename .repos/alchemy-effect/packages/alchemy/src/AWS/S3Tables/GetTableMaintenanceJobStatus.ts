@@ -12,8 +12,9 @@ import type { Table } from "./Table.ts";
  * ran and whether it succeeded. Useful for compute that monitors table
  * health at runtime. Provide the implementation with
  * `Effect.provide(AWS.S3Tables.GetTableMaintenanceJobStatusHttp)`.
- * ### Monitoring Maintenance
- * **Example:** Inspect maintenance job statuses
+ * @binding
+ * @section Monitoring Maintenance
+ * @example Inspect maintenance job statuses
  * ```typescript
  * const getTableMaintenanceJobStatus =
  *   yield* AWS.S3Tables.GetTableMaintenanceJobStatus(table);
@@ -23,8 +24,6 @@ import type { Table } from "./Table.ts";
  *   yield* Effect.log(`${job}: ${state?.status}`);
  * }
  * ```
- *
- * @binding
  */
 export interface GetTableMaintenanceJobStatus extends Binding.Service<
   GetTableMaintenanceJobStatus,

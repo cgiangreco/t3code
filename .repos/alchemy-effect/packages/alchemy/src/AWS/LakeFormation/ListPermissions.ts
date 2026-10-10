@@ -14,8 +14,9 @@ export interface ListPermissionsRequest extends lf.ListPermissionsRequest {}
  * optionally filtered by principal or resource — runtime authorization
  * introspection. Provide the implementation with
  * `Effect.provide(AWS.LakeFormation.ListPermissionsHttp)`.
- * ### Auditing Permissions
- * **Example:** List Grants on a Database
+ * @binding
+ * @section Auditing Permissions
+ * @example List Grants on a Database
  * ```typescript
  * // init — account-level binding takes no resource
  * const listPermissions = yield* AWS.LakeFormation.ListPermissions();
@@ -25,8 +26,6 @@ export interface ListPermissionsRequest extends lf.ListPermissionsRequest {}
  *   Resource: { Database: { Name: database.databaseName } },
  * });
  * ```
- *
- * @binding
  */
 export interface ListPermissions extends Binding.Service<
   ListPermissions,

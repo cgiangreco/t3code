@@ -18,8 +18,9 @@ export type ListWorkflowRunsInput = Omit<
  * Lists runs of the bound {@link Workflow}, optionally filtered to a
  * specific workflow version. Provide the implementation with
  * `Effect.provide(AWS.MWAAServerless.ListWorkflowRunsHttp)`.
- * ### Observing Runs
- * **Example:** List Recent Runs
+ * @binding
+ * @section Observing Runs
+ * @example List Recent Runs
  * ```typescript
  * // init — bind the operation to the workflow
  * const listWorkflowRuns = yield* AWS.MWAAServerless.ListWorkflowRuns(workflow);
@@ -28,8 +29,6 @@ export type ListWorkflowRunsInput = Omit<
  * const { WorkflowRuns } = yield* listWorkflowRuns({ MaxResults: 10 });
  * yield* Effect.log(`found ${WorkflowRuns?.length ?? 0} runs`);
  * ```
- *
- * @binding
  */
 export interface ListWorkflowRuns extends Binding.Service<
   ListWorkflowRuns,

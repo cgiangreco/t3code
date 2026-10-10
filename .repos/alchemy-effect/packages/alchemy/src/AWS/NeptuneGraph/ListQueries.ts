@@ -9,15 +9,14 @@ import type { Graph } from "./Graph.ts";
  *
  * Lists the openCypher queries currently active on the bound graph. Provide the implementation with
  * `Effect.provide(AWS.NeptuneGraph.ListQueriesHttp)`.
- * ### Managing Queries
- * **Example:** List active queries
+ * @binding
+ * @section Managing Queries
+ * @example List active queries
  * ```typescript
  * const listQueries = yield* NeptuneGraph.ListQueries(graph);
  *
  * const { queries } = yield* listQueries({ maxResults: 100 });
  * ```
- *
- * @binding
  */
 export interface ListQueries extends Binding.Service<
   ListQueries,

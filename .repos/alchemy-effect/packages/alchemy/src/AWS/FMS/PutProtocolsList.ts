@@ -12,8 +12,9 @@ export interface PutProtocolsListRequest extends fms.PutProtocolsListRequest {}
  *
  * Creates or updates a Firewall Manager protocols list. Provide the
  * implementation with `Effect.provide(AWS.FMS.PutProtocolsListHttp)`.
- * ### Protocols Lists
- * **Example:** Create a Protocols List
+ * @binding
+ * @section Protocols Lists
+ * @example Create a Protocols List
  * ```typescript
  * // init — account-level binding takes no resource
  * const putProtocolsList = yield* AWS.FMS.PutProtocolsList();
@@ -24,8 +25,6 @@ export interface PutProtocolsListRequest extends fms.PutProtocolsListRequest {}
  * });
  * console.log(result.ProtocolsList?.ListId);
  * ```
- *
- * @binding
  */
 export interface PutProtocolsList extends Binding.Service<
   PutProtocolsList,

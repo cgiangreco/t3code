@@ -195,17 +195,7 @@ test.provider(
 
       yield* purgeDnsRecord(zoneId);
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:addressing",
-      "provider:cloudflare:dns",
-      "provider:cloudflare:regionalhostname",
-      "provider:cloudflare:zone",
-      "live",
-    ],
-    timeout: 120_000,
-  },
+  { timeout: 120_000 },
 );
 
 // Canonical `list()` test (zone-scoped collection): `list()` fans out over
@@ -221,7 +211,7 @@ test.provider(
 //   Forbidden: forbidden  (GET /zones/{zone_id}/addressing/regional_hostnames)
 // `listRegionalHostnames` types its error union as `DefaultErrors` only, so
 // `Forbidden` cannot be `catchTag`ed/skipped yet. Needed distilled patch:
-//   submodules/distilled/packages/cloudflare/patches/addressing/listRegionalHostnames.json
+//   distilled/packages/cloudflare/patches/addressing/listRegionalHostnames.json
 //   -> { "errors": { "Forbidden": [{ "status": 403 }] } }
 // then regenerate addressing and add "Forbidden" to the catch in list().
 // Gate the live run behind CLOUDFLARE_TEST_REGIONAL_HOSTNAME_LIST=1 (run on
@@ -293,15 +283,5 @@ test.provider.skipIf(!process.env.CLOUDFLARE_TEST_REGIONAL_HOSTNAME_LIST)(
       yield* deleteRegionalHostname(zoneId, HOSTNAME);
       yield* purgeDnsRecord(zoneId);
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:addressing",
-      "provider:cloudflare:dns",
-      "provider:cloudflare:regionalhostname",
-      "provider:cloudflare:zone",
-      "live",
-    ],
-    timeout: 120_000,
-  },
+  { timeout: 120_000 },
 );

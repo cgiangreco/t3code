@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Starts estimating the monthly cost of DevOps Guru analyzing a candidate resource collection. Poll the result with `GetCostEstimation`.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.StartCostEstimationHttp)`.
- * ### Cost Estimation
- * **Example:** Estimate the Cost of Coverage
+ * @binding
+ * @section Cost Estimation
+ * @example Estimate the Cost of Coverage
  * ```typescript
  * // init — account-level binding, no resource argument
  * const startCostEstimation = yield* AWS.DevOpsGuru.StartCostEstimation();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   ResourceCollection: { CloudFormation: { StackNames: ["my-app-prod"] } },
  * });
  * ```
- *
- * @binding
  */
 export interface StartCostEstimation extends Binding.Service<
   StartCostEstimation,

@@ -16,8 +16,9 @@ export interface BatchUpdateCategoryRequest extends Omit<
  *
  * Renames or recolors existing library categories. Provide the implementation with
  * `Effect.provide(AWS.QApps.BatchUpdateCategoryHttp)`.
- * ### Categories
- * **Example:** Rename a Category
+ * @binding
+ * @section Categories
+ * @example Rename a Category
  * ```typescript
  * // init — bind the operation to the Q App
  * const batchUpdateCategory = yield* AWS.QApps.BatchUpdateCategory(app);
@@ -27,8 +28,6 @@ export interface BatchUpdateCategoryRequest extends Omit<
  *   categories: [{ id: categoryId, title: "People Ops" }],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchUpdateCategory extends Binding.Service<
   BatchUpdateCategory,

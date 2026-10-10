@@ -32,8 +32,9 @@ export interface StartPiiEntitiesDetectionJobRequest extends Omit<
  * {@link DescribePiiEntitiesDetectionJob} and stop it with
  * {@link StopPiiEntitiesDetectionJob}.
  *
- * ### Starting Analysis Jobs
- * **Example:** Start an Asynchronous PiiEntities Detection Job
+ * @binding
+ * @section Starting Analysis Jobs
+ * @example Start an Asynchronous PiiEntities Detection Job
  * ```typescript
  * // deploy time — bind the Comprehend data-access role
  * const startPiiEntitiesDetectionJob = yield* AWS.Comprehend.StartPiiEntitiesDetectionJob(dataAccessRole);
@@ -46,8 +47,6 @@ export interface StartPiiEntitiesDetectionJobRequest extends Omit<
  * });
  * // job.JobId, job.JobStatus === "SUBMITTED"
  * ```
- *
- * @binding
  */
 export interface StartPiiEntitiesDetectionJob extends Binding.Service<
   StartPiiEntitiesDetectionJob,

@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:AddInstanceFleet` — adds a task instance fleet to the bound cluster (instance-fleet clusters only; TASK fleets can be added after launch).
- * ### Scaling the Cluster
- * **Example:** Add a Task Fleet
+ * @binding
+ * @section Scaling the Cluster
+ * @example Add a Task Fleet
  * ```typescript
  * const addFleet = yield* AWS.EMR.AddInstanceFleet(cluster);
  *
@@ -18,8 +19,6 @@ import type { Cluster } from "./Cluster.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface AddInstanceFleet extends Binding.Service<
   AddInstanceFleet,

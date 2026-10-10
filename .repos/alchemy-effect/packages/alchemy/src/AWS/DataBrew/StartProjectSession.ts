@@ -15,8 +15,9 @@ export interface StartProjectSessionRequest extends Omit<
  * {@link SendProjectSessionAction} calls.
  *
  * Interactive sessions are billed per 30-minute session.
- * ### Interactive Sessions
- * **Example:** Open a Session
+ * @binding
+ * @section Interactive Sessions
+ * @example Open a Session
  * ```typescript
  * const startProjectSession = yield* AWS.DataBrew.StartProjectSession(project);
  *
@@ -24,8 +25,6 @@ export interface StartProjectSessionRequest extends Omit<
  *   AssumeControl: true,
  * });
  * ```
- *
- * @binding
  */
 export interface StartProjectSession extends Binding.Service<
   StartProjectSession,

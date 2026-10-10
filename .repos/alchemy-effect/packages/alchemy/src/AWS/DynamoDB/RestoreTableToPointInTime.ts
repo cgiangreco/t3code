@@ -17,8 +17,9 @@ export interface RestoreTableToPointInTimeRequest extends Omit<
  * table must have point-in-time recovery enabled. Provide the
  * `RestoreTableToPointInTimeHttp` layer on the Function to satisfy the
  * binding.
- * ### Backup and Restore
- * **Example:** Restore to the Latest Restorable Time
+ * @binding
+ * @section Backup and Restore
+ * @example Restore to the Latest Restorable Time
  * ```typescript
  * const restore = yield* AWS.DynamoDB.RestoreTableToPointInTime(
  *   sourceTable,
@@ -30,8 +31,6 @@ export interface RestoreTableToPointInTimeRequest extends Omit<
  * });
  * const status = response.TableDescription?.TableStatus;
  * ```
- *
- * @binding
  */
 export interface RestoreTableToPointInTime extends Binding.Service<
   RestoreTableToPointInTime,

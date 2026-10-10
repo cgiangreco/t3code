@@ -16,8 +16,9 @@ export interface BatchDeleteAttributesRequest extends Omit<
  * callable that automatically injects the domain name. Deletes attributes
  * (or whole items, when an entry lists no attributes) on up to 25 items in a
  * single call.
- * ### Deleting Items
- * **Example:** Batch Delete Whole Items
+ * @binding
+ * @section Deleting Items
+ * @example Batch Delete Whole Items
  * ```typescript
  * const batchDeleteAttributes =
  *   yield* AWS.SimpleDB.BatchDeleteAttributes(domain);
@@ -26,8 +27,6 @@ export interface BatchDeleteAttributesRequest extends Omit<
  *   Items: [{ ItemName: "user#1" }, { ItemName: "user#2" }],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchDeleteAttributes extends Binding.Service<
   BatchDeleteAttributes,

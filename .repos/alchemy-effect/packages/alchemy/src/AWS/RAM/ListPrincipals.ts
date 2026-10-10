@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * are chosen per request at runtime, so the binding takes no resource
  * argument. Provide the implementation with
  * `Effect.provide(AWS.RAM.ListPrincipalsHttp)`.
- * ### Discovering Shares & Shared Resources
- * **Example:** List the Principals You Share With
+ * @binding
+ * @section Discovering Shares & Shared Resources
+ * @example List the Principals You Share With
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listPrincipals = yield* AWS.RAM.ListPrincipals();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { principals } = yield* listPrincipals({ resourceOwner: "SELF" });
  * ```
- *
- * @binding
  */
 export interface ListPrincipals extends Binding.Service<
   ListPrincipals,

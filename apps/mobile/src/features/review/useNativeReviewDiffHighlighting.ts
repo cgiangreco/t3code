@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   highlightNativeReviewDiffVisibleRows,
@@ -8,10 +8,10 @@ import {
 import type { NativeReviewDiffRow } from "../diffs/nativeReviewDiffSurface";
 import type { NativeReviewDiffFile } from "../diffs/nativeReviewDiffTypes";
 
-import {
-  createReviewDiffHighlightScheduler,
-  type NativeReviewVisibleRange,
-} from "./reviewDiffHighlightScheduler";
+interface NativeReviewVisibleRange {
+  readonly firstRowIndex: number;
+  readonly lastRowIndex: number;
+}
 
 function createEmptyTokenPatch(resetKey: string): string {
   return JSON.stringify({ resetKey, tokensByRowId: {} });
@@ -43,22 +43,23 @@ export function useNativeReviewDiffHighlighting(input: {
 }) {
   const { enabled, files, resetKey, rows, scheme } = input;
   const highlightedRowIdsRef = useRef<Set<string>>(new Set());
-  const [visibleRange, setVisibleRange] = useState<NativeReviewVisibleRange>({
+  const visibleRangeRef = useRef<NativeReviewVisibleRange>({
     firstRowIndex: 0,
     lastRowIndex: 80,
   });
   const visibleChunkIndexRef = useRef(0);
   const [tokensPatchJson, setTokensPatchJson] = useState(() => createEmptyTokenPatch(resetKey));
-  const [scheduler] = useState(() => createReviewDiffHighlightScheduler(setVisibleRange));
+  const [visibleHighlightRequest, setVisibleHighlightRequest] = useState(0);
 
   useEffect(() => {
-    scheduler.reset();
     highlightedRowIdsRef.current = new Set();
     visibleChunkIndexRef.current = 0;
-    setVisibleRange({ firstRowIndex: 0, lastRowIndex: 80 });
+    visibleRangeRef.current = { firstRowIndex: 0, lastRowIndex: 80 };
     setTokensPatchJson(createEmptyTokenPatch(resetKey));
-    return () => scheduler.cancel();
-  }, [enabled, resetKey, rows.length, scheduler]);
+    if (enabled && rows.length > 0) {
+      setVisibleHighlightRequest((request) => request + 1);
+    }
+  }, [enabled, resetKey, rows.length]);
 
   useEffect(() => {
     if (!enabled || rows.length === 0) {
@@ -66,7 +67,7 @@ export function useNativeReviewDiffHighlighting(input: {
     }
 
     const abortController = new AbortController();
-    const requestRange = visibleRange;
+    const requestRange = visibleRangeRef.current;
     const engine: NativeReviewDiffHighlightEngine = "native";
 
     void (async () => {
@@ -118,10 +119,22 @@ export function useNativeReviewDiffHighlighting(input: {
     })();
 
     return () => abortController.abort();
-  }, [enabled, files, resetKey, rows, scheme, visibleRange]);
+  }, [enabled, files, resetKey, rows, scheme, visibleHighlightRequest]);
+
+  const updateVisibleRange = useCallback((nextRange: NativeReviewVisibleRange) => {
+    const previousRange = visibleRangeRef.current;
+    const movedRows =
+      Math.abs(nextRange.firstRowIndex - previousRange.firstRowIndex) +
+      Math.abs(nextRange.lastRowIndex - previousRange.lastRowIndex);
+
+    visibleRangeRef.current = nextRange;
+    if (movedRows >= 20) {
+      setVisibleHighlightRequest((request) => request + 1);
+    }
+  }, []);
 
   return {
     tokensPatchJson,
-    updateVisibleRange: scheduler.update,
+    updateVisibleRange,
   };
 }

@@ -15,8 +15,9 @@ import * as Binding from "../../Binding.ts";
  * The returned `authorizationToken` is wrapped in `Redacted` so it never
  * leaks into logs — unwrap with `Redacted.value(...)` at the point of use.
  *
- * ### Registry Authentication
- * **Example:** Decode Docker Login Credentials
+ * @binding
+ * @section Registry Authentication
+ * @example Decode Docker Login Credentials
  * ```typescript
  * import * as Redacted from "effect/Redacted";
  *
@@ -32,8 +33,6 @@ import * as Binding from "../../Binding.ts";
  *   "base64",
  * ).toString("utf8"); // "AWS:<password>" for `docker login`
  * ```
- *
- * @binding
  */
 export interface GetAuthorizationToken extends Binding.Service<
   GetAuthorizationToken,

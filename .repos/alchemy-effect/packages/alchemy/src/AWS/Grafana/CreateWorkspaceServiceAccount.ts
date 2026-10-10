@@ -14,8 +14,9 @@ import type { Workspace } from "./Workspace.ts";
  * `CreateWorkspaceServiceAccountToken`. Requires Grafana 9 or newer.
  * Provide the implementation with
  * `Effect.provide(AWS.Grafana.CreateWorkspaceServiceAccountHttp)`.
- * ### Managing Service Accounts
- * **Example:** Create an Automation Service Account
+ * @binding
+ * @section Managing Service Accounts
+ * @example Create an Automation Service Account
  * ```typescript
  * const createServiceAccount =
  *   yield* Grafana.CreateWorkspaceServiceAccount(workspace);
@@ -26,8 +27,6 @@ import type { Workspace } from "./Workspace.ts";
  * });
  * // account.id → the service account id used for token operations
  * ```
- *
- * @binding
  */
 export interface CreateWorkspaceServiceAccount extends Binding.Service<
   CreateWorkspaceServiceAccount,

@@ -89,15 +89,16 @@ export interface EventBusProps {
 
 /**
  * An Amazon EventBridge event bus for receiving and routing events.
- * ### Creating Event Buses
- * **Example:** Custom Event Bus
+ * @resource
+ * @section Creating Event Buses
+ * @example Custom Event Bus
  * ```typescript
  * const bus = yield* EventBus("MyAppEvents", {
  *   description: "Custom event bus for my application",
  * });
  * ```
  *
- * **Example:** Event Bus with Dead Letter Queue
+ * @example Event Bus with Dead Letter Queue
  * ```typescript
  * const bus = yield* EventBus("ReliableBus", {
  *   deadLetterConfig: {
@@ -106,14 +107,12 @@ export interface EventBusProps {
  * });
  * ```
  *
- * **Example:** Event Bus with KMS Encryption
+ * @example Event Bus with KMS Encryption
  * ```typescript
  * const bus = yield* EventBus("EncryptedBus", {
  *   kmsKeyIdentifier: yield* key.keyArn(),
  * });
  * ```
- *
- * @resource
  */
 export interface EventBus extends Resource<
   "AWS.EventBridge.EventBus",

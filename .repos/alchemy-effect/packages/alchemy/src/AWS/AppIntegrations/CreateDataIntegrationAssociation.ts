@@ -17,8 +17,9 @@ export interface CreateDataIntegrationAssociationRequest extends Omit<
  *
  * Provide the `CreateDataIntegrationAssociationHttp` layer on the Function to
  * satisfy the binding.
- * ### Creating Data Integration Associations
- * **Example:** Associate a Client with a Data Integration
+ * @binding
+ * @section Creating Data Integration Associations
+ * @example Associate a Client with a Data Integration
  * ```typescript
  * // init (provide AWS.AppIntegrations.CreateDataIntegrationAssociationHttp on the Function)
  * const createDataIntegrationAssociation =
@@ -31,8 +32,6 @@ export interface CreateDataIntegrationAssociationRequest extends Omit<
  *     ClientAssociationMetadata: { purpose: "sync" },
  *   });
  * ```
- *
- * @binding
  */
 export interface CreateDataIntegrationAssociation extends Binding.Service<
   CreateDataIntegrationAssociation,

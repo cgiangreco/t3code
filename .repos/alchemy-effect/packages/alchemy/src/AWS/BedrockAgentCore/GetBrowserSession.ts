@@ -15,8 +15,9 @@ export interface GetBrowserSessionRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.GetBrowserSessionHttp`
  * on the Function effect to implement the binding.
  *
- * ### Browser Sessions
- * **Example:** Read a Session
+ * @binding
+ * @section Browser Sessions
+ * @example Read a Session
  * ```typescript
  * // init
  * const getBrowserSession = yield* AgentCore.GetBrowserSession(browser);
@@ -29,8 +30,6 @@ export interface GetBrowserSessionRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface GetBrowserSession extends Binding.Service<
   GetBrowserSession,

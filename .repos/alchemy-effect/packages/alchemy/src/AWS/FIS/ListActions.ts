@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Enumerates the FIS action catalog — every fault the service can inject
  * (`aws:ec2:stop-instances`, `aws:ssm:send-command`, `aws:fis:wait`, …).
  * Provide the implementation with `Effect.provide(AWS.FIS.ListActionsHttp)`.
- * ### Browsing the Action Catalog
- * **Example:** List Available Fault Actions
+ * @binding
+ * @section Browsing the Action Catalog
+ * @example List Available Fault Actions
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listActions = yield* AWS.FIS.ListActions();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const { actions } = yield* listActions();
  * console.log((actions ?? []).map((a) => a.id));
  * ```
- *
- * @binding
  */
 export interface ListActions extends Binding.Service<
   ListActions,

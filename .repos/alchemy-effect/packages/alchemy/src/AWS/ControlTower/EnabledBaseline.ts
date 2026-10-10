@@ -78,8 +78,9 @@ export interface EnabledBaseline extends Resource<
  *
  * Requires an AWS Control Tower landing zone and can only be managed from
  * the Organizations management account.
- * ### Enabling Baselines
- * **Example:** Register an OU with Control Tower
+ * @resource
+ * @section Enabling Baselines
+ * @example Register an OU with Control Tower
  * ```typescript
  * import * as ControlTower from "alchemy/AWS/ControlTower";
  *
@@ -91,7 +92,7 @@ export interface EnabledBaseline extends Resource<
  * });
  * ```
  *
- * **Example:** Baseline with Identity Center parameter
+ * @example Baseline with Identity Center parameter
  * ```typescript
  * const enabled = yield* ControlTower.EnabledBaseline("WorkloadsBaseline", {
  *   baselineIdentifier: controlTowerBaselineArn,
@@ -105,8 +106,6 @@ export interface EnabledBaseline extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const EnabledBaseline = Resource<EnabledBaseline>(
   "AWS.ControlTower.EnabledBaseline",

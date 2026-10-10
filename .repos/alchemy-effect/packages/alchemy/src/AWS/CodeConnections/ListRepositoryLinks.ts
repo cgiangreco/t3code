@@ -17,8 +17,9 @@ export interface ListRepositoryLinksRequest
  * that discover which repositories are wired up before drilling into their
  * sync status. Provide the implementation with
  * `Effect.provide(AWS.CodeConnections.ListRepositoryLinksHttp)`.
- * ### Monitoring Git Sync
- * **Example:** List the Account's Repository Links
+ * @binding
+ * @section Monitoring Git Sync
+ * @example List the Account's Repository Links
  * ```typescript
  * // init — account-level binding takes no resource
  * const listRepositoryLinks =
@@ -28,8 +29,6 @@ export interface ListRepositoryLinksRequest
  * const result = yield* listRepositoryLinks();
  * const repos = (result.RepositoryLinks ?? []).map((l) => l.RepositoryName);
  * ```
- *
- * @binding
  */
 export interface ListRepositoryLinks extends Binding.Service<
   ListRepositoryLinks,

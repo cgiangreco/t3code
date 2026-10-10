@@ -74,8 +74,8 @@ export interface CertificateAuthorityEventSourceProps extends EventRouteProps {
  * ARN in the event's top-level `resources` array; `detail` is empty.
  * Failure events set `detail.result` to `"failure"`.
  *
- * ### Consuming Certificate Authority Events
- * **Example:** React To Issued Certificates
+ * @section Consuming Certificate Authority Events
+ * @example React To Issued Certificates
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

@@ -8,25 +8,25 @@ export type NotificationPermissionResult =
   | { readonly type: "granted" }
   | { readonly type: "denied"; readonly canAskAgain: boolean };
 
-export class NotificationPermissionReadError extends Schema.TaggedError<NotificationPermissionReadError>()(
+export class NotificationPermissionReadError extends Schema.TaggedErrorClass<NotificationPermissionReadError>()(
   "NotificationPermissionReadError",
   {
     cause: Schema.Defect(),
   },
 ) {
   override get message(): string {
-    return "Failed to read notification permissions.";
+    return "Failed to read notification permissions on iOS.";
   }
 }
 
-export class NotificationPermissionRequestError extends Schema.TaggedError<NotificationPermissionRequestError>()(
+export class NotificationPermissionRequestError extends Schema.TaggedErrorClass<NotificationPermissionRequestError>()(
   "NotificationPermissionRequestError",
   {
     cause: Schema.Defect(),
   },
 ) {
   override get message(): string {
-    return "Failed to request notification permissions.";
+    return "Failed to request notification permissions on iOS.";
   }
 }
 
@@ -34,19 +34,8 @@ export const requestAgentNotificationPermission: Effect.Effect<
   NotificationPermissionResult,
   NotificationPermissionReadError | NotificationPermissionRequestError
 > = Effect.gen(function* () {
-  if (Platform.OS !== "ios" && Platform.OS !== "android") {
+  if (Platform.OS !== "ios") {
     return { type: "unsupported" };
-  }
-
-  if (Platform.OS === "android") {
-    yield* Effect.tryPromise({
-      try: () =>
-        Notifications.setNotificationChannelAsync("agent-alerts", {
-          name: "Agent alerts",
-          importance: Notifications.AndroidImportance.HIGH,
-        }),
-      catch: (cause) => new NotificationPermissionRequestError({ cause }),
-    });
   }
 
   const existing = yield* Effect.tryPromise({

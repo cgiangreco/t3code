@@ -11,16 +11,15 @@ import type { Cluster } from "./Cluster.ts";
  * process without flushing the cache contents. The node id comes from
  * `DescribeClusters` (e.g. `my-cluster-a`). Provide the implementation with
  * `Effect.provide(AWS.DAX.RebootNodeHttp)`.
- * ### Operating a Cluster
- * **Example:** Reboot an Unhealthy Node
+ * @binding
+ * @section Operating a Cluster
+ * @example Reboot an Unhealthy Node
  * ```typescript
  * const rebootNode = yield* DAX.RebootNode(cluster);
  *
  * const result = yield* rebootNode({ NodeId: nodeId });
  * // result.Cluster?.Nodes → the node reports status "rebooting"
  * ```
- *
- * @binding
  */
 export interface RebootNode extends Binding.Service<
   RebootNode,

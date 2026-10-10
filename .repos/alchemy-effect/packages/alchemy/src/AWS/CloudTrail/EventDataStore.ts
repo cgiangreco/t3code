@@ -134,8 +134,9 @@ export interface EventDataStore extends Resource<
  * (`PENDING_DELETION`); AWS purges it after a seven-day wait period during
  * which it incurs no cost. If a store with the same name is still pending
  * deletion, the reconciler restores it instead of creating a duplicate.
- * ### Creating Event Data Stores
- * **Example:** Basic Event Data Store
+ * @resource
+ * @section Creating Event Data Stores
+ * @example Basic Event Data Store
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -145,7 +146,7 @@ export interface EventDataStore extends Resource<
  * });
  * ```
  *
- * **Example:** Single-Region Store with Custom Selectors
+ * @example Single-Region Store with Custom Selectors
  * ```typescript
  * const store = yield* AWS.CloudTrail.EventDataStore("S3DataEvents", {
  *   multiRegionEnabled: false,
@@ -162,8 +163,6 @@ export interface EventDataStore extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const EventDataStore = Resource<EventDataStore>(
   "AWS.CloudTrail.EventDataStore",

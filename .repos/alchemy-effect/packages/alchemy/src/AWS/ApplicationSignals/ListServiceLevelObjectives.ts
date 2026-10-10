@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * service key attributes, operation name, or dependency config. Provide the
  * implementation with
  * `Effect.provide(AWS.ApplicationSignals.ListServiceLevelObjectivesHttp)`.
- * ### Listing Service Level Objectives
- * **Example:** List All SLOs
+ * @binding
+ * @section Listing Service Level Objectives
+ * @example List All SLOs
  * ```typescript
  * // init — account-level, no resource argument
  * const listSlos = yield* AWS.ApplicationSignals.ListServiceLevelObjectives();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.log(`${slo.Name}: ${slo.Arn}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListServiceLevelObjectives extends Binding.Service<
   ListServiceLevelObjectives,

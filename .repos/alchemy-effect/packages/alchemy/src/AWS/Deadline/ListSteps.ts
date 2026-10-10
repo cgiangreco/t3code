@@ -9,8 +9,9 @@ import type { Queue } from "./Queue.ts";
  * Enumerates the steps of a job in the bound {@link Queue} (paginated).
  * The queue's `farmId`/`queueId` are injected from the binding. Provide
  * the implementation with `Effect.provide(AWS.Deadline.ListStepsHttp)`.
- * ### Monitoring Steps
- * **Example:** List A Job's Steps
+ * @binding
+ * @section Monitoring Steps
+ * @example List A Job's Steps
  * ```typescript
  * // init — bind the operation to the queue
  * const listSteps = yield* AWS.Deadline.ListSteps(queue);
@@ -18,8 +19,6 @@ import type { Queue } from "./Queue.ts";
  * // runtime
  * const { steps } = yield* listSteps({ jobId });
  * ```
- *
- * @binding
  */
 export interface ListSteps extends Binding.Service<
   ListSteps,

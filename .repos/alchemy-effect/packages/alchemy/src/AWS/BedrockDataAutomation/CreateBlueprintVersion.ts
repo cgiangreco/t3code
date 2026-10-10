@@ -20,8 +20,9 @@ export interface CreateBlueprintVersionRequest extends Omit<
  *
  * Provide the implementation with
  * `Effect.provide(AWS.BedrockDataAutomation.CreateBlueprintVersionHttp)`.
- * ### Blueprint Management
- * **Example:** Snapshot The Blueprint
+ * @binding
+ * @section Blueprint Management
+ * @example Snapshot The Blueprint
  * ```typescript
  * // deploy time — bind the blueprint
  * const createVersion =
@@ -31,8 +32,6 @@ export interface CreateBlueprintVersionRequest extends Omit<
  * const { blueprint: version } = yield* createVersion({});
  * yield* Effect.log(`created version ${version.blueprintVersion}`);
  * ```
- *
- * @binding
  */
 export interface CreateBlueprintVersion extends Binding.Service<
   CreateBlueprintVersion,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * that deletion protection is in place before destructive maintenance.
  * `ListRules` is an account-level list action, so the grant is on `*`.
  * Provide the implementation with `Effect.provide(AWS.Rbin.ListRulesHttp)`.
- * ### Listing Retention Rules
- * **Example:** Enumerate the Region's snapshot retention rules
+ * @binding
+ * @section Listing Retention Rules
+ * @example Enumerate the Region's snapshot retention rules
  * ```typescript
  * // init — grants rbin:ListRules on *
  * const listRules = yield* AWS.Rbin.ListRules();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.log(`${rule.Identifier}: ${rule.Description ?? ""}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListRules extends Binding.Service<
   ListRules,

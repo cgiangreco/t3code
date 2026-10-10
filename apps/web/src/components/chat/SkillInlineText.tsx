@@ -1,20 +1,38 @@
-import { formatProviderSkillDisplayName } from "@t3tools/shared/inlineSkills";
 import { Children, cloneElement, isValidElement, type ReactNode } from "react";
-import { matchInlineSkills, type InlineSkill } from "@t3tools/shared/inlineSkills";
+import type { ServerProviderSkill } from "@t3tools/contracts";
 
-import { SKILL_CHIP_ICON_SVG } from "../composerInlineChip";
-import { ContextChip, ContextChipLabel } from "../ContextChip";
+import { formatProviderSkillDisplayName } from "../../providerSkillPresentation";
+import {
+  CHAT_INLINE_CHIP_CLASS_NAME,
+  CHAT_INLINE_CHIP_LABEL_CLASS_NAME,
+  COMPOSER_INLINE_CHIP_ICON_CLASS_NAME,
+  SKILL_CHIP_ICON_SVG,
+} from "../composerInlineChip";
+import { cn } from "~/lib/utils";
+
+const SKILL_TOKEN_REGEX = /(^|\s)\$([a-zA-Z][a-zA-Z0-9:_-]*)(?=\s|$)/g;
+
+type InlineSkill = Pick<ServerProviderSkill, "name" | "displayName">;
 
 export function SkillInlineText(props: { text: string; skills: ReadonlyArray<InlineSkill> }) {
   const nodes: ReactNode[] = [];
   let cursor = 0;
 
-  for (const { start, end, skill, rawText } of matchInlineSkills(props.text, props.skills)) {
+  for (const match of props.text.matchAll(SKILL_TOKEN_REGEX)) {
+    const prefix = match[1] ?? "";
+    const name = match[2] ?? "";
+    const start = (match.index ?? 0) + prefix.length;
+    const rawText = `$${name}`;
+    const skill = props.skills.find((candidate) => candidate.name === name);
+    if (!skill) {
+      continue;
+    }
+
     if (start > cursor) {
       nodes.push(props.text.slice(cursor, start));
     }
-    nodes.push(<SkillChip key={`${start}:${skill.name}`} skill={skill} rawText={rawText} />);
-    cursor = end;
+    nodes.push(<SkillChip key={`${start}:${name}`} skill={skill} rawText={rawText} />);
+    cursor = start + rawText.length;
   }
 
   if (cursor === 0) {
@@ -56,20 +74,22 @@ export function renderSkillInlineMarkdownChildren(
 
 function SkillChip(props: { skill: InlineSkill; rawText: string }) {
   return (
-    <ContextChip kind="skill" data-markdown-copy={props.rawText}>
-      <SkillChipIcon />
-      <ContextChipLabel>{formatProviderSkillDisplayName(props.skill)}</ContextChipLabel>
-    </ContextChip>
-  );
-}
-
-/** The skill glyph; the surrounding chip sizes its svg. */
-export function SkillChipIcon() {
-  return (
-    <span
-      aria-hidden="true"
-      className="contents"
-      dangerouslySetInnerHTML={{ __html: SKILL_CHIP_ICON_SVG }}
-    />
+    <span className="inline-flex align-middle leading-none" data-markdown-copy={props.rawText}>
+      <span
+        className={cn(
+          CHAT_INLINE_CHIP_CLASS_NAME,
+          "border-fuchsia-500/25 bg-fuchsia-500/12 text-fuchsia-700 dark:text-fuchsia-300",
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={COMPOSER_INLINE_CHIP_ICON_CLASS_NAME}
+          dangerouslySetInnerHTML={{ __html: SKILL_CHIP_ICON_SVG }}
+        />
+        <span className={CHAT_INLINE_CHIP_LABEL_CLASS_NAME}>
+          {formatProviderSkillDisplayName(props.skill)}
+        </span>
+      </span>
+    </span>
   );
 }

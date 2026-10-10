@@ -13,8 +13,9 @@ import type { ResponsePlan } from "./ResponsePlan.ts";
  * incident.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMIncidents.StartIncidentHttp)`.
- * ### Starting Incidents
- * **Example:** Open An Incident From An Alarm Handler
+ * @binding
+ * @section Starting Incidents
+ * @example Open An Incident From An Alarm Handler
  * ```typescript
  * // init — bind the operation to the response plan
  * const startIncident = yield* AWS.SSMIncidents.StartIncident(plan);
@@ -29,8 +30,6 @@ import type { ResponsePlan } from "./ResponsePlan.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface StartIncident extends Binding.Service<
   StartIncident,

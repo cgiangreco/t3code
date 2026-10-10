@@ -93,8 +93,11 @@ export type LiveInputOutput = Resource<
  * the output. Toggling `enabled` updates the output in place.
  *
  * Requires the Stream subscription to be enabled on the account.
- * ### Creating an output
- * **Example:** Restream a live input to YouTube
+ * @resource
+ * @product Stream
+ * @category Media
+ * @section Creating an output
+ * @example Restream a live input to YouTube
  * ```typescript
  * const input = yield* Cloudflare.Stream.LiveInput("Broadcast", {});
  *
@@ -105,8 +108,8 @@ export type LiveInputOutput = Resource<
  * });
  * ```
  *
- * ### Managing an output
- * **Example:** Pause restreaming without deleting the output
+ * @section Managing an output
+ * @example Pause restreaming without deleting the output
  * ```typescript
  * const youtube = yield* Cloudflare.Stream.LiveInputOutput("YouTube", {
  *   liveInputId: input.liveInputId,
@@ -117,10 +120,6 @@ export type LiveInputOutput = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/stream/stream-live/simulcasting/
- *
- * @resource
- * @product Stream
- * @category Media
  */
 export const LiveInputOutput = Resource<LiveInputOutput>(TypeId);
 

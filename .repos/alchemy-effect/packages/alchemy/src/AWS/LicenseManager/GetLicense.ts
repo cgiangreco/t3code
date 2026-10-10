@@ -14,8 +14,9 @@ export interface GetLicenseRequest extends licensemanager.GetLicenseRequest {}
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.GetLicenseHttp)`.
- * ### Reading Licenses and Grants
- * **Example:** Read a License
+ * @binding
+ * @section Reading Licenses and Grants
+ * @example Read a License
  * ```typescript
  * // init
  * const getLicense = yield* AWS.LicenseManager.GetLicense();
@@ -23,8 +24,6 @@ export interface GetLicenseRequest extends licensemanager.GetLicenseRequest {}
  * // runtime
  * const { License } = yield* getLicense({ LicenseArn: licenseArn });
  * ```
- *
- * @binding
  */
 export interface GetLicense extends Binding.Service<
   GetLicense,

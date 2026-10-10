@@ -10,16 +10,15 @@ import type { Archive } from "./Archive.ts";
  * for one archived message (by `ArchivedMessageId` from a search
  * result). IAM access is granted on the bound archive's ARN. Provide the implementation with
  * `Effect.provide(AWS.MailManager.GetArchiveMessageHttp)`.
- * ### Reading Archived Messages
- * **Example:** Download an Archived Message
+ * @binding
+ * @section Reading Archived Messages
+ * @example Download an Archived Message
  * ```typescript
  * const getMessage = yield* MailManager.GetArchiveMessage(archive);
  *
  * // runtime
  * const { MessageDownloadLink, Envelope } = yield* getMessage({ ArchivedMessageId });
  * ```
- *
- * @binding
  */
 export interface GetArchiveMessage extends Binding.Service<
   GetArchiveMessage,

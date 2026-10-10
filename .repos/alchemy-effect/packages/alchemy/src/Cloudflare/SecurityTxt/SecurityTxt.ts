@@ -109,8 +109,11 @@ export type SecurityTxt = Resource<TypeId, Props, Attributes, never, Providers>;
  *
  * Cloudflare requires the RFC 9116 mandatory fields — `contact` and
  * `expires` — on every write.
- * ### Publishing a security.txt
- * **Example:** Minimal security.txt
+ * @resource
+ * @product Security.txt
+ * @category Application Security
+ * @section Publishing a security.txt
+ * @example Minimal security.txt
  * ```typescript
  * const zone = yield* Cloudflare.Zone.Zone("Site", { name: "example.com" });
  *
@@ -121,7 +124,7 @@ export type SecurityTxt = Resource<TypeId, Props, Attributes, never, Providers>;
  * });
  * ```
  *
- * **Example:** Full security.txt with policy and acknowledgments
+ * @example Full security.txt with policy and acknowledgments
  * ```typescript
  * yield* Cloudflare.SecurityTxt.SecurityTxt("SecurityTxt", {
  *   zoneId: zone.zoneId,
@@ -134,8 +137,8 @@ export type SecurityTxt = Resource<TypeId, Props, Attributes, never, Providers>;
  * });
  * ```
  *
- * ### Pausing without deleting
- * **Example:** Keep the configuration but stop serving the file
+ * @section Pausing without deleting
+ * @example Keep the configuration but stop serving the file
  * ```typescript
  * yield* Cloudflare.SecurityTxt.SecurityTxt("SecurityTxt", {
  *   zoneId: zone.zoneId,
@@ -146,10 +149,6 @@ export type SecurityTxt = Resource<TypeId, Props, Attributes, never, Providers>;
  * ```
  *
  * @see https://developers.cloudflare.com/security-center/infrastructure/security-file/
- *
- * @resource
- * @product Security.txt
- * @category Application Security
  */
 export const SecurityTxt = Resource<SecurityTxt>(TypeId, {
   aliases: ["Cloudflare.SecurityTxt"],

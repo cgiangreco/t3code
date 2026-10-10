@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * on `*`. Provide the implementation with
  * `Effect.provide(AWS.MediaConvert.StartJobsQueryHttp)`.
  *
- * ### Tracking Jobs
- * **Example:** Query Errored Jobs
+ * @binding
+ * @section Tracking Jobs
+ * @example Query Errored Jobs
  * ```typescript
  * // init
  * const startJobsQuery = yield* AWS.MediaConvert.StartJobsQuery();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   FilterList: [{ Type: "STATUS", Inputs: ["ERROR"] }],
  * });
  * ```
- *
- * @binding
  */
 export interface StartJobsQuery extends Binding.Service<
   StartJobsQuery,

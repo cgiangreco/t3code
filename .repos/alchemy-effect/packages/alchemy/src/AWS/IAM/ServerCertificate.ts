@@ -76,8 +76,9 @@ export interface ServerCertificate extends Resource<
  * `ServerCertificate` uploads and tracks a TLS certificate bundle for legacy
  * IAM-integrated services. The private key is write-only and should be provided
  * as a redacted value when possible.
- * ### Uploading Server Certificates
- * **Example:** Upload a TLS Certificate
+ * @resource
+ * @section Uploading Server Certificates
+ * @example Upload a TLS Certificate
  * ```typescript
  * const certificate = yield* ServerCertificate("ApiTlsCertificate", {
  *   certificateBody: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
@@ -87,8 +88,6 @@ export interface ServerCertificate extends Resource<
  *   certificateChain: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
  * });
  * ```
- *
- * @resource
  */
 export const ServerCertificate = Resource<ServerCertificate>(
   "AWS.IAM.ServerCertificate",

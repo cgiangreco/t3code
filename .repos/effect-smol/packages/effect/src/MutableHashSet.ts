@@ -17,7 +17,7 @@ import type { Pipeable } from "./Pipeable.ts"
 import { pipeArguments } from "./Pipeable.ts"
 import { hasProperty } from "./Predicate.ts"
 
-const TypeId = "~effect/MutableHashSet"
+const TypeId = "~effect/collections/MutableHashSet"
 
 /**
  * A mutable hash set for storing unique values with Effect structural equality
@@ -36,7 +36,7 @@ const TypeId = "~effect/MutableHashSet"
  *
  * **Example** (Using a mutable hash set)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * // Create a mutable hash set
@@ -49,14 +49,16 @@ const TypeId = "~effect/MutableHashSet"
  * MutableHashSet.add(set, "cherry")
  *
  * // Check if elements exist
- * MutableHashSet.has(set, "apple") // => true
- * MutableHashSet.has(set, "grape") // => false
+ * console.log(MutableHashSet.has(set, "apple")) // true
+ * console.log(MutableHashSet.has(set, "grape")) // false
  *
- * // Collect the iterator values
- * Array.from(set) // => ["apple", "banana", "cherry"]
+ * // Iterate over elements
+ * for (const value of set) {
+ *   console.log(value) // "apple", "banana", "cherry"
+ * }
  *
  * // Get size
- * MutableHashSet.size(set) // => 3
+ * console.log(MutableHashSet.size(set)) // 3
  * ```
  *
  * @category models
@@ -84,7 +86,7 @@ export interface MutableHashSet<out V> extends Iterable<V>, Pipeable, Inspectabl
  *
  * @see {@link MutableHashSet} for the mutable hash set interface
  *
- * @category guards
+ * @category refinements
  * @since 4.0.0
  */
 export const isMutableHashSet = <V>(value: unknown): value is MutableHashSet<V> => hasProperty(value, TypeId)
@@ -130,7 +132,7 @@ const fromHashMap = <V>(keyMap: MutableHashMap.MutableHashMap<V, boolean>): Muta
  *
  * **Example** (Creating an empty set)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.empty<string>()
@@ -140,8 +142,8 @@ const fromHashMap = <V>(keyMap: MutableHashMap.MutableHashMap<V, boolean>): Muta
  * MutableHashSet.add(set, "banana")
  * MutableHashSet.add(set, "apple") // Duplicate, no effect
  *
- * MutableHashSet.size(set) // => 2
- * Array.from(set) // => ["apple", "banana"]
+ * console.log(MutableHashSet.size(set)) // 2
+ * console.log(Array.from(set)) // ["apple", "banana"]
  * ```
  *
  * @see {@link make} for creating a set from explicit values
@@ -163,20 +165,22 @@ export const empty = <K = never>(): MutableHashSet<K> => fromHashMap(MutableHash
  *
  * **Example** (Creating a set from an iterable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const values = ["apple", "banana", "apple", "cherry", "banana"]
  * const set = MutableHashSet.fromIterable(values)
  *
- * MutableHashSet.size(set) // => 3
- * Array.from(set) // => ["apple", "banana", "cherry"]
+ * console.log(MutableHashSet.size(set)) // 3
+ * console.log(Array.from(set)) // ["apple", "banana", "cherry"]
  *
  * // Works with any iterable
- * MutableHashSet.size(MutableHashSet.fromIterable(new Set([1, 2, 3]))) // => 3
+ * const fromSet = MutableHashSet.fromIterable(new Set([1, 2, 3]))
+ * console.log(MutableHashSet.size(fromSet)) // 3
  *
  * // From string characters
- * Array.from(MutableHashSet.fromIterable("hello")) // => ["h", "e", "l", "o"]
+ * const fromString = MutableHashSet.fromIterable("hello")
+ * console.log(Array.from(fromString)) // ["h", "e", "l", "o"]
  * ```
  *
  * @category constructors
@@ -195,21 +199,22 @@ export const fromIterable = <K = never>(keys: Iterable<K>): MutableHashSet<K> =>
  *
  * **Example** (Creating a set from values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.make("apple", "banana", "apple", "cherry")
  *
- * MutableHashSet.size(set) // => 3
- * Array.from(set) // => ["apple", "banana", "cherry"]
+ * console.log(MutableHashSet.size(set)) // 3
+ * console.log(Array.from(set)) // ["apple", "banana", "cherry"]
  *
  * // With numbers
  * const numbers = MutableHashSet.make(1, 2, 3, 2, 1)
- * MutableHashSet.size(numbers) // => 3
- * Array.from(numbers) // => [1, 2, 3]
+ * console.log(MutableHashSet.size(numbers)) // 3
+ * console.log(Array.from(numbers)) // [1, 2, 3]
  *
  * // Mixed types
- * MutableHashSet.size(MutableHashSet.make("hello", 42, true, "hello")) // => 3
+ * const mixed = MutableHashSet.make("hello", 42, true, "hello")
+ * console.log(MutableHashSet.size(mixed)) // 3
  * ```
  *
  * @category constructors
@@ -229,7 +234,7 @@ export const make = <Keys extends ReadonlyArray<unknown>>(
  *
  * **Example** (Adding values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.empty<string>()
@@ -238,17 +243,17 @@ export const make = <Keys extends ReadonlyArray<unknown>>(
  * MutableHashSet.add(set, "apple")
  * MutableHashSet.add(set, "banana")
  *
- * MutableHashSet.size(set) // => 2
- * MutableHashSet.has(set, "apple") // => true
+ * console.log(MutableHashSet.size(set)) // 2
+ * console.log(MutableHashSet.has(set, "apple")) // true
  *
  * // Add duplicate (no effect)
  * MutableHashSet.add(set, "apple")
- * MutableHashSet.size(set) // => 2
+ * console.log(MutableHashSet.size(set)) // 2
  *
  * // Pipe-able version
  * const addFruit = MutableHashSet.add("cherry")
  * addFruit(set)
- * MutableHashSet.size(set) // => 3
+ * console.log(MutableHashSet.size(set)) // 3
  * ```
  *
  * @category mutations
@@ -276,27 +281,27 @@ export const add: {
  *
  * **Example** (Checking for a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.make("apple", "banana", "cherry")
  *
- * MutableHashSet.has(set, "apple") // => true
- * MutableHashSet.has(set, "grape") // => false
+ * console.log(MutableHashSet.has(set, "apple")) // true
+ * console.log(MutableHashSet.has(set, "grape")) // false
  *
  * // Pipe-able version
  * const hasApple = MutableHashSet.has("apple")
- * hasApple(set) // => true
+ * console.log(hasApple(set)) // true
  *
  * // Check after adding
  * MutableHashSet.add(set, "grape")
- * MutableHashSet.has(set, "grape") // => true
+ * console.log(MutableHashSet.has(set, "grape")) // true
  * ```
  *
  * @see {@link add} for adding a value to the set
  * @see {@link remove} for removing a value from the set
  *
- * @category predicates
+ * @category elements
  * @since 2.0.0
  */
 export const has: {
@@ -317,26 +322,26 @@ export const has: {
  *
  * **Example** (Removing a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.make("apple", "banana", "cherry")
  *
- * MutableHashSet.size(set) // => 3
+ * console.log(MutableHashSet.size(set)) // 3
  *
  * // Remove existing value
  * MutableHashSet.remove(set, "banana")
- * MutableHashSet.size(set) // => 2
- * MutableHashSet.has(set, "banana") // => false
+ * console.log(MutableHashSet.size(set)) // 2
+ * console.log(MutableHashSet.has(set, "banana")) // false
  *
  * // Remove non-existent value (no effect)
  * MutableHashSet.remove(set, "grape")
- * MutableHashSet.size(set) // => 2
+ * console.log(MutableHashSet.size(set)) // 2
  *
  * // Pipe-able version
  * const removeFruit = MutableHashSet.remove("apple")
  * removeFruit(set)
- * MutableHashSet.size(set) // => 1
+ * console.log(MutableHashSet.size(set)) // 1
  * ```
  *
  * @category mutations
@@ -359,25 +364,25 @@ export const remove: {
  *
  * **Example** (Checking set size)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.empty<string>()
- * MutableHashSet.size(set) // => 0
+ * console.log(MutableHashSet.size(set)) // 0
  *
  * MutableHashSet.add(set, "apple")
  * MutableHashSet.add(set, "banana")
  * MutableHashSet.add(set, "apple") // Duplicate
- * MutableHashSet.size(set) // => 2
+ * console.log(MutableHashSet.size(set)) // 2
  *
  * MutableHashSet.remove(set, "apple")
- * MutableHashSet.size(set) // => 1
+ * console.log(MutableHashSet.size(set)) // 1
  *
  * MutableHashSet.clear(set)
- * MutableHashSet.size(set) // => 0
+ * console.log(MutableHashSet.size(set)) // 0
  * ```
  *
- * @category getters
+ * @category elements
  * @since 2.0.0
  */
 export const size = <V>(self: MutableHashSet<V>): number => MutableHashMap.size(self.keyMap)
@@ -392,23 +397,23 @@ export const size = <V>(self: MutableHashSet<V>): number => MutableHashMap.size(
  *
  * **Example** (Clearing all values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { MutableHashSet } from "effect"
  *
  * const set = MutableHashSet.make("apple", "banana", "cherry")
  *
- * MutableHashSet.size(set) // => 3
+ * console.log(MutableHashSet.size(set)) // 3
  *
  * // Clear all values
  * MutableHashSet.clear(set)
  *
- * MutableHashSet.size(set) // => 0
- * MutableHashSet.has(set, "apple") // => false
- * Array.from(set) // => []
+ * console.log(MutableHashSet.size(set)) // 0
+ * console.log(MutableHashSet.has(set, "apple")) // false
+ * console.log(Array.from(set)) // []
  *
  * // Can still add new values after clearing
  * MutableHashSet.add(set, "new")
- * MutableHashSet.size(set) // => 1
+ * console.log(MutableHashSet.size(set)) // 1
  * ```
  *
  * @category mutations

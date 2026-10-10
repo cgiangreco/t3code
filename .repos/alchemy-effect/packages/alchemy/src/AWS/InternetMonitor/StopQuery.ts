@@ -15,8 +15,9 @@ export interface StopQueryRequest extends Omit<
  *
  * Provide `InternetMonitor.StopQueryHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Querying Measurements
- * **Example:** Cancel a Running Query
+ * @binding
+ * @section Querying Measurements
+ * @example Cancel a Running Query
  * ```typescript
  * // init — grants internetmonitor:StopQuery on the monitor
  * const stopQuery = yield* AWS.InternetMonitor.StopQuery(monitor);
@@ -24,8 +25,6 @@ export interface StopQueryRequest extends Omit<
  * // runtime
  * yield* stopQuery({ QueryId: queryId });
  * ```
- *
- * @binding
  */
 export interface StopQuery extends Binding.Service<
   StopQuery,

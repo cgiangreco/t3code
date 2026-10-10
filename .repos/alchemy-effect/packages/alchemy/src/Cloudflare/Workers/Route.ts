@@ -71,8 +71,11 @@ export type WorkerRoute = Resource<
  * scans the zone for an existing route with the same pattern and
  * reports it as `Unowned`, so the engine refuses to take it over unless
  * `--adopt` (or `adopt(true)`) is set.
- * ### Routing a hostname to a Worker
- * **Example:** Route all requests on a subdomain to a Worker
+ * @resource
+ * @product Workers
+ * @category Workers & Compute
+ * @section Routing a hostname to a Worker
+ * @example Route all requests on a subdomain to a Worker
  * ```typescript
  * const worker = yield* Cloudflare.Worker("Api", {
  *   main: "./src/api.ts",
@@ -94,8 +97,8 @@ export type WorkerRoute = Resource<
  * });
  * ```
  *
- * ### Disabling Workers on a path
- * **Example:** Opt a path out of a wildcard route
+ * @section Disabling Workers on a path
+ * @example Opt a path out of a wildcard route
  * ```typescript
  * // No `script` — matching requests bypass Workers entirely.
  * yield* Cloudflare.Workers.WorkerRoute("AssetsBypass", {
@@ -103,10 +106,6 @@ export type WorkerRoute = Resource<
  *   pattern: "example.com/assets/*",
  * });
  * ```
- *
- * @resource
- * @product Workers
- * @category Workers & Compute
  */
 export const WorkerRoute = Resource<WorkerRoute>("Cloudflare.Workers.Route");
 

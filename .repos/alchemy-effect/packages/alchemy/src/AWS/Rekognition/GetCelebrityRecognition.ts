@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.GetCelebrityRecognitionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Poll Celebrity Recognition Results
+ * @binding
+ * @section Video Analysis
+ * @example Poll Celebrity Recognition Results
  * ```typescript
  * // init
  * const getCelebrityRecognition = yield* AWS.Rekognition.GetCelebrityRecognition();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   // consume the detections
  * }
  * ```
- *
- * @binding
  */
 export interface GetCelebrityRecognition extends Binding.Service<
   GetCelebrityRecognition,

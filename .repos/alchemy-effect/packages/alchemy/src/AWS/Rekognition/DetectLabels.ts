@@ -14,8 +14,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Rekognition.DetectLabelsHttp)`.
  *
- * ### Detecting Labels
- * **Example:** Detect Labels in Image Bytes
+ * @binding
+ * @section Detecting Labels
+ * @example Detect Labels in Image Bytes
  * ```typescript
  * // init
  * const detectLabels = yield* AWS.Rekognition.DetectLabels();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const names = (result.Labels ?? []).map((label) => label.Name);
  * ```
- *
- * @binding
  */
 export interface DetectLabels extends Binding.Service<
   DetectLabels,

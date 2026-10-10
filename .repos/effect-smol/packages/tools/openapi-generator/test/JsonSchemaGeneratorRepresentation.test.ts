@@ -1,17 +1,8 @@
 import * as JsonSchemaGenerator from "@effect/openapi-generator/JsonSchemaGenerator"
 import { assert, describe, it } from "@effect/vitest"
 
-describe("JsonSchemaGenerator representation", () => {
-  it("preserves patterns in Unicode mode from code generation inputs", () => {
-    const generator = JsonSchemaGenerator.make()
-    generator.addSchema("Root", { type: "string", pattern: "^a+$" })
-
-    const output = generator.generate("openapi-3.1", {}, false)
-
-    assert.include(output, `Schema.isPattern(new RegExp("^a+$", "u"))`)
-  })
-
-  it("emits only reachable definitions", () => {
+describe("JsonSchemaGenerator representation v2", () => {
+  it("keeps definitions out of roots and emits unreachable definitions", () => {
     const generator = JsonSchemaGenerator.make()
     generator.addSchema("Root", { $ref: "#/components/schemas/Shared" })
 
@@ -25,6 +16,8 @@ describe("JsonSchemaGenerator representation", () => {
       `// non-recursive definitions
 export type Shared = string
 export const Shared = Schema.String.annotate({ "identifier": "Shared" })
+export type Unused = boolean
+export const Unused = Schema.Boolean.annotate({ "identifier": "Unused" })
 // schemas
 export type Root = Shared
 export const Root = Shared

@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * grants the function `polly:DescribeVoices`. Provide the implementation
  * with `Effect.provide(AWS.Polly.DescribeVoicesHttp)`.
  *
- * ### Discovering Voices
- * **Example:** List US English voices
+ * @binding
+ * @section Discovering Voices
+ * @example List US English voices
  * ```typescript
  * // init
  * const describeVoices = yield* AWS.Polly.DescribeVoices();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* describeVoices({ LanguageCode: "en-US" });
  * const voiceIds = (result.Voices ?? []).map((voice) => voice.Id);
  * ```
- *
- * @binding
  */
 export interface DescribeVoices extends Binding.Service<
   DescribeVoices,

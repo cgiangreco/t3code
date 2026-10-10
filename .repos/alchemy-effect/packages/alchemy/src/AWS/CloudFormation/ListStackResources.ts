@@ -12,8 +12,9 @@ import type { Stack } from "./Stack.ts";
  * lighter-weight alternative to `DescribeStackResources` for stacks with many
  * resources. Provide the implementation with
  * `Effect.provide(AWS.CloudFormation.ListStackResourcesHttp)`.
- * ### Reading Stack Resources
- * **Example:** Enumerate Stack Resources
+ * @binding
+ * @section Reading Stack Resources
+ * @example Enumerate Stack Resources
  * ```typescript
  * const listStackResources =
  *   yield* AWS.CloudFormation.ListStackResources(stack);
@@ -21,8 +22,6 @@ import type { Stack } from "./Stack.ts";
  * const { StackResourceSummaries } = yield* listStackResources();
  * const types = (StackResourceSummaries ?? []).map((r) => r.ResourceType);
  * ```
- *
- * @binding
  */
 export interface ListStackResources extends Binding.Service<
   ListStackResources,

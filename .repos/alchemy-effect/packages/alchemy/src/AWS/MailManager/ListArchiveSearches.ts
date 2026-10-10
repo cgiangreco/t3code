@@ -9,16 +9,15 @@ import type { Archive } from "./Archive.ts";
  * Lists the recent searches of the bound archive. The archive id is
  * injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.MailManager.ListArchiveSearchesHttp)`.
- * ### Searching the Archive
- * **Example:** List Recent Searches
+ * @binding
+ * @section Searching the Archive
+ * @example List Recent Searches
  * ```typescript
  * const listSearches = yield* MailManager.ListArchiveSearches(archive);
  *
  * // runtime
  * const { Searches } = yield* listSearches({});
  * ```
- *
- * @binding
  */
 export interface ListArchiveSearches extends Binding.Service<
   ListArchiveSearches,

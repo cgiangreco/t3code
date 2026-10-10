@@ -109,8 +109,8 @@ export interface Key extends Resource<
 /**
  * A customer managed AWS KMS key.
  *
- * ### Creating Keys
- * **Example:** Symmetric Encryption Key
+ * @section Creating Keys
+ * @example Symmetric Encryption Key
  * ```typescript
  * import * as KMS from "alchemy/AWS/KMS";
  *
@@ -121,8 +121,8 @@ export interface Key extends Resource<
  * });
  * ```
  *
- * ### Key Policies
- * **Example:** Key with Inline Policy
+ * @section Key Policies
+ * @example Key with Inline Policy
  * ```typescript
  * const key = yield* KMS.Key("PolicyKey", {
  *   policy: {
@@ -137,12 +137,12 @@ export interface Key extends Resource<
  * });
  * ```
  *
- * ### Runtime Operations
+ * @section Runtime Operations
  * Bind the KMS crypto operations to the key inside a Lambda function.
  * Each binding grants least-privilege IAM (the exact key ARN) and injects
  * the `KeyId` automatically.
  *
- * **Example:** Encrypt and Decrypt from a Lambda Function
+ * @example Encrypt and Decrypt from a Lambda Function
  * ```typescript
  * // init
  * const key = yield* AWS.KMS.Key("AppKey");
@@ -156,7 +156,7 @@ export interface Key extends Resource<
  * const { Plaintext } = yield* decrypt({ CiphertextBlob });
  * ```
  *
- * **Example:** Envelope Encryption with a Data Key
+ * @example Envelope Encryption with a Data Key
  * ```typescript
  * // init
  * const generateDataKey = yield* AWS.KMS.GenerateDataKey(key);

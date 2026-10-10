@@ -15,8 +15,9 @@ export interface AbortMultipartUploadRequest extends Omit<
  * consume — abandoned uploads keep billing until aborted (or expired by a
  * lifecycle rule). Provide the implementation with
  * `Effect.provide(AWS.S3.AbortMultipartUploadHttp)`.
- * ### Multipart Uploads
- * **Example:** Abort an Upload When Part Uploads Fail
+ * @binding
+ * @section Multipart Uploads
+ * @example Abort an Upload When Part Uploads Fail
  * ```typescript
  * // init — bind the operation to the bucket
  * const abortUpload = yield* AWS.S3.AbortMultipartUpload(bucket);
@@ -28,8 +29,6 @@ export interface AbortMultipartUploadRequest extends Omit<
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface AbortMultipartUpload extends Binding.Service<
   AbortMultipartUpload,

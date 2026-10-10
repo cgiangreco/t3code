@@ -5,7 +5,7 @@ import type {
 } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
-import { Atom } from "effect/reactivity";
+import { Atom } from "effect/unstable/reactivity";
 
 import { appAtomRegistry } from "~/rpc/atomRegistry";
 
@@ -21,7 +21,7 @@ export interface DesktopNetworkAccessSnapshot {
   readonly serverExposureState: DesktopServerExposureState;
 }
 
-class DesktopNetworkAccessUnavailableError extends Schema.TaggedError<DesktopNetworkAccessUnavailableError>()(
+class DesktopNetworkAccessUnavailableError extends Schema.TaggedErrorClass<DesktopNetworkAccessUnavailableError>()(
   "DesktopNetworkAccessUnavailableError",
   {},
 ) {
@@ -30,7 +30,7 @@ class DesktopNetworkAccessUnavailableError extends Schema.TaggedError<DesktopNet
   }
 }
 
-class DesktopServerExposureStateLoadError extends Schema.TaggedError<DesktopServerExposureStateLoadError>()(
+class DesktopServerExposureStateLoadError extends Schema.TaggedErrorClass<DesktopServerExposureStateLoadError>()(
   "DesktopServerExposureStateLoadError",
   { cause: Schema.Defect() },
 ) {
@@ -39,7 +39,7 @@ class DesktopServerExposureStateLoadError extends Schema.TaggedError<DesktopServ
   }
 }
 
-class DesktopAdvertisedEndpointsLoadError extends Schema.TaggedError<DesktopAdvertisedEndpointsLoadError>()(
+class DesktopAdvertisedEndpointsLoadError extends Schema.TaggedErrorClass<DesktopAdvertisedEndpointsLoadError>()(
   "DesktopAdvertisedEndpointsLoadError",
   { cause: Schema.Defect() },
 ) {

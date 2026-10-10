@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * `eks:ListAccessPolicies` is granted on `*` — the operation is account-scoped and takes no resource.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.ListAccessPoliciesHttp)`.
- * ### Discovering Clusters
- * **Example:** List the Managed Access Policies
+ * @binding
+ * @section Discovering Clusters
+ * @example List the Managed Access Policies
  * ```typescript
  * // init
  * const listAccessPolicies = yield* AWS.EKS.ListAccessPolicies();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { accessPolicies } = yield* listAccessPolicies();
  * ```
- *
- * @binding
  */
 export interface ListAccessPolicies extends Binding.Service<
   ListAccessPolicies,

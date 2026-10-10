@@ -12,8 +12,9 @@ export interface DeleteApiKeyRequest extends ag.DeleteApiKeyRequest {}
  * Provide `ApiGateway.DeleteApiKeyHttp` on the Function effect to
  * implement the binding.
  *
- * ### Managing API keys
- * **Example:** Delete a key on account closure
+ * @binding
+ * @section Managing API keys
+ * @example Delete a key on account closure
  * ```typescript
  * // init
  * const deleteApiKey = yield* ApiGateway.DeleteApiKey();
@@ -23,8 +24,6 @@ export interface DeleteApiKeyRequest extends ag.DeleteApiKeyRequest {}
  *   Effect.catchTag("NotFoundException", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteApiKey extends Binding.Service<
   DeleteApiKey,

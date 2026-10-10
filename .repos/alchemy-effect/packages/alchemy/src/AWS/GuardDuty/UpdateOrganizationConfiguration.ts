@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.UpdateOrganizationConfigurationHttp)`.
- * ### Organization Administration
- * **Example:** Auto-Enable New Accounts
+ * @binding
+ * @section Organization Administration
+ * @example Auto-Enable New Accounts
  * ```typescript
  * // init
  * const updateOrganizationConfiguration = yield* AWS.GuardDuty.UpdateOrganizationConfiguration(detector);
@@ -21,8 +22,6 @@ import type { Detector } from "./Detector.ts";
  *   AutoEnableOrganizationMembers: "NEW",
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateOrganizationConfiguration extends Binding.Service<
   UpdateOrganizationConfiguration,

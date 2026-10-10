@@ -301,8 +301,9 @@ export interface Project extends Resource<
  * The project is a definition only; creating it is instant and free.
  * Running a build (`StartBuild`) provisions compute and is billed per
  * build-minute.
- * ### Creating a Project
- * **Example:** NO_SOURCE Project with an Inline Buildspec
+ * @resource
+ * @section Creating a Project
+ * @example NO_SOURCE Project with an Inline Buildspec
  * ```typescript
  * const project = yield* CodeBuild.Project("Hello", {
  *   serviceRole: role.roleArn,
@@ -323,7 +324,7 @@ export interface Project extends Resource<
  * });
  * ```
  *
- * **Example:** S3-Source Project with S3 Artifacts
+ * @example S3-Source Project with S3 Artifacts
  * ```typescript
  * const project = yield* CodeBuild.Project("Packager", {
  *   serviceRole: role.roleArn,
@@ -335,8 +336,6 @@ export interface Project extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Project = Resource<Project>("AWS.CodeBuild.Project");
 

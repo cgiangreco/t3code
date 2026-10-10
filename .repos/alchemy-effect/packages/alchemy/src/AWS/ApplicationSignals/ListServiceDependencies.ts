@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * that a discovered service's operations connect with. Provide the
  * implementation with
  * `Effect.provide(AWS.ApplicationSignals.ListServiceDependenciesHttp)`.
- * ### Exploring the Service Topology
- * **Example:** List a Service's Dependencies
+ * @binding
+ * @section Exploring the Service Topology
+ * @example List a Service's Dependencies
  * ```typescript
  * // init — account-level, no resource argument
  * const listServiceDependencies =
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface ListServiceDependencies extends Binding.Service<
   ListServiceDependencies,

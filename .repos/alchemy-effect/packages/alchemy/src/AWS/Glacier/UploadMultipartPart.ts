@@ -21,8 +21,9 @@ export interface UploadMultipartPartRequest extends Omit<
  * `bytes 0-8388607/*`) and `checksum` its SHA-256 tree hash.
  * Provide the implementation with
  * `Effect.provide(AWS.Glacier.UploadMultipartPartHttp)`.
- * ### Uploading Archives
- * **Example:** Upload one part
+ * @binding
+ * @section Uploading Archives
+ * @example Upload one part
  * ```typescript
  * const uploadMultipartPart = yield* AWS.Glacier.UploadMultipartPart(vault);
  *
@@ -33,8 +34,6 @@ export interface UploadMultipartPartRequest extends Omit<
  *   body: partBytes,
  * });
  * ```
- *
- * @binding
  */
 export interface UploadMultipartPart extends Binding.Service<
   UploadMultipartPart,

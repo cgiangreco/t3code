@@ -56,8 +56,9 @@ export interface Resource extends AlchemyResource<
  * Formation can vend temporary credentials for data stored there
  * (`DATA_LOCATION_ACCESS` grants, governed tables, etc.).
  *
- * ### Registering Locations
- * **Example:** Register a Bucket with the Service-Linked Role
+ * @resource
+ * @section Registering Locations
+ * @example Register a Bucket with the Service-Linked Role
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -67,7 +68,7 @@ export interface Resource extends AlchemyResource<
  * });
  * ```
  *
- * **Example:** Register with a Custom Data-Access Role
+ * @example Register with a Custom Data-Access Role
  * ```typescript
  * const location = yield* AWS.LakeFormation.Resource("DataLakeLocation", {
  *   resourceArn: bucket.bucketArn,
@@ -75,8 +76,6 @@ export interface Resource extends AlchemyResource<
  *   hybridAccessEnabled: true,
  * });
  * ```
- *
- * @resource
  */
 export const Resource = AlchemyResource<Resource>("AWS.LakeFormation.Resource");
 

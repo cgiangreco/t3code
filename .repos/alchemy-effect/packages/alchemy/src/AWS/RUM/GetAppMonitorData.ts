@@ -16,8 +16,9 @@ export interface GetAppMonitorDataRequest extends Omit<
  *
  * Provide `RUM.GetAppMonitorDataHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Reading RUM Telemetry
- * **Example:** Read the Trailing Hour of Events
+ * @binding
+ * @section Reading RUM Telemetry
+ * @example Read the Trailing Hour of Events
  * ```typescript
  * // init — grants rum:GetAppMonitorData on the monitor
  * const getAppMonitorData = yield* AWS.RUM.GetAppMonitorData(monitor);
@@ -28,8 +29,6 @@ export interface GetAppMonitorDataRequest extends Omit<
  *   TimeRange: { After: now - 3_600_000, Before: now },
  * });
  * ```
- *
- * @binding
  */
 export interface GetAppMonitorData extends Binding.Service<
   GetAppMonitorData,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * quota before a large send. Account-level operation — invoked with no
  * arguments. Provide the implementation with
  * `Effect.provide(AWS.SES.GetAccountHttp)`.
- * ### Account Status
- * **Example:** Check Quota and Sandbox Status
+ * @binding
+ * @section Account Status
+ * @example Check Quota and Sandbox Status
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getAccount = yield* SES.GetAccount();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const account = yield* getAccount();
  * // account.SendQuota?.Max24HourSend, account.ProductionAccessEnabled
  * ```
- *
- * @binding
  */
 export interface GetAccount extends Binding.Service<
   GetAccount,

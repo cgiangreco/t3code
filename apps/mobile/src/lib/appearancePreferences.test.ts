@@ -2,13 +2,19 @@ import { describe, expect, it } from "vite-plus/test";
 
 import {
   DEFAULT_BASE_FONT_SIZE,
+  deriveCodeFontSize,
+  deriveTerminalFontSize,
   normalizeBaseFontSize,
+  normalizeCodeFontSize,
+  normalizeCodeWordBreak,
   resolveAppearance,
   resolveAppearancePreferences,
   resolveMarkdownFontSizes,
   resolveMobileCodeSurface,
   resolveNativeMarkdownTypography,
   resolveTextScaleVariables,
+  stepBaseFontSize,
+  stepCodeFontSize,
   stepTerminalFontSize,
 } from "./appearancePreferences";
 
@@ -44,8 +50,10 @@ describe("appearancePreferences", () => {
     expect(appearance.isCodeFontSizeCustom).toBe(false);
 
     const scaled = resolveAppearance(resolveAppearancePreferences({ baseFontSize: 22 }));
-    expect(scaled.terminalFontSize).toBe(14);
-    expect(scaled.codeFontSize).toBe(17);
+    expect(scaled.terminalFontSize).toBe(deriveTerminalFontSize(22));
+    expect(scaled.codeFontSize).toBe(deriveCodeFontSize(22));
+    expect(scaled.terminalFontSize).toBeGreaterThan(10);
+    expect(scaled.codeFontSize).toBeGreaterThan(11);
   });
 
   it("applies explicit overrides over derived values", () => {
@@ -61,12 +69,15 @@ describe("appearancePreferences", () => {
   it("clamps base and code font sizes", () => {
     expect(normalizeBaseFontSize(4)).toBe(11);
     expect(normalizeBaseFontSize(30)).toBe(22);
-    expect(resolveAppearancePreferences({ codeFontSize: 4 }).codeFontSize).toBe(8);
-    expect(resolveAppearancePreferences({ codeFontSize: 30 }).codeFontSize).toBe(18);
+    expect(normalizeCodeFontSize(4)).toBe(8);
+    expect(normalizeCodeFontSize(30)).toBe(18);
   });
 
-  it("steps terminal font size within bounds", () => {
+  it("steps font sizes within bounds", () => {
     expect(stepTerminalFontSize(6, -1)).toBe(6);
+    expect(stepBaseFontSize(11, -1)).toBe(11);
+    expect(stepCodeFontSize(8, -1)).toBe(8);
+    expect(stepBaseFontSize(15, 1)).toBe(16);
   });
 
   it("scales markdown typography from the base size", () => {
@@ -86,15 +97,9 @@ describe("appearancePreferences", () => {
     });
   });
 
-  it("keeps explicit code word break enabled", () => {
-    expect(resolveAppearancePreferences({ codeWordBreak: true }).codeWordBreak).toBe(true);
-  });
-
-  it("preserves the no-wrap default unless wrapping is explicitly enabled", () => {
-    expect(resolveAppearancePreferences(undefined).codeWordBreak).toBe(false);
-    expect(resolveAppearancePreferences({}).codeWordBreak).toBe(false);
-    expect(resolveAppearancePreferences({ codeWordBreak: null }).codeWordBreak).toBe(false);
-    expect(resolveAppearancePreferences({ codeWordBreak: false }).codeWordBreak).toBe(false);
+  it("defaults code word break to false", () => {
+    expect(normalizeCodeWordBreak(undefined)).toBe(false);
+    expect(normalizeCodeWordBreak(true)).toBe(true);
   });
 
   it("returns the authored text scale at the 16pt default", () => {

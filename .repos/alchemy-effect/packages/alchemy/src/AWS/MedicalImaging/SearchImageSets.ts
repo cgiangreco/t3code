@@ -22,8 +22,9 @@ export interface SearchImageSetsRequest extends Omit<
  * image set. Provide the implementation with
  * `Effect.provide(AWS.MedicalImaging.SearchImageSetsHttp)`.
  *
- * ### Searching Image Sets
- * **Example:** Search by Patient Id
+ * @binding
+ * @section Searching Image Sets
+ * @example Search by Patient Id
  * ```typescript
  * const searchImageSets = yield* MedicalImaging.SearchImageSets(datastore);
  *
@@ -35,12 +36,10 @@ export interface SearchImageSetsRequest extends Omit<
  * // results.imageSetsMetadataSummaries[i].imageSetId
  * ```
  *
- * **Example:** List Every Image Set
+ * @example List Every Image Set
  * ```typescript
  * const results = yield* searchImageSets();
  * ```
- *
- * @binding
  */
 export interface SearchImageSets extends Binding.Service<
   SearchImageSets,

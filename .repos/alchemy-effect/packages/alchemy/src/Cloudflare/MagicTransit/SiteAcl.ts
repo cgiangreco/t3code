@@ -111,8 +111,11 @@ export type MagicSiteAcl = Resource<
  *
  * `siteId` is create-only — changing it triggers a replacement. Everything
  * else is updated in place.
- * ### Creating an ACL
- * **Example:** Allow TCP between two LANs
+ * @resource
+ * @product Magic Transit
+ * @category Network
+ * @section Creating an ACL
+ * @example Allow TCP between two LANs
  * ```typescript
  * yield* Cloudflare.MagicTransit.MagicSiteAcl("lan-to-lan", {
  *   siteId: site.siteId,
@@ -123,7 +126,7 @@ export type MagicSiteAcl = Resource<
  * });
  * ```
  *
- * **Example:** Unidirectional ACL forwarded locally
+ * @example Unidirectional ACL forwarded locally
  * ```typescript
  * yield* Cloudflare.MagicTransit.MagicSiteAcl("one-way", {
  *   siteId: site.siteId,
@@ -136,10 +139,6 @@ export type MagicSiteAcl = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/magic-wan/configuration/connector/network-options/site-acls/
- *
- * @resource
- * @product Magic Transit
- * @category Network
  */
 export const MagicSiteAcl = Resource<MagicSiteAcl>(TypeId);
 

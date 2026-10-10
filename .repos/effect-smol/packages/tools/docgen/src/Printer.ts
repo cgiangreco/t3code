@@ -1,6 +1,4 @@
 /**
- * Renders parsed documentation models as Markdown.
- *
  * @since 0.6.0
  */
 import * as Array from "effect/Array"
@@ -46,6 +44,10 @@ function replaceJSDocLinks(text: string): string {
 /**
  * Removes all extra metadata from fenced code blocks in a Markdown string.
  * For each code fence, only the first token (the language identifier) is preserved.
+ *
+ * Examples:
+ *   Input:  "```ts skip-type-checking a=1\nexport const a: string = 1\n```"
+ *   Output: "```ts\nexport const a: string = 1\n```"
  */
 function removeFenceMetadata(markdown: string): string {
   return markdown.replace(/^(`{3,})([^\n]*)/gm, (_match, fence, info) => {
@@ -312,8 +314,6 @@ const sortByName: <A extends { name: string }>(self: Iterable<A>) => Array<A> = 
 )
 
 /**
- * Renders a parsed module as a Markdown documentation page.
- *
  * @category printers
  * @since 0.6.0
  */
@@ -356,8 +356,6 @@ const defaultPrettierOptions: Prettier.Options = {
 }
 
 /**
- * Renders the front matter for a generated module page.
- *
  * @category printers
  * @since 0.6.0
  */
@@ -370,8 +368,6 @@ parent: Modules
 }
 
 /**
- * Formats generated Markdown with the docgen Prettier settings.
- *
  * @category printers
  * @since 0.6.0
  */

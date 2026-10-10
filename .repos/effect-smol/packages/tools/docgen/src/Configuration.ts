@@ -1,6 +1,4 @@
 /**
- * Loads and provides configuration for documentation generation.
- *
  * @since 0.6.0
  */
 
@@ -21,9 +19,6 @@ import * as Domain from "./Domain.ts"
 import { DocgenError } from "./Domain.ts"
 
 /**
- * Default GitHub Pages theme written to generated configuration.
- *
- * @category constants
  * @since 0.6.0
  */
 export const DEFAULT_THEME = "mikearnaldi/just-the-docs"
@@ -37,9 +32,7 @@ const compilerOptionsSchema = Schema.Union([
 ])
 
 /**
- * Schema for docgen configuration files.
- *
- * @category schemas
+ * @category service
  * @since 0.6.0
  */
 export const ConfigurationSchema = Schema.Struct({
@@ -106,9 +99,7 @@ export const ConfigurationSchema = Schema.Struct({
 }).annotate({ identifier: "ConfigurationSchema" })
 
 /**
- * Resolved configuration used by the docgen services.
- *
- * @category services
+ * @category service
  * @since 0.6.0
  */
 export interface ConfigurationShape {
@@ -130,9 +121,7 @@ export interface ConfigurationShape {
 }
 
 /**
- * Service that provides resolved docgen configuration.
- *
- * @category services
+ * @category service
  * @since 0.6.0
  */
 export class Configuration
@@ -223,7 +212,7 @@ const readTSConfig = (fileName: string): Effect.Effect<
   })
 
 const loadCompilerOptions = (configKey: string) =>
-  Config.String(configKey).pipe(
+  Config.string(configKey).pipe(
     Effect.flatMap((config) =>
       Schema.decodeUnknownEffect(JsonRecordSchema)(config).pipe(Effect.orElseSucceed(() => config))
     )
@@ -297,7 +286,7 @@ export const load = (args: {
     // Resolve the excluded files
     const exclude = yield* Array.match(args.exclude, {
       onEmpty: () =>
-        Effect.result(Config.Array(Schema.String, "exclude")).pipe(
+        Effect.result(Config.schema(Config.Array(Schema.String), "exclude")).pipe(
           Effect.map((configured) =>
             Result.isSuccess(configured)
               ? configured.success

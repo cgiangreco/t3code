@@ -5,7 +5,7 @@ import * as Artifacts from "../Artifacts.ts";
 import { isResolved } from "../Diff.ts";
 import * as Provider from "../Provider.ts";
 import { Resource } from "../Resource.ts";
-import { Docker, dockerContextName, dockerPhysicalName } from "./Docker.ts";
+import { Docker, dockerPhysicalName } from "./Docker.ts";
 import type { Providers } from "./Providers.ts";
 import {
   type ImageRegistry,
@@ -55,8 +55,6 @@ export interface ImageProps {
   registry?: ImageRegistry;
   /** Skip registry push even when `registry` is set. @default false */
   skipPush?: boolean;
-  /** Docker context name or context resource. */
-  context?: Docker.ContextRef;
   /** Docker build configuration. */
   build: DockerBuildOptions;
 }
@@ -94,9 +92,10 @@ export interface Image extends Resource<
  * `Image` always builds from a Dockerfile. To pull (and optionally re-tag and
  * push) an existing registry image, use `Docker.RemoteImage`.
  *
+ * @resource
  *
- * ### Building Images
- * **Example:** Build from a Dockerfile
+ * @section Building Images
+ * @example Build from a Dockerfile
  * ```typescript
  * const image = yield* Docker.Image("app", {
  *   name: "my-app",
@@ -109,8 +108,8 @@ export interface Image extends Resource<
  * });
  * ```
  *
- * ### Registry Push
- * **Example:** Push with Redacted credentials
+ * @section Registry Push
+ * @example Push with Redacted credentials
  * ```typescript
  * const image = yield* Docker.Image("app", {
  *   name: "my-app",
@@ -118,23 +117,10 @@ export interface Image extends Resource<
  *   registry: {
  *     server: "ghcr.io",
  *     username: "octocat",
- *     password: Config.Redacted("GITHUB_TOKEN"),
+ *     password: Config.redacted("GITHUB_TOKEN"),
  *   },
  * });
  * ```
- *
- * ### Docker Context
- * **Example:** Build in a named Docker context
- * ```typescript
- * const image = yield* Docker.Image("app", {
- *   name: "my-app",
- *   context: "remote-build",
- *   build: { context: "./app" },
- * });
- * ```
- *
- * @resource
- * @product Image
  */
 export const Image = Resource<Image>("Docker.Image");
 
@@ -152,7 +138,6 @@ export const ImageProvider = () =>
         instanceId: string,
       ) {
         const name = yield* dockerPhysicalName(id, props, instanceId);
-        const engineContext = dockerContextName(props.context);
         const tag = props.tag ?? "latest";
         const ref = `${name}:${tag}`;
 
@@ -167,7 +152,6 @@ export const ImageProvider = () =>
           "cache-from": props.build.cacheFrom,
           "cache-to": props.build.cacheTo,
           args: props.build.options,
-          engineContext,
         });
 
         // Read the freshly built image's id and creation time straight from
@@ -175,7 +159,7 @@ export const ImageProvider = () =>
         return {
           name,
           tag,
-          image: yield* docker.image.inspect(ref, engineContext),
+          image: yield* docker.image.inspect(ref),
           ref,
         };
       }, Artifacts.cached("build"));
@@ -204,14 +188,13 @@ export const ImageProvider = () =>
       return Image.Provider.of({
         list: () => Effect.succeed([]),
         read: Effect.fn(function* ({ id, instanceId, olds, output }) {
-          const context = dockerContextName(olds.context);
           const ref =
             output?.imageRef ??
             (yield* dockerPhysicalName(id, olds, instanceId).pipe(
               Effect.map((name) => `${name}:${olds.tag ?? "latest"}`),
             ));
           const image = yield* docker.image
-            .inspect(ref, context)
+            .inspect(ref)
             .pipe(
               Effect.catchReason(
                 "PlatformError",
@@ -229,20 +212,14 @@ export const ImageProvider = () =>
             builtAt: output?.builtAt ?? parseCreatedAt(image.Created),
           };
         }),
-        diff: Effect.fn(function* ({ id, instanceId, news, output, olds }) {
+        diff: Effect.fn(function* ({ id, instanceId, news, output }) {
           if (!isResolved(news) || !output) return undefined;
-          if (
-            dockerContextName(olds.context) !== dockerContextName(news.context)
-          ) {
-            return { action: "update" };
-          }
           const { image } = yield* buildAndInspectImage(id, news, instanceId);
           if (output?.imageId !== image.Id) {
             return { action: "update" };
           }
         }),
         reconcile: Effect.fn(function* ({ id, instanceId, news, session }) {
-          const context = dockerContextName(news.context);
           const { name, tag, image, ref } = yield* buildAndInspectImage(
             id,
             news,
@@ -257,7 +234,7 @@ export const ImageProvider = () =>
             );
             targetImageRef = withRegistryHost(ref, news.registry);
             repoDigest = yield* docker.image
-              .push(ref, news.registry, undefined, context)
+              .push(ref, news.registry)
               .pipe(
                 Effect.map((result) => parseRepoDigest(ref, result.stdout)),
               );
@@ -272,9 +249,9 @@ export const ImageProvider = () =>
             builtAt: parseCreatedAt(image.Created),
           };
         }),
-        delete: Effect.fn(({ olds, output }) =>
+        delete: Effect.fn(({ output }) =>
           docker.image
-            .remove(output.imageRef, undefined, dockerContextName(olds.context))
+            .remove(output.imageRef)
             .pipe(
               Effect.catchReason(
                 "PlatformError",

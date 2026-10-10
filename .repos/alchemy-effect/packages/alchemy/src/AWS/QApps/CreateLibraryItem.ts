@@ -16,8 +16,9 @@ export interface CreateLibraryItemRequest extends Omit<
  *
  * Publishes a version of the bound Q App into the instance's library so other users can discover and run it. Provide the implementation with
  * `Effect.provide(AWS.QApps.CreateLibraryItemHttp)`.
- * ### Library Items
- * **Example:** Publish the App to the Library
+ * @binding
+ * @section Library Items
+ * @example Publish the App to the Library
  * ```typescript
  * // init — bind the operation to the Q App
  * const createLibraryItem = yield* AWS.QApps.CreateLibraryItem(app);
@@ -29,8 +30,6 @@ export interface CreateLibraryItemRequest extends Omit<
  * });
  * console.log(item.libraryItemId);
  * ```
- *
- * @binding
  */
 export interface CreateLibraryItem extends Binding.Service<
   CreateLibraryItem,

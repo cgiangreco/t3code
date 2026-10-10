@@ -19,15 +19,14 @@ export interface ListGroupsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.ListGroupsHttp)`.
  *
- * ### Principal Mapping
- * **Example:** List Mapped Groups
+ * @binding
+ * @section Principal Mapping
+ * @example List Mapped Groups
  * ```typescript
  * const listGroups = yield* AWS.QBusiness.ListGroups(index);
  *
  * const { items } = yield* listGroups({ updatedEarlierThan: new Date() });
  * ```
- *
- * @binding
  */
 export interface ListGroups extends Binding.Service<
   ListGroups,

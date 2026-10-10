@@ -50,15 +50,16 @@ export interface Activity extends Resource<
  * Activities support worker-hosted task processing outside Lambda. For
  * most callback flows the `.waitForTaskToken` service-integration pattern
  * on a {@link StateMachine} Task state is preferred.
- * ### Creating Activities
- * **Example:** Basic Activity
+ * @resource
+ * @section Creating Activities
+ * @example Basic Activity
  * ```typescript
  * import * as StepFunctions from "alchemy/AWS/StepFunctions";
  *
  * const activity = yield* StepFunctions.Activity("ApprovalActivity");
  * ```
  *
- * **Example:** Reference an Activity from a State Machine
+ * @example Reference an Activity from a State Machine
  * ```typescript
  * const machine = yield* StepFunctions.StateMachine("ApprovalFlow", {
  *   definition: {
@@ -74,8 +75,8 @@ export interface Activity extends Resource<
  * });
  * ```
  *
- * ### Completing Tasks at Runtime
- * **Example:** Send a task result scoped to the activity
+ * @section Completing Tasks at Runtime
+ * @example Send a task result scoped to the activity
  * ```typescript
  * // init
  * const sendTaskSuccess = yield* StepFunctions.SendTaskSuccess(activity);
@@ -86,8 +87,6 @@ export interface Activity extends Resource<
  *   output: JSON.stringify({ approved: true }),
  * });
  * ```
- *
- * @resource
  */
 export const Activity = Resource<Activity>("AWS.StepFunctions.Activity");
 

@@ -16,16 +16,15 @@ export interface ListMultipartUploadsRequest extends Omit<
  * multipart uploads — the bucket name is injected automatically and
  * `s3:ListBucketMultipartUploads` is granted on the bucket. Provide the
  * implementation with `Effect.provide(AWS.S3.ListMultipartUploadsHttp)`.
- * ### Multipart Uploads
- * **Example:** List In-Progress Uploads
+ * @binding
+ * @section Multipart Uploads
+ * @example List In-Progress Uploads
  * ```typescript
  * const listMultipartUploads = yield* AWS.S3.ListMultipartUploads(bucket);
  *
  * const result = yield* listMultipartUploads({ Prefix: "uploads/" });
  * const uploads = result.Uploads ?? [];
  * ```
- *
- * @binding
  */
 export interface ListMultipartUploads extends Binding.Service<
   ListMultipartUploads,

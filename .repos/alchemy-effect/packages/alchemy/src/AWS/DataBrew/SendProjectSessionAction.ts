@@ -13,8 +13,9 @@ export interface SendProjectSessionActionRequest extends Omit<
  * recipe step (optionally as a preview) inside an open interactive session
  * on the bound DataBrew project. Authenticate with the `Redacted`
  * `ClientSessionId` returned by {@link StartProjectSession}.
- * ### Interactive Sessions
- * **Example:** Preview a Recipe Step
+ * @binding
+ * @section Interactive Sessions
+ * @example Preview a Recipe Step
  * ```typescript
  * const sendProjectSessionAction =
  *   yield* AWS.DataBrew.SendProjectSessionAction(project);
@@ -25,8 +26,6 @@ export interface SendProjectSessionActionRequest extends Omit<
  *   ViewFrame: { StartColumnIndex: 0 },
  * });
  * ```
- *
- * @binding
  */
 export interface SendProjectSessionAction extends Binding.Service<
   SendProjectSessionAction,

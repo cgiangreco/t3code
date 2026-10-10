@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * organization. Useful for compliance dashboards and drift-detection
  * functions. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ListEnabledControlsHttp)`.
- * ### Auditing Enablements
- * **Example:** List Controls Enabled on an OU
+ * @binding
+ * @section Auditing Enablements
+ * @example List Controls Enabled on an OU
  * ```typescript
  * // init — account-level binding takes no resource
  * const listEnabledControls = yield* AWS.ControlTower.ListEnabledControls();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   (c) => c.driftStatusSummary?.driftStatus === "DRIFTED",
  * );
  * ```
- *
- * @binding
  */
 export interface ListEnabledControls extends Binding.Service<
   ListEnabledControls,

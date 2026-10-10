@@ -64,8 +64,11 @@ export type MagicApp = Resource<
  * `MagicWanUnauthorized` error (Cloudflare code 1025).
  *
  * All properties are mutable in place via PATCH.
- * ### Creating an app
- * **Example:** App matching hostnames
+ * @resource
+ * @product Magic Transit
+ * @category Network
+ * @section Creating an app
+ * @example App matching hostnames
  * ```typescript
  * const app = yield* Cloudflare.MagicTransit.MagicApp("crm", {
  *   name: "Internal CRM",
@@ -74,7 +77,7 @@ export type MagicApp = Resource<
  * });
  * ```
  *
- * **Example:** App matching IP subnets
+ * @example App matching IP subnets
  * ```typescript
  * const app = yield* Cloudflare.MagicTransit.MagicApp("voip", {
  *   name: "VoIP",
@@ -84,10 +87,6 @@ export type MagicApp = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/magic-wan/configuration/apps/
- *
- * @resource
- * @product Magic Transit
- * @category Network
  */
 export const MagicApp = Resource<MagicApp>(TypeId);
 

@@ -64,13 +64,13 @@ export interface Session extends Resource<
  * tracked by Alchemy state. Adopting a session that Alchemy did not create
  * requires `--adopt`, and destroy disables Macie for the account.
  *
- * ### Enabling Macie
- * **Example:** Enable Macie
+ * @section Enabling Macie
+ * @example Enable Macie
  * ```typescript
  * const macie = yield* Macie2.Session("Macie", {});
  * ```
  *
- * **Example:** Enable with frequent findings and pause later
+ * @example Enable with frequent findings and pause later
  * ```typescript
  * const macie = yield* Macie2.Session("Macie", {
  *   status: "ENABLED",

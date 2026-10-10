@@ -97,8 +97,9 @@ export interface EndpointConfig extends Resource<
  * replaces the configuration. To roll a live endpoint onto new settings,
  * point the `Endpoint` at the replacement config (alchemy creates the new
  * config first, updates the endpoint, then deletes the old config).
- * ### Creating Endpoint Configurations
- * **Example:** Serverless Variant
+ * @resource
+ * @section Creating Endpoint Configurations
+ * @example Serverless Variant
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -111,7 +112,7 @@ export interface EndpointConfig extends Resource<
  * });
  * ```
  *
- * **Example:** Provisioned Instances
+ * @example Provisioned Instances
  * ```typescript
  * const config = yield* AWS.SageMaker.EndpointConfig("MyConfig", {
  *   productionVariants: [{
@@ -122,8 +123,6 @@ export interface EndpointConfig extends Resource<
  *   }],
  * });
  * ```
- *
- * @resource
  */
 export const EndpointConfig = Resource<EndpointConfig>(
   "AWS.SageMaker.EndpointConfig",

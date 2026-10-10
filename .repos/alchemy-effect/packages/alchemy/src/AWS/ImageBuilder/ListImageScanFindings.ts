@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * `imageBuildVersionArn` or `imagePipelineArn` to narrow to one build or
  * pipeline. Provide the implementation with
  * `Effect.provide(AWS.ImageBuilder.ListImageScanFindingsHttp)`.
- * ### Scan Findings
- * **Example:** List Findings for a Pipeline's Builds
+ * @binding
+ * @section Scan Findings
+ * @example List Findings for a Pipeline's Builds
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listImageScanFindings =
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   filters: [{ name: "imagePipelineArn", values: [pipelineArn] }],
  * });
  * ```
- *
- * @binding
  */
 export interface ListImageScanFindings extends Binding.Service<
   ListImageScanFindings,

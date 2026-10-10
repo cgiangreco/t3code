@@ -53,17 +53,19 @@
   "scripts": {
     "build": "tsc -b tsconfig.json && pnpm babel",
     "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
-    "check": "tsc -b tsconfig.json"
+    "check": "tsc -b tsconfig.json",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
   },
   "dependencies": {
-    "@oxlint/plugins": "^1.85.0"
+    "@effect/jsdocs": "workspace:^"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0 <7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.1.1",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.2"
+    "vitest": "^4.1.10"
   }
 }

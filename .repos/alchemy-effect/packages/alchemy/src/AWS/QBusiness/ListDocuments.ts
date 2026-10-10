@@ -19,15 +19,14 @@ export interface ListDocumentsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.ListDocumentsHttp)`.
  *
- * ### Document Ingestion
- * **Example:** List Indexed Documents
+ * @binding
+ * @section Document Ingestion
+ * @example List Indexed Documents
  * ```typescript
  * const listDocuments = yield* AWS.QBusiness.ListDocuments(index);
  *
  * const { documentDetailList } = yield* listDocuments();
  * ```
- *
- * @binding
  */
 export interface ListDocuments extends Binding.Service<
   ListDocuments,

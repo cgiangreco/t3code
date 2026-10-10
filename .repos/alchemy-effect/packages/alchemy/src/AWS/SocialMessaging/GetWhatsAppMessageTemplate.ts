@@ -23,8 +23,9 @@ export interface GetWhatsAppMessageTemplateRequest extends Omit<
  * into every request.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.GetWhatsAppMessageTemplateHttp)`.
- * ### Managing Message Templates
- * **Example:** Read a Template
+ * @binding
+ * @section Managing Message Templates
+ * @example Read a Template
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const getTemplate = yield* AWS.SocialMessaging.GetWhatsAppMessageTemplate(account);
@@ -34,8 +35,6 @@ export interface GetWhatsAppMessageTemplateRequest extends Omit<
  *   metaTemplateId: "1234567890",
  * });
  * ```
- *
- * @binding
  */
 export interface GetWhatsAppMessageTemplate extends Binding.Service<
   GetWhatsAppMessageTemplate,

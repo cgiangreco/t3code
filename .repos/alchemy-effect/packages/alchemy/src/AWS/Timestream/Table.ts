@@ -121,8 +121,9 @@ export interface Table extends Resource<
  * were not already onboarded receive `TimestreamNotOnboarded` on every
  * operation.
  * :::
- * ### Creating Tables
- * **Example:** Basic Table
+ * @resource
+ * @section Creating Tables
+ * @example Basic Table
  * ```typescript
  * import * as Timestream from "alchemy/AWS/Timestream";
  *
@@ -132,7 +133,7 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * **Example:** Table with Retention Tuning
+ * @example Table with Retention Tuning
  * ```typescript
  * const table = yield* Timestream.Table("Cpu", {
  *   databaseName: database.databaseName,
@@ -143,8 +144,8 @@ export interface Table extends Resource<
  * });
  * ```
  *
- * ### Writing Points
- * **Example:** Write records from a handler
+ * @section Writing Points
+ * @example Write records from a handler
  * ```typescript
  * // init
  * const writeRecords = yield* Timestream.WriteRecords(table);
@@ -168,8 +169,6 @@ export interface Table extends Resource<
  *   }),
  * };
  * ```
- *
- * @resource
  */
 export const Table = Resource<Table>("AWS.Timestream.Table");
 

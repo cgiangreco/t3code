@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * status, endpoint, instance class, cluster membership — for health checks
  * and reader discovery. Provide the implementation with
  * `Effect.provide(AWS.Neptune.DescribeDBInstancesHttp)`.
- * ### Monitoring Clusters
- * **Example:** Check an Instance's Status
+ * @binding
+ * @section Monitoring Clusters
+ * @example Check an Instance's Status
  * ```typescript
  * const describeDBInstances = yield* AWS.Neptune.DescribeDBInstances();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const status = page.DBInstances?.[0]?.DBInstanceStatus;
  * ```
- *
- * @binding
  */
 export interface DescribeDBInstances extends Binding.Service<
   DescribeDBInstances,

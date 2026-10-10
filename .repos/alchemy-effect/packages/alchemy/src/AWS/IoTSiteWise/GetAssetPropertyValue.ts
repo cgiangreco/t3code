@@ -19,12 +19,13 @@ export interface GetAssetPropertyValueRequest extends Omit<
  * current (latest) timestamp-quality-value of one property of the bound
  * asset from a deployed Lambda or Task.
  *
- * ### Reading Current Values
+ * @binding
+ * @section Reading Current Values
  * Provide the `GetAssetPropertyValueHttp` implementation layer on the
  * Function effect, bind the asset in the init phase, then call the returned
  * client at runtime.
  *
- * **Example:** Read the Latest Temperature
+ * @example Read the Latest Temperature
  * ```typescript
  * // init
  * const getValue = yield* AWS.IoTSiteWise.GetAssetPropertyValue(asset);
@@ -35,8 +36,6 @@ export interface GetAssetPropertyValueRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTSiteWise.GetAssetPropertyValueHttp))
  * ```
- *
- * @binding
  */
 export interface GetAssetPropertyValue extends Binding.Service<
   GetAssetPropertyValue,

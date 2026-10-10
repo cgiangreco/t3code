@@ -17,8 +17,9 @@ export interface ListTagsForResourceRequest extends Omit<
  * Bind this operation to a `Stream` or `StreamConsumer` to read its tags —
  * the resource ARN is injected automatically. Provide the implementation
  * with `Effect.provide(AWS.Kinesis.ListTagsForResourceHttp)`.
- * ### Inspecting Streams
- * **Example:** Read a Stream's Tags
+ * @binding
+ * @section Inspecting Streams
+ * @example Read a Stream's Tags
  * ```typescript
  * // init — works for a Stream or a StreamConsumer
  * const listTagsForResource = yield* AWS.Kinesis.ListTagsForResource(stream);
@@ -29,8 +30,6 @@ export interface ListTagsForResourceRequest extends Omit<
  *   (result.Tags ?? []).map((tag) => [tag.Key, tag.Value]),
  * );
  * ```
- *
- * @binding
  */
 export interface ListTagsForResource extends Binding.Service<
   ListTagsForResource,

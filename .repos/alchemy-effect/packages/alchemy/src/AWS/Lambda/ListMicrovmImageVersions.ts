@@ -13,9 +13,8 @@ export interface ListMicrovmImageVersionsRequest extends Omit<
  *
  * Bind it to a {@link MicrovmImage} to list the image's versions (the
  * `imageIdentifier` is injected).
- * ### Image Reads
- *
  * @binding
+ * @section Image Reads
  */
 export interface ListMicrovmImageVersions extends Binding.Service<
   ListMicrovmImageVersions,

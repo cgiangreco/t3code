@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * resolved — every account the experiment injects faults into. Provide the
  * implementation with
  * `Effect.provide(AWS.FIS.ListExperimentTargetAccountConfigurationsHttp)`.
- * ### Multi-Account Experiments
- * **Example:** List an Experiment's Target Accounts
+ * @binding
+ * @section Multi-Account Experiments
+ * @example List an Experiment's Target Accounts
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listTargetAccounts =
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   (targetAccountConfigurations ?? []).map((c) => c.accountId),
  * );
  * ```
- *
- * @binding
  */
 export interface ListExperimentTargetAccountConfigurations extends Binding.Service<
   ListExperimentTargetAccountConfigurations,

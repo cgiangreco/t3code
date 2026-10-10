@@ -17,8 +17,9 @@ export interface GetPackageVersionReadmeRequest extends Omit<
  *
  * Reads a package version's readme, where the format supports one. Provide the implementation with
  * `Effect.provide(AWS.CodeArtifact.GetPackageVersionReadmeHttp)`.
- * ### Inspecting Package Versions
- * **Example:** Get a Version's Readme
+ * @binding
+ * @section Inspecting Package Versions
+ * @example Get a Version's Readme
  * ```typescript
  * const getReadme = yield* AWS.CodeArtifact.GetPackageVersionReadme(repo);
  *
@@ -29,8 +30,6 @@ export interface GetPackageVersionReadmeRequest extends Omit<
  * });
  * console.log(res.readme);
  * ```
- *
- * @binding
  */
 export interface GetPackageVersionReadme extends Binding.Service<
   GetPackageVersionReadme,

@@ -4,7 +4,22 @@ import * as Option from "effect/Option";
 import { getPropertyName, isIdentifier, unwrapExpression } from "../utils.ts";
 
 const RUNTIME_PROPERTIES = new Set(["platform", "arch"]);
+const HOST_PROCESS_REFERENCE_FILE = "packages/shared/src/hostProcess.ts";
 const NODE_OS_MODULES = new Set(["node:os", "os"]);
+
+const normalizePath = (path: string) => path.replaceAll("\\", "/");
+
+const toRepoPath = (filename: string, cwd: string) => {
+  const normalizedFilename = normalizePath(filename);
+  const normalizedCwd = normalizePath(cwd).replace(/\/+$/u, "");
+  const prefix = `${normalizedCwd}/`;
+  return normalizedFilename.startsWith(prefix)
+    ? normalizedFilename.slice(prefix.length)
+    : normalizedFilename;
+};
+
+const isHostProcessReferenceFile = (filename: string, cwd: string) =>
+  toRepoPath(filename, cwd) === HOST_PROCESS_REFERENCE_FILE;
 
 const isGlobalProcessObject = (node: unknown): boolean => {
   const expression = unwrapExpression(node);
@@ -19,7 +34,7 @@ const isGlobalProcessObject = (node: unknown): boolean => {
 };
 
 const message = (property: string) =>
-  `Use HostProcess.${property === "arch" ? "Architecture" : "Platform"} instead of process.${property}; inject the runtime reference in Effect code and provide it explicitly in tests.`;
+  `Use HostProcess${property === "arch" ? "Architecture" : "Platform"} instead of process.${property}; inject the runtime reference in Effect code and provide it explicitly in tests.`;
 
 const getLiteralStringValue = (node: unknown): Option.Option<string> => {
   if (typeof node !== "object" || node === null) return Option.none();
@@ -33,7 +48,7 @@ export default defineRule({
     type: "problem",
     docs: {
       description:
-        "Disallow direct host runtime platform/architecture reads; the shared host process references are exempted in the lint config.",
+        "Disallow direct host runtime platform/architecture reads outside the shared host process references.",
     },
   },
   createOnce(context) {
@@ -102,6 +117,8 @@ export default defineRule({
       before: resetBindings,
       ImportDeclaration: trackImportDeclaration,
       MemberExpression(node) {
+        if (isHostProcessReferenceFile(context.filename, context.cwd)) return;
+
         const property = getPropertyName(node.property);
         if (Option.isNone(property) || !RUNTIME_PROPERTIES.has(property.value)) return;
         if (!isGlobalProcessObject(node.object)) return;
@@ -112,6 +129,8 @@ export default defineRule({
         });
       },
       CallExpression(node) {
+        if (isHostProcessReferenceFile(context.filename, context.cwd)) return;
+
         const property = getNodeOsRuntimeCall(node.callee);
         if (Option.isNone(property)) return;
 

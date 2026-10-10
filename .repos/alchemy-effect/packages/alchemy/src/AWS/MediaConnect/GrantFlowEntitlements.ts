@@ -13,8 +13,9 @@ import type { Flow } from "./Flow.ts";
  * `GrantFlowEntitlements420Exception` tag. The flow ARN is injected from
  * the binding. Provide the implementation with
  * `Effect.provide(AWS.MediaConnect.GrantFlowEntitlementsHttp)`.
- * ### Managing Entitlements
- * **Example:** Grant a Subscriber Access to the Flow
+ * @binding
+ * @section Managing Entitlements
+ * @example Grant a Subscriber Access to the Flow
  * ```typescript
  * // init — bind the operation to the flow
  * const grantEntitlements = yield* AWS.MediaConnect.GrantFlowEntitlements(flow);
@@ -26,8 +27,6 @@ import type { Flow } from "./Flow.ts";
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface GrantFlowEntitlements extends Binding.Service<
   GrantFlowEntitlements,

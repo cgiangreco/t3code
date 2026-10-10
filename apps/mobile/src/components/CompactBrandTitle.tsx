@@ -1,34 +1,43 @@
-import { NATIVE_WORKSPACE_COLUMNS_SUPPORTED } from "../native/NativeWorkspaceColumns";
 import Constants from "expo-constants";
-import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import type {
+  NativeStackHeaderItem,
+  NativeStackNavigationOptions,
+} from "@react-navigation/native-stack";
 import { Platform, View } from "react-native";
 
 import { AppText as Text } from "./AppText";
 import { T3Wordmark } from "./T3Wordmark";
 import { IPAD_HOME_TITLE_OFFSET } from "../lib/layoutMetrics";
 import { resolveMobileStageLabel } from "../lib/mobileBranding";
-import { useAndroidControlSizing } from "./useAndroidControlSizing";
+import { useThemeColor } from "../lib/useThemeColor";
+import { NATIVE_LIQUID_GLASS_SUPPORTED } from "../native/native-glass";
 
-/**
- * Horizontal correction applied to content rendered in the brand title slot,
- * shared with the connection-status swap so both align identically.
- */
-export function brandTitleOffset(): number {
-  if (Platform.OS !== "ios") return 0;
-  return Platform.isPad && !NATIVE_WORKSPACE_COLUMNS_SUPPORTED ? IPAD_HOME_TITLE_OFFSET : 0;
-}
+// Native leading items inherit different UIKit margins than title views.
+const IOS_NATIVE_LEADING_TITLE_OFFSET = -6;
+const IPAD_NATIVE_LEADING_TITLE_OFFSET = 7;
 
 /**
  * Compact brand lockup sized for native navigation bars.
  */
 export function CompactBrandTitle(
   props: {
-    readonly allowFontScaling?: boolean;
+    readonly nativeLeadingItem?: boolean;
   } = {},
 ) {
+  const iconColor = useThemeColor("--color-icon");
+  const mutedColor = useThemeColor("--color-foreground-muted");
+  const subtleColor = useThemeColor("--color-subtle");
   const stageLabel = resolveMobileStageLabel(Constants.expoConfig?.extra?.appVariant);
-  const titleOffset = brandTitleOffset();
-  const { scale } = useAndroidControlSizing();
+  const titleOffset =
+    Platform.OS !== "ios"
+      ? 0
+      : props.nativeLeadingItem
+        ? Platform.isPad
+          ? IPAD_NATIVE_LEADING_TITLE_OFFSET
+          : IOS_NATIVE_LEADING_TITLE_OFFSET
+        : Platform.isPad
+          ? IPAD_HOME_TITLE_OFFSET
+          : 0;
 
   return (
     <View
@@ -36,29 +45,40 @@ export function CompactBrandTitle(
       accessibilityLabel="T3 Code, Threads"
       accessible
       role="heading"
-      className="flex-row items-center gap-1.5"
-      style={[{ marginLeft: titleOffset }, Platform.OS === "android" && { gap: 5.25 * scale }]}
+      style={{
+        alignItems: "center",
+        flexDirection: "row",
+        gap: 6,
+        marginLeft: titleOffset,
+      }}
     >
-      <T3Wordmark colorClassName="accent-icon" height={Math.round(15 * scale)} />
+      <T3Wordmark color={iconColor} height={15} />
       <Text
-        allowFontScaling={props.allowFontScaling}
-        className="font-t3-medium text-foreground-muted"
-        style={{ fontSize: 21 * scale, letterSpacing: -0.5 * scale }}
+        style={{
+          color: mutedColor,
+          fontFamily: "DMSans-Medium",
+          fontSize: 21,
+          letterSpacing: -0.5,
+        }}
       >
         Code
       </Text>
       <View
-        className="rounded-full bg-subtle px-1.5 py-0.5"
-        style={
-          Platform.OS === "android"
-            ? { paddingHorizontal: 5.25 * scale, paddingVertical: 1.75 * scale }
-            : undefined
-        }
+        style={{
+          backgroundColor: subtleColor,
+          borderRadius: 999,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+        }}
       >
         <Text
-          allowFontScaling={props.allowFontScaling}
-          className="font-t3-bold text-foreground-muted uppercase"
-          style={{ fontSize: 9 * scale, letterSpacing: 0.9 * scale }}
+          style={{
+            color: mutedColor,
+            fontFamily: "DMSans-Bold",
+            fontSize: 9,
+            letterSpacing: 0.9,
+            textTransform: "uppercase",
+          }}
         >
           {stageLabel}
         </Text>
@@ -68,16 +88,34 @@ export function CompactBrandTitle(
 }
 
 export function renderCompactBrandTitle() {
-  return <CompactBrandTitle allowFontScaling={Platform.OS === "ios"} />;
+  return <CompactBrandTitle />;
+}
+
+export function renderCompactBrandHeaderItems(): NativeStackHeaderItem[] {
+  return [
+    {
+      element: <CompactBrandTitle nativeLeadingItem />,
+      hidesSharedBackground: true,
+      type: "custom",
+    },
+  ];
 }
 
 export function getCompactBrandHeaderOptions(
   fallbackTitleStyle?: NativeStackNavigationOptions["headerTitleStyle"],
 ): NativeStackNavigationOptions {
+  if (Platform.OS === "ios" && NATIVE_LIQUID_GLASS_SUPPORTED) {
+    return {
+      headerTitle: "Threads",
+      headerTitleStyle: { color: "transparent", fontSize: 18, fontWeight: "800" },
+      title: "Threads",
+      unstable_headerLeftItems: renderCompactBrandHeaderItems,
+    };
+  }
+
   return {
     headerTitle: renderCompactBrandTitle,
     headerTitleStyle: fallbackTitleStyle,
     title: "Threads",
-    unstable_headerLeftItems: undefined,
   };
 }

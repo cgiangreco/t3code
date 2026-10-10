@@ -1,4 +1,7 @@
-import type { EnvironmentId } from "@t3tools/contracts";
+import type { EnvironmentId, SidebarThreadSortOrder } from "@t3tools/contracts";
+
+import type { HomeProjectSortOrder } from "./homeThreadList";
+import { PROJECT_SORT_OPTIONS, THREAD_SORT_OPTIONS } from "./home-list-options";
 
 export interface HomeListFilterMenuEnvironment {
   readonly environmentId: EnvironmentId;
@@ -34,8 +37,16 @@ export function buildHomeListFilterMenu(props: {
   readonly projects: ReadonlyArray<HomeListFilterMenuProject>;
   readonly selectedEnvironmentId: EnvironmentId | null;
   readonly selectedProjectKey: string | null;
+  readonly projectSortOrder: HomeProjectSortOrder;
+  readonly threadSortOrder: SidebarThreadSortOrder;
   readonly onEnvironmentChange: (environmentId: EnvironmentId | null) => void;
   readonly onProjectChange: (projectKey: string | null) => void;
+  readonly onProjectSortOrderChange: (sortOrder: HomeProjectSortOrder) => void;
+  readonly onThreadSortOrderChange: (sortOrder: SidebarThreadSortOrder) => void;
+  /** False hides the sort/group submenus. Thread List v2 uses a fixed
+      creation-order layout, so offering those controls while it silently
+      ignores them would be a lie; the environment filter still applies. */
+  readonly listOrganization?: boolean;
 }): HomeListFilterMenu {
   const items: Array<HomeListFilterMenuAction | HomeListFilterMenuSubmenu> = [];
 
@@ -82,6 +93,31 @@ export function buildHomeListFilterMenu(props: {
         })),
       ],
     });
+  }
+
+  if (props.listOrganization !== false) {
+    items.push(
+      {
+        type: "submenu",
+        title: "Sort projects",
+        items: PROJECT_SORT_OPTIONS.map((option) => ({
+          type: "action",
+          title: option.label,
+          state: props.projectSortOrder === option.value ? "on" : "off",
+          onPress: () => props.onProjectSortOrderChange(option.value),
+        })),
+      },
+      {
+        type: "submenu",
+        title: "Sort threads",
+        items: THREAD_SORT_OPTIONS.map((option) => ({
+          type: "action",
+          title: option.label,
+          state: props.threadSortOrder === option.value ? "on" : "off",
+          onPress: () => props.onThreadSortOrderChange(option.value),
+        })),
+      },
+    );
   }
 
   return {

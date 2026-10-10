@@ -6,8 +6,9 @@ import * as Binding from "../../Binding.ts";
  * Runtime binding for `textract:ListAdapters` — list the Textract
  * adapters in the account/region.
  *
- * ### Managing Adapters
- * **Example:** List Adapters
+ * @binding
+ * @section Managing Adapters
+ * @example List Adapters
  * ```typescript
  * // init
  * const listAdapters = yield* AWS.Textract.ListAdapters();
@@ -16,8 +17,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* listAdapters();
  * const names = (result.Adapters ?? []).map((a) => a.AdapterName);
  * ```
- *
- * @binding
  */
 export interface ListAdapters extends Binding.Service<
   ListAdapters,

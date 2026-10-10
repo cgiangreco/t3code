@@ -22,8 +22,9 @@ export interface CreateBatchLoadTaskRequest extends Omit<
  * Provide `Timestream.CreateBatchLoadTaskHttp` on the Function to implement
  * the binding.
  *
- * ### Batch Loading
- * **Example:** Start a bulk CSV import
+ * @binding
+ * @section Batch Loading
+ * @example Start a bulk CSV import
  * ```typescript
  * // init — bind the operation to the target table
  * const createBatchLoadTask = yield* Timestream.CreateBatchLoadTask(table);
@@ -41,8 +42,6 @@ export interface CreateBatchLoadTaskRequest extends Omit<
  * });
  * // task.TaskId identifies the import for Describe/Resume
  * ```
- *
- * @binding
  */
 export interface CreateBatchLoadTask extends Binding.Service<
   CreateBatchLoadTask,

@@ -5,24 +5,24 @@ import * as Layer from "effect/Layer";
 import * as Redacted from "effect/Redacted";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
-import * as HttpClient from "effect/http/HttpClient";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
-import * as HttpApiClient from "effect/http-api/HttpApiClient";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import * as HttpApiClient from "effect/unstable/httpapi/HttpApiClient";
 import crypto from "node:crypto";
 
 import * as Config from "effect/Config";
 import * as Option from "effect/Option";
+import { isHttpClientError } from "effect/unstable/http/HttpClientError";
 import { adopt } from "../../AdoptPolicy.ts";
 import { AlchemyContext } from "../../AlchemyContext.ts";
 import { AuthError } from "../../Auth/AuthProvider.ts";
 import { CredentialsStore } from "../../Auth/Credentials.ts";
-import { currentProfileName } from "../../Auth/Profile.ts";
+import { ALCHEMY_PROFILE } from "../../Auth/Profile.ts";
 import * as Cloudflare from "../../Cloudflare/Providers.ts";
 import { deploy } from "../../Deploy.ts";
 import * as Output from "../../Output.ts";
 import { RandomProvider } from "../../Random.ts";
 import * as Alchemy from "../../Stack.ts";
-import { Progress } from "../../Report.ts";
 import { StateApi } from "../../State/HttpStateApi.ts";
 import {
   checkHttpStateStoreAuth,
@@ -30,23 +30,19 @@ import {
   type HttpStateStoreCredentials,
 } from "../../State/HttpStateStore.ts";
 import { makeLocalState } from "../../State/LocalState.ts";
-import {
-  State,
-  type StateService,
-  type StateStoreError,
-} from "../../State/State.ts";
+import { State, type StateService } from "../../State/State.ts";
 import {
   recordStateStoreInit,
   recordStateStoreOp,
 } from "../../Telemetry/Metrics.ts";
-import * as Interaction from "../../Interaction.ts";
+import * as Clank from "../../Util/Clank.ts";
 import * as Access from "../Access.ts";
 import * as CloudflareEnvironment from "../CloudflareEnvironment.ts";
 import { EdgeSessionError, createEdgeSession } from "../EdgeSession.ts";
 import Api, { STATE_STORE_SCRIPT_NAME, STATE_STORE_VERSION } from "./Api.ts";
 import {
   CREDENTIALS_FILE,
-  StoredStateStoreCredentials,
+  type StoredStateStoreCredentials,
   isStateStoreCredentialsStale,
 } from "./CredentialsFile.ts";
 import {
@@ -56,7 +52,7 @@ import {
   TokenValue,
 } from "./Token.ts";
 
-const CI = Config.Boolean("CI").pipe(Config.withDefault(false));
+const CI = Config.boolean("CI").pipe(Config.withDefault(false));
 
 export const state = () =>
   Layer.effect(
@@ -64,7 +60,7 @@ export const state = () =>
     Effect.gen(function* () {
       const isCI = yield* CI;
       const scriptName = STATE_STORE_SCRIPT_NAME;
-      const profileName = yield* currentProfileName;
+      const profileName = yield* ALCHEMY_PROFILE;
       const localStage = `${profileName}_${scriptName}`;
       const credStore = yield* CredentialsStore;
       // `deploy --yes` flows in here (via AlchemyContext.updateStateStore) to
@@ -79,18 +75,12 @@ export const state = () =>
         if (yield* hasLocalStack(localStage)) {
           // if there's still a local stack, then we need to finish the bootstrap
           // TODO(sam): what if the local stack was
-          const task = (yield* Interaction.Interaction).task;
-          return yield* task(
-            {
-              label: `Resuming Cloudflare State Store '${scriptName}' deployment`,
-            },
-            deployWithLocalState({
-              scriptName,
-              profileName,
-              isCI,
-              force: false,
-            }),
-          ).pipe(withStateBootstrapEvents(scriptName));
+          return yield* deployWithLocalState({
+            scriptName,
+            profileName,
+            isCI,
+            force: false,
+          });
         }
 
         const ensureLatest = ({
@@ -107,13 +97,8 @@ export const state = () =>
             if (observed === undefined) {
               const shouldDeploy =
                 autoUpdateStateStore ||
-                (yield* Interaction.accessors.prompt.confirm({
+                (yield* Clank.confirm({
                   message: `Cloudflare State Store '${scriptName}' is not available. Do you want to deploy it?`,
-                  // Deploying is the constructive happy path, not destructive
-                  // — keep default-yes despite the prompt-wide default-no.
-                  initialValue: true,
-                  confirmLabel: "Deploy",
-                  cancelLabel: "Cancel",
                 }));
               if (shouldDeploy) {
                 return yield* bootstrap({
@@ -121,7 +106,7 @@ export const state = () =>
                   profile: profileName,
                 });
               } else {
-                return yield* Effect.die(new Interaction.TerminalCancelled());
+                return yield* Effect.die(new Clank.PromptCancelled());
               }
             }
 
@@ -132,22 +117,17 @@ export const state = () =>
 
             // The store is out of date. Upgrade it in place.
             const upgrade = Effect.gen(function* () {
-              const interaction = yield* Interaction.Interaction;
-              return yield* interaction.task(
-                {
-                  label: `Updating Cloudflare State Store '${scriptName}'`,
-                  detail: `v${observed ?? "unknown"} → v${expected}`,
-                },
-                Effect.gen(function* () {
-                  const stateStoreOptions = yield* deployStateStore({
-                    stage: scriptName,
-                    state: httpState,
-                    force: false,
-                  });
-                  return yield* makeCloudflareStateStore(stateStoreOptions);
-                }),
+              yield* Clank.info(
+                `Cloudflare State Store '${scriptName}' is out of date ` +
+                  `(expected v${expected}, observed v${observed ?? "unknown"}); upgrading...`,
               );
-            }).pipe(withStateBootstrapEvents(scriptName));
+              const stateStoreOptions = yield* deployStateStore({
+                stage: scriptName,
+                state: httpState,
+                force: false,
+              });
+              return yield* makeCloudflareStateStore(stateStoreOptions);
+            });
 
             if (autoUpdateStateStore) {
               // `--yes`: upgrade automatically (also unblocks CI).
@@ -158,23 +138,19 @@ export const state = () =>
                   message:
                     `Cloudflare State store is out of date ` +
                     `(expected v${expected}, observed v${observed ?? "unknown"}). ` +
-                    `Run 'alchemy provider cloudflare bootstrap --profile <your-ci-profile>' to upgrade it first, or pass --yes.`,
+                    `Run 'alchemy bootstrap cloudflare --profile <your-ci-profile>' to upgrade it first, or pass --yes.`,
                 }),
               );
             } else {
-              const shouldDeploy = yield* Interaction.accessors.prompt.confirm({
+              const shouldDeploy = yield* Clank.confirm({
                 message:
                   `Cloudflare State Store '${scriptName}' is out of date ` +
                   `(expected v${expected}, observed v${observed ?? "unknown"})`,
-                // Upgrading is the constructive happy path — default-yes.
-                initialValue: true,
-                confirmLabel: "Upgrade",
-                cancelLabel: "Cancel",
               });
               if (shouldDeploy) {
                 return yield* upgrade;
               } else {
-                return yield* Effect.die(new Interaction.TerminalCancelled());
+                return yield* Effect.die(new Clank.PromptCancelled());
               }
             }
           });
@@ -184,6 +160,9 @@ export const state = () =>
             const isAuth = yield* checkHttpStateStoreAuth(credentials);
             if (!isAuth) {
               // our token is wrong, force a refresh
+              yield* Clank.info(
+                `Cloudflare State store authentication failed, refreshing credentials...`,
+              );
               const credentials = yield* loginWithCloudflare(profileName, true);
               if (!(yield* checkHttpStateStoreAuth(credentials))) {
                 return yield* Effect.die(
@@ -200,10 +179,9 @@ export const state = () =>
         const { accountId } =
           yield* yield* CloudflareEnvironment.CloudflareEnvironment;
 
-        const credentials = yield* credStore.read(
+        const credentials = yield* credStore.read<StoredStateStoreCredentials>(
           profileName,
           CREDENTIALS_FILE,
-          StoredStateStoreCredentials,
         );
         if (credentials) {
           // The cached `url`/`authToken` are minted per-account (the `url`
@@ -213,7 +191,7 @@ export const state = () =>
           // silently read/write state in the wrong account, so discard it
           // and fall through to re-derivation from the current account.
           if (isStateStoreCredentialsStale(credentials, accountId)) {
-            yield* Interaction.accessors.output.info(
+            yield* Clank.info(
               `Cloudflare State Store credentials were minted for a different ` +
                 `Cloudflare account; re-deriving for the current account.`,
             );
@@ -234,21 +212,18 @@ export const state = () =>
         } else if (isCI) {
           return yield* Effect.die(
             new AuthError({
-              message: `Cloudflare State store not found. Run 'alchemy provider cloudflare bootstrap --profile <your-ci-profile>' to deploy it first, or pass --yes.`,
+              message: `Cloudflare State store not found. Run 'alchemy bootstrap cloudflare --profile <your-ci-profile>' to deploy it first, or pass --yes.`,
             }),
           );
         } else {
-          const confirm = Interaction.accessors.prompt.confirm;
-          return yield* confirm({
+          return yield* Clank.confirm({
             message:
               "Cloudflare State Store not found. Do you want to deploy it?",
-            // Deploying is the constructive happy path — default-yes.
-            initialValue: true,
           }).pipe(
             Effect.flatMap((shouldDeploy) =>
               shouldDeploy
                 ? bootstrap()
-                : Effect.die(new Interaction.TerminalCancelled()),
+                : Effect.die(new Clank.PromptCancelled()),
             ),
           );
         }
@@ -277,122 +252,108 @@ export interface BootstrapOptions {
   profile?: string;
 }
 
-/**
- * Report `state.bootstrap.*` progress events around a state-store deploy or
- * upgrade. Bootstrap runs lazily inside the plan's "loading state" phase,
- * can take many seconds (it deploys a worker), and would otherwise be
- * invisible to non-interactive renderers and traces — the Interaction task only
- * paints the local terminal.
- */
-const withStateBootstrapEvents =
-  (store: string) =>
-  <A, E, R>(effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> =>
-    Effect.gen(function* () {
-      const report = yield* Progress;
-      yield* report({ _tag: "state.bootstrap.started", store });
-      const result = yield* effect;
-      yield* report({ _tag: "state.bootstrap.completed", store });
-      return result;
-    });
-
 export const bootstrap = (options: BootstrapOptions = {}) =>
-  withStateBootstrapEvents(options.workerName ?? STATE_STORE_SCRIPT_NAME)(
-    Effect.gen(function* () {
-      const interaction = yield* Interaction.Interaction;
-      const isCI = yield* CI;
-      const profileName = options.profile ?? (yield* currentProfileName);
-      const scriptName = options.workerName ?? STATE_STORE_SCRIPT_NAME;
-      const force = options.force ?? false;
-      const localStage = `${profileName}_${scriptName}`;
-      yield* Effect.annotateCurrentSpan({
-        "alchemy.state_store.script_name": scriptName,
-        "alchemy.state_store.profile": profileName,
-        "alchemy.state_store.force": force,
-        "alchemy.state_store.ci": isCI,
-      });
-      yield* annotateAccountHash();
+  Effect.gen(function* () {
+    const isCI = yield* CI;
+    const profileName = options.profile ?? (yield* ALCHEMY_PROFILE);
+    const scriptName = options.workerName ?? STATE_STORE_SCRIPT_NAME;
+    const force = options.force ?? false;
+    const localStage = `${profileName}_${scriptName}`;
+    yield* Effect.annotateCurrentSpan({
+      "alchemy.state_store.script_name": scriptName,
+      "alchemy.state_store.profile": profileName,
+      "alchemy.state_store.force": force,
+      "alchemy.state_store.ci": isCI,
+    });
+    yield* annotateAccountHash();
 
-      if (yield* hasLocalStack(localStage)) {
-        // if there's a local stack still, we can assume we did not finish hoisting it, so finish that
-        // resume deployment
-        return yield* interaction.task(
-          {
-            label: `Resuming Cloudflare State Store '${scriptName}' deployment`,
-          },
-          deployWithLocalState({
-            scriptName,
-            profileName,
-            isCI,
-            force,
-          }),
+    if (yield* hasLocalStack(localStage)) {
+      // if there's a local stack still, we can assume we did not finish hoisting it, so finish that
+      yield* Clank.info(
+        `Resuming Cloudflare State Store '${scriptName}' deployment...`,
+      );
+      // resume deployment
+      return yield* deployWithLocalState({
+        scriptName,
+        profileName,
+        isCI,
+        force,
+      }).pipe(
+        Effect.tap(() =>
+          Clank.success(`Cloudflare State Store '${scriptName}' is ready.`),
+        ),
+      );
+    }
+    const { accountId } =
+      yield* yield* CloudflareEnvironment.CloudflareEnvironment;
+    if (yield* isStateStoreServing(accountId)) {
+      // this is a regular update, let's check if it needs an update and refresh credentials
+      if (!force) {
+        yield* Clank.info(
+          `Worker '${scriptName}' already exists; adopting and refreshing credentials. ` +
+            `Use --force to redeploy.`,
         );
       }
-      const { accountId } =
-        yield* yield* CloudflareEnvironment.CloudflareEnvironment;
-      if (yield* isStateStoreServing(accountId)) {
-        // this is a regular update, let's check if it needs an update and refresh credentials
-        if (!force) {
-          yield* Interaction.accessors.output.info(
-            `Worker '${scriptName}' already exists; adopting and refreshing credentials. ` +
-              `Use --force to redeploy.`,
-          );
-        }
-        const credentials = yield* loginWithCloudflare(
+      const credentials = yield* loginWithCloudflare(
+        profileName,
+        // force refresh during
+        true,
+      );
+      const { url, authToken } = credentials;
+      if (!isCI) {
+        // we don't write credentials in CI because the file system is ephemeral
+        const store = yield* CredentialsStore;
+        yield* store.write<StoredStateStoreCredentials>(
           profileName,
-          // force refresh during
-          true,
+          CREDENTIALS_FILE,
+          credentials,
         );
-        const { url, authToken } = credentials;
-        if (!isCI) {
-          // we don't write credentials in CI because the file system is ephemeral
-          const store = yield* CredentialsStore;
-          yield* store.write(
-            profileName,
-            CREDENTIALS_FILE,
-            StoredStateStoreCredentials,
-            credentials,
-          );
-        }
-        const { matches, expected, observed } =
-          yield* checkStateStoreVersion(url);
-        const httpState = yield* makeCloudflareStateStore({ url, authToken });
-        if (!matches || force) {
-          return yield* interaction.task(
-            {
-              label: `${matches ? "Redeploying" : "Updating"} Cloudflare State Store '${scriptName}'`,
-              detail: matches
-                ? "forced"
-                : `v${observed ?? "unknown"} → v${expected}`,
-            },
-            deployStateStore({
-              stage: scriptName,
-              state: httpState,
-              force,
-            }).pipe(Effect.flatMap(makeCloudflareStateStore)),
+      }
+      const { matches, expected, observed } =
+        yield* checkStateStoreVersion(url);
+      const httpState = yield* makeCloudflareStateStore({ url, authToken });
+      if (!matches || force) {
+        if (matches && force) {
+          yield* Clank.info(
+            `Cloudflare State Store '${scriptName}' is up to date; force redeploying...`,
           );
         } else {
-          return httpState;
+          yield* Clank.info(
+            `Cloudflare State Store '${scriptName}' is out of date ` +
+              `(expected v${expected}, observed v${observed ?? "unknown"}); redeploying...`,
+          );
         }
-      } else {
-        return yield* interaction.task(
-          { label: `Deploying Cloudflare State Store '${scriptName}'` },
-          deployWithLocalState({
-            scriptName,
-            profileName,
-            isCI,
+        return yield* makeCloudflareStateStore(
+          yield* deployStateStore({
+            stage: scriptName,
+            state: httpState,
             force,
           }),
         );
+      } else {
+        return httpState;
       }
-    }).pipe(
-      Effect.withSpan("state_store.bootstrap", {
-        attributes: {
-          "alchemy.state_store.op": "bootstrap",
-          "alchemy.state_store.script_name":
-            options.workerName ?? STATE_STORE_SCRIPT_NAME,
-        },
-      }),
-    ),
+    } else {
+      yield* Clank.info(`Deploying Cloudflare State Store '${scriptName}'...`);
+      return yield* deployWithLocalState({
+        scriptName,
+        profileName,
+        isCI,
+        force,
+      }).pipe(
+        Effect.tap(() =>
+          Clank.success(`Cloudflare State Store '${scriptName}' is ready.`),
+        ),
+      );
+    }
+  }).pipe(
+    Effect.withSpan("state_store.bootstrap", {
+      attributes: {
+        "alchemy.state_store.op": "bootstrap",
+        "alchemy.state_store.script_name":
+          options.workerName ?? STATE_STORE_SCRIPT_NAME,
+      },
+    }),
   );
 
 export interface TeardownOptions {
@@ -422,8 +383,7 @@ export interface TeardownOptions {
  */
 export const teardownStateStore = (options: TeardownOptions = {}) =>
   Effect.gen(function* () {
-    const interaction = yield* Interaction.Interaction;
-    const profileName = options.profile ?? (yield* currentProfileName);
+    const profileName = options.profile ?? (yield* ALCHEMY_PROFILE);
     const scriptName = options.workerName ?? STATE_STORE_SCRIPT_NAME;
     const deleteEmptyStore = options.deleteEmptySecretsStore ?? true;
     const { accountId } =
@@ -436,15 +396,11 @@ export const teardownStateStore = (options: TeardownOptions = {}) =>
     });
 
     // 1. Delete the state-store Worker.
-    yield* Interaction.accessors.output.info(
-      `Deleting state store worker '${scriptName}'...`,
-    );
+    yield* Clank.info(`Deleting state store worker '${scriptName}'...`);
     yield* workers.deleteScript({ accountId, scriptName, force: true }).pipe(
       Effect.asVoid,
       Effect.catchTag("WorkerNotFound", () =>
-        interaction.output.info(
-          `  Worker '${scriptName}' not found (already gone).`,
-        ),
+        Clank.info(`  Worker '${scriptName}' not found (already gone).`),
       ),
     );
 
@@ -470,9 +426,7 @@ export const teardownStateStore = (options: TeardownOptions = {}) =>
         );
       const ours = secrets.filter((s) => ourSecretNames.has(s.name));
       for (const secret of ours) {
-        yield* Interaction.accessors.output.info(
-          `Deleting secret '${secret.name}'...`,
-        );
+        yield* Clank.info(`Deleting secret '${secret.name}'...`);
         yield* SecretsStore.deleteStoreSecret({
           accountId,
           storeId: store.id,
@@ -487,9 +441,7 @@ export const teardownStateStore = (options: TeardownOptions = {}) =>
       }
       const remaining = secrets.length - ours.length;
       if (deleteEmptyStore && remaining === 0) {
-        yield* Interaction.accessors.output.info(
-          `Deleting empty secrets store '${store.id}'...`,
-        );
+        yield* Clank.info(`Deleting empty secrets store '${store.id}'...`);
         yield* SecretsStore.deleteStore({
           accountId,
           storeId: store.id,
@@ -502,7 +454,7 @@ export const teardownStateStore = (options: TeardownOptions = {}) =>
           ),
         );
       } else if (remaining > 0) {
-        yield* Interaction.accessors.output.info(
+        yield* Clank.info(
           `Secrets store '${store.id}' still has ${remaining} other ` +
             `secret(s); leaving it in place.`,
         );
@@ -513,9 +465,7 @@ export const teardownStateStore = (options: TeardownOptions = {}) =>
     const credStore = yield* CredentialsStore;
     yield* credStore.delete(profileName, CREDENTIALS_FILE).pipe(Effect.ignore);
 
-    yield* Interaction.accessors.output.success(
-      `Cloudflare State Store '${scriptName}' torn down.`,
-    );
+    yield* Clank.success(`Cloudflare State Store '${scriptName}' torn down.`);
   }).pipe(
     Effect.withSpan("state_store.teardown", {
       attributes: {
@@ -660,14 +610,18 @@ const deployWithLocalState = ({
  *
  * @internal exported for unit testing.
  */
-export const isTransientBootstrapWriteError = (
-  error: Pick<StateStoreError, "http">,
-): boolean => {
-  if (error.http === undefined) return false;
-  const { status } = error.http;
-  return (
-    status === undefined || status === 401 || status === 404 || status >= 500
-  );
+export const isTransientBootstrapWriteError = (error: {
+  cause?: unknown;
+}): boolean => {
+  const cause = error.cause;
+  if (cause == null) return false;
+  const tag = (cause as { _tag?: unknown })._tag;
+  if (typeof tag === "string" && tag.startsWith("Unauthorized")) return true;
+  if (isHttpClientError(cause)) {
+    const status = cause.response?.status;
+    return status === undefined || status === 404 || status >= 500;
+  }
+  return false;
 };
 
 // check if there's a local stack that wasn't properly hoisted
@@ -771,10 +725,9 @@ export const loginWithCloudflare = (profileName: string, force: boolean) =>
 
     if (!force) {
       // try and read from the cached credentials first if not forcing (force will always refresh)
-      const credentials = yield* credStore.read(
+      const credentials = yield* credStore.read<StoredStateStoreCredentials>(
         profileName,
         CREDENTIALS_FILE,
-        StoredStateStoreCredentials,
       );
       // Ignore a cache minted for a different account (or a legacy file with
       // no `accountId`) — reusing it would hand back the wrong account's
@@ -787,79 +740,75 @@ export const loginWithCloudflare = (profileName: string, force: boolean) =>
       }
     }
 
-    const interaction = yield* Interaction.Interaction;
-    const credentials = yield* interaction.task(
-      { label: "Refreshing Cloudflare State Store credentials" },
-      Effect.gen(function* () {
-        // 1. Locate the single Secrets Store on the account.
-        const store = yield* SecretsStore.listStores
-          .items({ accountId })
-          .pipe(Stream.runHead, Effect.map(Option.getOrUndefined));
-        if (!store) {
-          return yield* Effect.fail(
-            new AuthError({
-              message:
-                "No Secrets Store found on this account. Deploy the state store first.",
-            }),
-          );
-        }
+    // 1. Locate the single Secrets Store on the account.
+    const store = yield* SecretsStore.listStores
+      .items({ accountId })
+      .pipe(Stream.runHead, Effect.map(Option.getOrUndefined));
+    if (!store) {
+      return yield* Effect.fail(
+        new AuthError({
+          message:
+            "No Secrets Store found on this account. Deploy the state store first.",
+        }),
+      );
+    }
 
-        // 2. Fetch the auth-token from Secrets Store with a temporary edge-preview worker.
-        const authToken = yield* readSecretViaEdge(
-          STATE_STORE_SCRIPT_NAME,
-          store.id,
-          AuthTokenSecretName,
-        ).pipe(
-          Effect.retry({
-            while: (error) =>
-              isWorkersPreviewConfigurationError(error) ||
-              isTransientEdgeSessionError(error),
-            // Cap the exponential delay at 2s so 15 retries stay within
-            // ~30s instead of doubling unboundedly.
-            schedule: Schedule.max([
-              Schedule.min([
-                Schedule.exponential(200),
-                Schedule.spaced("2 seconds"),
-              ]),
-              Schedule.recurs(15),
-            ]),
-          }),
-        );
+    // 2. Fetch the auth-token from Secrets Store with a temporary edge-preview worker
+    const authToken = yield* readSecretViaEdge(
+      STATE_STORE_SCRIPT_NAME,
+      store.id,
+      AuthTokenSecretName,
+    ).pipe(
+      Effect.retry({
+        while: (error) =>
+          isWorkersPreviewConfigurationError(error) ||
+          isTransientEdgeSessionError(error),
+        // Cap the exponential delay at 2s so 15 retries stay within
+        // ~30s instead of doubling unboundedly.
+        schedule: Schedule.max([
+          Schedule.min([
+            Schedule.exponential(200),
+            Schedule.spaced("2 seconds"),
+          ]),
+          Schedule.recurs(15),
+        ]),
+      }),
+    );
 
-        // 3. Derive the deployed worker URL.
-        const { subdomain } = yield* workers.getSubdomain({ accountId });
-        const url = `https://${STATE_STORE_SCRIPT_NAME}.${subdomain}.workers.dev`;
-        const credentials = {
+    // 3. Derive the deployed worker URL.
+    const { subdomain } = yield* workers.getSubdomain({ accountId });
+    const url = `https://${STATE_STORE_SCRIPT_NAME}.${subdomain}.workers.dev`;
+
+    if (!isCI) {
+      // 4. Persist credentials. The profile entry is managed by
+      //    `loadOrConfigure` when this is invoked through `configure`.
+      yield* credStore
+        .write<StoredStateStoreCredentials>(profileName, CREDENTIALS_FILE, {
           url,
           authToken: authToken.trim(),
           accountId,
-        };
+        })
+        .pipe(
+          Effect.mapError(
+            (e) =>
+              new AuthError({
+                message: "Failed to write credentials",
+                cause: e,
+              }),
+          ),
+        );
 
-        if (!isCI) {
-          // 4. Persist credentials for subsequent invocations.
-          yield* credStore
-            .write(
-              profileName,
-              CREDENTIALS_FILE,
-              StoredStateStoreCredentials,
-              credentials,
-            )
-            .pipe(
-              Effect.mapError(
-                (e) =>
-                  new AuthError({
-                    message: "Failed to write credentials",
-                    cause: e,
-                  }),
-              ),
-            );
-        }
+      yield* Clank.success(
+        `HTTP state store credentials saved for '${profileName}'.`,
+      );
+      yield* Clank.info(`  url:     ${url}`);
+    }
 
-        return credentials;
-      }),
-    );
-    if (!isCI) yield* interaction.output.info(`  url:     ${credentials.url}`);
-    return credentials;
+    return {
+      url,
+      authToken: authToken.trim(),
+      accountId,
+    };
   }).pipe(
     Effect.catchTag("EdgeSessionError", (e) =>
       Effect.fail(
@@ -1107,14 +1056,13 @@ const readSecretViaEdge = (
 
 const writeCredentials = (url: string, authToken: string) =>
   Effect.gen(function* () {
-    const profileName = yield* currentProfileName;
+    const profileName = yield* ALCHEMY_PROFILE;
     const credStore = yield* CredentialsStore;
     const { accountId } =
       yield* yield* CloudflareEnvironment.CloudflareEnvironment;
-    yield* credStore.write(
+    yield* credStore.write<StoredStateStoreCredentials>(
       profileName,
       CREDENTIALS_FILE,
-      StoredStateStoreCredentials,
       {
         url,
         authToken,
@@ -1184,7 +1132,7 @@ const annotateAccountHash = (noTrack?: boolean) =>
   Effect.gen(function* () {
     if (noTrack === true) return;
     if (noTrack === undefined) {
-      const fromEnv = yield* Config.Boolean("NO_TRACK").pipe(
+      const fromEnv = yield* Config.boolean("NO_TRACK").pipe(
         Config.withDefault(false),
       );
       if (fromEnv) return;

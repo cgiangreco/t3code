@@ -1,5 +1,4 @@
 import type * as Credentials from "@distilled.cloud/aws/Credentials";
-import type * as SigV4 from "@distilled.cloud/aws/SigV4";
 import type * as Effect from "effect/Effect";
 import * as Binding from "../../Binding.ts";
 import type { IngestRequest, PipelineIngestError } from "./BindingHttp.ts";
@@ -19,8 +18,9 @@ export { PipelineIngestError } from "./BindingHttp.ts";
  * pass the source `path` configured on the pipeline's `http` source and the
  * batch of events. Provide the implementation with
  * `Effect.provide(AWS.OSIS.IngestHttp)`.
- * ### Ingesting Data
- * **Example:** Send a Batch of Log Events
+ * @binding
+ * @section Ingesting Data
+ * @example Send a Batch of Log Events
  * ```typescript
  * // init — bind the data plane to the pipeline
  * const ingest = yield* AWS.OSIS.Ingest(pipeline);
@@ -31,8 +31,6 @@ export { PipelineIngestError } from "./BindingHttp.ts";
  *   events: [{ message: "hello", level: "info" }],
  * });
  * ```
- *
- * @binding
  */
 export interface Ingest extends Binding.Service<
   Ingest,
@@ -42,10 +40,7 @@ export interface Ingest extends Binding.Service<
   ) => Effect.Effect<
     (
       request: IngestRequest,
-    ) => Effect.Effect<
-      void,
-      PipelineIngestError | Credentials.CredentialsError | SigV4.SigningError
-    >
+    ) => Effect.Effect<void, PipelineIngestError | Credentials.CredentialsError>
   >
 > {}
 export const Ingest = Binding.Service<Ingest>("AWS.OSIS.Ingest");

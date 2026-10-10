@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.ListStreamProcessorsHttp)`.
  *
- * ### Stream Processors
- * **Example:** List Stream Processors
+ * @binding
+ * @section Stream Processors
+ * @example List Stream Processors
  * ```typescript
  * // init
  * const listStreamProcessors = yield* AWS.Rekognition.ListStreamProcessors();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const page = yield* listStreamProcessors({ MaxResults: 10 });
  * // page.StreamProcessors
  * ```
- *
- * @binding
  */
 export interface ListStreamProcessors extends Binding.Service<
   ListStreamProcessors,

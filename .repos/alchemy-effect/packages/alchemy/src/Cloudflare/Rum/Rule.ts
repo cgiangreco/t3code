@@ -102,8 +102,11 @@ export type Rule = Resource<
  * place; changing `rulesetId` triggers a replacement.
  *
  * Web Analytics is available on free accounts.
- * ### Excluding traffic
- * **Example:** Exclude a path from measurement
+ * @resource
+ * @product RUM
+ * @category Observability & Analytics
+ * @section Excluding traffic
+ * @example Exclude a path from measurement
  * ```typescript
  * const zone = yield* Cloudflare.Zone.Zone("Zone", { name: "example.com" });
  *
@@ -120,8 +123,8 @@ export type Rule = Resource<
  * });
  * ```
  *
- * ### Pausing a rule
- * **Example:** Keep the rule but stop applying it
+ * @section Pausing a rule
+ * @example Keep the rule but stop applying it
  * ```typescript
  * yield* Cloudflare.Rum.Rule("ExcludeAdmin", {
  *   rulesetId: site.rulesetId.as<string>(),
@@ -133,10 +136,6 @@ export type Rule = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/web-analytics/
- *
- * @resource
- * @product RUM
- * @category Observability & Analytics
  */
 export const Rule = Resource<Rule>(TypeId);
 

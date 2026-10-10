@@ -1,5 +1,4 @@
 import * as lambda from "@distilled.cloud/aws/lambda";
-import * as Data from "effect/Data";
 import type * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
@@ -14,11 +13,6 @@ import { AWSEnvironment } from "../Environment.ts";
 import type { Providers } from "../Providers.ts";
 
 export type StartingPosition = "TRIM_HORIZON" | "LATEST" | "AT_TIMESTAMP";
-
-/** Internal retry signal: the mapping has not reached its desired state yet. */
-class MappingNotSettled extends Data.TaggedError("MappingNotSettled")<{
-  readonly state: string | undefined;
-}> {}
 
 export type FunctionResponseType = "ReportBatchItemFailures";
 
@@ -195,13 +189,14 @@ export interface EventSourceMapping extends Resource<
  * directly when you need full control over batching, starting position, retry
  * behavior, or filtering.
  *
- * ### Polling an SQS Queue
+ * @resource
+ * @section Polling an SQS Queue
  * SQS is the simplest source: no `startingPosition` is needed because there is
  * no stream cursor. Lambda long-polls the queue and invokes the function with
  * up to `batchSize` messages, and `functionName` plus `eventSourceArn` are the
  * only required props.
  *
- * **Example:** Subscribe a function to a queue
+ * @example Subscribe a function to a queue
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -223,13 +218,13 @@ export interface EventSourceMapping extends Resource<
  * for fewer, larger invocations — useful for amortizing cold starts or
  * downstream write costs on bursty queues.
  *
- * ### Streaming from Kinesis & DynamoDB
+ * @section Streaming from Kinesis & DynamoDB
  * Stream sources (Kinesis and DynamoDB Streams) deliver records in shard order
  * and therefore require a `startingPosition` that tells Lambda where in the
  * shard to begin reading. These sources also unlock the stream-only tuning
  * knobs covered in the next sections.
  *
- * **Example:** Process a Kinesis stream from the latest records
+ * @example Process a Kinesis stream from the latest records
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -250,7 +245,7 @@ export interface EventSourceMapping extends Resource<
  * written after the mapping is created — the right choice for live event
  * pipelines where replaying history would be wasteful or incorrect.
  *
- * **Example:** Replay a DynamoDB stream from the beginning
+ * @example Replay a DynamoDB stream from the beginning
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -272,7 +267,7 @@ export interface EventSourceMapping extends Resource<
  * function processes the full available history before catching up to new
  * writes — use it when every change matters (e.g. building a projection).
  *
- * **Example:** Start reading from a specific timestamp
+ * @example Start reading from a specific timestamp
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("EventsFromTime", {
  *   functionName: consumer.functionName,
@@ -286,12 +281,12 @@ export interface EventSourceMapping extends Resource<
  * `startingPositionTimestamp`, letting you reprocess a known time range without
  * replaying the entire stream.
  *
- * ### Tuning Throughput
+ * @section Tuning Throughput
  * For stream sources, throughput is governed by how records are batched and how
  * many batches run in parallel per shard. These knobs let you balance
  * end-to-end latency against invocation count and downstream load.
  *
- * **Example:** Increase parallelism and use tumbling windows
+ * @example Increase parallelism and use tumbling windows
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("HighThroughput", {
  *   functionName: consumer.functionName,
@@ -310,12 +305,12 @@ export interface EventSourceMapping extends Resource<
  * windowed stream processing. Raising `batchSize`/`maximumBatchingWindow`
  * favors fewer, larger invocations.
  *
- * ### Error Handling & Retries
+ * @section Error Handling & Retries
  * For stream sources a single poison-pill record can block a shard forever.
  * These props bound retries, split failing batches, expire stale records, and
  * route failures elsewhere instead of stalling the stream.
  *
- * **Example:** Bisect on error, cap retries, and expire old records
+ * @example Bisect on error, cap retries, and expire old records
  * ```typescript
  * const dlq = yield* AWS.SQS.Queue("StreamFailures", {});
  *
@@ -338,7 +333,7 @@ export interface EventSourceMapping extends Resource<
  * discarded and its metadata is sent to the `destinationConfig.OnFailure`
  * target so it is never silently lost.
  *
- * **Example:** Report partial batch failures
+ * @example Report partial batch failures
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("PartialFailures", {
  *   functionName: handler.functionName,
@@ -353,13 +348,13 @@ export interface EventSourceMapping extends Resource<
  * instead of the whole batch — avoiding redundant reprocessing of records that
  * already succeeded.
  *
- * ### Filtering Records
+ * @section Filtering Records
  * Attach `filterCriteria` so the function is only invoked for records matching
  * an event pattern. Filtering happens before invocation, so it cuts both cost
  * and unnecessary cold starts. Encrypt the patterns with `kmsKeyArn` when they
  * contain sensitive values.
  *
- * **Example:** Only deliver records where `type` is `"order"`
+ * @example Only deliver records where `type` is `"order"`
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("OrdersOnly", {
  *   functionName: worker.functionName,
@@ -376,11 +371,11 @@ export interface EventSourceMapping extends Resource<
  * dropped without invoking the function. The optional `kmsKeyArn` encrypts the
  * stored filter criteria with your own KMS key instead of an AWS-managed one.
  *
- * ### Enabling & Disabling
+ * @section Enabling & Disabling
  * The `enabled` flag controls whether Lambda actively polls the source without
  * deleting the mapping, so you can pause and resume delivery in place.
  *
- * **Example:** Create a paused mapping
+ * @example Create a paused mapping
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("PausedConsumer", {
  *   functionName: consumer.functionName,
@@ -394,12 +389,12 @@ export interface EventSourceMapping extends Resource<
  * to `true` to resume. This is handy for maintenance windows or for staging a
  * consumer before turning on traffic.
  *
- * ### Scaling & Provisioned Pollers
+ * @section Scaling & Provisioned Pollers
  * Cap concurrency for SQS sources with `scalingConfig`, or reserve dedicated
  * polling capacity (for Kafka/MSK and SQS) with `provisionedPollerConfig` to
  * keep latency predictable under load.
  *
- * **Example:** Limit SQS concurrency and provision pollers
+ * @example Limit SQS concurrency and provision pollers
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("BoundedConsumer", {
  *   functionName: worker.functionName,
@@ -417,14 +412,14 @@ export interface EventSourceMapping extends Resource<
  * `provisionedPollerConfig` keeps a pool of dedicated event pollers warm so
  * throughput doesn't lag behind sudden spikes.
  *
- * ### Kafka, MQ & DocumentDB Sources
+ * @section Kafka, MQ & DocumentDB Sources
  * Beyond AWS-native streams, an event source mapping can poll Amazon MSK,
  * self-managed Apache Kafka, Amazon MQ brokers, and Amazon DocumentDB change
  * streams. These sources use `topics`/`queues` to select what to consume,
  * `sourceAccessConfigurations` for VPC and authentication wiring, and
  * source-specific config props.
  *
- * **Example:** Consume a self-managed Kafka topic
+ * @example Consume a self-managed Kafka topic
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("KafkaConsumer", {
  *   functionName: consumer.functionName,
@@ -447,7 +442,7 @@ export interface EventSourceMapping extends Resource<
  * consumer group. For Amazon MSK use `amazonManagedKafkaEventSourceConfig`
  * instead.
  *
- * **Example:** Consume an Amazon MQ queue and a DocumentDB change stream
+ * @example Consume an Amazon MQ queue and a DocumentDB change stream
  * ```typescript
  * const mqMapping = yield* AWS.Lambda.EventSourceMapping("MqConsumer", {
  *   functionName: worker.functionName,
@@ -474,12 +469,12 @@ export interface EventSourceMapping extends Resource<
  * `documentDBEventSourceConfig` selects the database/collection and whether full
  * documents are delivered on updates.
  *
- * ### Metrics & Tags
+ * @section Metrics & Tags
  * Opt into per-mapping CloudWatch metrics with `metricsConfig` and brand the
  * mapping with your own `tags` (Alchemy also applies its internal ownership
  * tags automatically).
  *
- * **Example:** Enable event metrics and add tags
+ * @example Enable event metrics and add tags
  * ```typescript
  * const mapping = yield* AWS.Lambda.EventSourceMapping("ObservedConsumer", {
  *   functionName: worker.functionName,
@@ -492,8 +487,6 @@ export interface EventSourceMapping extends Resource<
  * `metricsConfig.Metrics` turns on the named CloudWatch metrics (e.g.
  * `EventCount`) for this mapping, and `tags` attaches arbitrary key/value pairs
  * for cost allocation and discovery.
- *
- * @resource
  */
 export const EventSourceMapping = Resource<EventSourceMapping>(
   "AWS.Lambda.EventSourceMapping",
@@ -742,43 +735,6 @@ export const EventSourceMappingProvider = () =>
               retryPermissionsPropagation,
               retryTransient,
             );
-
-          // Wait for the mapping to settle into its desired terminal state.
-          // A fresh mapping sits in `Creating` for up to ~a minute before
-          // Lambda actually starts polling — and for stream sources with
-          // `startingPosition: LATEST`, records written before polling
-          // starts are silently skipped. Returning early would hand the
-          // caller a mapping that looks deployed but drops events.
-          const desiredState = (news.enabled ?? true) ? "Enabled" : "Disabled";
-          if (config.State !== desiredState) {
-            config = yield* lambda.getEventSourceMapping({ UUID: uuid }).pipe(
-              Effect.flatMap((observed) =>
-                observed.State === desiredState
-                  ? Effect.succeed(observed)
-                  : Effect.fail(
-                      new MappingNotSettled({ state: observed.State }),
-                    ),
-              ),
-              Effect.retry({
-                while: (e) => e._tag === "MappingNotSettled",
-                schedule: Schedule.max([
-                  Schedule.spaced("2 seconds"),
-                  Schedule.recurs(45),
-                ]).pipe(
-                  Schedule.tap(({ attempt }) =>
-                    session.note(
-                      `EventSourceMapping ${uuid}: waiting to become ${desiredState} (${(attempt + 1) * 2}s elapsed)`,
-                    ),
-                  ),
-                ),
-              }),
-              // Never wedge a deploy on a mapping stuck in transition —
-              // surface the observed state in the attributes instead.
-              Effect.catchTag("MappingNotSettled", () =>
-                lambda.getEventSourceMapping({ UUID: uuid }),
-              ),
-            );
-          }
 
           // Sync tags — diff observed cloud tags against desired so
           // adoption rewrites ownership tags correctly.

@@ -100,8 +100,8 @@ export interface Dashboard extends Resource<
  * one, create operations fail with the typed `QuickSightSubscriptionRequired`
  * error.
  *
- * ### Creating a Dashboard
- * **Example:** Dashboard from a Template
+ * @section Creating a Dashboard
+ * @example Dashboard from a Template
  * ```typescript
  * const dashboard = yield* Dashboard("sales-overview", {
  *   name: "Sales Overview",

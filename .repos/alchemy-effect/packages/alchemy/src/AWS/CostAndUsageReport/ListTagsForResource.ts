@@ -10,8 +10,9 @@ import type { ReportDefinition } from "./ReportDefinition.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.CostAndUsageReport.ListTagsForResourceHttp)`.
- * ### Reading Report Tags
- * **Example:** List the tags on a report definition
+ * @binding
+ * @section Reading Report Tags
+ * @example List the tags on a report definition
  * ```typescript
  * // init — grants cur:ListTagsForResource on the report's ARN
  * const listReportTags =
@@ -23,8 +24,6 @@ import type { ReportDefinition } from "./ReportDefinition.ts";
  *   yield* Effect.log(`${tag.Key}=${tag.Value}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListTagsForResource extends Binding.Service<
   ListTagsForResource,

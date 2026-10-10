@@ -27,8 +27,9 @@ export interface StartParticipantReplicationRequest extends Omit<
  * bound destination stage — e.g. to bring a guest publisher into a second
  * room without a re-publish.
  *
- * ### Replicating Participants
- * **Example:** Replicate a publisher into another stage
+ * @binding
+ * @section Replicating Participants
+ * @example Replicate a publisher into another stage
  * ```typescript
  * // init — bound to (source, destination)
  * const startParticipantReplication =
@@ -40,8 +41,6 @@ export interface StartParticipantReplicationRequest extends Omit<
  *   reconnectWindow: "30 seconds",
  * });
  * ```
- *
- * @binding
  */
 export interface StartParticipantReplication extends Binding.Service<
   StartParticipantReplication,

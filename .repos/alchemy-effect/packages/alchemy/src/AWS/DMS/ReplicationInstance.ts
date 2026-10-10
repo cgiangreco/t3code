@@ -114,8 +114,9 @@ export interface ReplicationInstance extends Resource<
  * replication tasks. Provisioning takes several minutes and the instance is
  * billed hourly while it exists, so create it only when a migration is
  * running and destroy it promptly.
- * ### Creating a Replication Instance
- * **Example:** Small Instance in a Subnet Group
+ * @resource
+ * @section Creating a Replication Instance
+ * @example Small Instance in a Subnet Group
  * ```typescript
  * const instance = yield* ReplicationInstance("Migration", {
  *   replicationInstanceClass: "dms.t3.micro",
@@ -124,8 +125,6 @@ export interface ReplicationInstance extends Resource<
  *   publiclyAccessible: false,
  * });
  * ```
- *
- * @resource
  */
 export const ReplicationInstance = Resource<ReplicationInstance>(
   "AWS.DMS.ReplicationInstance",

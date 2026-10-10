@@ -17,9 +17,12 @@ import type { DispatchNamespace as DispatchNamespaceResource } from "./DispatchN
  * Provide {@link GetBinding} on the Worker's runtime layer to resolve the
  * underlying `dispatch_namespace` binding at request time.
  *
+ * @binding
+ * @product Workers for Platforms
+ * @category Workers & Compute
  *
- * ### Dispatching to user Workers
- * **Example:** Dispatch a request to a customer Worker
+ * @section Dispatching to user Workers
+ * @example Dispatch a request to a customer Worker
  * Bind the namespace during the Worker's init phase, then look up and forward
  * to a user Worker from a request handler.
  * ```typescript
@@ -35,10 +38,6 @@ import type { DispatchNamespace as DispatchNamespaceResource } from "./DispatchN
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/get-started/dynamic-dispatch/
- *
- * @binding
- * @product Workers for Platforms
- * @category Workers & Compute
  */
 export interface Get extends Binding.Service<
   Get,

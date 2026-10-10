@@ -17,12 +17,13 @@ export interface RunTaskRequest extends Omit<
  * definition. The cluster and task definition ARNs are injected automatically;
  * the host is granted `ecs:RunTask` on the task definition plus `iam:PassRole`
  * on the task and execution roles.
- * ### Running Tasks
- * **Example:** Launch a Fargate Task from a handler
+ * @binding
+ * @section Running Tasks
+ * @example Launch a Fargate Task from a handler
  * ```typescript
  * const api = yield* AWS.Lambda.Function(
  *   "Api",
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     // init: bind the launch (IAM grants happen here)
  *     const runTask = yield* AWS.ECS.RunTask(cluster, task);
@@ -47,8 +48,6 @@ export interface RunTaskRequest extends Omit<
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface RunTask extends Binding.Service<
   RunTask,

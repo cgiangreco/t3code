@@ -9,15 +9,14 @@ import * as Binding from "../../Binding.ts";
  * filtered by incident or time range.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMContacts.ListEngagementsHttp)`.
- * ### Managing Engagements
- * **Example:** List Recent Engagements
+ * @binding
+ * @section Managing Engagements
+ * @example List Recent Engagements
  * ```typescript
  * const listEngagements = yield* AWS.SSMContacts.ListEngagements();
  *
  * const { Engagements } = yield* listEngagements();
  * ```
- *
- * @binding
  */
 export interface ListEngagements extends Binding.Service<
   ListEngagements,

@@ -14,8 +14,9 @@ export interface ListCostAllocationTagsRequest
  * List your cost allocation tags with their activation status —
  * user-defined and AWS-generated. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.ListCostAllocationTagsHttp)`.
- * ### Cost Allocation Tags
- * **Example:** List Cost Allocation Tags
+ * @binding
+ * @section Cost Allocation Tags
+ * @example List Cost Allocation Tags
  * ```typescript
  * // init — account-level binding takes no resource
  * const listCostAllocationTags = yield* AWS.CostExplorer.ListCostAllocationTags();
@@ -24,8 +25,6 @@ export interface ListCostAllocationTagsRequest
  * const result = yield* listCostAllocationTags();
  * const tags = result.CostAllocationTags;
  * ```
- *
- * @binding
  */
 export interface ListCostAllocationTags extends Binding.Service<
   ListCostAllocationTags,

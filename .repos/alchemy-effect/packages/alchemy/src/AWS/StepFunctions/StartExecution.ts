@@ -14,8 +14,9 @@ export interface StartExecutionRequest extends Omit<
  * Bind this operation to a {@link StateMachine} inside a function runtime to
  * get a callable that starts asynchronous executions with the state machine
  * ARN injected automatically.
- * ### Starting Executions
- * **Example:** Start a workflow execution
+ * @binding
+ * @section Starting Executions
+ * @example Start a workflow execution
  * ```typescript
  * const startExecution = yield* StepFunctions.StartExecution(machine);
  *
@@ -25,15 +26,13 @@ export interface StartExecutionRequest extends Omit<
  * // execution.executionArn identifies the running workflow
  * ```
  *
- * **Example:** Idempotent start via execution name
+ * @example Idempotent start via execution name
  * ```typescript
  * const execution = yield* startExecution({
  *   name: `order-${orderId}`,
  *   input: JSON.stringify({ orderId }),
  * });
  * ```
- *
- * @binding
  */
 export interface StartExecution extends Binding.Service<
   StartExecution,

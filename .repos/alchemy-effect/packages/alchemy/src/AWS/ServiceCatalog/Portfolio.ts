@@ -57,8 +57,9 @@ export interface Portfolio extends Resource<
  * An AWS Service Catalog portfolio — a container that organizes products
  * and grants access to them for a set of principals.
  *
- * ### Creating a Portfolio
- * **Example:** Basic Portfolio
+ * @resource
+ * @section Creating a Portfolio
+ * @example Basic Portfolio
  * ```typescript
  * import * as ServiceCatalog from "alchemy/AWS/ServiceCatalog";
  *
@@ -67,7 +68,7 @@ export interface Portfolio extends Resource<
  * });
  * ```
  *
- * **Example:** Portfolio with Description and Tags
+ * @example Portfolio with Description and Tags
  * ```typescript
  * const portfolio = yield* ServiceCatalog.Portfolio("Tools", {
  *   displayName: "engineering-tools",
@@ -77,8 +78,8 @@ export interface Portfolio extends Resource<
  * });
  * ```
  *
- * ### Granting Access
- * **Example:** Associate a principal (IAM role)
+ * @section Granting Access
+ * @example Associate a principal (IAM role)
  * ```typescript
  * yield* ServiceCatalog.PrincipalPortfolioAssociation("DevAccess", {
  *   portfolioId: portfolio.portfolioId,
@@ -86,16 +87,14 @@ export interface Portfolio extends Resource<
  * });
  * ```
  *
- * ### Adding Products
- * **Example:** Associate a product
+ * @section Adding Products
+ * @example Associate a product
  * ```typescript
  * yield* ServiceCatalog.PortfolioProductAssociation("ToolsVpcProduct", {
  *   portfolioId: portfolio.portfolioId,
  *   productId: product.productId,
  * });
  * ```
- *
- * @resource
  */
 export const Portfolio = Resource<Portfolio>("AWS.ServiceCatalog.Portfolio");
 

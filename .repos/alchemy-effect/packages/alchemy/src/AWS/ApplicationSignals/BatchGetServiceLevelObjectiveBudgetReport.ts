@@ -21,8 +21,9 @@ export interface GetBudgetReportRequest extends Omit<
  * attainment, and remaining budget — at the requested timestamp. Provide
  * the implementation with
  * `Effect.provide(AWS.ApplicationSignals.BatchGetServiceLevelObjectiveBudgetReportHttp)`.
- * ### Reading SLOs
- * **Example:** Check the SLO's Error Budget
+ * @binding
+ * @section Reading SLOs
+ * @example Check the SLO's Error Budget
  * ```typescript
  * // init — bind the operation to the SLO
  * const getBudgetReport =
@@ -33,8 +34,6 @@ export interface GetBudgetReportRequest extends Omit<
  * const report = result.Reports[0];
  * yield* Effect.log(`${report?.BudgetStatus}: ${report?.Attainment}%`);
  * ```
- *
- * @binding
  */
 export interface BatchGetServiceLevelObjectiveBudgetReport extends Binding.Service<
   BatchGetServiceLevelObjectiveBudgetReport,

@@ -117,8 +117,9 @@ export interface Product extends Resource<
  * (or Terraform/external equivalent) with one or more provisioning
  * artifacts (versions) that principals can launch from a portfolio.
  *
- * ### Creating a Product
- * **Example:** CloudFormation Product
+ * @resource
+ * @section Creating a Product
+ * @example CloudFormation Product
  * ```typescript
  * import * as ServiceCatalog from "alchemy/AWS/ServiceCatalog";
  *
@@ -132,7 +133,7 @@ export interface Product extends Resource<
  * });
  * ```
  *
- * **Example:** Product with Support Information
+ * @example Product with Support Information
  * ```typescript
  * const product = yield* ServiceCatalog.Product("VpcProduct", {
  *   owner: "platform-team",
@@ -145,16 +146,14 @@ export interface Product extends Resource<
  * });
  * ```
  *
- * ### Publishing to a Portfolio
- * **Example:** Associate the product with a portfolio
+ * @section Publishing to a Portfolio
+ * @example Associate the product with a portfolio
  * ```typescript
  * yield* ServiceCatalog.PortfolioProductAssociation("ToolsVpc", {
  *   portfolioId: portfolio.portfolioId,
  *   productId: product.productId,
  * });
  * ```
- *
- * @resource
  */
 export const Product = Resource<Product>("AWS.ServiceCatalog.Product");
 

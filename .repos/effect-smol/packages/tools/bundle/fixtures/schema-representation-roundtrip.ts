@@ -9,7 +9,7 @@ const schema = Schema.toCodecJson(Schema.Struct({
 
 const json = SchemaRepresentation.toJson(SchemaRepresentation.toRepresentation(schema.ast))
 
-export const roundtrip = SchemaRepresentation.fromRepresentation(
+SchemaRepresentation.fromRepresentation(
   SchemaRepresentation.fromJson(JSON.parse(JSON.stringify(json))),
-  { revivers: [SchemaRepresentation.isFiniteReviver] }
+  { revivers: [Schema.isFiniteReviver] }
 )

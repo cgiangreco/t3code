@@ -87,23 +87,24 @@ export interface Vault extends Resource<
  * Vault creation is idempotent and free; storage is billed per archive.
  * A vault must be empty to be deleted, which is always the case for vaults
  * that only ever held configuration.
- * ### Creating Vaults
- * **Example:** Basic Vault
+ * @resource
+ * @section Creating Vaults
+ * @example Basic Vault
  * ```typescript
  * import * as Glacier from "alchemy/AWS/Glacier";
  *
  * const vault = yield* Glacier.Vault("Backups");
  * ```
  *
- * **Example:** Vault with Tags
+ * @example Vault with Tags
  * ```typescript
  * const vault = yield* Glacier.Vault("Backups", {
  *   tags: { team: "storage" },
  * });
  * ```
  *
- * ### Notifications
- * **Example:** Publish job-completion events to SNS
+ * @section Notifications
+ * @example Publish job-completion events to SNS
  * ```typescript
  * const topic = yield* SNS.Topic("VaultEvents");
  * const vault = yield* Glacier.Vault("Backups", {
@@ -114,8 +115,8 @@ export interface Vault extends Resource<
  * });
  * ```
  *
- * ### Access Control
- * **Example:** Vault access policy
+ * @section Access Control
+ * @example Vault access policy
  * ```typescript
  * const vault = yield* Glacier.Vault("Backups", {
  *   accessPolicy: {
@@ -131,7 +132,7 @@ export interface Vault extends Resource<
  * });
  * ```
  *
- * **Example:** Vault lock policy (left in-progress, never completed)
+ * @example Vault lock policy (left in-progress, never completed)
  * ```typescript
  * const vault = yield* Glacier.Vault("Compliance", {
  *   lockPolicy: {
@@ -146,8 +147,6 @@ export interface Vault extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Vault = Resource<Vault>("AWS.Glacier.Vault");
 

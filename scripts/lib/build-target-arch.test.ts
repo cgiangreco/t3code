@@ -2,7 +2,7 @@ import { assert, describe, it } from "@effect/vitest";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessArchitecture, HostProcessPlatform } from "@t3tools/shared/hostProcess";
 
 import { getDefaultBuildArch } from "./build-target-arch.ts";
 
@@ -18,8 +18,8 @@ const withHostRuntime = (
 ) =>
   Effect.provide(
     Layer.mergeAll(
-      Layer.succeed(HostProcess.Platform, platform),
-      Layer.succeed(HostProcess.Architecture, arch),
+      Layer.succeed(HostProcessPlatform, platform),
+      Layer.succeed(HostProcessArchitecture, arch),
       ConfigProvider.layer(ConfigProvider.fromEnv({ env: compactEnv(env) })),
     ),
   );

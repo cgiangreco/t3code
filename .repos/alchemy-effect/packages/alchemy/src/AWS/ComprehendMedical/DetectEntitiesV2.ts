@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * `comprehendmedical:DetectEntitiesV2` (the action has no resource-level
  * IAM). Pass the clinical note as raw text — no marshalling.
  *
- * ### Detecting Medical Entities
- * **Example:** Detect Entities in a Clinical Note
+ * @binding
+ * @section Detecting Medical Entities
+ * @example Detect Entities in a Clinical Note
  * ```typescript
  * // init
  * const detectEntities = yield* AWS.ComprehendMedical.DetectEntitiesV2();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const names = (result.Entities ?? []).map((entity) => entity.Text);
  * ```
- *
- * @binding
  */
 export interface DetectEntitiesV2 extends Binding.Service<
   DetectEntitiesV2,

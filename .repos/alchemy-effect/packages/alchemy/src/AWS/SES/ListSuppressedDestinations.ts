@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * filtered by reason and date range. Account-level operation. Provide the
  * implementation with
  * `Effect.provide(AWS.SES.ListSuppressedDestinationsHttp)`.
- * ### Suppression List
- * **Example:** List Bounce-Suppressed Addresses
+ * @binding
+ * @section Suppression List
+ * @example List Bounce-Suppressed Addresses
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listSuppressed = yield* SES.ListSuppressedDestinations();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   Reasons: ["BOUNCE"],
  * });
  * ```
- *
- * @binding
  */
 export interface ListSuppressedDestinations extends Binding.Service<
   ListSuppressedDestinations,

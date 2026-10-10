@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * status, endpoints, members, engine versions — for health checks and
  * cluster discovery. Provide the implementation with
  * `Effect.provide(AWS.RDS.DescribeDBClustersHttp)`.
- * ### Monitoring Databases
- * **Example:** Check a Cluster's Status
+ * @binding
+ * @section Monitoring Databases
+ * @example Check a Cluster's Status
  * ```typescript
  * const describeDBClusters = yield* AWS.RDS.DescribeDBClusters();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const status = page.DBClusters?.[0]?.Status;
  * ```
- *
- * @binding
  */
 export interface DescribeDBClusters extends Binding.Service<
   DescribeDBClusters,

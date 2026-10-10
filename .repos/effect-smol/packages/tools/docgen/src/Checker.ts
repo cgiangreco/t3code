@@ -1,6 +1,4 @@
 /**
- * Validates parsed documentation against the configured requirements.
- *
  * @since 0.6.0
  */
 import { codeFrameColumns } from "@babel/code-frame"
@@ -85,9 +83,6 @@ function checkFunction(model: Domain.Function) {
 }
 
 /**
- * Validates documentation for function declarations.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkFunctions(models: ReadonlyArray<Domain.Function>) {
@@ -113,9 +108,6 @@ function checkClass(model: Domain.Class) {
 }
 
 /**
- * Validates documentation for class declarations and their documented members.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkClasses(models: ReadonlyArray<Domain.Class>) {
@@ -129,9 +121,6 @@ function checkConstant(model: Domain.Constant) {
 }
 
 /**
- * Validates documentation for constant declarations.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkConstants(models: ReadonlyArray<Domain.Constant>) {
@@ -145,9 +134,6 @@ function checkInterface(model: Domain.Interface) {
 }
 
 /**
- * Validates documentation for interface declarations.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkInterfaces(models: ReadonlyArray<Domain.Interface>) {
@@ -161,9 +147,6 @@ function checkTypeAlias(model: Domain.TypeAlias) {
 }
 
 /**
- * Validates documentation for type alias declarations.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkTypeAliases(models: ReadonlyArray<Domain.TypeAlias>) {
@@ -185,9 +168,6 @@ function checkNamespace(
 }
 
 /**
- * Validates documentation for namespaces and their nested declarations.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkNamespaces(models: ReadonlyArray<Domain.Namespace>) {
@@ -201,9 +181,6 @@ function checkExport(model: Domain.Export) {
 }
 
 /**
- * Validates documentation for explicit export declarations.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkExports(models: ReadonlyArray<Domain.Export>) {
@@ -211,9 +188,6 @@ export function checkExports(models: ReadonlyArray<Domain.Export>) {
 }
 
 /**
- * Validates every documented declaration in a parsed module.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkModule(module: Domain.Module) {
@@ -238,9 +212,6 @@ export function checkModule(module: Domain.Module) {
 }
 
 /**
- * Validates every documented declaration in a collection of parsed modules.
- *
- * @category validation
  * @since 0.6.0
  */
 export function checkModules(modules: ReadonlyArray<Domain.Module>) {

@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.GetFindingStatisticsHttp)`.
- * ### Working with Findings
- * **Example:** Group Findings by Severity
+ * @binding
+ * @section Working with Findings
+ * @example Group Findings by Severity
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getFindingStatistics = yield* AWS.Macie2.GetFindingStatistics();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { countsByGroup } = yield* getFindingStatistics({ groupBy: "severity.description" });
  * ```
- *
- * @binding
  */
 export interface GetFindingStatistics extends Binding.Service<
   GetFindingStatistics,

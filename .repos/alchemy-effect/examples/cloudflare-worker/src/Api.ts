@@ -1,13 +1,11 @@
-import { BetterAuth } from "@alchemy.run/better-auth";
-import { CloudflareD1 } from "@alchemy.run/better-auth/CloudflareD1";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Stream from "effect/Stream";
-import * as HttpBody from "effect/http/HttpBody";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import * as HttpBody from "effect/unstable/http/HttpBody";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import Agent from "./Agent.ts";
 import { Gateway } from "./AiGateway.ts";
 import { Bucket } from "./Bucket.ts";
@@ -23,9 +21,6 @@ interface QueueMessageBody {
   sentAt: number;
 }
 
-/** D1 database backing Better Auth (auto-migrated at deploy). */
-export const AuthDb = Cloudflare.D1.Database("AuthDb");
-
 export default class Api extends Cloudflare.Worker<Api>()(
   "Api",
   {
@@ -37,15 +32,9 @@ export default class Api extends Cloudflare.Worker<Api>()(
     build: {
       bundleAnalyzer: true,
     },
-    compatibility: {
-      date: "2026-08-31",
-    },
   },
   Effect.gen(function* () {
-    const auth = yield* BetterAuth({
-      basePath: "/auth",
-      emailAndPassword: { enabled: true },
-    });
+    // const betterAuth = yield* BetterAuth.BetterAuth;
     const agents = yield* Agent;
     const rooms = yield* Room;
     const notifier = yield* NotifyWorkflow;
@@ -78,7 +67,7 @@ export default class Api extends Cloudflare.Worker<Api>()(
         const request = yield* HttpServerRequest;
 
         if (request.url.startsWith("/auth/")) {
-          return yield* auth.fetch;
+          // return yield* betterAuth.fetch;
         } else if (request.url.startsWith("/kv/")) {
           if (request.method === "GET") {
             const key = request.url.split("/").pop()!;
@@ -195,7 +184,7 @@ export default class Api extends Cloudflare.Worker<Api>()(
           if (request.method === "POST") {
             const code = yield* request.text;
             const worker = yield* loader.load({
-              compatibilityDate: "2026-08-31",
+              compatibilityDate: "2026-01-28",
               mainModule: "worker.js",
               modules: {
                 "worker.js": `
@@ -460,7 +449,6 @@ export default class Api extends Cloudflare.Worker<Api>()(
   }).pipe(
     Effect.provide(
       Layer.mergeAll(
-        CloudflareD1(AuthDb),
         Cloudflare.R2.ReadWriteBucketBinding,
         Cloudflare.KV.ReadWriteNamespaceBinding,
         Cloudflare.Queues.WriteQueueBinding,

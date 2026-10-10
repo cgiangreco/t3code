@@ -15,8 +15,9 @@ import type { Flow } from "./Flow.ts";
  * deploy-time grant covers the flow ARN plus the entitlement wildcard.
  * Provide the implementation with
  * `Effect.provide(AWS.MediaConnect.RevokeFlowEntitlementHttp)`.
- * ### Managing Entitlements
- * **Example:** Revoke a Subscriber's Access
+ * @binding
+ * @section Managing Entitlements
+ * @example Revoke a Subscriber's Access
  * ```typescript
  * // init — bind the operation to the flow
  * const revokeEntitlement = yield* AWS.MediaConnect.RevokeFlowEntitlement(flow);
@@ -24,8 +25,6 @@ import type { Flow } from "./Flow.ts";
  * // runtime
  * yield* revokeEntitlement({ EntitlementArn: entitlementArn });
  * ```
- *
- * @binding
  */
 export interface RevokeFlowEntitlement extends Binding.Service<
   RevokeFlowEntitlement,

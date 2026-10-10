@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * for a specific account — the role and description FIS uses to act in that
  * account. Provide the implementation with
  * `Effect.provide(AWS.FIS.GetExperimentTargetAccountConfigurationHttp)`.
- * ### Multi-Account Experiments
- * **Example:** Read an Experiment's Target Account
+ * @binding
+ * @section Multi-Account Experiments
+ * @example Read an Experiment's Target Account
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getTargetAccount =
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(targetAccountConfiguration?.roleArn);
  * ```
- *
- * @binding
  */
 export interface GetExperimentTargetAccountConfiguration extends Binding.Service<
   GetExperimentTargetAccountConfiguration,

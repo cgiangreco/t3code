@@ -15,8 +15,9 @@ export interface GetCostComparisonDriversRequest
  * billing periods — which services, accounts, or usage types moved the
  * bill. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.GetCostComparisonDriversHttp)`.
- * ### Querying Cost and Usage
- * **Example:** Find What Drove a Cost Change
+ * @binding
+ * @section Querying Cost and Usage
+ * @example Find What Drove a Cost Change
  * ```typescript
  * // init — account-level binding takes no resource
  * const getCostComparisonDrivers = yield* AWS.CostExplorer.GetCostComparisonDrivers();
@@ -28,8 +29,6 @@ export interface GetCostComparisonDriversRequest
  *   MetricForComparison: "UnblendedCost",
  * });
  * ```
- *
- * @binding
  */
 export interface GetCostComparisonDrivers extends Binding.Service<
   GetCostComparisonDrivers,

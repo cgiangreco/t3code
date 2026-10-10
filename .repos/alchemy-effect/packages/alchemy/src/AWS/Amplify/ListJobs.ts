@@ -14,8 +14,9 @@ export interface ListJobsRequest extends Omit<
  * Bind an {@link App} in the function's init phase to get a callable that
  * lists the build jobs of one of the app's branches, newest first. Provide the
  * implementation with `Effect.provide(AWS.Amplify.ListJobsHttp)`.
- * ### Observing Jobs
- * **Example:** Read the Latest Job of a Branch
+ * @binding
+ * @section Observing Jobs
+ * @example Read the Latest Job of a Branch
  * ```typescript
  * // init — bind the operation to the app
  * const listJobs = yield* AWS.Amplify.ListJobs(app);
@@ -27,8 +28,6 @@ export interface ListJobsRequest extends Omit<
  * });
  * const latest = jobSummaries[0];
  * ```
- *
- * @binding
  */
 export interface ListJobs extends Binding.Service<
   ListJobs,

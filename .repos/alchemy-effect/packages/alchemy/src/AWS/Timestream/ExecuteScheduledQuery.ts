@@ -19,8 +19,9 @@ export interface ExecuteScheduledQueryRequest extends Omit<
  * Provide `Timestream.ExecuteScheduledQueryHttp` on the Function to
  * implement the binding.
  *
- * ### Creating Scheduled Queries
- * **Example:** Backfill a missed window
+ * @binding
+ * @section Creating Scheduled Queries
+ * @example Backfill a missed window
  * ```typescript
  * // init — bind the operation to the scheduled query
  * const executeScheduledQuery = yield* Timestream.ExecuteScheduledQuery(rollup);
@@ -30,8 +31,6 @@ export interface ExecuteScheduledQueryRequest extends Omit<
  *   InvocationTime: new Date(Date.now() - 60 * 60 * 1000),
  * });
  * ```
- *
- * @binding
  */
 export interface ExecuteScheduledQuery extends Binding.Service<
   ExecuteScheduledQuery,

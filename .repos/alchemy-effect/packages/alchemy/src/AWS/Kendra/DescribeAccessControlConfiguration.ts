@@ -19,8 +19,9 @@ export interface DescribeAccessControlConfigurationRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.DescribeAccessControlConfigurationHttp)`.
  *
- * ### Access Control Configurations
- * **Example:** Describe a Runtime ACL
+ * @binding
+ * @section Access Control Configurations
+ * @example Describe a Runtime ACL
  * ```typescript
  * const describeAcl =
  *   yield* AWS.Kendra.DescribeAccessControlConfiguration(index);
@@ -28,8 +29,6 @@ export interface DescribeAccessControlConfigurationRequest extends Omit<
  * const acl = yield* describeAcl({ Id: configurationId });
  * console.log(acl.Name, acl.AccessControlList);
  * ```
- *
- * @binding
  */
 export interface DescribeAccessControlConfiguration extends Binding.Service<
   DescribeAccessControlConfiguration,

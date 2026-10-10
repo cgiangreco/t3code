@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * `UnprocessedClusters` (with the reason) rather than failing the call.
  * Provide the implementation with
  * `Effect.provide(AWS.MemoryDB.BatchUpdateClusterHttp)`.
- * ### Applying Service Updates
- * **Example:** Apply a Service Update to Clusters
+ * @binding
+ * @section Applying Service Updates
+ * @example Apply a Service Update to Clusters
  * ```typescript
  * const batchUpdateCluster = yield* MemoryDB.BatchUpdateCluster();
  *
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.ProcessedClusters / result.UnprocessedClusters
  * ```
- *
- * @binding
  */
 export interface BatchUpdateCluster extends Binding.Service<
   BatchUpdateCluster,

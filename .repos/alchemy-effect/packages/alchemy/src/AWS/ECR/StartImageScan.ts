@@ -17,16 +17,15 @@ export interface StartImageScanRequest extends Omit<
  *
  * Starts an on-demand vulnerability scan of an image in the bound repository (basic scanning; one scan per image per day). Provide the implementation with
  * `Effect.provide(AWS.ECR.StartImageScanHttp)`.
- * ### Image Scanning
- * **Example:** Scan an Image on Demand
+ * @binding
+ * @section Image Scanning
+ * @example Scan an Image on Demand
  * ```typescript
  * const startImageScan = yield* AWS.ECR.StartImageScan(repository);
  *
  * const res = yield* startImageScan({ imageId: { imageTag: "latest" } });
  * console.log(res.imageScanStatus?.status);
  * ```
- *
- * @binding
  */
 export interface StartImageScan extends Binding.Service<
   StartImageScan,

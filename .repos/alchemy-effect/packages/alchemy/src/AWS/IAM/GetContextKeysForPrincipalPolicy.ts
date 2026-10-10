@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * `*`. Provide the implementation with
  * `Effect.provide(AWS.IAM.GetContextKeysForPrincipalPolicyHttp)`.
  *
- * ### Simulating Policies
- * **Example:** Discover a Role's Context Keys
+ * @binding
+ * @section Simulating Policies
+ * @example Discover a Role's Context Keys
  * ```typescript
  * // init
  * const getContextKeys = yield* IAM.GetContextKeysForPrincipalPolicy();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   PolicySourceArn: roleArn,
  * });
  * ```
- *
- * @binding
  */
 export interface GetContextKeysForPrincipalPolicy extends Binding.Service<
   GetContextKeysForPrincipalPolicy,

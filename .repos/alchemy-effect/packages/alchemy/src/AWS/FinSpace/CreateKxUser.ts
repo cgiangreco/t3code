@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:CreateKxUser` — creates a kdb user in the bound environment, mapping an IAM role to a kdb identity.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.CreateKxUserHttp)`.
- * ### Managing kdb Users
- * **Example:** Create a User
+ * @binding
+ * @section Managing kdb Users
+ * @example Create a User
  * ```typescript
  * const createUser = yield* AWS.FinSpace.CreateKxUser(kdb);
  *
@@ -17,8 +18,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   iamRole: roleArn,
  * });
  * ```
- *
- * @binding
  */
 export interface CreateKxUser extends Binding.Service<
   CreateKxUser,

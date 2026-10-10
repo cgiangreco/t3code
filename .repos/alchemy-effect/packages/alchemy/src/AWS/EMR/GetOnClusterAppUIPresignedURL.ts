@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:GetOnClusterAppUIPresignedURL` — mints a presigned URL for a live application UI (Spark UI, YARN ResourceManager, Tez) on the bound cluster.
- * ### Application UIs
- * **Example:** Link to the Spark UI
+ * @binding
+ * @section Application UIs
+ * @example Link to the Spark UI
  * ```typescript
  * const getAppUrl = yield* AWS.EMR.GetOnClusterAppUIPresignedURL(cluster);
  *
@@ -14,8 +15,6 @@ import type { Cluster } from "./Cluster.ts";
  *   OnClusterAppUIType: "ApplicationMaster",
  * });
  * ```
- *
- * @binding
  */
 export interface GetOnClusterAppUIPresignedURL extends Binding.Service<
   GetOnClusterAppUIPresignedURL,

@@ -17,8 +17,9 @@ export interface CompleteLayerUploadRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.ECRPublic.CompleteLayerUploadHttp)`.
  *
- * ### Pushing Images
- * **Example:** Complete A Layer Upload
+ * @binding
+ * @section Pushing Images
+ * @example Complete A Layer Upload
  * ```typescript
  * // init
  * const completeLayerUpload = yield* AWS.ECRPublic.CompleteLayerUpload(repository);
@@ -29,8 +30,6 @@ export interface CompleteLayerUploadRequest extends Omit<
  *   layerDigests: [digest],
  * });
  * ```
- *
- * @binding
  */
 export interface CompleteLayerUpload extends Binding.Service<
   CompleteLayerUpload,

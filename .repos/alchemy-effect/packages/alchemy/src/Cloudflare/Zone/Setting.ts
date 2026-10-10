@@ -225,8 +225,11 @@ export type Setting = Resource<
  * `image_resizing`, `polish` need Pro+; `advanced_ddos` is Enterprise).
  * Patching a non-editable setting fails with Cloudflare's "setting not
  * editable" error.
- * ### Toggle settings
- * **Example:** Force HTTPS on the whole zone
+ * @resource
+ * @product Zones
+ * @category Domains & DNS
+ * @section Toggle settings
+ * @example Force HTTPS on the whole zone
  * ```typescript
  * yield* Cloudflare.Zone.Setting("AlwaysUseHttps", {
  *   zoneId: zone.zoneId,
@@ -235,7 +238,7 @@ export type Setting = Resource<
  * });
  * ```
  *
- * **Example:** Disable Always Online
+ * @example Disable Always Online
  * ```typescript
  * yield* Cloudflare.Zone.Setting("AlwaysOnline", {
  *   zoneId: zone.zoneId,
@@ -244,8 +247,8 @@ export type Setting = Resource<
  * });
  * ```
  *
- * ### Numeric settings
- * **Example:** Browser cache TTL of one hour
+ * @section Numeric settings
+ * @example Browser cache TTL of one hour
  * ```typescript
  * yield* Cloudflare.Zone.Setting("BrowserCacheTtl", {
  *   zoneId: zone.zoneId,
@@ -254,8 +257,8 @@ export type Setting = Resource<
  * });
  * ```
  *
- * ### TLS settings
- * **Example:** Require at least TLS 1.2
+ * @section TLS settings
+ * @example Require at least TLS 1.2
  * ```typescript
  * yield* Cloudflare.Zone.Setting("MinTls", {
  *   zoneId: zone.zoneId,
@@ -265,10 +268,6 @@ export type Setting = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api/resources/zones/subresources/settings/
- *
- * @resource
- * @product Zones
- * @category Domains & DNS
  */
 export const Setting = Resource<Setting>(TypeId);
 

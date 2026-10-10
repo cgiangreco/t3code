@@ -15,14 +15,13 @@ export interface GetAccessPreviewRequest extends Omit<
  * Retrieves an access preview's status and configuration. Provide the
  * implementation with
  * `Effect.provide(AWS.AccessAnalyzer.GetAccessPreviewHttp)`.
- * ### Access Previews
- * **Example:** Poll a Preview Until Completed
+ * @binding
+ * @section Access Previews
+ * @example Poll a Preview Until Completed
  * ```typescript
  * const getPreview = yield* AWS.AccessAnalyzer.GetAccessPreview(analyzer);
  * const preview = yield* getPreview({ accessPreviewId });
  * ```
- *
- * @binding
  */
 export interface GetAccessPreview extends Binding.Service<
   GetAccessPreview,

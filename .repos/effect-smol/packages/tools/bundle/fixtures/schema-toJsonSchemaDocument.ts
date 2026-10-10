@@ -6,4 +6,4 @@ const schema = Schema.Struct({
   c: Schema.Array(Schema.String)
 })
 
-export const document = Schema.toJsonSchemaDocument(schema)
+Schema.toJsonSchemaDocument(schema)

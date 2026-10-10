@@ -20,8 +20,9 @@ export interface UpdateExclusionWindowsRequest extends Omit<
  * example, automation that excludes a deployment window from SLO
  * attainment. Provide the implementation with
  * `Effect.provide(AWS.ApplicationSignals.BatchUpdateExclusionWindowsHttp)`.
- * ### Managing Exclusion Windows
- * **Example:** Exclude a Maintenance Window
+ * @binding
+ * @section Managing Exclusion Windows
+ * @example Exclude a Maintenance Window
  * ```typescript
  * // init — bind the operation to the SLO
  * const updateExclusionWindows =
@@ -38,8 +39,6 @@ export interface UpdateExclusionWindowsRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchUpdateExclusionWindows extends Binding.Service<
   BatchUpdateExclusionWindows,

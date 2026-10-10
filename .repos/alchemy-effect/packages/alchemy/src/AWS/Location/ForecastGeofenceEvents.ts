@@ -19,8 +19,9 @@ export interface ForecastGeofenceEventsRequest extends Omit<
  * `geo:ForecastGeofenceEvents`), scoped to one {@link GeofenceCollection}. Provide the implementation with
  * `Effect.provide(AWS.Location.ForecastGeofenceEventsHttp)`.
  *
- * ### Evaluating Positions Against Geofences
- * **Example:** Forecast Upcoming Geofence Events
+ * @binding
+ * @section Evaluating Positions Against Geofences
+ * @example Forecast Upcoming Geofence Events
  * ```typescript
  * const forecast = yield* Location.ForecastGeofenceEvents(collection);
  *
@@ -30,8 +31,6 @@ export interface ForecastGeofenceEventsRequest extends Omit<
  * });
  * // events.ForecastedEvents → [{ GeofenceId, EventType, NearestDistance }, …]
  * ```
- *
- * @binding
  */
 export interface ForecastGeofenceEvents extends Binding.Service<
   ForecastGeofenceEvents,

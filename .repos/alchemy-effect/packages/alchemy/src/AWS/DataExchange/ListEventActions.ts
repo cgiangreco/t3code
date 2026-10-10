@@ -9,16 +9,15 @@ import * as Binding from "../../Binding.ts";
  * data sets), optionally filtered to one event source data set.
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.ListEventActionsHttp)`.
- * ### Event Actions
- * **Example:** List Auto-Export Rules
+ * @binding
+ * @section Event Actions
+ * @example List Auto-Export Rules
  * ```typescript
  * const listEventActions = yield* AWS.DataExchange.ListEventActions();
  *
  * // runtime
  * const { EventActions } = yield* listEventActions();
  * ```
- *
- * @binding
  */
 export interface ListEventActions extends Binding.Service<
   ListEventActions,

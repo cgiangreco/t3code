@@ -9,7 +9,7 @@
 import * as Context from "effect/Context"
 import * as Effect from "effect/Effect"
 import { dual } from "effect/Function"
-import type { HttpClient } from "effect/http/HttpClient"
+import type { HttpClient } from "effect/unstable/http/HttpClient"
 
 /**
  * Context service for OpenAI-compatible client configuration in the current
@@ -36,7 +36,7 @@ export class OpenAiConfig extends Context.Service<
    */
   static readonly getOrUndefined: Effect.Effect<typeof OpenAiConfig.Service | undefined> = Effect.map(
     Effect.context<never>(),
-    Context.getOrUndefined(OpenAiConfig)
+    (context) => context.mapUnsafe.get(OpenAiConfig.key)
   )
 }
 
@@ -50,7 +50,7 @@ export declare namespace OpenAiConfig {
    * Configuration consumed by OpenAI-compatible clients when they build or
    * resolve the underlying HTTP client.
    *
-   * @category services
+   * @category models
    * @since 4.0.0
    */
   export interface Service {

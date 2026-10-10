@@ -13,8 +13,9 @@ import type { Broker } from "./Broker.ts";
  * The password is marked sensitive — pass a `Redacted` value and it stays
  * redacted until wire encoding. Provide the implementation with
  * `Effect.provide(AWS.MQ.CreateUserHttp)`.
- * ### Managing Users
- * **Example:** Provision a User at Runtime
+ * @binding
+ * @section Managing Users
+ * @example Provision a User at Runtime
  * ```typescript
  * const createUser = yield* MQ.CreateUser(broker);
  *
@@ -23,8 +24,6 @@ import type { Broker } from "./Broker.ts";
  *   Password: Redacted.make("SuperSecretPassw0rd"),
  * });
  * ```
- *
- * @binding
  */
 export interface CreateUser extends Binding.Service<
   CreateUser,

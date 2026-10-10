@@ -62,8 +62,9 @@ export interface KeyGroup extends Resource<
  * `TrustedKeyGroups` on a Distribution's cache behavior. CloudFront uses
  * the keys in the group to verify the signatures on signed URLs and
  * signed cookies for that behavior.
- * ### Creating Key Groups
- * **Example:** Group two public keys for signed URL verification
+ * @resource
+ * @section Creating Key Groups
+ * @example Group two public keys for signed URL verification
  * ```typescript
  * const primary = yield* PublicKey("PrimarySigningKey", {
  *   encodedKey: yield* fs.readFileString("./primary.pem"),
@@ -77,8 +78,6 @@ export interface KeyGroup extends Resource<
  *   items: [primary.publicKeyId, secondary.publicKeyId],
  * });
  * ```
- *
- * @resource
  */
 export const KeyGroup = Resource<KeyGroup>("AWS.CloudFront.KeyGroup");
 

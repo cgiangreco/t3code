@@ -16,8 +16,9 @@ export interface DeleteObjectRequest extends Omit<
  * the bucket name is injected automatically and `s3:DeleteObject` is granted
  * on the bucket. Provide the implementation with
  * `Effect.provide(AWS.S3.DeleteObjectHttp)`.
- * ### Deleting Objects
- * **Example:** Delete an Object
+ * @binding
+ * @section Deleting Objects
+ * @example Delete an Object
  * ```typescript
  * // init — bind the operation to the bucket
  * const deleteObject = yield* AWS.S3.DeleteObject(bucket);
@@ -25,8 +26,6 @@ export interface DeleteObjectRequest extends Omit<
  * // runtime — deleting a non-existent key succeeds (S3 delete is idempotent)
  * yield* deleteObject({ Key: "jobs/job-123.json" });
  * ```
- *
- * @binding
  */
 export interface DeleteObject extends Binding.Service<
   DeleteObject,

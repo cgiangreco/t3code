@@ -121,8 +121,9 @@ export interface Workgroup extends Resource<
  * `AVAILABLE`. Because a running workgroup bills against its RPU floor, tear
  * it down promptly when you are done.
  *
- * ### Creating a Workgroup
- * **Example:** Minimal (Cheapest) Workgroup
+ * @resource
+ * @section Creating a Workgroup
+ * @example Minimal (Cheapest) Workgroup
  * ```typescript
  * const namespace = yield* RedshiftServerless.Namespace("Analytics", {
  *   adminUsername: "admin",
@@ -135,8 +136,8 @@ export interface Workgroup extends Resource<
  * // workgroup.endpointAddress -> "<wg>.<account>.<region>.redshift-serverless.amazonaws.com"
  * ```
  *
- * ### Networking
- * **Example:** Publicly Accessible with Explicit Subnets
+ * @section Networking
+ * @example Publicly Accessible with Explicit Subnets
  * ```typescript
  * const workgroup = yield* RedshiftServerless.Workgroup("AnalyticsWg", {
  *   namespaceName: namespace.namespaceName,
@@ -147,8 +148,6 @@ export interface Workgroup extends Resource<
  *   enhancedVpcRouting: false,
  * });
  * ```
- *
- * @resource
  */
 export const Workgroup = Resource<Workgroup>(
   "AWS.RedshiftServerless.Workgroup",

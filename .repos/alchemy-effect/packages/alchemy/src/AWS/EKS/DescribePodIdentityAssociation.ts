@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `clusterName` is injected from the bound {@link Cluster} and `eks:DescribePodIdentityAssociation` is granted on the cluster's sub-resource ARNs.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.DescribePodIdentityAssociationHttp)`.
- * ### Inspecting Identity and Access
- * **Example:** Read a Pod Identity Association
+ * @binding
+ * @section Inspecting Identity and Access
+ * @example Read a Pod Identity Association
  * ```typescript
  * // init
  * const describePodIdentityAssociation =
@@ -22,8 +23,6 @@ import type { Cluster } from "./Cluster.ts";
  *   associationId,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribePodIdentityAssociation extends Binding.Service<
   DescribePodIdentityAssociation,

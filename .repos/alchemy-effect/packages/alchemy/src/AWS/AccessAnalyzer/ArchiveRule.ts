@@ -58,8 +58,9 @@ export interface ArchiveRule extends Resource<
  *
  * Archive rules apply only to findings created after the rule; existing
  * findings are unaffected.
- * ### Creating Archive Rules
- * **Example:** Archive Findings from a Trusted Account
+ * @resource
+ * @section Creating Archive Rules
+ * @example Archive Findings from a Trusted Account
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -74,7 +75,7 @@ export interface ArchiveRule extends Resource<
  * });
  * ```
  *
- * **Example:** Archive Public S3 Findings
+ * @example Archive Public S3 Findings
  * ```typescript
  * yield* AWS.AccessAnalyzer.ArchiveRule("PublicBuckets", {
  *   analyzerName: analyzer.analyzerName,
@@ -85,8 +86,6 @@ export interface ArchiveRule extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const ArchiveRule = Resource<ArchiveRule>(
   "AWS.AccessAnalyzer.ArchiveRule",

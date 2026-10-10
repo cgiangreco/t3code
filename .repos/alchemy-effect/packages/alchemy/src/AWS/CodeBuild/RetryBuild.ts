@@ -7,15 +7,14 @@ import type { Project } from "./Project.ts";
  * Runtime binding for `codebuild:RetryBuild` — restarts a finished
  * (failed, stopped, …) build of the bound project by build id, producing a
  * new build.
- * ### Retrying Builds
- * **Example:** Retry a Failed Build
+ * @binding
+ * @section Retrying Builds
+ * @example Retry a Failed Build
  * ```typescript
  * const retryBuild = yield* AWS.CodeBuild.RetryBuild(project);
  *
  * const { build } = yield* retryBuild({ id: failedBuildId });
  * ```
- *
- * @binding
  */
 export interface RetryBuild extends Binding.Service<
   RetryBuild,

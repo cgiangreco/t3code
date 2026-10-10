@@ -106,8 +106,9 @@ export interface DeploymentConfig extends Resource<
  * Deployment configurations are immutable: any change replaces the
  * configuration.
  *
- * ### Creating a Deployment Config
- * **Example:** Lambda Canary Config
+ * @resource
+ * @section Creating a Deployment Config
+ * @example Lambda Canary Config
  * ```typescript
  * const config = yield* CodeDeploy.DeploymentConfig("canary", {
  *   computePlatform: "Lambda",
@@ -118,15 +119,13 @@ export interface DeploymentConfig extends Resource<
  * });
  * ```
  *
- * **Example:** Server Config with Minimum Healthy Hosts
+ * @example Server Config with Minimum Healthy Hosts
  * ```typescript
  * const config = yield* CodeDeploy.DeploymentConfig("half-fleet", {
  *   computePlatform: "Server",
  *   minimumHealthyHosts: { type: "FLEET_PERCENT", value: 50 },
  * });
  * ```
- *
- * @resource
  */
 export const DeploymentConfig = Resource<DeploymentConfig>(
   "AWS.CodeDeploy.DeploymentConfig",

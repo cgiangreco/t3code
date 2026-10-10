@@ -1,15 +1,16 @@
 import { assert, describe, it } from "@effect/vitest";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import { HttpClient } from "effect/http";
-import { ChildProcessSpawner } from "effect/process";
+import { HttpClient } from "effect/unstable/http";
+import { ChildProcessSpawner } from "effect/unstable/process";
 
 import {
+  isTailscaleIpv4Address,
   parseTailscaleMagicDnsName,
   resolveTailscaleAdvertisedEndpoints,
 } from "./tailscaleEndpointProvider.ts";
 
-const layerUnusedTailscaleExternalServices = Layer.mergeAll(
+const unusedTailscaleExternalServicesLayer = Layer.mergeAll(
   Layer.succeed(
     HttpClient.HttpClient,
     HttpClient.make(() => Effect.die("unexpected Tailscale HTTPS probe")),
@@ -21,6 +22,13 @@ const layerUnusedTailscaleExternalServices = Layer.mergeAll(
 );
 
 describe("tailscale endpoint provider", () => {
+  it("detects Tailnet IPv4 addresses", () => {
+    assert.equal(isTailscaleIpv4Address("100.64.0.1"), true);
+    assert.equal(isTailscaleIpv4Address("100.127.255.254"), true);
+    assert.equal(isTailscaleIpv4Address("100.128.0.1"), false);
+    assert.equal(isTailscaleIpv4Address("192.168.1.44"), false);
+  });
+
   it.effect("parses MagicDNS names from tailscale status", () =>
     Effect.gen(function* () {
       const dnsName = yield* parseTailscaleMagicDnsName(
@@ -93,7 +101,7 @@ describe("tailscale endpoint provider", () => {
           description: "MagicDNS hostname. Configure Tailscale Serve for HTTPS access.",
         },
       ]);
-    }).pipe(Effect.provide(layerUnusedTailscaleExternalServices)),
+    }).pipe(Effect.provide(unusedTailscaleExternalServicesLayer)),
   );
 
   it.effect("uses an injected magic DNS name reader instead of spawning tailscale", () =>
@@ -112,7 +120,7 @@ describe("tailscale endpoint provider", () => {
         endpoints.map((endpoint) => endpoint.httpBaseUrl),
         ["https://desktop.tail.ts.net/"],
       );
-    }).pipe(Effect.provide(layerUnusedTailscaleExternalServices)),
+    }).pipe(Effect.provide(unusedTailscaleExternalServicesLayer)),
   );
 
   it.effect(
@@ -148,6 +156,6 @@ describe("tailscale endpoint provider", () => {
             description: "HTTPS endpoint served by Tailscale Serve.",
           },
         ]);
-      }).pipe(Effect.provide(layerUnusedTailscaleExternalServices)),
+      }).pipe(Effect.provide(unusedTailscaleExternalServicesLayer)),
   );
 });

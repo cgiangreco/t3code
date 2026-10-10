@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.GetContentModerationHttp)`.
  *
- * ### Video Analysis
- * **Example:** Poll Content Moderation Results
+ * @binding
+ * @section Video Analysis
+ * @example Poll Content Moderation Results
  * ```typescript
  * // init
  * const getContentModeration = yield* AWS.Rekognition.GetContentModeration();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   // consume the detections
  * }
  * ```
- *
- * @binding
  */
 export interface GetContentModeration extends Binding.Service<
   GetContentModeration,

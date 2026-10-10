@@ -12,8 +12,9 @@ export interface DisableStageTransitionRequest extends Omit<
  * Runtime binding for `codepipeline:DisableStageTransition` — freezes a
  * transition into (`Inbound`) or out of (`Outbound`) a stage, e.g. to gate
  * deploys during an incident.
- * ### Operating Stages
- * **Example:** Freeze Deploys
+ * @binding
+ * @section Operating Stages
+ * @example Freeze Deploys
  * ```typescript
  * const disableTransition =
  *   yield* AWS.CodePipeline.DisableStageTransition(pipeline);
@@ -24,8 +25,6 @@ export interface DisableStageTransitionRequest extends Omit<
  *   reason: "incident in progress",
  * });
  * ```
- *
- * @binding
  */
 export interface DisableStageTransition extends Binding.Service<
   DisableStageTransition,

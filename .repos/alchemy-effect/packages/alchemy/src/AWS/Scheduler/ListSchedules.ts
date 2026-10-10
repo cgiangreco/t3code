@@ -18,8 +18,9 @@ export interface ListSchedulesRequest extends Omit<
  * Note: IAM evaluates `scheduler:ListSchedules` against the account-wide
  * `schedule/*​/*` pattern (not the group), so the binding grants on that
  * pattern while the request's `GroupName` filter keeps results group-scoped.
- * ### Listing Schedules At Runtime
- * **Example:** Sweep Pending Reminders
+ * @binding
+ * @section Listing Schedules At Runtime
+ * @example Sweep Pending Reminders
  * ```typescript
  * const listSchedules = yield* AWS.Scheduler.ListSchedules();
  *
@@ -30,12 +31,10 @@ export interface ListSchedulesRequest extends Omit<
  * }
  * ```
  *
- * **Example:** Scope Listing To A Schedule Group
+ * @example Scope Listing To A Schedule Group
  * ```typescript
  * const listSchedules = yield* AWS.Scheduler.ListSchedules(group);
  * ```
- *
- * @binding
  */
 export interface ListSchedules extends Binding.Service<
   ListSchedules,

@@ -13,16 +13,15 @@ import type { ManagedThing } from "./ManagedThing.ts";
  * implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.GetManagedThingCertificateHttp)`.
  *
- * ### Reading Device State
- * **Example:** Fetch the Device Certificate
+ * @binding
+ * @section Reading Device State
+ * @example Fetch the Device Certificate
  * ```typescript
  * const getCertificate =
  *   yield* IoTManagedIntegrations.GetManagedThingCertificate(thing);
  *
  * const { CertificatePem } = yield* getCertificate();
  * ```
- *
- * @binding
  */
 export interface GetManagedThingCertificate extends Binding.Service<
   GetManagedThingCertificate,

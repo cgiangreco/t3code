@@ -138,7 +138,7 @@ export default function BindingsToIAM() {
   }, []);
 
   return (
-    <div ref={wrapRef} className="bindings-iam" data-nosnippet="">
+    <div ref={wrapRef} className="bindings-iam">
       {/* LEFT — Lambda code */}
       <div className="alc-code-block bindings-iam__code">
         <div className="alc-code-block__header">

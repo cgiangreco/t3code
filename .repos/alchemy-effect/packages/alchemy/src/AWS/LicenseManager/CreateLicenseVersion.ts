@@ -16,8 +16,9 @@ export interface CreateLicenseVersionRequest
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.CreateLicenseVersionHttp)`.
- * ### Issuing Licenses
- * **Example:** Extend a License's Validity
+ * @binding
+ * @section Issuing Licenses
+ * @example Extend a License's Validity
  * ```typescript
  * // init
  * const createLicenseVersion = yield* AWS.LicenseManager.CreateLicenseVersion();
@@ -38,8 +39,6 @@ export interface CreateLicenseVersionRequest
  *   ClientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface CreateLicenseVersion extends Binding.Service<
   CreateLicenseVersion,

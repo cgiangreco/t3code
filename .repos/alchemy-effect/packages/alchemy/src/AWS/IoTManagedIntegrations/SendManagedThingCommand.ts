@@ -22,8 +22,9 @@ export interface SendManagedThingCommandRequest extends Omit<
  * implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.SendManagedThingCommandHttp)`.
  *
- * ### Controlling Devices
- * **Example:** Toggle a Device On
+ * @binding
+ * @section Controlling Devices
+ * @example Toggle a Device On
  * ```typescript
  * const sendCommand = yield* IoTManagedIntegrations.SendManagedThingCommand(thing);
  *
@@ -43,8 +44,6 @@ export interface SendManagedThingCommandRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface SendManagedThingCommand extends Binding.Service<
   SendManagedThingCommand,

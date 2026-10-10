@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.GetOrganizationStatisticsHttp)`.
- * ### Organization Administration
- * **Example:** Read Org Statistics
+ * @binding
+ * @section Organization Administration
+ * @example Read Org Statistics
  * ```typescript
  * // init
  * // init — account-level binding, no resource argument
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { OrganizationDetails } = yield* getOrganizationStatistics();
  * ```
- *
- * @binding
  */
 export interface GetOrganizationStatistics extends Binding.Service<
   GetOrganizationStatistics,

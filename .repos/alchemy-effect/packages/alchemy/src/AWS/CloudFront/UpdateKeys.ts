@@ -16,8 +16,9 @@ export interface UpdateKeysRequest extends Omit<
  * the store's current `ETag` as `IfMatch` (from
  * {@link DescribeKeyValueStore} or a previous write's response). Provide the
  * implementation with `Effect.provide(AWS.CloudFront.UpdateKeysHttp)`.
- * ### Writing KeyValueStore Data
- * **Example:** Batch Put + Delete
+ * @binding
+ * @section Writing KeyValueStore Data
+ * @example Batch Put + Delete
  * ```typescript
  * // init — bind the operations to the store
  * const describeStore = yield* CloudFront.DescribeKeyValueStore(store);
@@ -31,8 +32,6 @@ export interface UpdateKeysRequest extends Omit<
  *   Deletes: [{ Key: "routes:/legacy" }],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateKeys extends Binding.Service<
   UpdateKeys,

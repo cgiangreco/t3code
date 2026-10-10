@@ -22,8 +22,9 @@ export interface DescribeScalingActivitiesRequest extends Omit<
  * not-scaled reasons when `IncludeNotScaledActivities` is set. Provide the
  * implementation with
  * `Effect.provide(AWS.ApplicationAutoScaling.DescribeScalingActivitiesHttp)`.
- * ### Observing Scaling Activity
- * **Example:** List Recent Scaling Activities
+ * @binding
+ * @section Observing Scaling Activity
+ * @example List Recent Scaling Activities
  * ```typescript
  * // init — bind the operation to the scalable target
  * const describeScalingActivities =
@@ -36,14 +37,12 @@ export interface DescribeScalingActivitiesRequest extends Omit<
  * }
  * ```
  *
- * **Example:** Include Not-Scaled Reasons
+ * @example Include Not-Scaled Reasons
  * ```typescript
  * const page = yield* describeScalingActivities({
  *   IncludeNotScaledActivities: true,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeScalingActivities extends Binding.Service<
   DescribeScalingActivities,

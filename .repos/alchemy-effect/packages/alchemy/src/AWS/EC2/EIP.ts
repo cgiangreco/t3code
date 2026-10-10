@@ -114,10 +114,11 @@ export interface EIP extends Resource<
  * `networkBorderGroup`, `customerOwnedIpv4Pool`) are immutable and replace the
  * address when changed.
  *
- * ### Allocating Elastic IPs
+ * @resource
+ * @section Allocating Elastic IPs
  * By default an Elastic IP is allocated for use within a VPC (`domain: "vpc"`),
  * which is the only domain available to modern accounts.
- * **Example:** VPC-Scoped Elastic IP
+ * @example VPC-Scoped Elastic IP
  * ```typescript
  * const eip = yield* AWS.EC2.EIP("MyEip", {
  *   domain: "vpc",
@@ -128,10 +129,10 @@ export interface EIP extends Resource<
  * `domain` defaults to `"vpc"`, so it can be omitted, and `tags` help you find
  * the address in the console and on the bill.
  *
- * ### Bring-Your-Own-IP and Address Pools
+ * @section Bring-Your-Own-IP and Address Pools
  * If you have onboarded an address range to AWS (BYOIP) or use Outposts, you can
  * draw the address from a specific pool instead of Amazon's general pool.
- * **Example:** Allocate from a Public IPv4 (BYOIP) Pool
+ * @example Allocate from a Public IPv4 (BYOIP) Pool
  * ```typescript
  * const eip = yield* AWS.EC2.EIP("ByoipEip", {
  *   publicIpv4Pool: "ipv4pool-ec2-0abcdef1234567890",
@@ -142,7 +143,7 @@ export interface EIP extends Resource<
  * Amazon address, and `networkBorderGroup` restricts which zone group AWS
  * advertises it from (useful for Local and Wavelength Zones).
  *
- * **Example:** Allocate from a Customer-Owned Pool (Outposts)
+ * @example Allocate from a Customer-Owned Pool (Outposts)
  * ```typescript
  * const eip = yield* AWS.EC2.EIP("CoIpEip", {
  *   customerOwnedIpv4Pool: "ipv4pool-coip-0abcdef1234567890",
@@ -152,8 +153,8 @@ export interface EIP extends Resource<
  * Outposts-associated pool, for workloads that must use your own on-premises
  * address space.
  *
- * ### Using an Elastic IP
- * **Example:** Attach to a NAT Gateway
+ * @section Using an Elastic IP
+ * @example Attach to a NAT Gateway
  * ```typescript
  * const eip = yield* AWS.EC2.EIP("NatEip", {});
  *
@@ -164,8 +165,6 @@ export interface EIP extends Resource<
  * ```
  * Downstream resources consume the reserved address through its `allocationId`;
  * here the EIP becomes the fixed public IP of a NAT gateway.
- *
- * @resource
  */
 export const EIP = Resource<EIP>("AWS.EC2.EIP");
 

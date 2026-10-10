@@ -6,7 +6,7 @@ import {
   type ServerProvider,
 } from "@t3tools/contracts";
 import * as Cause from "effect/Cause";
-import { AsyncResult } from "effect/reactivity";
+import { AsyncResult } from "effect/unstable/reactivity";
 
 import {
   buildLocalEnvironmentUpdateGroups,
@@ -18,19 +18,19 @@ import {
   environmentGroupsWithUpdates,
   firstFailedProviderUpdateMessage,
   firstRejectedProviderUpdateMessage,
+  firstUnsuccessfulSecondaryProviderOutcome,
   getProviderUpdateInitialToastView,
   getProviderUpdateProgressToastView,
   getProviderUpdateRejectedToastView,
-  getProviderUpdateRunToastView,
   getProviderUpdateSidebarPillView,
+  getSingleProviderUpdateProgressToastView,
   hasOneClickUpdateProviderCandidate,
   isProviderUpdateCandidate,
-  isProviderSettingsUpdateCandidate,
   isTerminalProviderUpdatePhase,
   localEnvironmentUpdateNotificationKey,
+  parseWslDistroFromInstanceId,
   providerUpdateNotificationKey,
   resolveEnvironmentUpdateRowStatus,
-  shouldShowPrimaryProviderUpdateToast,
   type LocalEnvironmentProvidersInput,
   type LocalEnvironmentUpdateGroup,
   type LocalProviderUpdateOutcome,
@@ -325,21 +325,6 @@ describe("provider update launch notification logic", () => {
       type: "loading",
       title: "Updating provider",
     });
-    expect(shouldShowPrimaryProviderUpdateToast(view)).toBe(false);
-  });
-
-  it("keeps the initial prompt and terminal outcomes visible as toasts", () => {
-    expect(
-      shouldShowPrimaryProviderUpdateToast(
-        getProviderUpdateInitialToastView({
-          updateProviders: [updateCandidate({ driver: driver("codex") })],
-          oneClickProviders: [updateCandidate({ driver: driver("codex") })],
-        }),
-      ),
-    ).toBe(true);
-    expect(
-      shouldShowPrimaryProviderUpdateToast(getProviderUpdateRejectedToastView(1, "boom")),
-    ).toBe(true);
   });
 
   it("uses server failure state for failed progress", () => {
@@ -363,6 +348,28 @@ describe("provider update launch notification logic", () => {
       phase: "failed",
       type: "error",
       title: "Provider update failed",
+      description: "command failed",
+    });
+  });
+
+  it("resolves a single-provider completion view from the returned provider snapshot", () => {
+    const view = getSingleProviderUpdateProgressToastView(
+      provider({
+        driver: driver("codex"),
+        updateState: {
+          status: "failed",
+          startedAt: checkedAt,
+          finishedAt: checkedAt,
+          message: "command failed",
+          output: "stderr",
+        },
+      }),
+    );
+
+    expect(view).toMatchObject({
+      phase: "failed",
+      type: "error",
+      title: "Codex v1.1.0 update failed",
       description: "command failed",
     });
   });
@@ -418,6 +425,31 @@ describe("provider update launch notification logic", () => {
       title: "Provider updated",
       description: "New sessions will use the updated provider.",
       dismissAfterVisibleMs: 3_000,
+    });
+  });
+
+  it("uses the updated version in the single-provider success toast title", () => {
+    const view = getSingleProviderUpdateProgressToastView(
+      provider({
+        driver: driver("codex"),
+        version: "1.1.0",
+        latestVersion: "1.1.0",
+        advisoryStatus: "current",
+        updateState: {
+          status: "succeeded",
+          startedAt: checkedAt,
+          finishedAt: checkedAt,
+          message: "Provider updated.",
+          output: null,
+        },
+      }),
+    );
+
+    expect(view).toMatchObject({
+      phase: "succeeded",
+      type: "success",
+      title: "Codex updated: v1.1.0",
+      description: "New sessions will use the updated provider.",
     });
   });
 
@@ -766,6 +798,39 @@ describe("provider update launch notification logic", () => {
       expect(snapshots).toEqual([primary]);
     });
 
+    it("flags the first unsuccessful secondary outcome, skipping the primary and successes", () => {
+      const primaryFailed = provider({
+        driver: driver("codex"),
+        updateState: terminalState("failed", "primary boom"),
+      });
+
+      expect(
+        firstUnsuccessfulSecondaryProviderOutcome([
+          fulfilledOutcome(true, primaryFailed),
+          fulfilledOutcome(
+            false,
+            provider({
+              driver: driver("codex"),
+              updateState: terminalState("succeeded", "ok"),
+            }),
+          ),
+        ]),
+      ).toBeNull();
+
+      expect(
+        firstUnsuccessfulSecondaryProviderOutcome([
+          fulfilledOutcome(true, primaryFailed),
+          fulfilledOutcome(
+            false,
+            provider({
+              driver: driver("codex"),
+              updateState: terminalState("failed", "wsl boom"),
+            }),
+          ),
+        ]),
+      ).toMatchObject({ status: "failed", provider: { updateState: { message: "wsl boom" } } });
+    });
+
     it("treats a rejected dispatch as not contributing a snapshot", () => {
       const primary = provider({
         driver: driver("codex"),
@@ -914,6 +979,14 @@ describe("provider update launch notification logic", () => {
         }),
       ).toBe("My Device");
     });
+
+    it("parses the WSL distro from the backend instance id", () => {
+      expect(parseWslDistroFromInstanceId("wsl:ubuntu")).toBe("ubuntu");
+      expect(parseWslDistroFromInstanceId("wsl:default")).toBeNull();
+      expect(parseWslDistroFromInstanceId("wsl:")).toBeNull();
+      expect(parseWslDistroFromInstanceId("ssh:host")).toBeNull();
+      expect(parseWslDistroFromInstanceId(undefined)).toBeNull();
+    });
   });
 
   describe("isTerminalProviderUpdatePhase", () => {
@@ -1038,111 +1111,5 @@ describe("provider update launch notification logic", () => {
         }),
       ).toMatchObject({ kind: "idle", text: "Codex" });
     });
-  });
-});
-
-it("does not offer incompatible latest versions and restores suggestions after policy relaxation", () => {
-  const installed = provider({ driver: driver("codex") });
-  for (const latestVersionStatus of ["broken", "unsupported", "supported", "unknown"] as const) {
-    const snapshot: ServerProvider = {
-      ...installed,
-      compatibilityAdvisory: {
-        status: "supported",
-        latestVersionStatus,
-        message: null,
-        recommendedRange: null,
-        recommendedVersion: null,
-      },
-    };
-    const expected = latestVersionStatus === "supported" || latestVersionStatus === "unknown";
-    expect(isProviderUpdateCandidate(snapshot)).toBe(expected);
-    expect(isProviderSettingsUpdateCandidate(snapshot)).toBe(expected);
-  }
-});
-
-describe("getProviderUpdateRunToastView", () => {
-  const updateState = (
-    status: "succeeded" | "failed",
-    message: string,
-  ): ServerProvider["updateState"] => ({
-    status,
-    startedAt: checkedAt,
-    finishedAt: laterCheckedAt,
-    message,
-    output: null,
-  });
-  const run = (
-    machineLabel: string,
-    providerDriver: string,
-    result: Parameters<typeof getProviderUpdateRunToastView>[0][number]["result"],
-  ) => ({
-    machineLabel,
-    driver: driver(providerDriver),
-    instanceId: instanceId(providerDriver),
-    result,
-  });
-
-  it("lists every failed update and ignores interrupted ones", () => {
-    const view = getProviderUpdateRunToastView([
-      run(
-        "Mac Studio",
-        "codex",
-        AsyncResult.success({
-          providers: [
-            provider({
-              driver: driver("codex"),
-              updateState: updateState("succeeded", "Provider updated."),
-            }),
-          ],
-        }),
-      ),
-      run(
-        "Mac Studio",
-        "claudeAgent",
-        AsyncResult.success({
-          providers: [
-            provider({
-              driver: driver("claudeAgent"),
-              updateState: updateState("failed", "npm exited with code 1."),
-            }),
-          ],
-        }),
-      ),
-      run("Laptop", "codex", AsyncResult.failure(Cause.die(new Error("WebSocket closed")))),
-      run("Server", "codex", AsyncResult.failure(Cause.interrupt())),
-    ]);
-
-    expect(view).toEqual({
-      type: "error",
-      title: "2 of 3 provider updates failed",
-      description: "Mac Studio · Claude: npm exited with code 1.\nLaptop · Codex: WebSocket closed",
-    });
-  });
-
-  it("reports success when every update succeeded", () => {
-    const succeeded = AsyncResult.success({
-      providers: [
-        provider({
-          driver: driver("codex"),
-          updateState: updateState("succeeded", "Provider updated."),
-        }),
-      ],
-    });
-
-    expect(
-      getProviderUpdateRunToastView([
-        run("Mac Studio", "codex", succeeded),
-        run("Laptop", "codex", succeeded),
-      ]),
-    ).toEqual({
-      type: "success",
-      title: "2 providers updated",
-      description: "New sessions will use the updated providers.",
-    });
-    expect(
-      getProviderUpdateRunToastView([
-        run("Server", "codex", AsyncResult.failure(Cause.interrupt())),
-      ]),
-    ).toBeNull();
   });
 });

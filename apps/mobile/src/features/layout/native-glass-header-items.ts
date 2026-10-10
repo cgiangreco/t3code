@@ -4,7 +4,6 @@ type NativeGlassHeaderItem = {
   readonly hidesSharedBackground?: boolean;
   readonly sharesBackground?: boolean;
   readonly variant?: "plain" | "done" | "prominent";
-  readonly axisBehavior?: "automatic" | "horizontalOnly" | "verticalPreferred";
   readonly width?: number;
 };
 

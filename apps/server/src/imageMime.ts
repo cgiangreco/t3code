@@ -1,7 +1,6 @@
-import * as Option from "effect/Option";
-import * as Mime from "effect/http/Mime";
+import Mime from "@effect/platform-node/Mime";
 
-const IMAGE_EXTENSION_BY_MIME_TYPE: Record<string, string> = {
+export const IMAGE_EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/avif": ".avif",
   "image/bmp": ".bmp",
   "image/gif": ".gif",
@@ -122,10 +121,9 @@ export function inferImageExtension(input: { mimeType: string; fileName?: string
     return fromMime;
   }
 
-  // The registry returns bare extensions ("png"); the safe list is dotted.
-  const fromMimeExtension = Option.map(Mime.getExtension(input.mimeType), (ext) => `.${ext}`);
-  if (Option.isSome(fromMimeExtension) && SAFE_IMAGE_FILE_EXTENSIONS.has(fromMimeExtension.value)) {
-    return fromMimeExtension.value;
+  const fromMimeExtension = Mime.getExtension(input.mimeType);
+  if (fromMimeExtension && SAFE_IMAGE_FILE_EXTENSIONS.has(fromMimeExtension)) {
+    return fromMimeExtension;
   }
 
   const fileName = input.fileName?.trim() ?? "";

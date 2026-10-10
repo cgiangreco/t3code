@@ -17,8 +17,9 @@ export interface DeleteRecordRequest extends Omit<
  * `SoftDelete` mode nulls the feature columns; `HardDelete` removes the
  * record entirely. `EventTime` must be later than the stored record's event
  * time for the deletion to take effect.
- * ### Deleting Records
- * **Example:** Soft-Delete a Record
+ * @binding
+ * @section Deleting Records
+ * @example Soft-Delete a Record
  * ```typescript
  * // init
  * const deleteRecord = yield* AWS.SageMaker.DeleteRecord(featureGroup);
@@ -29,8 +30,6 @@ export interface DeleteRecordRequest extends Omit<
  *   EventTime: new Date().toISOString(),
  * });
  * ```
- *
- * @binding
  */
 export interface DeleteRecord extends Binding.Service<
   DeleteRecord,

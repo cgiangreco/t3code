@@ -54,8 +54,9 @@ export interface TransactWriteItemsRequest extends Omit<
  *
  * Bind this operation to one or more tables and identify each item's target
  * table by the bound table's `LogicalId`.
- * ### Writing Data
- * **Example:** Write Items Transactionally
+ * @binding
+ * @section Writing Data
+ * @example Write Items Transactionally
  * ```typescript
  * const transactWriteItems = yield* AWS.DynamoDB.TransactWriteItems(
  *   sourceTable,
@@ -73,8 +74,6 @@ export interface TransactWriteItemsRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface TransactWriteItems extends Binding.Service<
   TransactWriteItems,

@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * {@link StartQuotaUtilizationReport | StartQuotaUtilizationReport} from
  * inside a Function.
  *
- * ### Utilization Reports
- * **Example:** Read a utilization report
+ * @binding
+ * @section Utilization Reports
+ * @example Read a utilization report
  * ```typescript
  * // init
  * const getQuotaUtilizationReport =
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   ReportId: reportId,
  * });
  * ```
- *
- * @binding
  */
 export interface GetQuotaUtilizationReport extends Binding.Service<
   GetQuotaUtilizationReport,

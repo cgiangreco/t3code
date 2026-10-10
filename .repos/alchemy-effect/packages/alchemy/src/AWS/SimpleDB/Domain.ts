@@ -39,22 +39,21 @@ export interface Domain extends Resource<
  * configuration: the name is its identity, so any name change replaces the
  * domain. SimpleDB has no tagging API, so Alchemy cannot brand domains for
  * ownership detection.
- * ### Creating Domains
- * **Example:** Basic Domain
+ * @resource
+ * @section Creating Domains
+ * @example Basic Domain
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
  * const domain = yield* AWS.SimpleDB.Domain("MyDomain", {});
  * ```
  *
- * **Example:** Named Domain
+ * @example Named Domain
  * ```typescript
  * const domain = yield* AWS.SimpleDB.Domain("MyDomain", {
  *   domainName: "my-application-data",
  * });
  * ```
- *
- * @resource
  */
 export const Domain = Resource<Domain>("AWS.SimpleDB.Domain");
 

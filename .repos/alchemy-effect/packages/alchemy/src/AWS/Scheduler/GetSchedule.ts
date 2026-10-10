@@ -15,8 +15,9 @@ export interface GetScheduleRequest extends Omit<
  * deployed Lambda inspects schedules it minted at runtime (is the reminder
  * still pending?). Optionally scoped to a `ScheduleGroup`; without one it
  * covers the default group.
- * ### Reading Schedules At Runtime
- * **Example:** Check A Pending Reminder
+ * @binding
+ * @section Reading Schedules At Runtime
+ * @example Check A Pending Reminder
  * ```typescript
  * const getSchedule = yield* AWS.Scheduler.GetSchedule();
  *
@@ -25,12 +26,10 @@ export interface GetScheduleRequest extends Omit<
  * console.log(schedule.State, schedule.ScheduleExpression);
  * ```
  *
- * **Example:** Scope Reads To A Schedule Group
+ * @example Scope Reads To A Schedule Group
  * ```typescript
  * const getSchedule = yield* AWS.Scheduler.GetSchedule(group);
  * ```
- *
- * @binding
  */
 export interface GetSchedule extends Binding.Service<
   GetSchedule,

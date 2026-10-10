@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * status, endpoint, storage, engine version — for health checks and
  * instance discovery. Provide the implementation with
  * `Effect.provide(AWS.RDS.DescribeDBInstancesHttp)`.
- * ### Monitoring Databases
- * **Example:** Check an Instance's Status
+ * @binding
+ * @section Monitoring Databases
+ * @example Check an Instance's Status
  * ```typescript
  * const describeDBInstances = yield* AWS.RDS.DescribeDBInstances();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const status = page.DBInstances?.[0]?.DBInstanceStatus;
  * ```
- *
- * @binding
  */
 export interface DescribeDBInstances extends Binding.Service<
   DescribeDBInstances,

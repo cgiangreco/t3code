@@ -10,8 +10,9 @@ import type { Queue } from "./Queue.ts";
  * lifecycle status, host properties, worker log configuration. The queue's
  * `farmId`/`queueId` are injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Deadline.GetSessionHttp)`.
- * ### Monitoring Sessions
- * **Example:** Inspect A Session
+ * @binding
+ * @section Monitoring Sessions
+ * @example Inspect A Session
  * ```typescript
  * // init — bind the operation to the queue
  * const getSession = yield* AWS.Deadline.GetSession(queue);
@@ -19,8 +20,6 @@ import type { Queue } from "./Queue.ts";
  * // runtime
  * const session = yield* getSession({ jobId, sessionId });
  * ```
- *
- * @binding
  */
 export interface GetSession extends Binding.Service<
   GetSession,

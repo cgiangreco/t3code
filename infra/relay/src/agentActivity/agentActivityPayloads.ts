@@ -22,29 +22,22 @@ export function isTerminalPhase(state: RelayAgentActivityState): boolean {
 const RUNNING_AGENT_ACTIVITY_ROW_TTL_MS = 2 * 60 * 60 * 1_000;
 const WAITING_AGENT_ACTIVITY_ROW_TTL_MS = 24 * 60 * 60 * 1_000;
 
-export function agentActivityExpiresAt(
-  state: Pick<RelayAgentActivityState, "phase" | "updatedAt">,
-): number {
+export function isExpiredAgentActivityState(
+  state: RelayAgentActivityState,
+  nowMs: number,
+): boolean {
   const updatedAtMs = Option.match(DateTime.make(state.updatedAt), {
     onNone: () => Number.NaN,
     onSome: (dt) => dt.epochMilliseconds,
   });
   if (Number.isNaN(updatedAtMs)) {
-    return Number.NaN;
+    return true;
   }
   const ttlMs =
     state.phase === "running" || state.phase === "starting"
       ? RUNNING_AGENT_ACTIVITY_ROW_TTL_MS
       : WAITING_AGENT_ACTIVITY_ROW_TTL_MS;
-  return updatedAtMs + ttlMs;
-}
-
-export function isExpiredAgentActivityState(
-  state: RelayAgentActivityState,
-  nowMs: number,
-): boolean {
-  const expiresAt = agentActivityExpiresAt(state);
-  return !Number.isFinite(expiresAt) || nowMs > expiresAt;
+  return nowMs - updatedAtMs > ttlMs;
 }
 
 const MAX_SUMMARY_TEXT_LENGTH = 120;
@@ -105,19 +98,4 @@ export function sanitizeApnsNotificationPayload(
     body: truncateText(notification.body, MAX_SUMMARY_TEXT_LENGTH),
     deepLink: sanitizeDeepLink(notification.deepLink),
   };
-}
-
-export function notificationForActivity(
-  row: RelayAgentActivityAggregateRow,
-): ApnsNotificationPayload {
-  const activity = sanitizeAgentActivityAggregateRow(row);
-  return sanitizeApnsNotificationPayload({
-    title: activity.threadTitle,
-    body: `${activity.status}: ${activity.projectTitle}`,
-    environmentId: activity.environmentId,
-    threadId: activity.threadId,
-    deepLink: activity.deepLink,
-    phase: activity.phase,
-    updatedAt: activity.updatedAt,
-  });
 }

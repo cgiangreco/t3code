@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * {@link ResetEnabledBaseline} to poll a drift-remediation run to
  * completion. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.GetBaselineOperationHttp)`.
- * ### Polling Asynchronous Operations
- * **Example:** Poll a Baseline Operation
+ * @binding
+ * @section Polling Asynchronous Operations
+ * @example Poll a Baseline Operation
  * ```typescript
  * // init — account-level binding takes no resource
  * const getBaselineOperation = yield* AWS.ControlTower.GetBaselineOperation();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(baselineOperation.status);
  * ```
- *
- * @binding
  */
 export interface GetBaselineOperation extends Binding.Service<
   GetBaselineOperation,

@@ -19,15 +19,14 @@ export interface ListSubscriptionsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.ListSubscriptionsHttp)`.
  *
- * ### Subscriptions
- * **Example:** List Subscriptions
+ * @binding
+ * @section Subscriptions
+ * @example List Subscriptions
  * ```typescript
  * const listSubscriptions = yield* AWS.QBusiness.ListSubscriptions(app);
  *
  * const { subscriptions } = yield* listSubscriptions();
  * ```
- *
- * @binding
  */
 export interface ListSubscriptions extends Binding.Service<
   ListSubscriptions,

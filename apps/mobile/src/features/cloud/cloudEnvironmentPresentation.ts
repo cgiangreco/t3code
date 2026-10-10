@@ -1,9 +1,5 @@
 import type { RelayEnvironmentStatusResponse } from "@t3tools/contracts/relay";
-import {
-  orchestrationProtocolCompatibilityError,
-  type EnvironmentConnectionPhase,
-} from "@t3tools/client-runtime/connection";
-import { relayOfflineReasonMessage } from "@t3tools/client-runtime/relay";
+import { type EnvironmentConnectionPhase } from "@t3tools/client-runtime/connection";
 
 export interface AvailableCloudEnvironmentPresentation {
   readonly connectionError: string | null;
@@ -18,18 +14,6 @@ export function availableCloudEnvironmentPresentation(input: {
   readonly statusError: string | null;
   readonly statusErrorTraceId: string | null;
 }): AvailableCloudEnvironmentPresentation {
-  const compatibilityError =
-    input.status?.descriptor === undefined
-      ? null
-      : orchestrationProtocolCompatibilityError(input.status.descriptor);
-  if (compatibilityError !== null) {
-    return {
-      connectionError: compatibilityError.message,
-      connectionErrorTraceId: null,
-      connectionState: "unsupported",
-      statusText: "Client not supported",
-    };
-  }
   if (input.status?.status === "online") {
     return {
       connectionError: null,
@@ -40,8 +24,7 @@ export function availableCloudEnvironmentPresentation(input: {
   }
 
   if (input.status?.status === "offline") {
-    const connectionError =
-      relayOfflineReasonMessage(input.status) ?? input.status.error ?? "Relay is offline.";
+    const connectionError = input.status.error ?? "Relay is offline.";
     return {
       connectionError,
       connectionErrorTraceId: input.status.traceId ?? null,

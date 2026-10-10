@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Starts a maintenance action on a domain — reboot a node, restart the search process, or restart Dashboards — e.g. remediation triggered by a health alarm. Provide the implementation with
  * `Effect.provide(AWS.OpenSearch.StartDomainMaintenanceHttp)`.
- * ### Domain Maintenance
- * **Example:** Reboot a Data Node
+ * @binding
+ * @section Domain Maintenance
+ * @example Reboot a Data Node
  * ```typescript
  * const startDomainMaintenance = yield* OpenSearch.StartDomainMaintenance();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.MaintenanceId → track with GetDomainMaintenanceStatus
  * ```
- *
- * @binding
  */
 export interface StartDomainMaintenance extends Binding.Service<
   StartDomainMaintenance,

@@ -10,8 +10,9 @@ import type { AddressList } from "./AddressList.ts";
  * the job id and a pre-signed URL to upload the address data (CSV or
  * JSON). The address list id is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.MailManager.CreateAddressListImportJobHttp)`.
- * ### Bulk Importing Members
- * **Example:** Create an Import Job
+ * @binding
+ * @section Bulk Importing Members
+ * @example Create an Import Job
  * ```typescript
  * const createImportJob = yield* MailManager.CreateAddressListImportJob(blockList);
  *
@@ -22,8 +23,6 @@ import type { AddressList } from "./AddressList.ts";
  * });
  * // upload the CSV to PreSignedUrl, then start the job
  * ```
- *
- * @binding
  */
 export interface CreateAddressListImportJob extends Binding.Service<
   CreateAddressListImportJob,

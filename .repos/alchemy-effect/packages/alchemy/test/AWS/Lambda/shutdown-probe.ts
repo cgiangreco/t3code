@@ -1,7 +1,7 @@
 import * as AWS from "@/AWS/index.ts";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 
 /**
  * Probe for Lambda's Shutdown phase.
@@ -20,7 +20,7 @@ export default class ShutdownProbe extends AWS.Lambda.Function<ShutdownProbe>()(
   "ShutdownProbe",
   {
     main: import.meta.url,
-    functionUrl: true,
+    url: true,
     timeout: Duration.seconds(10),
   },
   Effect.gen(function* () {

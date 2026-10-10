@@ -1,5 +1,5 @@
 import { Credentials } from "@distilled.cloud/planetscale/Credentials";
-import * as planetscale from "@distilled.cloud/planetscale";
+import * as planetscale from "@distilled.cloud/planetscale/Operations";
 import * as Effect from "effect/Effect";
 import * as Redacted from "effect/Redacted";
 import * as Stream from "effect/Stream";
@@ -64,14 +64,6 @@ export interface PostgresDefaultRoleAttributes {
   connectionUrl: Redacted.Redacted<string>;
   /** Pooled connection URL via PSBouncer (Redacted). */
   connectionUrlPooled: Redacted.Redacted<string>;
-  /**
-   * Private connection host or DNS zone for this branch, supplied by
-   * PlanetScale. GCP Private Service Connect requires an endpoint name before
-   * this DNS zone.
-   */
-  privateHost: string;
-  /** Service name for this branch supplied by PlanetScale to establish a private connection. */
-  privateConnectionServiceName: string;
   /** Inherited roles. */
   inheritedRoles: InheritedRole[];
   /** Resolved organization slug. */
@@ -85,8 +77,8 @@ export interface PostgresDefaultRoleAttributes {
 /**
  * The default PlanetScale PostgreSQL role for a database branch.
  *
- * ### Creating a Default Role
- * **Example:** Default role on the main branch
+ * @section Creating a Default Role
+ * @example Default role on the main branch
  * ```typescript
  * const db = yield* Planetscale.PostgresDatabase("MyDb", {
  *   clusterSize: "PS_10",
@@ -152,11 +144,7 @@ export const PostgresDefaultRoleProvider = () =>
           branch: output.branch,
         })
         .pipe(
-          Effect.map((role) => ({
-            ...output,
-            privateHost: role.private_access_host_url,
-            privateConnectionServiceName: role.private_connection_service_name,
-          })),
+          Effect.map(() => output),
           Effect.catchTag("NotFound", () => Effect.succeed(undefined)),
         );
     }),
@@ -183,16 +171,11 @@ export const PostgresDefaultRoleProvider = () =>
 
       // 2. Sync (no-op) — we own the role and it still exists in the
       //    cloud. Default roles have nothing mutable in place: their
-      //    plaintext password isn't retrievable, so we retain the cached
-      //    credentials while refreshing the private connection details.
-      //    diff() forces a replace when database/branch change.
+      //    plaintext password isn't retrievable, so we re-emit the
+      //    persisted attributes unchanged. diff() forces a replace
+      //    when database/branch change.
       if (output && observed) {
-        return {
-          ...output,
-          privateHost: observed.private_access_host_url,
-          privateConnectionServiceName:
-            observed.private_connection_service_name,
-        };
+        return output;
       }
 
       // 3. Adoption guard — observed exists but we have no prior
@@ -242,8 +225,6 @@ export const PostgresDefaultRoleProvider = () =>
         databaseName: data.database_name,
         connectionUrl: Redacted.make(connectionUrl),
         connectionUrlPooled: Redacted.make(connectionUrlPooled),
-        privateHost: data.private_access_host_url,
-        privateConnectionServiceName: data.private_connection_service_name,
         inheritedRoles: data.inherited_roles as InheritedRole[],
         organization,
         database: databaseName,
@@ -309,9 +290,6 @@ export const PostgresDefaultRoleProvider = () =>
                                     databaseName: role.database_name,
                                     connectionUrl: Redacted.make(""),
                                     connectionUrlPooled: Redacted.make(""),
-                                    privateHost: role.private_access_host_url,
-                                    privateConnectionServiceName:
-                                      role.private_connection_service_name,
                                     inheritedRoles:
                                       role.inherited_roles as InheritedRole[],
                                     organization,

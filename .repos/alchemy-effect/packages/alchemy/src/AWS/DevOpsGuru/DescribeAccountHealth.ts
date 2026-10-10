@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Returns the number of open reactive and proactive insights, analyzed metrics, and resource hours for the account — the top line of an operations dashboard.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.DescribeAccountHealthHttp)`.
- * ### Account Health
- * **Example:** Read Open Insight Counts
+ * @binding
+ * @section Account Health
+ * @example Read Open Insight Counts
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeAccountHealth = yield* AWS.DevOpsGuru.DescribeAccountHealth();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const health = yield* describeAccountHealth();
  * yield* Effect.log(`open reactive insights: ${health.OpenReactiveInsights}`);
  * ```
- *
- * @binding
  */
 export interface DescribeAccountHealth extends Binding.Service<
   DescribeAccountHealth,

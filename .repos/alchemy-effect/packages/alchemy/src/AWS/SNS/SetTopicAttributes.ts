@@ -15,8 +15,9 @@ export interface SetTopicAttributesRequest extends Omit<
  * single topic attribute by name. The binding grants the host function
  * `sns:SetTopicAttributes` on the topic. Provide the
  * `SetTopicAttributesHttp` layer on the Function to implement the binding.
- * ### Updating Topic Attributes
- * **Example:** Set a Topic's Display Name
+ * @binding
+ * @section Updating Topic Attributes
+ * @example Set a Topic's Display Name
  * ```typescript
  * // init (provide SNS.SetTopicAttributesHttp on the Function)
  * const setTopicAttributes = yield* SNS.SetTopicAttributes(topic);
@@ -27,8 +28,6 @@ export interface SetTopicAttributesRequest extends Omit<
  *   AttributeValue: "order-events",
  * });
  * ```
- *
- * @binding
  */
 export interface SetTopicAttributes extends Binding.Service<
   SetTopicAttributes,

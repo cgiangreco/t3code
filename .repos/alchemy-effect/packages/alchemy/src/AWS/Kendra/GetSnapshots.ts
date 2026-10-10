@@ -20,8 +20,9 @@ export interface GetSnapshotsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.GetSnapshotsHttp)`.
  *
- * ### Search Analytics
- * **Example:** Fetch Search Metrics
+ * @binding
+ * @section Search Analytics
+ * @example Fetch Search Metrics
  * ```typescript
  * const getSnapshots = yield* AWS.Kendra.GetSnapshots(index);
  *
@@ -30,8 +31,6 @@ export interface GetSnapshotsRequest extends Omit<
  *   MetricType: "QUERIES_BY_COUNT",
  * });
  * ```
- *
- * @binding
  */
 export interface GetSnapshots extends Binding.Service<
   GetSnapshots,

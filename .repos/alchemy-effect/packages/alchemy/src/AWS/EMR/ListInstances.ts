@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:ListInstances` — lists the bound cluster's EC2 instances with state, private/public addresses, and group/fleet membership.
- * ### Inspecting the Cluster
- * **Example:** List Running Core Instances
+ * @binding
+ * @section Inspecting the Cluster
+ * @example List Running Core Instances
  * ```typescript
  * const listInstances = yield* AWS.EMR.ListInstances(cluster);
  *
@@ -15,8 +16,6 @@ import type { Cluster } from "./Cluster.ts";
  *   InstanceStates: ["RUNNING"],
  * });
  * ```
- *
- * @binding
  */
 export interface ListInstances extends Binding.Service<
   ListInstances,

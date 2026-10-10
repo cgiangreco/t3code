@@ -11,7 +11,6 @@ import {
   cssFontFamilies,
   resolveDefaultFamilyLabel,
   resolveTerminalFontPreference,
-  resolveTerminalFontSizePreference,
 } from "./appearanceFonts";
 
 describe("areFontAdvancesMonospace", () => {
@@ -95,16 +94,6 @@ describe("resolveTerminalFontPreference", () => {
         terminal: "Berkeley Mono",
       }),
     ).toBe("Berkeley Mono");
-  });
-});
-
-describe("resolveTerminalFontSizePreference", () => {
-  it("inherits the code font size in simple mode", () => {
-    expect(resolveTerminalFontSizePreference({ advanced: false, code: 15, terminal: 12 })).toBe(15);
-  });
-
-  it("keeps code and terminal font sizes independent in advanced mode", () => {
-    expect(resolveTerminalFontSizePreference({ advanced: true, code: 15, terminal: 12 })).toBe(12);
   });
 });
 

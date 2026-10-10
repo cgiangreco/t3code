@@ -14,8 +14,9 @@ import type { Server } from "./Server.ts";
  * Calling it on a `SERVICE_MANAGED` server fails with the typed
  * `InvalidRequestException`. Provide the implementation with
  * `Effect.provide(AWS.Transfer.TestIdentityProviderHttp)`.
- * ### Diagnosing Authentication
- * **Example:** Test a User's Credentials
+ * @binding
+ * @section Diagnosing Authentication
+ * @example Test a User's Credentials
  * ```typescript
  * import * as Redacted from "effect/Redacted";
  *
@@ -30,8 +31,6 @@ import type { Server } from "./Server.ts";
  * });
  * yield* Effect.log(`identity provider replied ${result.StatusCode}`);
  * ```
- *
- * @binding
  */
 export interface TestIdentityProvider extends Binding.Service<
   TestIdentityProvider,

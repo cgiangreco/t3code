@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Lists an Aurora cluster's endpoints (writer, reader, and custom
  * endpoints) with their status and member lists. Provide the implementation with
  * `Effect.provide(AWS.RDS.DescribeDBClusterEndpointsHttp)`.
- * ### Monitoring Databases
- * **Example:** List a Cluster's Endpoints
+ * @binding
+ * @section Monitoring Databases
+ * @example List a Cluster's Endpoints
  * ```typescript
  * const describeDBClusterEndpoints =
  *   yield* AWS.RDS.DescribeDBClusterEndpoints();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   DBClusterIdentifier: clusterId,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeDBClusterEndpoints extends Binding.Service<
   DescribeDBClusterEndpoints,

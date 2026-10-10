@@ -11,16 +11,15 @@ export interface DescribeMapRunRequest extends sfn.DescribeMapRunInput {}
  * Returns a Distributed Map Run's status, item counts, and configuration.
  * IAM access is scoped to Map Runs of the bound {@link StateMachine};
  * obtain `mapRunArn`s from `ListMapRuns`.
- * ### Distributed Map Runs
- * **Example:** Inspect a Map Run's progress
+ * @binding
+ * @section Distributed Map Runs
+ * @example Inspect a Map Run's progress
  * ```typescript
  * const describeMapRun = yield* StepFunctions.DescribeMapRun(machine);
  *
  * const mapRun = yield* describeMapRun({ mapRunArn });
  * // mapRun.status, mapRun.itemCounts.succeeded, ...
  * ```
- *
- * @binding
  */
 export interface DescribeMapRun extends Binding.Service<
   DescribeMapRun,

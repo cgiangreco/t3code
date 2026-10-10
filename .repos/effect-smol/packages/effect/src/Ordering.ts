@@ -27,7 +27,7 @@ import * as Reducer_ from "./Reducer.ts"
  *
  * **Example** (Defining comparison results)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Ordering } from "effect"
  *
  * // Custom comparison function
@@ -37,9 +37,9 @@ import * as Reducer_ from "./Reducer.ts"
  *   return 0
  * }
  *
- * compareNumbers(5, 10) // => -1
- * compareNumbers(10, 5) // => 1
- * compareNumbers(5, 5) // => 0
+ * console.log(compareNumbers(5, 10)) // -1 (5 < 10)
+ * console.log(compareNumbers(10, 5)) // 1 (10 > 5)
+ * console.log(compareNumbers(5, 5)) // 0 (5 == 5)
  *
  * // Using with string comparison
  * const compareStrings = (a: string, b: string): Ordering.Ordering => {
@@ -63,13 +63,13 @@ export type Ordering = -1 | 0 | 1
  *
  * **Example** (Reversing comparison order)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Ordering } from "effect"
  *
  * // Basic reversal
- * Ordering.reverse(1) // => -1
- * Ordering.reverse(-1) // => 1
- * Ordering.reverse(0) // => 0
+ * console.log(Ordering.reverse(1)) // -1 (greater becomes less)
+ * console.log(Ordering.reverse(-1)) // 1 (less becomes greater)
+ * console.log(Ordering.reverse(0)) // 0 (equal stays equal)
  *
  * // Creating descending sort from ascending comparison
  * const compareNumbers = (a: number, b: number): Ordering.Ordering =>
@@ -103,8 +103,9 @@ export const reverse = (o: Ordering): Ordering => (o === -1 ? 1 : o === 1 ? -1 :
  *
  * **Example** (Pattern matching on orderings)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Function, Ordering } from "effect"
+ * import * as assert from "node:assert"
  *
  * const toMessage = Ordering.match({
  *   onLessThan: Function.constant("less than"),
@@ -112,9 +113,9 @@ export const reverse = (o: Ordering): Ordering => (o === -1 ? 1 : o === 1 ? -1 :
  *   onGreaterThan: Function.constant("greater than")
  * })
  *
- * toMessage(-1) // => "less than"
- * toMessage(0) // => "equal"
- * toMessage(1) // => "greater than"
+ * assert.deepStrictEqual(toMessage(-1), "less than")
+ * assert.deepStrictEqual(toMessage(0), "equal")
+ * assert.deepStrictEqual(toMessage(1), "greater than")
  * ```
  *
  * @category pattern matching

@@ -18,14 +18,13 @@ export interface StopDeploymentRequest extends Omit<
  * Provide `AppConfig.StopDeploymentHttp` on the hosting function's Effect to
  * implement the binding.
  *
- * ### Deploying Configuration at Runtime
- * **Example:** Roll back an in-progress rollout
+ * @binding
+ * @section Deploying Configuration at Runtime
+ * @example Roll back an in-progress rollout
  * ```typescript
  * const stopDeployment = yield* AppConfig.StopDeployment(app, env);
  * yield* stopDeployment({ DeploymentNumber: 2 });
  * ```
- *
- * @binding
  */
 export interface StopDeployment extends Binding.Service<
   StopDeployment,

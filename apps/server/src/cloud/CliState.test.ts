@@ -5,10 +5,9 @@ import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 
 import * as ServerSecretStore from "../auth/ServerSecretStore.ts";
-import * as ServerConfig from "../config.ts";
+import { ServerConfig } from "../config.ts";
 import * as CliState from "./CliState.ts";
 import {
-  CLOUD_ENDPOINT_CONFIRMED_ORIGIN,
   CLOUD_ENDPOINT_RUNTIME_CONFIG,
   CLOUD_LINKED_USER_ID,
   CLOUD_MINT_PUBLIC_KEY,
@@ -25,11 +24,10 @@ const persistedCloudLinkSecrets = [
   RELAY_ENVIRONMENT_CREDENTIAL_SECRET,
   CLOUD_MINT_PUBLIC_KEY,
   CLOUD_ENDPOINT_RUNTIME_CONFIG,
-  CLOUD_ENDPOINT_CONFIRMED_ORIGIN,
   PUBLISH_AGENT_ACTIVITY_SECRET,
 ] as const;
 
-const layerTest = () =>
+const makeTestLayer = () =>
   ServerSecretStore.layer.pipe(
     Layer.provide(
       ServerConfig.layerTest(process.cwd(), {
@@ -56,7 +54,7 @@ it.layer(NodeServices.layer)("CliState", (it) => {
       for (const name of persistedCloudLinkSecrets) {
         assert.isTrue(Option.isNone(yield* secrets.get(name)));
       }
-    }).pipe(Effect.provide(layerTest())),
+    }).pipe(Effect.provide(makeTestLayer())),
   );
 
   it.effect("round-trips the desired link mode and defaults legacy links to managed", () =>
@@ -79,6 +77,6 @@ it.layer(NodeServices.layer)("CliState", (it) => {
 
       yield* CliState.setCliDesiredCloudLink(false);
       assert.equal(yield* CliState.readCliDesiredLinkMode, "managed");
-    }).pipe(Effect.provide(layerTest())),
+    }).pipe(Effect.provide(makeTestLayer())),
   );
 });

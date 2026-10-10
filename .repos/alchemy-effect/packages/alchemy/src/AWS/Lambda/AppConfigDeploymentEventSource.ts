@@ -67,8 +67,9 @@ const isEnvironment = (
  * 2. At runtime it narrows incoming invocations to AppConfig deployment
  *    notifications for the bound target and forwards them into the supplied
  *    handler as a typed `DeploymentEventRecord` stream.
- * ### Consuming Deployment Events
- * **Example:** Record Completed Deployments
+ * @binding
+ * @section Consuming Deployment Events
+ * @example Record Completed Deployments
  * ```typescript
  * yield* AppConfig.consumeDeploymentEvents(
  *   env,
@@ -81,8 +82,6 @@ const isEnvironment = (
  *     ),
  * );
  * ```
- *
- * @binding
  */
 export const AppConfigDeploymentEventSource = Layer.effect(
   AppConfigDeploymentEventSourceContract,

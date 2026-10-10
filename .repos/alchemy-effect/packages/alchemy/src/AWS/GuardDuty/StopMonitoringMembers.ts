@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.StopMonitoringMembersHttp)`.
- * ### Member Administration
- * **Example:** Pause Monitoring
+ * @binding
+ * @section Member Administration
+ * @example Pause Monitoring
  * ```typescript
  * // init
  * const stopMonitoringMembers = yield* AWS.GuardDuty.StopMonitoringMembers(detector);
@@ -19,8 +20,6 @@ import type { Detector } from "./Detector.ts";
  * // runtime
  * yield* stopMonitoringMembers({ AccountIds: ["111122223333"] });
  * ```
- *
- * @binding
  */
 export interface StopMonitoringMembers extends Binding.Service<
   StopMonitoringMembers,

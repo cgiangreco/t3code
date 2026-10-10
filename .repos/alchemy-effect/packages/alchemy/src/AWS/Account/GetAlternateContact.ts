@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * `ResourceNotFoundException`. Account Management is an account singleton,
  * so the binding takes no resource argument. Provide the implementation with
  * `Effect.provide(AWS.Account.GetAlternateContactHttp)`.
- * ### Reading Account Settings
- * **Example:** Read the Billing Contact
+ * @binding
+ * @section Reading Account Settings
+ * @example Read the Billing Contact
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getAlternateContact = yield* AWS.Account.GetAlternateContact();
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GetAlternateContact extends Binding.Service<
   GetAlternateContact,

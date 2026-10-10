@@ -16,8 +16,9 @@ export interface ListRecordsRequest extends Omit<
  * callable that automatically injects the feature group name. Use it to
  * discover which records exist without retrieving the full record data;
  * paginate with `NextToken`.
- * ### Listing Records
- * **Example:** List Record Identifiers
+ * @binding
+ * @section Listing Records
+ * @example List Record Identifiers
  * ```typescript
  * // init
  * const listRecords = yield* AWS.SageMaker.ListRecords(featureGroup);
@@ -25,8 +26,6 @@ export interface ListRecordsRequest extends Omit<
  * // runtime
  * const { RecordIdentifiers } = yield* listRecords({ MaxResults: 100 });
  * ```
- *
- * @binding
  */
 export interface ListRecords extends Binding.Service<
   ListRecords,

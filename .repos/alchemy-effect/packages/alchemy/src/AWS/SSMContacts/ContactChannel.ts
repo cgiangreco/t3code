@@ -71,8 +71,8 @@ export interface ContactChannel extends Resource<
  * An Incident Manager contact channel — the method (SMS, voice, or email)
  * that Incident Manager uses to engage a contact during an incident.
  *
- * ### Creating Contact Channels
- * **Example:** Email channel without activation
+ * @section Creating Contact Channels
+ * @example Email channel without activation
  * ```typescript
  * const email = yield* SSMContacts.ContactChannel("Email", {
  *   contactId: oncall.contactArn,
@@ -82,7 +82,7 @@ export interface ContactChannel extends Resource<
  * });
  * ```
  *
- * **Example:** SMS channel
+ * @example SMS channel
  * ```typescript
  * const sms = yield* SSMContacts.ContactChannel("Sms", {
  *   contactId: oncall.contactArn,

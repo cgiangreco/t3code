@@ -9,16 +9,15 @@ import type { Archive } from "./Archive.ts";
  * Cancels a queued or running archive export (by `ExportId`). IAM
  * access is granted on the bound archive's ARN. Provide the implementation with
  * `Effect.provide(AWS.MailManager.StopArchiveExportHttp)`.
- * ### Exporting from the Archive
- * **Example:** Cancel an Export
+ * @binding
+ * @section Exporting from the Archive
+ * @example Cancel an Export
  * ```typescript
  * const stopExport = yield* MailManager.StopArchiveExport(archive);
  *
  * // runtime
  * yield* stopExport({ ExportId });
  * ```
- *
- * @binding
  */
 export interface StopArchiveExport extends Binding.Service<
   StopArchiveExport,

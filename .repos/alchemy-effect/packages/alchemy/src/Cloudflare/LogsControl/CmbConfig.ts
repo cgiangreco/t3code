@@ -70,15 +70,18 @@ export type CmbConfig = Resource<
  * and processed, and deleting the config lifts the boundary. Handle with
  * care in production accounts.
  * :::
- * ### Restricting logs to a region
- * **Example:** Keep all account logs in the EU
+ * @resource
+ * @product Logs
+ * @category Observability & Analytics
+ * @section Restricting logs to a region
+ * @example Keep all account logs in the EU
  * ```typescript
  * const cmb = yield* Cloudflare.LogsControl.CmbConfig("EuLogs", {
  *   regions: "eu",
  * });
  * ```
  *
- * **Example:** Allow out-of-region access
+ * @example Allow out-of-region access
  * ```typescript
  * const cmb = yield* Cloudflare.LogsControl.CmbConfig("EuLogs", {
  *   regions: "eu",
@@ -87,10 +90,6 @@ export type CmbConfig = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/data-localization/metadata-boundary/
- *
- * @resource
- * @product Logs
- * @category Observability & Analytics
  */
 export const CmbConfig = Resource<CmbConfig>(TypeId);
 

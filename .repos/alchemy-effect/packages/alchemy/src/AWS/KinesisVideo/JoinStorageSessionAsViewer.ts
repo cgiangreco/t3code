@@ -23,8 +23,9 @@ export interface JoinStorageSessionAsViewerRequest extends Omit<
  * `MediaStorageConfiguration` linking the channel to a stream); without it
  * the endpoint discovery fails with the typed `SignalingEndpointUnavailable`
  * error.
- * ### WebRTC Storage
- * **Example:** Join a Storage Session as Viewer
+ * @binding
+ * @section WebRTC Storage
+ * @example Join a Storage Session as Viewer
  * ```typescript
  * // init
  * const joinAsViewer =
@@ -33,8 +34,6 @@ export interface JoinStorageSessionAsViewerRequest extends Omit<
  * // runtime
  * yield* joinAsViewer({ clientId: "viewer-1" });
  * ```
- *
- * @binding
  */
 export interface JoinStorageSessionAsViewer extends Binding.Service<
   JoinStorageSessionAsViewer,

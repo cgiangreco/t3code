@@ -19,15 +19,14 @@ export interface DeleteAttachmentRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.DeleteAttachmentHttp)`.
  *
- * ### Conversations
- * **Example:** Delete an Attachment
+ * @binding
+ * @section Conversations
+ * @example Delete an Attachment
  * ```typescript
  * const deleteAttachment = yield* AWS.QBusiness.DeleteAttachment(app);
  *
  * yield* deleteAttachment({ conversationId, attachmentId });
  * ```
- *
- * @binding
  */
 export interface DeleteAttachment extends Binding.Service<
   DeleteAttachment,

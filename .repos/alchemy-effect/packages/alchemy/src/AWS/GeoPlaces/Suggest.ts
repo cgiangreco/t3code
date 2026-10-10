@@ -14,12 +14,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-places:Suggest`. Requests and responses are raw distilled types (no
  * marshalling).
  *
- * ### Suggesting Places
+ * @binding
+ * @section Suggesting Places
  * Provide the `SuggestHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoPlaces.SuggestHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Suggest places for a free-form query
+ * @example Suggest places for a free-form query
  * ```typescript
  * // init
  * const suggest = yield* AWS.GeoPlaces.Suggest();
@@ -32,8 +33,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const first = result.ResultItems?.[0]?.Title;
  * ```
- *
- * @binding
  */
 export interface Suggest extends Binding.Service<
   Suggest,

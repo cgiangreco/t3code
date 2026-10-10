@@ -107,8 +107,9 @@ export interface FileSystem extends Resource<
  * token derived from the app, stage, and logical id; if state is lost, the
  * file system is re-discovered by its internal Alchemy tags.
  *
- * ### Creating File Systems
- * **Example:** Lustre scratch file system (cheapest / fastest)
+ * @resource
+ * @section Creating File Systems
+ * @example Lustre scratch file system (cheapest / fastest)
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -120,7 +121,7 @@ export interface FileSystem extends Resource<
  * });
  * ```
  *
- * **Example:** Persistent Lustre with S3 data repository
+ * @example Persistent Lustre with S3 data repository
  * ```typescript
  * const files = yield* AWS.FSx.FileSystem("Files", {
  *   fileSystemType: "LUSTRE",
@@ -134,7 +135,7 @@ export interface FileSystem extends Resource<
  * });
  * ```
  *
- * **Example:** OpenZFS file system
+ * @example OpenZFS file system
  * ```typescript
  * const zfs = yield* AWS.FSx.FileSystem("Zfs", {
  *   fileSystemType: "OPENZFS",
@@ -146,8 +147,6 @@ export interface FileSystem extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const FileSystem = Resource<FileSystem>("AWS.FSx.FileSystem");
 

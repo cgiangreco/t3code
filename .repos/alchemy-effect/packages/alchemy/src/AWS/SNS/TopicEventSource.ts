@@ -23,8 +23,9 @@ export interface TopicEventSourceProps {
  * The contract is a `Binding.Service`; the Lambda implementation layer is
  * `Lambda.TopicEventSource`. Consume it through the
  * {@link consumeTopicNotifications} helper.
- * ### Consuming a Topic
- * **Example:** Consume Notifications in a Lambda Function
+ * @binding
+ * @section Consuming a Topic
+ * @example Consume Notifications in a Lambda Function
  * ```typescript
  * export default WorkerFunction.make(
  *   { main: import.meta.url },
@@ -40,8 +41,6 @@ export interface TopicEventSourceProps {
  *   }).pipe(Effect.provide(Lambda.TopicEventSource)),
  * );
  * ```
- *
- * @binding
  */
 export interface TopicEventSource extends Binding.Service<
   TopicEventSource,

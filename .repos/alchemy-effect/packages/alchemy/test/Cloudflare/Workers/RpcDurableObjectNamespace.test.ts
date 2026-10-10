@@ -5,8 +5,8 @@ import * as Effect from "effect/Effect";
 import { MinimumLogLevel } from "effect/References";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
-import * as HttpClient from "effect/http/HttpClient";
-import * as RpcClient from "effect/rpc/RpcClient";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as RpcClient from "effect/unstable/rpc/RpcClient";
 import Stack from "./fixtures/rpc-do-namespace-do-rpc/stack.ts";
 import { WorkerRpcs as RpcWorkerWorkerRpcs } from "./fixtures/rpc-worker-rpc-http/group.ts";
 import RpcWorkerStack from "./fixtures/rpc-worker-rpc-http/stack.ts";
@@ -52,9 +52,7 @@ const resetCounter = (url: string, id: string) =>
     yield* client.post(`${url}/counter/${id}/reset`).pipe(retryHttp);
   });
 
-// Full-suite concurrency + workers.dev propagation routinely needs more than
-// a dozen attempts before the DO binding / subdomain is routable.
-const readinessRetries = 30;
+const readinessRetries = 15;
 
 // The `*DO` RPC handlers forward to the Durable Object via `getByName(...)`.
 // On a freshly-deployed worker the DO-namespace binding hasn't propagated to
@@ -74,20 +72,7 @@ const retryReadyN =
 
 const retryReady = retryReadyN(readinessRetries);
 
-// Gate HTTP deploy on workers.dev + DO binding readiness. Without this the
-// first test burns its 30s budget on 404s while the subdomain propagates.
-const stack = beforeAll(
-  deploy(Stack).pipe(
-    Effect.tap((outputs) =>
-      Effect.gen(function* () {
-        const client = HttpClient.filterStatusOk(yield* HttpClient.HttpClient);
-        yield* client
-          .post(`${outputs.url}/counter/${k("warmup")}/reset`)
-          .pipe(retryReadyN(readinessRetries));
-      }),
-    ),
-  ),
-);
+const stack = beforeAll(deploy(Stack));
 afterAll.skipIf(!!process.env.NO_DESTROY)(destroy(Stack));
 
 // Gate the deploy on the worker→DO binding having propagated to the edge:
@@ -132,10 +117,7 @@ test(
     const got = (yield* getRes.json) as { count: number };
     expect(got.count).toBe(3);
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 60_000,
-  },
+  { timeout: 30_000 },
 );
 
 test(
@@ -163,10 +145,7 @@ test(
     expect(beta.count).toBe(1);
     expect(gamma.count).toBe(0);
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 30_000,
-  },
+  { timeout: 30_000 },
 );
 
 test(
@@ -197,10 +176,7 @@ test(
       );
     expect(lines).toEqual(["1", "2", "3", "4"]);
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 30_000,
-  },
+  { timeout: 30_000 },
 );
 
 test(
@@ -217,10 +193,7 @@ test(
       expect(pingDO.echo).toBe("via DO");
     }).pipe(Effect.scoped, Effect.provide(rpcClientLayer(url)));
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 30_000,
-  },
+  { timeout: 30_000 },
 );
 
 test(
@@ -265,10 +238,7 @@ test(
     const final = (yield* finalRes.json) as { count: number };
     expect(final.count).toBe(N + 1);
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 30_000,
-  },
+  { timeout: 30_000 },
 );
 
 test(
@@ -301,10 +271,7 @@ test(
       }
     }).pipe(Effect.scoped, Effect.provide(rpcClientLayer(url)));
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 60_000,
-  },
+  { timeout: 60_000 },
 );
 
 test(
@@ -331,10 +298,7 @@ test(
       }
     }).pipe(Effect.scoped, Effect.provide(rpcClientLayer(url)));
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 30_000,
-  },
+  { timeout: 30_000 },
 );
 
 test(
@@ -367,8 +331,5 @@ test(
       }
     }).pipe(Effect.scoped, Effect.provide(rpcClientLayer(url)));
   }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:worker", "live"],
-    timeout: 30_000,
-  },
+  { timeout: 30_000 },
 );

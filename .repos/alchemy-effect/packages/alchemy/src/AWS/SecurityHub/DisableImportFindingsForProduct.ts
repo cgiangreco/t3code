@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.DisableImportFindingsForProductHttp)`.
- * ### Product Integrations
- * **Example:** Disable a Product Integration
+ * @binding
+ * @section Product Integrations
+ * @example Disable a Product Integration
  * ```typescript
  * // init — account-level binding, no resource argument
  * const disableImportFindingsForProduct = yield* AWS.SecurityHub.DisableImportFindingsForProduct();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   ProductSubscriptionArn: subscriptionArn,
  * });
  * ```
- *
- * @binding
  */
 export interface DisableImportFindingsForProduct extends Binding.Service<
   DisableImportFindingsForProduct,

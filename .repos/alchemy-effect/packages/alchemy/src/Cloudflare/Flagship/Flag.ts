@@ -32,17 +32,6 @@ export type FlagConditionOperator =
  * A single targeting condition: either a flat attribute comparison or a
  * nested group of clauses combined with AND/OR.
  */
-/**
- * Value a flat condition compares against — a scalar, a JSON object, or a
- * list (for `in` / `not_in`).
- */
-export type FlagConditionValue =
-  | string
-  | number
-  | boolean
-  | { [key: string]: unknown }
-  | unknown[];
-
 export type FlagCondition =
   | {
       /**
@@ -56,7 +45,7 @@ export type FlagCondition =
       /**
        * Value to compare against.
        */
-      value: FlagConditionValue;
+      value: unknown;
     }
   | {
       /**
@@ -224,8 +213,11 @@ export type Flag = Resource<
  * endpoint); changing variations, rules, enablement, or the default
  * variation takes effect without redeploying code. Everything except the
  * flag key and the parent app is mutable in place.
- * ### Creating a Flag
- * **Example:** Boolean flag
+ * @resource
+ * @product Flagship
+ * @category Developer Platform
+ * @section Creating a Flag
+ * @example Boolean flag
  * ```typescript
  * const app = yield* Cloudflare.Flagship.App("Flags", {});
  *
@@ -237,7 +229,7 @@ export type Flag = Resource<
  * });
  * ```
  *
- * **Example:** String flag with multiple variations
+ * @example String flag with multiple variations
  * ```typescript
  * const flag = yield* Cloudflare.Flagship.Flag("CheckoutFlow", {
  *   appId: app.appId,
@@ -247,8 +239,8 @@ export type Flag = Resource<
  * });
  * ```
  *
- * ### Targeting Rules
- * **Example:** Serve a variation to a specific country
+ * @section Targeting Rules
+ * @example Serve a variation to a specific country
  * ```typescript
  * const flag = yield* Cloudflare.Flagship.Flag("DarkMode", {
  *   appId: app.appId,
@@ -267,7 +259,7 @@ export type Flag = Resource<
  * });
  * ```
  *
- * **Example:** Percentage rollout
+ * @example Percentage rollout
  * ```typescript
  * const flag = yield* Cloudflare.Flagship.Flag("NewSearch", {
  *   appId: app.appId,
@@ -285,8 +277,8 @@ export type Flag = Resource<
  * });
  * ```
  *
- * ### Toggling a Flag
- * **Example:** Disable a flag without removing its rules
+ * @section Toggling a Flag
+ * @example Disable a flag without removing its rules
  * ```typescript
  * const flag = yield* Cloudflare.Flagship.Flag("NewCheckout", {
  *   appId: app.appId,
@@ -299,10 +291,6 @@ export type Flag = Resource<
  *
  * @see https://developers.cloudflare.com/flagship/
  * @see https://developers.cloudflare.com/api/resources/flagship/
- *
- * @resource
- * @product Flagship
- * @category Developer Platform
  */
 export const Flag = Resource<Flag>(TypeId);
 
@@ -541,7 +529,7 @@ const normalizeConditions = (conditions: readonly unknown[]): FlagCondition[] =>
       const flat = condition as {
         attribute: string;
         operator: string;
-        value: FlagConditionValue;
+        value: unknown;
       };
       return [
         {

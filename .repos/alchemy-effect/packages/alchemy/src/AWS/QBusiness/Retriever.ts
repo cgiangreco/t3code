@@ -95,8 +95,9 @@ export interface Retriever extends Resource<
  * An Amazon Q Business retriever — the query engine that fetches relevant
  * passages from an index (native or Kendra) to ground chat responses.
  *
- * ### Creating Retrievers
- * **Example:** Native Index Retriever
+ * @resource
+ * @section Creating Retrievers
+ * @example Native Index Retriever
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -109,7 +110,7 @@ export interface Retriever extends Resource<
  * });
  * ```
  *
- * **Example:** Kendra Index Retriever
+ * @example Kendra Index Retriever
  * ```typescript
  * const retriever = yield* AWS.QBusiness.Retriever("Kendra", {
  *   applicationId: app.applicationId,
@@ -120,8 +121,6 @@ export interface Retriever extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Retriever = Resource<Retriever>("AWS.QBusiness.Retriever");
 

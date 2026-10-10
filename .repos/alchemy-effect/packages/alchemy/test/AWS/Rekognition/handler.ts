@@ -3,8 +3,8 @@ import * as Rekognition from "@/AWS/Rekognition";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import path from "pathe";
 
 const main = path.resolve(import.meta.dirname, "handler.ts");
@@ -42,7 +42,7 @@ export class RekognitionTestFunction extends Lambda.Function<Lambda.Function>()(
 export default RekognitionTestFunction.make(
   {
     main,
-    functionUrl: true,
+    url: true,
     // The image-analysis route runs seven sequential inferences and the
     // collection route ~15 sequential data-plane calls.
     timeout: Duration.seconds(120),
@@ -538,48 +538,38 @@ export default RekognitionTestFunction.make(
         }
 
         // Stream processors: list for real, control plane through the typed
-        // ResourceNotFoundException path. Rekognition Video stream processors
-        // are allow-listed per account: an unentitled account gets the typed
-        // AccessDeniedException from every op (the list included), which
-        // still proves the binding reached the service.
+        // ResourceNotFoundException path.
         if (request.method === "GET" && pathname === "/stream-processors") {
-          const listed = yield* listStreamProcessors({ MaxResults: 10 }).pipe(
-            Effect.map(
-              (r) => ({ count: (r.StreamProcessors ?? []).length }) as const,
-            ),
-            Effect.catchTag("AccessDeniedException", (e) =>
-              Effect.succeed({ count: -1, listTag: e._tag } as const),
-            ),
-          );
+          const count = (
+            (yield* listStreamProcessors({ MaxResults: 10 }))
+              .StreamProcessors ?? []
+          ).length;
           const describeTag = yield* describeStreamProcessor({
             Name: "alchemy-nonexistent-processor",
           }).pipe(
             Effect.map(() => "Found"),
-            Effect.catchTag(
-              ["ResourceNotFoundException", "AccessDeniedException"],
-              (e) => Effect.succeed(e._tag),
+            Effect.catchTag("ResourceNotFoundException", (e) =>
+              Effect.succeed(e._tag),
             ),
           );
           const startTag = yield* startStreamProcessor({
             Name: "alchemy-nonexistent-processor",
           }).pipe(
             Effect.map(() => "Started"),
-            Effect.catchTag(
-              ["ResourceNotFoundException", "AccessDeniedException"],
-              (e) => Effect.succeed(e._tag),
+            Effect.catchTag("ResourceNotFoundException", (e) =>
+              Effect.succeed(e._tag),
             ),
           );
           const stopTag = yield* stopStreamProcessor({
             Name: "alchemy-nonexistent-processor",
           }).pipe(
             Effect.map(() => "Stopped"),
-            Effect.catchTag(
-              ["ResourceNotFoundException", "AccessDeniedException"],
-              (e) => Effect.succeed(e._tag),
+            Effect.catchTag("ResourceNotFoundException", (e) =>
+              Effect.succeed(e._tag),
             ),
           );
           return yield* HttpServerResponse.json({
-            ...listed,
+            count,
             describeTag,
             startTag,
             stopTag,

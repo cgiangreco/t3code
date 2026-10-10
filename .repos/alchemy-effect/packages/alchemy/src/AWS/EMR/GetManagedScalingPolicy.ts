@@ -5,15 +5,14 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:GetManagedScalingPolicy` — reads the bound cluster's managed scaling policy (compute limits), if one is attached.
- * ### Scaling the Cluster
- * **Example:** Read the Scaling Limits
+ * @binding
+ * @section Scaling the Cluster
+ * @example Read the Scaling Limits
  * ```typescript
  * const getScalingPolicy = yield* AWS.EMR.GetManagedScalingPolicy(cluster);
  *
  * const { ManagedScalingPolicy } = yield* getScalingPolicy();
  * ```
- *
- * @binding
  */
 export interface GetManagedScalingPolicy extends Binding.Service<
   GetManagedScalingPolicy,

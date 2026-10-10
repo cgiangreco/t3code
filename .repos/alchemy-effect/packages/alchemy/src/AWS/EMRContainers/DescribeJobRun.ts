@@ -12,8 +12,9 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * injected from the binding; pass the job run `id` returned by
  * `StartJobRun`. Provide the implementation with
  * `Effect.provide(AWS.EMRContainers.DescribeJobRunHttp)`.
- * ### Running Jobs
- * **Example:** Poll A Job Run Until It Finishes
+ * @binding
+ * @section Running Jobs
+ * @example Poll A Job Run Until It Finishes
  * ```typescript
  * // init
  * const describeJobRun = yield* AWS.EMRContainers.DescribeJobRun(virtualCluster);
@@ -28,8 +29,6 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeJobRun extends Binding.Service<
   DescribeJobRun,

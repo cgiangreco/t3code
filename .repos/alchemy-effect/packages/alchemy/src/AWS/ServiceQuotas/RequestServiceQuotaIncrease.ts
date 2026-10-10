@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * the {@link ServiceQuotaIncreaseRequest} resource.
  * :::
  *
- * ### Quota Increase Requests
- * **Example:** Request more concurrent executions
+ * @binding
+ * @section Quota Increase Requests
+ * @example Request more concurrent executions
  * ```typescript
  * // init
  * const requestServiceQuotaIncrease =
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const requestId = RequestedQuota?.Id;
  * ```
- *
- * @binding
  */
 export interface RequestServiceQuotaIncrease extends Binding.Service<
   RequestServiceQuotaIncrease,

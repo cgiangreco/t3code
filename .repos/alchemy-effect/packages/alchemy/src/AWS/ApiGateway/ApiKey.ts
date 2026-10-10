@@ -70,8 +70,8 @@ export interface ApiKey extends Resource<
 /**
  * API Gateway API key for usage plans and `apiKeyRequired` methods.
  *
- * ### API keys
- * **Example:** Generated key
+ * @section API keys
+ * @example Generated key
  * ```typescript
  * const key = yield* ApiGateway.ApiKey("PartnerKey", {
  *   generateDistinctId: true,

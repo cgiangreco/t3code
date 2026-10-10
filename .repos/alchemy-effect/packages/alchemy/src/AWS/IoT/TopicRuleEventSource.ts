@@ -120,7 +120,6 @@ export function consumeTopicMessages<Req = never>(
  * `AWS.Lambda.TopicRuleEventSource`, which deploys an IoT {@link TopicRule}
  * with a Lambda action (plus the invoke permission) and streams matching
  * messages into the registered handler.
- *
  * @binding
  */
 export class TopicRuleEventSource extends Context.Service<

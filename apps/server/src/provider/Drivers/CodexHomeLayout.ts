@@ -1,3 +1,5 @@
+import * as NodeOS from "node:os";
+
 import { ProviderDriverKind, type CodexSettings } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
@@ -5,8 +7,7 @@ import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import * as PlatformError from "effect/PlatformError";
 
-import { expandHomePath } from "@t3tools/provider-core/server/pathExpansion";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { expandHomePath } from "../../pathExpansion.ts";
 
 export interface CodexHomeLayout {
   readonly mode: "direct" | "authOverlay";
@@ -30,13 +31,13 @@ const KNOWN_SHARED_DIRECTORIES = [
 
 const PRIVATE_ENTRY_NAMES = new Set(["auth.json", "models_cache.json"]);
 const SHADOW_LOCAL_ENTRY_NAMES = new Set(["log", "memories", "tmp"]);
-// Codex creates these runtime locks itself when it starts in a shadow home before the shared
-// home has one. They guard shared state, so a local copy is replaced with the shared link.
-const REPLACEABLE_SHARED_RUNTIME_ENTRIES = new Set(["mcp-oauth-locks", ".sqlite-maintenance.lock"]);
+const REPLACEABLE_SHARED_RUNTIME_DIRECTORIES = new Set(["mcp-oauth-locks"]);
 
-function resolveHomePath(path: Path.Path, home: string, value: string | undefined): string {
+function resolveHomePath(path: Path.Path, value: string | undefined): string {
   const expanded =
-    value && value.trim().length > 0 ? expandHomePath(value, home) : path.join(home, ".codex");
+    value && value.trim().length > 0
+      ? expandHomePath(value)
+      : path.join(NodeOS.homedir(), ".codex");
   return path.resolve(expanded);
 }
 
@@ -44,8 +45,7 @@ export const resolveCodexHomeLayout = Effect.fn("resolveCodexHomeLayout")(functi
   config: CodexSettings,
 ): Effect.fn.Return<CodexHomeLayout, never, Path.Path> {
   const path = yield* Path.Path;
-  const home = yield* HostProcess.HomeDirectory;
-  const sharedHomePath = resolveHomePath(path, home, config.homePath);
+  const sharedHomePath = resolveHomePath(path, config.homePath);
   const shadowHomePath = config.shadowHomePath.trim();
   if (shadowHomePath.length === 0) {
     return {
@@ -56,7 +56,7 @@ export const resolveCodexHomeLayout = Effect.fn("resolveCodexHomeLayout")(functi
     };
   }
 
-  const effectiveHomePath = path.resolve(expandHomePath(shadowHomePath, home));
+  const effectiveHomePath = path.resolve(expandHomePath(shadowHomePath));
   return {
     mode: "authOverlay",
     sharedHomePath,
@@ -70,7 +70,7 @@ const CodexShadowHomeContext = {
   effectiveHomePath: Schema.String,
 };
 
-export class CodexShadowHomeFileSystemError extends Schema.TaggedError<CodexShadowHomeFileSystemError>()(
+export class CodexShadowHomeFileSystemError extends Schema.TaggedErrorClass<CodexShadowHomeFileSystemError>()(
   "CodexShadowHomeFileSystemError",
   {
     ...CodexShadowHomeContext,
@@ -87,7 +87,7 @@ export class CodexShadowHomeFileSystemError extends Schema.TaggedError<CodexShad
   }
 }
 
-export class CodexShadowHomePathConflictError extends Schema.TaggedError<CodexShadowHomePathConflictError>()(
+export class CodexShadowHomePathConflictError extends Schema.TaggedErrorClass<CodexShadowHomePathConflictError>()(
   "CodexShadowHomePathConflictError",
   CodexShadowHomeContext,
 ) {
@@ -96,7 +96,7 @@ export class CodexShadowHomePathConflictError extends Schema.TaggedError<CodexSh
   }
 }
 
-export class CodexShadowHomeEntryConflictError extends Schema.TaggedError<CodexShadowHomeEntryConflictError>()(
+export class CodexShadowHomeEntryConflictError extends Schema.TaggedErrorClass<CodexShadowHomeEntryConflictError>()(
   "CodexShadowHomeEntryConflictError",
   {
     ...CodexShadowHomeContext,
@@ -110,7 +110,7 @@ export class CodexShadowHomeEntryConflictError extends Schema.TaggedError<CodexS
   }
 }
 
-export class CodexShadowHomePrivateEntrySymlinkError extends Schema.TaggedError<CodexShadowHomePrivateEntrySymlinkError>()(
+export class CodexShadowHomePrivateEntrySymlinkError extends Schema.TaggedErrorClass<CodexShadowHomePrivateEntrySymlinkError>()(
   "CodexShadowHomePrivateEntrySymlinkError",
   {
     ...CodexShadowHomeContext,
@@ -243,7 +243,7 @@ const ensureSymlink = Effect.fn("CodexHomeLayout.ensureSymlink")(function* (inpu
   );
 
   if (state._tag === "NotSymlink") {
-    if (!REPLACEABLE_SHARED_RUNTIME_ENTRIES.has(input.entryName)) {
+    if (!REPLACEABLE_SHARED_RUNTIME_DIRECTORIES.has(input.entryName)) {
       return yield* new CodexShadowHomeEntryConflictError({
         sharedHomePath: input.sharedHomePath,
         effectiveHomePath: input.effectiveHomePath,

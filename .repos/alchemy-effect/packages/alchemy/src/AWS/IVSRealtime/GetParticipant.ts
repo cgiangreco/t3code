@@ -13,8 +13,9 @@ export interface GetParticipantRequest extends Omit<
  * Read a participant's detail (state, join time, attributes, publish state,
  * recording state, connection metadata) for a session of the bound stage.
  *
- * ### Inspecting Participants
- * **Example:** Look up a participant
+ * @binding
+ * @section Inspecting Participants
+ * @example Look up a participant
  * ```typescript
  * // init
  * const getParticipant = yield* IVSRealtime.GetParticipant(stage);
@@ -25,8 +26,6 @@ export interface GetParticipantRequest extends Omit<
  *   participantId: "abcDEF123",
  * });
  * ```
- *
- * @binding
  */
 export interface GetParticipant extends Binding.Service<
   GetParticipant,

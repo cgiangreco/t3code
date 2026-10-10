@@ -45,8 +45,9 @@ export interface ResourcePolicy extends Resource<
  * quota cannot be raised. Always use a deterministic `policyName` and destroy
  * policies you no longer need.
  * :::
- * ### Granting Log Delivery
- * **Example:** Allow Route 53 Query Logging
+ * @resource
+ * @section Granting Log Delivery
+ * @example Allow Route 53 Query Logging
  * ```typescript
  * const policy = yield* ResourcePolicy("Route53QueryLogging", {
  *   policyName: "route53-query-logging",
@@ -63,8 +64,6 @@ export interface ResourcePolicy extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const ResourcePolicy = Resource<ResourcePolicy>(
   "AWS.Logs.ResourcePolicy",

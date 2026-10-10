@@ -19,16 +19,15 @@ export interface GetMapStyleDescriptorRequest extends Omit<
  * `geo:GetMapStyleDescriptor`), scoped to one {@link LocationMap | Map}. Provide the implementation with
  * `Effect.provide(AWS.Location.GetMapStyleDescriptorHttp)`.
  *
- * ### Serving Map Assets
- * **Example:** Serve the Style Descriptor
+ * @binding
+ * @section Serving Map Assets
+ * @example Serve the Style Descriptor
  * ```typescript
  * const getStyle = yield* Location.GetMapStyleDescriptor(map);
  *
  * const style = yield* getStyle();
  * // style.Blob → style JSON bytes, style.ContentType → "application/json"
  * ```
- *
- * @binding
  */
 export interface GetMapStyleDescriptor extends Binding.Service<
   GetMapStyleDescriptor,

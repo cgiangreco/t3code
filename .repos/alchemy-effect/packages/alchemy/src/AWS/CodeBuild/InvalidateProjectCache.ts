@@ -6,15 +6,14 @@ import type { Project } from "./Project.ts";
 /**
  * Runtime binding for `codebuild:InvalidateProjectCache` — resets the
  * bound project's build cache so the next build starts cold.
- * ### Project Cache
- * **Example:** Invalidate the Build Cache
+ * @binding
+ * @section Project Cache
+ * @example Invalidate the Build Cache
  * ```typescript
  * const invalidateProjectCache = yield* AWS.CodeBuild.InvalidateProjectCache(project);
  *
  * yield* invalidateProjectCache();
  * ```
- *
- * @binding
  */
 export interface InvalidateProjectCache extends Binding.Service<
   InvalidateProjectCache,

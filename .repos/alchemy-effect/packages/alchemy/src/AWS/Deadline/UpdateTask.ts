@@ -10,8 +10,9 @@ import type { Queue } from "./Queue.ts";
  * (`READY`), cancel (`CANCELED`), suspend (`SUSPENDED`), or force-fail/
  * succeed it. The queue's `farmId`/`queueId` are injected from the binding.
  * Provide the implementation with `Effect.provide(AWS.Deadline.UpdateTaskHttp)`.
- * ### Managing Tasks
- * **Example:** Cancel A Task
+ * @binding
+ * @section Managing Tasks
+ * @example Cancel A Task
  * ```typescript
  * // init — bind the operation to the queue
  * const updateTask = yield* AWS.Deadline.UpdateTask(queue);
@@ -19,8 +20,6 @@ import type { Queue } from "./Queue.ts";
  * // runtime
  * yield* updateTask({ jobId, stepId, taskId, targetRunStatus: "CANCELED" });
  * ```
- *
- * @binding
  */
 export interface UpdateTask extends Binding.Service<
   UpdateTask,

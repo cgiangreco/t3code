@@ -101,23 +101,22 @@ export interface Stage extends Resource<
  * Participants join a stage with participant tokens minted at runtime via
  * `CreateParticipantToken`; publishers can also ingest via the stage's
  * WHIP/RTMP endpoints.
- * ### Creating Stages
- * **Example:** Basic Stage
+ * @resource
+ * @section Creating Stages
+ * @example Basic Stage
  * ```typescript
  * import * as IVSRealtime from "alchemy/AWS/IVSRealtime";
  *
  * const stage = yield* IVSRealtime.Stage("VideoRoom");
  * ```
  *
- * **Example:** Named Stage with Tags
+ * @example Named Stage with Tags
  * ```typescript
  * const stage = yield* IVSRealtime.Stage("VideoRoom", {
  *   stageName: "my-video-room",
  *   tags: { team: "media" },
  * });
  * ```
- *
- * @resource
  */
 export const Stage = Resource<Stage>("AWS.IVSRealtime.Stage");
 

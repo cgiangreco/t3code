@@ -101,7 +101,7 @@ export const toComment = UndefinedOr.match({
  * This mutates `destination` directly, which avoids allocating an intermediate
  * array when generator code needs to merge collections.
  *
- * @category mutations
+ * @category concatenating
  * @since 4.0.0
  */
 export const spreadElementsInto = <A>(source: Array<A>, destination: Array<A>): void => {

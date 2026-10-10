@@ -80,8 +80,9 @@ export interface Index extends Resource<
  * metadata keys) is fixed at create time; changing any of them replaces the
  * index.
  *
- * ### Creating an Index
- * **Example:** Cosine-Similarity Index
+ * @resource
+ * @section Creating an Index
+ * @example Cosine-Similarity Index
  * ```typescript
  * import * as S3Vectors from "alchemy/AWS/S3Vectors";
  *
@@ -92,8 +93,6 @@ export interface Index extends Resource<
  *   distanceMetric: "cosine",
  * });
  * ```
- *
- * @resource
  */
 export const Index = Resource<Index>("AWS.S3Vectors.Index");
 

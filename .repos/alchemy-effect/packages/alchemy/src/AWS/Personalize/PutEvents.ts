@@ -20,8 +20,9 @@ export interface PutEventsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.PutEventsHttp)`.
  *
- * ### Streaming Events
- * **Example:** Record a Click Event
+ * @binding
+ * @section Streaming Events
+ * @example Record a Click Event
  * ```typescript
  * // init
  * const putEvents = yield* Personalize.PutEvents(tracker);
@@ -32,8 +33,6 @@ export interface PutEventsRequest extends Omit<
  *   eventList: [{ eventType: "click", itemId: "item-42", sentAt: new Date() }],
  * });
  * ```
- *
- * @binding
  */
 export interface PutEvents extends Binding.Service<
   PutEvents,

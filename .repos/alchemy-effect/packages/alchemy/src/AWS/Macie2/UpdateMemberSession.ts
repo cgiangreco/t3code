@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.UpdateMemberSessionHttp)`.
- * ### Organization & Members
- * **Example:** Pause Macie for a Member
+ * @binding
+ * @section Organization & Members
+ * @example Pause Macie for a Member
  * ```typescript
  * // init — account-level binding, no resource argument
  * const updateMemberSession = yield* AWS.Macie2.UpdateMemberSession();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* updateMemberSession({ id: accountId, status: "PAUSED" });
  * ```
- *
- * @binding
  */
 export interface UpdateMemberSession extends Binding.Service<
   UpdateMemberSession,

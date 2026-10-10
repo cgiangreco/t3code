@@ -131,8 +131,9 @@ export interface Stack extends Resource<
  * a typed error rather than hanging. An update whose template and parameters
  * are unchanged is a no-op (`No updates are to be performed`). Deletion waits
  * for `DELETE_COMPLETE`.
- * ### Deploying a Template
- * **Example:** Inline Template (SNS Topic)
+ * @resource
+ * @section Deploying a Template
+ * @example Inline Template (SNS Topic)
  * ```typescript
  * const stack = yield* CloudFormation.Stack("Notifications", {
  *   templateBody: JSON.stringify({
@@ -145,7 +146,7 @@ export interface Stack extends Resource<
  * // stack.outputs.TopicArn -> "arn:aws:sns:us-west-2:...:Notifications-Topic-..."
  * ```
  *
- * **Example:** Template with Parameters
+ * @example Template with Parameters
  * ```typescript
  * const stack = yield* CloudFormation.Stack("Config", {
  *   templateBody: JSON.stringify({
@@ -161,16 +162,14 @@ export interface Stack extends Resource<
  * });
  * ```
  *
- * ### IAM Templates
- * **Example:** Acknowledging Capabilities
+ * @section IAM Templates
+ * @example Acknowledging Capabilities
  * ```typescript
  * const stack = yield* CloudFormation.Stack("Roles", {
  *   templateBody: iamTemplateJson,
  *   capabilities: ["CAPABILITY_NAMED_IAM"],
  * });
  * ```
- *
- * @resource
  */
 export const Stack = Resource<Stack>("AWS.CloudFormation.Stack");
 

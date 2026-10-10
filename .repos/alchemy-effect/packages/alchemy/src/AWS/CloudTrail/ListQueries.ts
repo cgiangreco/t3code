@@ -10,8 +10,9 @@ import type { EventDataStore } from "./EventDataStore.ts";
  * {@link EventDataStore} in the last seven days — the store is injected from
  * the binding. Provide the implementation with
  * `Effect.provide(AWS.CloudTrail.ListQueriesHttp)`.
- * ### Querying CloudTrail Lake
- * **Example:** List Recent Queries
+ * @binding
+ * @section Querying CloudTrail Lake
+ * @example List Recent Queries
  * ```typescript
  * // init — bind the operation to the event data store
  * const listQueries = yield* AWS.CloudTrail.ListQueries(store);
@@ -20,8 +21,6 @@ import type { EventDataStore } from "./EventDataStore.ts";
  * const result = yield* listQueries({ MaxResults: 10 });
  * console.log(result.Queries?.map((q) => q.QueryId));
  * ```
- *
- * @binding
  */
 export interface ListQueries extends Binding.Service<
   ListQueries,

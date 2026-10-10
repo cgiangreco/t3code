@@ -7,14 +7,13 @@ import * as Binding from "../../Binding.ts";
  *
  * Lists the assessment reports created in the account. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.ListAssessmentReportsHttp)`.
- * ### Assessment Reports
- * **Example:** List Assessment Reports
+ * @binding
+ * @section Assessment Reports
+ * @example List Assessment Reports
  * ```typescript
  * const listAssessmentReports = yield* AWS.AuditManager.ListAssessmentReports();
  * const result = yield* listAssessmentReports({ maxResults: 20 });
  * ```
- *
- * @binding
  */
 export interface ListAssessmentReports extends Binding.Service<
   ListAssessmentReports,

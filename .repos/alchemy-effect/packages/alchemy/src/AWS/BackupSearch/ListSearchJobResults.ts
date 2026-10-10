@@ -16,8 +16,9 @@ export interface ListSearchJobResultsRequest extends Omit<
  * bound search job. Results stream in while the job is `RUNNING` and are
  * retained for seven days after it completes. Provide the implementation
  * with `Effect.provide(AWS.BackupSearch.ListSearchJobResultsHttp)`.
- * ### Reading Search Results
- * **Example:** List the Search Job's Results
+ * @binding
+ * @section Reading Search Results
+ * @example List the Search Job's Results
  * ```typescript
  * // init — bind the operation to the search job
  * const listSearchJobResults =
@@ -29,8 +30,6 @@ export interface ListSearchJobResultsRequest extends Omit<
  *   if (item.S3ResultItem) console.log(item.S3ResultItem.BackupVaultName);
  * }
  * ```
- *
- * @binding
  */
 export interface ListSearchJobResults extends Binding.Service<
   ListSearchJobResults,

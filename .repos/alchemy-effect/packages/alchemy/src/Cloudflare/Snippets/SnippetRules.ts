@@ -90,8 +90,11 @@ export type SnippetRules = Resource<
  * Safety: when there is no prior state and the zone already has a
  * non-empty rule list, `read` reports it as `Unowned` and the engine
  * refuses to take it over unless `--adopt` (or `adopt(true)`) is set.
- * ### Activating Snippets
- * **Example:** Route a path through a snippet
+ * @resource
+ * @product Snippets
+ * @category Rules & Configuration
+ * @section Activating Snippets
+ * @example Route a path through a snippet
  * ```typescript
  * const snippet = yield* Cloudflare.Snippets.Snippet("HeaderSnippet", {
  *   zoneId: zone.zoneId,
@@ -109,10 +112,6 @@ export type SnippetRules = Resource<
  *   ],
  * });
  * ```
- *
- * @resource
- * @product Snippets
- * @category Rules & Configuration
  */
 export const SnippetRules = Resource<SnippetRules>("Cloudflare.Snippets.Rules");
 
@@ -203,27 +202,20 @@ export const SnippetRulesProvider = () =>
     }),
 
     delete: Effect.fn(function* ({ output }) {
-      // An empty zone's DELETE can return "requested zone not found" even
-      // though the zone exists. Observe first so repeated deletes converge.
-      if ((yield* listObservedRules(output.zoneId)).length === 0) return;
+      // `deleteRule` removes the zone's entire rule list; deleting an
+      // already-empty list succeeds, making this naturally idempotent.
       yield* snippets
         .deleteRule({ zoneId: output.zoneId })
-        .pipe(
-          Effect.catchTag(
-            ["SnippetRulesNotFound", "SnippetZoneNotFound"],
-            () => Effect.void,
-          ),
-        );
+        .pipe(Effect.catchTag("SnippetRulesNotFound", () => Effect.void));
     }),
   });
 
 /**
  * `ListRulesResponse` is untyped in distilled (`unknown`); the wire shape
- * is an array of rule objects under `result`, camelized by the service key
- * dictionary at decode (`snippet_name` → `snippetName`).
+ * is an array of snake_case rule objects under `result`.
  */
 interface WireRule {
-  readonly snippetName?: string;
+  readonly snippet_name?: string;
   readonly expression?: string;
   readonly enabled?: boolean;
   readonly description?: string | null;
@@ -237,11 +229,11 @@ const listObservedRules = (zoneId: string) =>
     Effect.map((result): SnippetRuleAttribute[] => {
       if (!Array.isArray(result)) return [];
       return (result as WireRule[]).flatMap((rule) =>
-        rule.snippetName === undefined || rule.expression === undefined
+        rule.snippet_name === undefined || rule.expression === undefined
           ? []
           : [
               {
-                snippetName: rule.snippetName,
+                snippetName: rule.snippet_name,
                 expression: rule.expression,
                 enabled: rule.enabled ?? true,
                 description: rule.description ?? undefined,

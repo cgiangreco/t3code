@@ -71,8 +71,9 @@ export interface PipelineEndpoint extends Resource<
  *
  * All properties are create-only; any change replaces the endpoint. The
  * endpoint id is assigned by OSIS on create.
- * ### Creating a Pipeline Endpoint
- * **Example:** Private Ingest From a VPC
+ * @resource
+ * @section Creating a Pipeline Endpoint
+ * @example Private Ingest From a VPC
  * ```typescript
  * const endpoint = yield* OSIS.PipelineEndpoint("Private", {
  *   pipelineArn: pipeline.pipelineArn,
@@ -83,8 +84,6 @@ export interface PipelineEndpoint extends Resource<
  * });
  * // endpoint.ingestEndpointUrl — the VPC-private ingest URL
  * ```
- *
- * @resource
  */
 export const PipelineEndpoint = Resource<PipelineEndpoint>(
   "AWS.OSIS.PipelineEndpoint",

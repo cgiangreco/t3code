@@ -1,9 +1,9 @@
 import type { DesktopUpdateActionResult, DesktopUpdateState } from "@t3tools/contracts";
+import { isWindowsPlatform } from "../lib/utils";
 
 export type DesktopUpdateButtonAction = "download" | "install" | "none";
 
-const DESKTOP_RELEASE_HISTORY_URL = "https://github.com/pingdotgg/t3code/releases";
-const DESKTOP_RELEASE_TAG_URL = `${DESKTOP_RELEASE_HISTORY_URL}/tag`;
+const DESKTOP_RELEASE_TAG_URL = "https://github.com/pingdotgg/t3code/releases/tag";
 
 /**
  * The main process fills `downloadedVersion` from the updater's `update-downloaded`
@@ -21,19 +21,10 @@ export function getDesktopUpdateReleaseUrl(version: string | null): string | nul
   return `${DESKTOP_RELEASE_TAG_URL}/v${encodeURIComponent(normalizedVersion)}`;
 }
 
-export function getDesktopUpdateReleaseHistoryUrl(): string {
-  return DESKTOP_RELEASE_HISTORY_URL;
-}
-
 export function resolveDesktopUpdateButtonAction(
   state: DesktopUpdateState,
 ): DesktopUpdateButtonAction {
-  if (
-    state.downloadedVersion &&
-    (state.status === "downloaded" ||
-      (state.status === "error" &&
-        (state.errorContext === null || state.errorContext === "install")))
-  ) {
+  if (state.downloadedVersion) {
     return "install";
   }
   if (state.status === "available") {
@@ -45,6 +36,16 @@ export function resolveDesktopUpdateButtonAction(
     }
   }
   return "none";
+}
+
+export function shouldShowDesktopUpdateButton(state: DesktopUpdateState | null): boolean {
+  if (!state || !state.enabled) {
+    return false;
+  }
+  if (state.status === "downloading") {
+    return true;
+  }
+  return resolveDesktopUpdateButtonAction(state) !== "none";
 }
 
 export function shouldShowArm64IntelBuildWarning(state: DesktopUpdateState | null): boolean {
@@ -89,9 +90,6 @@ export function getDesktopUpdateButtonTooltip(state: DesktopUpdateState): string
     if (state.errorContext === "install" && state.downloadedVersion) {
       return `Install failed for ${state.downloadedVersion}. Click to retry.`;
     }
-    if (state.downloadedVersion) {
-      return `Update ${state.downloadedVersion} downloaded. Click to restart and install.`;
-    }
     return state.message ?? "Update failed";
   }
   return "Up to date";
@@ -99,9 +97,13 @@ export function getDesktopUpdateButtonTooltip(state: DesktopUpdateState): string
 
 export function getDesktopUpdateInstallConfirmationMessage(
   state: Pick<DesktopUpdateState, "availableVersion" | "downloadedVersion">,
+  platform = "",
 ): string {
   const version = state.downloadedVersion ?? state.availableVersion;
-  return `Install update${version ? ` ${version}` : ""} and restart T3 Code?\n\nAny running tasks will be interrupted. Make sure you're ready before continuing.`;
+  const windowsInstallWarning = isWindowsPlatform(platform)
+    ? "\n\nOn Windows, T3 Code may remain closed for several minutes while the update installs, and no installer window may appear. T3 Code will reopen automatically when installation finishes."
+    : "";
+  return `Install update${version ? ` ${version}` : ""} and restart T3 Code?\n\nAny running tasks will be interrupted. Make sure you're ready before continuing.${windowsInstallWarning}`;
 }
 
 export function getDesktopUpdateActionError(result: DesktopUpdateActionResult): string | null {
@@ -115,9 +117,17 @@ export function shouldToastDesktopUpdateActionResult(result: DesktopUpdateAction
   return getDesktopUpdateActionError(result) !== null;
 }
 
+export function shouldHighlightDesktopUpdateError(state: DesktopUpdateState | null): boolean {
+  if (!state || state.status !== "error") return false;
+  return state.errorContext === "download" || state.errorContext === "install";
+}
+
 export function canCheckForUpdate(state: DesktopUpdateState | null): boolean {
   if (!state || !state.enabled) return false;
   return (
-    state.status !== "checking" && state.status !== "downloading" && state.status !== "disabled"
+    state.status !== "checking" &&
+    state.status !== "downloading" &&
+    state.status !== "downloaded" &&
+    state.status !== "disabled"
   );
 }

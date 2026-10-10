@@ -114,8 +114,9 @@ export interface InstrumentationConfiguration extends Resource<
  * replaces the configuration. Tags remain mutable through the standard
  * tagging APIs.
  *
- * ### Creating an Instrumentation Configuration
- * **Example:** Snapshot Probe on a Python Method
+ * @resource
+ * @section Creating an Instrumentation Configuration
+ * @example Snapshot Probe on a Python Method
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -141,7 +142,7 @@ export interface InstrumentationConfiguration extends Resource<
  * );
  * ```
  *
- * **Example:** Expiring Probe with Attribute Filters
+ * @example Expiring Probe with Attribute Filters
  * ```typescript
  * const probe = yield* AWS.ApplicationSignals.InstrumentationConfiguration(
  *   "DebugProbe",
@@ -165,8 +166,6 @@ export interface InstrumentationConfiguration extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const InstrumentationConfiguration =
   Resource<InstrumentationConfiguration>(

@@ -15,8 +15,9 @@ export interface DeleteEventRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.DeleteEventHttp`
  * on the Function effect to implement the binding.
  *
- * ### Deleting Events
- * **Example:** Delete an Event by Id
+ * @binding
+ * @section Deleting Events
+ * @example Delete an Event by Id
  * ```typescript
  * // init
  * const deleteEvent = yield* AgentCore.DeleteEvent(memory);
@@ -33,8 +34,6 @@ export interface DeleteEventRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface DeleteEvent extends Binding.Service<
   DeleteEvent,

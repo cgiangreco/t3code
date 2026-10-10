@@ -56,15 +56,14 @@ export interface DBSubnetGroup extends Resource<
  * cluster and its instances are placed into. Neptune is VPC-only, so a
  * subnet group spanning at least two Availability Zones is required before a
  * cluster can be created.
- * ### Creating a Subnet Group
- * **Example:** Multi-AZ subnet group
+ * @resource
+ * @section Creating a Subnet Group
+ * @example Multi-AZ subnet group
  * ```typescript
  * const subnetGroup = yield* DBSubnetGroup("NeptuneSubnets", {
  *   subnetIds: [subnetA.subnetId, subnetB.subnetId],
  * });
  * ```
- *
- * @resource
  */
 export const DBSubnetGroup = Resource<DBSubnetGroup>(
   "AWS.Neptune.DBSubnetGroup",

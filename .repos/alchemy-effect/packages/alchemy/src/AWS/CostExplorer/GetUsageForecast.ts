@@ -13,8 +13,9 @@ export interface GetUsageForecastRequest extends ce.GetUsageForecastRequest {}
  * Forecast usage quantity (e.g. hours, requests) over a future time
  * period for a filtered slice of your usage. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.GetUsageForecastHttp)`.
- * ### Forecasting
- * **Example:** Forecast Usage Quantity
+ * @binding
+ * @section Forecasting
+ * @example Forecast Usage Quantity
  * ```typescript
  * // init — account-level binding takes no resource
  * const getUsageForecast = yield* AWS.CostExplorer.GetUsageForecast();
@@ -27,8 +28,6 @@ export interface GetUsageForecastRequest extends ce.GetUsageForecastRequest {}
  *   Filter: { Dimensions: { Key: "USAGE_TYPE_GROUP", Values: ["EC2: Running Hours"] } },
  * });
  * ```
- *
- * @binding
  */
 export interface GetUsageForecast extends Binding.Service<
   GetUsageForecast,

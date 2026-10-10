@@ -30,10 +30,6 @@ class T3TerminalModule : Module() {
         view.focusRequest = focusRequest
       }
 
-      Prop("readOnly") { view: T3TerminalView, readOnly: Boolean ->
-        view.readOnly = readOnly
-      }
-
       Prop("autoFocus") { view: T3TerminalView, autoFocus: Boolean ->
         view.autoFocus = autoFocus
       }
@@ -58,10 +54,7 @@ class T3TerminalModule : Module() {
         view.mutedForegroundColorHex = mutedForegroundColor
       }
 
-      Prop("captureRequest") { view: T3TerminalView, request: Double ->
-        view.captureRequest = request
-      }
-      Events("onInput", "onResize", "onCapture")
+      Events("onInput", "onResize")
 
       OnViewDestroys { view: T3TerminalView ->
         view.cleanup()

@@ -1,4 +1,4 @@
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessHostname, HostProcessPlatform } from "@t3tools/shared/hostProcess";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Option from "effect/Option";
@@ -16,7 +16,7 @@ const ServerEnvironmentLabelCommandProbe = Schema.Literals([
 ]);
 type ServerEnvironmentLabelCommandProbe = typeof ServerEnvironmentLabelCommandProbe.Type;
 
-export class ServerEnvironmentLabelFileError extends Schema.TaggedError<ServerEnvironmentLabelFileError>()(
+export class ServerEnvironmentLabelFileError extends Schema.TaggedErrorClass<ServerEnvironmentLabelFileError>()(
   "ServerEnvironmentLabelFileError",
   {
     operation: Schema.Literals(["inspect", "read"]),
@@ -29,7 +29,7 @@ export class ServerEnvironmentLabelFileError extends Schema.TaggedError<ServerEn
   }
 }
 
-export class ServerEnvironmentLabelCommandError extends Schema.TaggedError<ServerEnvironmentLabelCommandError>()(
+export class ServerEnvironmentLabelCommandError extends Schema.TaggedErrorClass<ServerEnvironmentLabelCommandError>()(
   "ServerEnvironmentLabelCommandError",
   {
     probe: ServerEnvironmentLabelCommandProbe,
@@ -128,7 +128,7 @@ const runFriendlyLabelCommand = Effect.fn("runFriendlyLabelCommand")(function* (
             cause,
           }),
       ),
-      Effect.asSome,
+      Effect.map(Option.some),
       Effect.catchTags({
         ServerEnvironmentLabelCommandError: (error) =>
           Effect.logDebug(error.message).pipe(
@@ -151,7 +151,7 @@ const runFriendlyLabelCommand = Effect.fn("runFriendlyLabelCommand")(function* (
 });
 
 const resolveFriendlyHostLabel = Effect.fn("resolveFriendlyHostLabel")(function* () {
-  const platform = yield* HostProcess.Platform;
+  const platform = yield* HostProcessPlatform;
   if (platform === "darwin") {
     return yield* runFriendlyLabelCommand({
       probe: "macos-computer-name",
@@ -187,7 +187,7 @@ export const resolveServerEnvironmentLabel = Effect.fn("resolveServerEnvironment
     return friendlyHostLabel;
   }
 
-  const hostname = normalizeLabel(yield* HostProcess.Hostname);
+  const hostname = normalizeLabel(yield* HostProcessHostname);
   if (hostname) {
     return hostname;
   }

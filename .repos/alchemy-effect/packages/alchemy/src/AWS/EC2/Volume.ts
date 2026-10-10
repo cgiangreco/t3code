@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
 
-import type { ScopedPlanStatusSession } from "../../Report.ts";
+import type { ScopedPlanStatusSession } from "../../Cli/Cli.ts";
 import { isResolved, somePropsAreDifferent } from "../../Diff.ts";
 import * as Provider from "../../Provider.ts";
 import { Resource } from "../../Resource.ts";
@@ -170,8 +170,9 @@ export interface Volume extends Resource<
  * `throughput`, or `volumeType` are applied in place via `modifyVolume` (note
  * AWS enforces a 6-hour cooldown between volume modifications).
  *
- * ### Creating a Volume
- * **Example:** Basic gp3 Volume
+ * @resource
+ * @section Creating a Volume
+ * @example Basic gp3 Volume
  * ```typescript
  * const volume = yield* AWS.EC2.Volume("DataVolume", {
  *   availabilityZone: "us-east-1a",
@@ -183,8 +184,8 @@ export interface Volume extends Resource<
  * The minimal volume: a 20 GiB general-purpose `gp3` volume in one AZ. It must
  * be in the same AZ as the instance you attach it to.
  *
- * ### Provisioned Performance
- * **Example:** gp3 with Provisioned IOPS and Throughput
+ * @section Provisioned Performance
+ * @example gp3 with Provisioned IOPS and Throughput
  * ```typescript
  * const fast = yield* AWS.EC2.Volume("FastVolume", {
  *   availabilityZone: "us-east-1a",
@@ -199,8 +200,8 @@ export interface Volume extends Resource<
  * 16,000 IOPS and 1,000 MiB/s independently. Use `io2` for the highest
  * durability and IOPS ceilings.
  *
- * ### Encryption
- * **Example:** Encrypted Volume with a KMS Key
+ * @section Encryption
+ * @example Encrypted Volume with a KMS Key
  * ```typescript
  * const secure = yield* AWS.EC2.Volume("SecureVolume", {
  *   availabilityZone: "us-east-1a",
@@ -213,8 +214,8 @@ export interface Volume extends Resource<
  * Setting `kmsKeyId` implies encryption. Omit it while setting `encrypted:
  * true` to use the account's default EBS KMS key.
  *
- * ### Creating from a Snapshot
- * **Example:** Restore a Volume from a Snapshot
+ * @section Creating from a Snapshot
+ * @example Restore a Volume from a Snapshot
  * ```typescript
  * const restored = yield* AWS.EC2.Volume("RestoredVolume", {
  *   availabilityZone: "us-east-1a",
@@ -224,8 +225,6 @@ export interface Volume extends Resource<
  *
  * When you create a volume from a snapshot, `size` defaults to the snapshot's
  * size and can only be grown, never shrunk.
- *
- * @resource
  */
 export const Volume = Resource<Volume>("AWS.EC2.Volume");
 
@@ -576,10 +575,8 @@ const waitForVolumeDeleted = (
       while: (e) => e instanceof VolumeStillExists,
       schedule: Schedule.max([
         Schedule.fixed(2000),
-        // DeleteVolume is accepted immediately but describe can keep
-        // returning `deleting` well past a minute after a snapshot (the
-        // suite log hit the old 60s cap with the volume still present).
-        Schedule.recurs(45),
+        // give the delete call ~60s to be reflected by describeVolumes
+        Schedule.recurs(30),
       ]).pipe(
         Schedule.tap(({ attempt }) =>
           session.note(

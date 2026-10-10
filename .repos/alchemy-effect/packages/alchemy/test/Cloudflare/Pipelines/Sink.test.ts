@@ -70,9 +70,7 @@ test.provider(
       const deployed = yield* retryAuthBlip(
         stack.deploy(
           Effect.gen(function* () {
-            const bucket = yield* Cloudflare.R2.Bucket("SinkBucket", {
-              forceDestroy: true,
-            });
+            const bucket = yield* Cloudflare.R2.Bucket("SinkBucket", {});
             return yield* Cloudflare.Pipelines.Sink("ListSink", {
               type: "r2",
               config: {
@@ -100,13 +98,5 @@ test.provider(
 
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:pipelines",
-      "provider:cloudflare:r2",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );

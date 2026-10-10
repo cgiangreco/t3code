@@ -34,14 +34,15 @@ export interface BatchPutAssetPropertyValueRequest {
  * timestamped property values (measurements) into the bound asset's data
  * streams from a deployed Lambda or Task.
  *
- * ### Ingesting Property Values
+ * @binding
+ * @section Ingesting Property Values
  * Provide the `BatchPutAssetPropertyValueHttp` implementation layer on the
  * Function effect, bind the asset in the init phase, then call the returned
  * client at runtime. The binding grants
  * `iotsitewise:BatchPutAssetPropertyValue` on the asset and injects its id
  * into every entry automatically.
  *
- * **Example:** Ingest a Temperature Reading
+ * @example Ingest a Temperature Reading
  * ```typescript
  * // init
  * const asset = yield* AWS.IoTSiteWise.Asset("Pump1", {
@@ -69,8 +70,6 @@ export interface BatchPutAssetPropertyValueRequest {
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTSiteWise.BatchPutAssetPropertyValueHttp))
  * ```
- *
- * @binding
  */
 export interface BatchPutAssetPropertyValue extends Binding.Service<
   BatchPutAssetPropertyValue,

@@ -68,8 +68,9 @@ export interface WirelessGateway extends Resource<
  * The gateway's radio identity (`GatewayEui`, `RfRegion`, sub-bands,
  * beaconing) is immutable — changing it replaces the gateway. The name,
  * description, EUI/NetID filters, `MaxEirp`, and tags update in place.
- * ### Creating Gateways
- * **Example:** US915 Gateway
+ * @resource
+ * @section Creating Gateways
+ * @example US915 Gateway
  * ```typescript
  * import * as IoTWireless from "alchemy/AWS/IoTWireless";
  *
@@ -82,7 +83,7 @@ export interface WirelessGateway extends Resource<
  * });
  * ```
  *
- * **Example:** Gateway with join filters
+ * @example Gateway with join filters
  * ```typescript
  * const gateway = yield* IoTWireless.WirelessGateway("RooftopGw", {
  *   loRaWAN: {
@@ -93,8 +94,6 @@ export interface WirelessGateway extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const WirelessGateway = Resource<WirelessGateway>(
   "AWS.IoTWireless.WirelessGateway",

@@ -97,8 +97,9 @@ export interface IngressPoint extends Resource<
  *
  * `type` and `networkConfiguration` are immutable (changes replace the
  * endpoint); everything else updates in place.
- * ### Creating Ingress Points
- * **Example:** Open Ingress Point
+ * @resource
+ * @section Creating Ingress Points
+ * @example Open Ingress Point
  * ```typescript
  * import * as MailManager from "alchemy/AWS/MailManager";
  *
@@ -116,7 +117,7 @@ export interface IngressPoint extends Resource<
  * // point your domain's MX record at ingress.aRecord
  * ```
  *
- * **Example:** Authenticated Ingress Point
+ * @example Authenticated Ingress Point
  * ```typescript
  * const ingress = yield* MailManager.IngressPoint("Smtp", {
  *   type: "AUTH",
@@ -126,8 +127,6 @@ export interface IngressPoint extends Resource<
  *   tlsPolicy: "REQUIRED",
  * });
  * ```
- *
- * @resource
  */
 export const IngressPoint = Resource<IngressPoint>(
   "AWS.MailManager.IngressPoint",

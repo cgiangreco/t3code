@@ -1,6 +1,6 @@
 {
   "name": "@effect/sql-libsql",
-  "version": "4.0.1",
+  "version": "4.0.0-beta.102",
   "type": "module",
   "license": "MIT",
   "description": "A libSQL toolkit for Effect",
@@ -31,7 +31,6 @@
     ".": "./src/index.ts",
     "./*": "./src/*.ts",
     "./internal/*": null,
-    "./index": null,
     "./*/index": null
   },
   "files": [
@@ -39,10 +38,7 @@
     "dist/**/*.js",
     "dist/**/*.js.map",
     "dist/**/*.d.ts",
-    "dist/**/*.d.ts.map",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "ai-docs/**/*"
+    "dist/**/*.d.ts.map"
   ],
   "publishConfig": {
     "access": "public",
@@ -52,7 +48,6 @@
       ".": "./dist/index.js",
       "./*": "./dist/*.js",
       "./internal/*": null,
-      "./index": null,
       "./*/index": null
     }
   },
@@ -60,16 +55,18 @@
     "codegen": "effect-utils codegen",
     "build": "tsc -b tsconfig.json && pnpm babel",
     "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
-    "check": "tsc -b tsconfig.json"
+    "check": "tsc -b tsconfig.json",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
   },
   "devDependencies": {
     "effect": "workspace:^",
-    "testcontainers": "^12.1.0"
+    "testcontainers": "^11.14.0"
   },
   "peerDependencies": {
     "effect": "workspace:^"
   },
   "dependencies": {
-    "@libsql/client": "^0.18.0"
+    "@libsql/client": "^0.17.4"
   }
 }

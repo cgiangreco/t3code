@@ -11,8 +11,9 @@ import type { ExperimentTemplate } from "./ExperimentTemplate.ts";
  * function can inspect the experiment it is about to start. The template id
  * is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.FIS.GetExperimentTemplateHttp)`.
- * ### Inspecting Templates
- * **Example:** Read the Bound Template's Definition
+ * @binding
+ * @section Inspecting Templates
+ * @example Read the Bound Template's Definition
  * ```typescript
  * // init — bind the operation to the experiment template
  * const getExperimentTemplate = yield* AWS.FIS.GetExperimentTemplate(template);
@@ -21,8 +22,6 @@ import type { ExperimentTemplate } from "./ExperimentTemplate.ts";
  * const { experimentTemplate } = yield* getExperimentTemplate();
  * console.log(Object.keys(experimentTemplate?.actions ?? {}));
  * ```
- *
- * @binding
  */
 export interface GetExperimentTemplate extends Binding.Service<
   GetExperimentTemplate,

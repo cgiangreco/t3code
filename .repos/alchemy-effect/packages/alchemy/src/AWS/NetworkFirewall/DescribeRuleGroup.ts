@@ -15,8 +15,9 @@ export interface DescribeRuleGroupRequest extends Omit<
  *
  * Provide `NetworkFirewall.DescribeRuleGroupHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Reading Rule Group State
- * **Example:** Read the Rule Group Definition
+ * @binding
+ * @section Reading Rule Group State
+ * @example Read the Rule Group Definition
  * ```typescript
  * // init — grants network-firewall:DescribeRuleGroup on the rule group
  * const describeRuleGroup =
@@ -25,8 +26,6 @@ export interface DescribeRuleGroupRequest extends Omit<
  * // runtime
  * const { RuleGroup } = yield* describeRuleGroup();
  * ```
- *
- * @binding
  */
 export interface DescribeRuleGroup extends Binding.Service<
   DescribeRuleGroup,

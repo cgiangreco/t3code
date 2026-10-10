@@ -78,15 +78,14 @@ export interface StreamConsumer extends Resource<
  *
  * `StreamConsumer` is the canonical lifecycle resource for
  * `RegisterStreamConsumer` / `DeregisterStreamConsumer`.
- * ### Creating Consumers
- * **Example:** Register a Consumer
+ * @resource
+ * @section Creating Consumers
+ * @example Register a Consumer
  * ```typescript
  * const consumer = yield* StreamConsumer("AnalyticsConsumer", {
  *   streamArn: stream.streamArn,
  * });
  * ```
- *
- * @resource
  */
 export const StreamConsumer = Resource<StreamConsumer>(
   "AWS.Kinesis.StreamConsumer",

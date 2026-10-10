@@ -8,16 +8,15 @@ import * as Binding from "../../Binding.ts";
  *
  * Maps engine versions to the versions they can be upgraded to — for one domain (pass `DomainName`) or for every supported version. Provide the implementation with
  * `Effect.provide(AWS.OpenSearch.GetCompatibleVersionsHttp)`.
- * ### Engine Upgrades
- * **Example:** Find Valid Upgrade Targets
+ * @binding
+ * @section Engine Upgrades
+ * @example Find Valid Upgrade Targets
  * ```typescript
  * const getCompatibleVersions = yield* OpenSearch.GetCompatibleVersions();
  *
  * const result = yield* getCompatibleVersions({ DomainName: name });
  * // result.CompatibleVersions?.[0]?.TargetVersions → upgrade targets
  * ```
- *
- * @binding
  */
 export interface GetCompatibleVersions extends Binding.Service<
   GetCompatibleVersions,

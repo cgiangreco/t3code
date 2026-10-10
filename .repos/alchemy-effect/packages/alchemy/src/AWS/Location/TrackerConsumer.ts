@@ -42,8 +42,9 @@ export interface TrackerConsumer extends Resource<
  * The association is existence-only: both properties are immutable and any
  * change replaces it.
  *
- * ### Linking Trackers to Geofence Collections
- * **Example:** Evaluate Tracker Positions Against a Collection
+ * @resource
+ * @section Linking Trackers to Geofence Collections
+ * @example Evaluate Tracker Positions Against a Collection
  * ```typescript
  * import * as Location from "alchemy/AWS/Location";
  *
@@ -57,8 +58,6 @@ export interface TrackerConsumer extends Resource<
  *   consumerArn: fences.collectionArn,
  * });
  * ```
- *
- * @resource
  */
 export const TrackerConsumer = Resource<TrackerConsumer>(
   "AWS.Location.TrackerConsumer",

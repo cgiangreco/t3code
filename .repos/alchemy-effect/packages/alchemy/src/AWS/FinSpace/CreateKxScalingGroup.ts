@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:CreateKxScalingGroup` — provisions a shared compute host in the bound environment that multiple kdb clusters can be placed on.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.CreateKxScalingGroupHttp)`.
- * ### Managing Scaling Groups
- * **Example:** Provision a Scaling Group
+ * @binding
+ * @section Managing Scaling Groups
+ * @example Provision a Scaling Group
  * ```typescript
  * const createScalingGroup = yield* AWS.FinSpace.CreateKxScalingGroup(kdb);
  *
@@ -19,8 +20,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   clientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface CreateKxScalingGroup extends Binding.Service<
   CreateKxScalingGroup,

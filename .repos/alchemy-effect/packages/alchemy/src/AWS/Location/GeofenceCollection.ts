@@ -61,23 +61,22 @@ export interface GeofenceCollection extends Resource<
  * geofences and evaluates device positions against them. The KMS key is
  * immutable; the description can be updated in place.
  *
- * ### Creating Geofence Collections
- * **Example:** Basic Geofence Collection
+ * @resource
+ * @section Creating Geofence Collections
+ * @example Basic Geofence Collection
  * ```typescript
  * import * as Location from "alchemy/AWS/Location";
  *
  * const collection = yield* Location.GeofenceCollection("Fences", {});
  * ```
  *
- * **Example:** Encrypted Geofence Collection
+ * @example Encrypted Geofence Collection
  * ```typescript
  * const collection = yield* Location.GeofenceCollection("SecureFences", {
  *   kmsKeyId: "alias/my-key",
  *   description: "Encrypted geofence collection",
  * });
  * ```
- *
- * @resource
  */
 export const GeofenceCollection = Resource<GeofenceCollection>(
   "AWS.Location.GeofenceCollection",

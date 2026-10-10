@@ -60,8 +60,9 @@ export interface PermissionSet extends Resource<
 
 /**
  * An IAM Identity Center permission set.
- * ### Creating Permission Sets
- * **Example:** Administrator Access
+ * @resource
+ * @section Creating Permission Sets
+ * @example Administrator Access
  * ```typescript
  * const admin = yield* PermissionSet("AdministratorAccess", {
  *   name: "AdministratorAccess",
@@ -69,8 +70,6 @@ export interface PermissionSet extends Resource<
  *   sessionDuration: "8 hours",
  * });
  * ```
- *
- * @resource
  */
 export const PermissionSet = Resource<PermissionSet>(
   "AWS.IdentityCenter.PermissionSet",

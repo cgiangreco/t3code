@@ -27,24 +27,26 @@ import { type TunnelAuth } from "./TunnelBinding.ts";
  * Write` permission and binds its outputs into the Worker (the token value as a
  * `secret_text` binding) so runtime code can authenticate.
  *
- * @remarks
+ * @binding
+ * @product Tunnels
+ * @category Cloudflare One (Zero Trust)
  *
  * `WriteTunnel` is a single identifier that is simultaneously the binding's
  * Context tag, its type, and the callable — `yield* Cloudflare.Tunnel.WriteTunnel()`.
  *
- * ### Mutating tunnels at runtime
- * **Example:** Bind the write client
+ * @section Mutating tunnels at runtime
+ * @example Bind the write client
  * Bind once in the Init phase; every method is available on the returned client.
  * ```typescript
  * const tunnels = yield* Cloudflare.Tunnel.WriteTunnel();
  * ```
  *
- * **Example:** Create a tunnel
+ * @example Create a tunnel
  * ```typescript
  * const tunnel = yield* tunnels.create({ name: "on-demand-tunnel" });
  * ```
  *
- * **Example:** Push ingress configuration
+ * @example Push ingress configuration
  * ```typescript
  * yield* tunnels.putConfiguration(tunnel.id!, {
  *   ingress: [
@@ -54,21 +56,17 @@ import { type TunnelAuth } from "./TunnelBinding.ts";
  * });
  * ```
  *
- * **Example:** Rename and delete a tunnel
+ * @example Rename and delete a tunnel
  * ```typescript
  * yield* tunnels.update(tunnel.id!, { name: "renamed-tunnel" });
  * yield* tunnels.delete(tunnel.id!);
  * ```
  *
- * ### Runtime Layer
+ * @section Runtime Layer
  * Provide {@link WriteTunnelBinding} in the Worker's runtime layer.
  * ```typescript
  * Effect.provide(Cloudflare.Tunnel.WriteTunnelBinding)
  * ```
- *
- * @binding
- * @product Tunnels
- * @category Cloudflare One (Zero Trust)
  */
 export interface WriteTunnel extends Binding.Service<
   WriteTunnel,

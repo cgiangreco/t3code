@@ -71,8 +71,11 @@ export type OperationSetting = Resource<
  * The override is keyed by the operation's UUID; deleting the resource
  * clears the override so the operation falls back to the zone default.
  * Deleting the underlying API Shield operation cascades the override away.
- * ### Overriding an operation
- * **Example:** Block non-conforming requests on one operation
+ * @resource
+ * @product Schema Validation
+ * @category Application Security
+ * @section Overriding an operation
+ * @example Block non-conforming requests on one operation
  * ```typescript
  * const op = yield* Cloudflare.ApiShield.Operation("GetUser", {
  *   zoneId: zone.zoneId,
@@ -88,7 +91,7 @@ export type OperationSetting = Resource<
  * });
  * ```
  *
- * **Example:** Exempt an operation from validation
+ * @example Exempt an operation from validation
  * ```typescript
  * yield* Cloudflare.SchemaValidation.OperationSetting("SkipWebhook", {
  *   zoneId: zone.zoneId,
@@ -98,10 +101,6 @@ export type OperationSetting = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api-shield/security/schema-validation/
- *
- * @resource
- * @product Schema Validation
- * @category Application Security
  */
 export const OperationSetting = Resource<OperationSetting>(TypeId);
 

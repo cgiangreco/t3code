@@ -21,16 +21,15 @@ export interface ChatSyncRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.ChatSyncHttp)`.
  *
- * ### Chat
- * **Example:** Ask a Question
+ * @binding
+ * @section Chat
+ * @example Ask a Question
  * ```typescript
  * const chat = yield* AWS.QBusiness.ChatSync(app);
  *
  * const reply = yield* chat({ userMessage: "What is our travel policy?" });
  * console.log(reply.systemMessage);
  * ```
- *
- * @binding
  */
 export interface ChatSync extends Binding.Service<
   ChatSync,

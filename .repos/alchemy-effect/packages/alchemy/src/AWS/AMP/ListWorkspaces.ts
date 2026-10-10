@@ -11,16 +11,15 @@ export interface ListWorkspacesRequest extends amp.ListWorkspacesRequest {}
  * lists AMP workspaces in the region. Provide the `ListWorkspacesHttp` layer
  * on the Function to satisfy the binding.
  *
- * ### Workspace Metadata
- * **Example:** List Workspaces in the Region
+ * @binding
+ * @section Workspace Metadata
+ * @example List Workspaces in the Region
  * ```typescript
  * const listWorkspaces = yield* AMP.ListWorkspaces();
  *
  * const response = yield* listWorkspaces();
  * const ids = response.workspaces.map((workspace) => workspace.workspaceId);
  * ```
- *
- * @binding
  */
 export interface ListWorkspaces extends Binding.Service<
   ListWorkspaces,

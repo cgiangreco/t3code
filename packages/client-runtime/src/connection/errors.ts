@@ -1,9 +1,7 @@
-import type { ClientConnectionMethod, EnvironmentId } from "@t3tools/contracts";
+import type { EnvironmentId } from "@t3tools/contracts";
 import type { RelayProtectedError } from "@t3tools/contracts/relay";
 import type { ManagedRelayClientError } from "../relay/managedRelay.ts";
-import { dpopFailureMessage, relayProtectedErrorMessage } from "../relay/errorPresentation.ts";
 import type { RemoteEnvironmentAuthError } from "../authorization/remote.ts";
-import { NETWORK_BLOCKING_HINT } from "../errors/network.ts";
 import {
   ConnectionBlockedError,
   type ConnectionAttemptError,
@@ -42,7 +40,7 @@ function relayProtectedError(error: RelayProtectedError): ConnectionAttemptError
     case "RelayAgentActivityPublishProofInvalidError":
       return new ConnectionBlockedError({
         reason: "authentication",
-        detail: relayProtectedErrorMessage(error),
+        detail: error.message,
         traceId: error.traceId,
       });
     case "RelayEnvironmentConnectNotAuthorizedError":
@@ -50,27 +48,27 @@ function relayProtectedError(error: RelayProtectedError): ConnectionAttemptError
     case "RelayEnvironmentLinkLimitExceededError":
       return new ConnectionBlockedError({
         reason: "permission",
-        detail: relayProtectedErrorMessage(error),
+        detail: error.message,
         traceId: error.traceId,
       });
     case "RelayEnvironmentEndpointTimedOutError":
       return new ConnectionTransientError({
         reason: "timeout",
-        detail: relayProtectedErrorMessage(error),
+        detail: error.message,
         traceId: error.traceId,
       });
     case "RelayEnvironmentEndpointUnavailableError":
     case "RelayEnvironmentLinkUnavailableError":
       return new ConnectionTransientError({
         reason: "endpoint-unavailable",
-        detail: relayProtectedErrorMessage(error),
+        detail: error.message,
         traceId: error.traceId,
       });
     case "RelayEnvironmentLinkFailedError":
     case "RelayInternalError":
       return new ConnectionTransientError({
         reason: "relay-unavailable",
-        detail: relayProtectedErrorMessage(error),
+        detail: error.message,
         traceId: error.traceId,
       });
   }
@@ -114,9 +112,7 @@ export function mapManagedRelayError(error: ManagedRelayClientError): Connection
 
 export function mapRemoteEnvironmentError(
   error: RemoteEnvironmentAuthError,
-  connectionMethod: ClientConnectionMethod = "direct",
 ): ConnectionAttemptError {
-  const networkHint = connectionMethod === "relay" ? ` ${NETWORK_BLOCKING_HINT}` : "";
   switch (error._tag) {
     case "EnvironmentAuthInvalidError":
       return new ConnectionBlockedError({
@@ -149,12 +145,12 @@ export function mapRemoteEnvironmentError(
     case "RemoteEnvironmentAuthTimeoutError":
       return new ConnectionTransientError({
         reason: "timeout",
-        detail: `${error.message}${networkHint}`,
+        detail: error.message,
       });
     case "RemoteEnvironmentAuthFetchError":
       return new ConnectionTransientError({
         reason: "network",
-        detail: `${error.message}${networkHint}`,
+        detail: error.message,
       });
     case "EnvironmentInternalError":
       return new ConnectionTransientError({
@@ -169,24 +165,4 @@ export function mapRemoteEnvironmentError(
         detail: error.message,
       });
   }
-}
-
-/**
- * Map an environment error from a request that used DPoP authentication. An
- * older environment server reports a DPoP clock failure as the same generic
- * invalid-credential response as other failures, so keep the compatibility
- * hint cautious when the server omits the category. Newer servers can identify
- * clock and non-clock proof failures precisely.
- */
-export function mapRemoteDpopEnvironmentError(
-  error: RemoteEnvironmentAuthError,
-): ConnectionAttemptError {
-  if (error._tag === "EnvironmentAuthInvalidError" && error.reason === "invalid_credential") {
-    return new ConnectionBlockedError({
-      reason: "authentication",
-      detail: dpopFailureMessage("The environment credential is invalid.", error.dpopFailureReason),
-      traceId: error.traceId,
-    });
-  }
-  return mapRemoteEnvironmentError(error, "relay");
 }

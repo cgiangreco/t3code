@@ -20,8 +20,9 @@ export interface CreateSubscriptionRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.CreateSubscriptionHttp)`.
  *
- * ### Subscriptions
- * **Example:** Subscribe a User
+ * @binding
+ * @section Subscriptions
+ * @example Subscribe a User
  * ```typescript
  * const subscribe = yield* AWS.QBusiness.CreateSubscription(app);
  *
@@ -30,8 +31,6 @@ export interface CreateSubscriptionRequest extends Omit<
  *   type: "Q_BUSINESS",
  * });
  * ```
- *
- * @binding
  */
 export interface CreateSubscription extends Binding.Service<
   CreateSubscription,

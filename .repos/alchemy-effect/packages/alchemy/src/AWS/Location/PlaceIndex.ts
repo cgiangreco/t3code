@@ -68,8 +68,9 @@ export interface PlaceIndex extends Resource<
  * positions against a chosen data provider. The data source is immutable;
  * the intended use and description can be updated in place.
  *
- * ### Creating Place Indexes
- * **Example:** Basic Place Index
+ * @resource
+ * @section Creating Place Indexes
+ * @example Basic Place Index
  * ```typescript
  * import * as Location from "alchemy/AWS/Location";
  *
@@ -78,7 +79,7 @@ export interface PlaceIndex extends Resource<
  * });
  * ```
  *
- * **Example:** Storage-Intent Place Index
+ * @example Storage-Intent Place Index
  * ```typescript
  * const index = yield* Location.PlaceIndex("Geocoder", {
  *   dataSource: "Here",
@@ -86,8 +87,6 @@ export interface PlaceIndex extends Resource<
  *   description: "Cacheable geocoding index",
  * });
  * ```
- *
- * @resource
  */
 export const PlaceIndex = Resource<PlaceIndex>("AWS.Location.PlaceIndex");
 

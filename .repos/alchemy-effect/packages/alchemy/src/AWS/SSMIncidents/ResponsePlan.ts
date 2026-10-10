@@ -82,8 +82,8 @@ export interface ResponsePlan extends Resource<
  * Requires the account's Incident Manager replication set
  * (`SSMIncidents.ReplicationSet`) to exist.
  *
- * ### Creating Response Plans
- * **Example:** Minimal response plan
+ * @section Creating Response Plans
+ * @example Minimal response plan
  * ```typescript
  * const replicationSet = yield* SSMIncidents.ReplicationSet("Incidents", {});
  * const plan = yield* SSMIncidents.ResponsePlan("Critical", {
@@ -91,7 +91,7 @@ export interface ResponsePlan extends Resource<
  * });
  * ```
  *
- * **Example:** Response plan with engagements and chat channel
+ * @example Response plan with engagements and chat channel
  * ```typescript
  * const plan = yield* SSMIncidents.ResponsePlan("Sev1", {
  *   displayName: "Severity 1 response",

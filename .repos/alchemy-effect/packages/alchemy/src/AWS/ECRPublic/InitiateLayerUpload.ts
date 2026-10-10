@@ -17,8 +17,9 @@ export interface InitiateLayerUploadRequest extends Omit<
  * {@link CompleteLayerUpload}. Provide the implementation with
  * `Effect.provide(AWS.ECRPublic.InitiateLayerUploadHttp)`.
  *
- * ### Pushing Images
- * **Example:** Start A Layer Upload
+ * @binding
+ * @section Pushing Images
+ * @example Start A Layer Upload
  * ```typescript
  * // init
  * const initiateLayerUpload = yield* AWS.ECRPublic.InitiateLayerUpload(repository);
@@ -26,8 +27,6 @@ export interface InitiateLayerUploadRequest extends Omit<
  * // runtime
  * const { uploadId } = yield* initiateLayerUpload();
  * ```
- *
- * @binding
  */
 export interface InitiateLayerUpload extends Binding.Service<
   InitiateLayerUpload,

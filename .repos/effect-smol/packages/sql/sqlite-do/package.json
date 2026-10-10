@@ -1,6 +1,6 @@
 {
   "name": "@effect/sql-sqlite-do",
-  "version": "4.0.1",
+  "version": "4.0.0-beta.102",
   "type": "module",
   "license": "MIT",
   "description": "A SQLite toolkit for Effect",
@@ -29,7 +29,6 @@
     ".": "./src/index.ts",
     "./*": "./src/*.ts",
     "./internal/*": null,
-    "./index": null,
     "./*/index": null
   },
   "files": [
@@ -37,10 +36,7 @@
     "dist/**/*.js",
     "dist/**/*.js.map",
     "dist/**/*.d.ts",
-    "dist/**/*.d.ts.map",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "ai-docs/**/*"
+    "dist/**/*.d.ts.map"
   ],
   "publishConfig": {
     "access": "public",
@@ -50,7 +46,6 @@
       ".": "./dist/index.js",
       "./*": "./dist/*.js",
       "./internal/*": null,
-      "./index": null,
       "./*/index": null
     }
   },
@@ -58,13 +53,13 @@
     "codegen": "effect-utils codegen",
     "build": "tsc -b tsconfig.json && pnpm babel",
     "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
-    "check": "tsc -b tsconfig.json"
+    "check": "tsc -b tsconfig.json",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260926.1",
-    "effect": "workspace:^",
-    "esbuild": "^0.28.2",
-    "miniflare": "5.20260925.0-alpha"
+    "@cloudflare/workers-types": "^5.20260708.1",
+    "effect": "workspace:^"
   },
   "peerDependencies": {
     "effect": "workspace:^"

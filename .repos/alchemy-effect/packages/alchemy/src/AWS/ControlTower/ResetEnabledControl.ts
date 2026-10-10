@@ -12,8 +12,9 @@ import type { EnabledControl } from "./EnabledControl.ts";
  * call starts an asynchronous operation; poll it with
  * {@link GetControlOperation}. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ResetEnabledControlHttp)`.
- * ### Remediating Drift
- * **Example:** Reset a Drifted Enabled Control
+ * @binding
+ * @section Remediating Drift
+ * @example Reset a Drifted Enabled Control
  * ```typescript
  * // init — bind the operation to the enabled control
  * const resetEnabledControl = yield* AWS.ControlTower.ResetEnabledControl(guardrail);
@@ -21,8 +22,6 @@ import type { EnabledControl } from "./EnabledControl.ts";
  * // runtime
  * const { operationIdentifier } = yield* resetEnabledControl();
  * ```
- *
- * @binding
  */
 export interface ResetEnabledControl extends Binding.Service<
   ResetEnabledControl,

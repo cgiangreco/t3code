@@ -75,8 +75,9 @@ export interface Destination extends Resource<
  * The destination name is its identity (changing it replaces the
  * destination); the expression, expression type, description, role, and
  * tags all update in place.
- * ### Creating Destinations
- * **Example:** Route uplinks to an IoT rule
+ * @resource
+ * @section Creating Destinations
+ * @example Route uplinks to an IoT rule
  * ```typescript
  * import * as IoTWireless from "alchemy/AWS/IoTWireless";
  *
@@ -87,7 +88,7 @@ export interface Destination extends Resource<
  * });
  * ```
  *
- * **Example:** Publish uplinks straight to an MQTT topic
+ * @example Publish uplinks straight to an MQTT topic
  * ```typescript
  * const destination = yield* IoTWireless.Destination("Uplinks", {
  *   expressionType: "MqttTopic",
@@ -96,8 +97,8 @@ export interface Destination extends Resource<
  * });
  * ```
  *
- * ### Delivery Role
- * **Example:** IAM role IoT Wireless assumes for delivery
+ * @section Delivery Role
+ * @example IAM role IoT Wireless assumes for delivery
  * ```typescript
  * const deliveryRole = yield* IAM.Role("IotWirelessDelivery", {
  *   assumeRolePolicyDocument: {
@@ -122,13 +123,13 @@ export interface Destination extends Resource<
  * });
  * ```
  *
- * ### Consuming Uplinks in a Function
+ * @section Consuming Uplinks in a Function
  * Uplinks are delivered through AWS IoT Core. For a `RuleName` destination,
  * `IoTWireless.consumeUplinks` (see {@link DestinationEventSource}) creates
  * the named IoT rule targeting the current Lambda and invokes the handler
  * for every uplink. Alternatively, point an `MqttTopic` destination at a
  * topic and consume it with `AWS.IoT.consumeTopicMessages`.
- * **Example:** Route Device Uplinks into a Lambda
+ * @example Route Device Uplinks into a Lambda
  * ```typescript
  * const destination = yield* IoTWireless.Destination("Uplinks", {
  *   expressionType: "RuleName",
@@ -144,8 +145,6 @@ export interface Destination extends Resource<
  *   ),
  * );
  * ```
- *
- * @resource
  */
 export const Destination = Resource<Destination>("AWS.IoTWireless.Destination");
 

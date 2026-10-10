@@ -23,7 +23,6 @@ export class GhosttyRuntime {
   readonly memory: WebAssembly.Memory;
   readonly layouts: TypeLayouts;
   private readonly exports: WebAssembly.Exports;
-  private memoryView: DataView;
   private readonly ptyWriters = new Map<number, (data: string) => void>();
   private nextPtyWriterId = 1;
   private writePtyFunctionIndex = 0;
@@ -35,7 +34,6 @@ export class GhosttyRuntime {
       throw new Error("libghostty-vt did not export WebAssembly memory");
     }
     this.memory = memory;
-    this.memoryView = new DataView(memory.buffer);
     const jsonPointer = this.call("ghostty_type_json");
     const bytes = new Uint8Array(memory.buffer);
     let end = jsonPointer;
@@ -106,7 +104,7 @@ export class GhosttyRuntime {
   }
 
   readPointer(slot: number): number {
-    return this.memoryDataView().getUint32(slot, true);
+    return new DataView(this.memory.buffer).getUint32(slot, true);
   }
 
   attachPtyWriter(terminal: number, writer: (data: string) => void): number {
@@ -134,36 +132,27 @@ export class GhosttyRuntime {
     return new Uint8Array(this.memory.buffer, pointer, size);
   }
 
-  /** Reuse scalar reads across cells, refreshing after any terminal grows shared WASM memory. */
-  memoryDataView(): DataView {
-    if (this.memoryView.buffer !== this.memory.buffer) {
-      this.memoryView = new DataView(this.memory.buffer);
-    }
-    return this.memoryView;
-  }
-
   setField(pointer: number, structName: string, fieldName: string, value: number): void {
     const field = this.layout(structName).fields[fieldName];
     if (!field) throw new Error(`libghostty-vt field is unavailable: ${structName}.${fieldName}`);
-    const view = this.memoryDataView();
-    const offset = pointer + field.offset;
+    const view = this.view(pointer + field.offset, field.size);
     switch (field.type) {
       case "bool":
       case "u8":
-        view.setUint8(offset, value);
+        view.setUint8(0, value);
         return;
       case "u16":
-        view.setUint16(offset, value, true);
+        view.setUint16(0, value, true);
         return;
       case "i32":
-        view.setInt32(offset, value, true);
+        view.setInt32(0, value, true);
         return;
       case "u32":
       case "enum":
-        view.setUint32(offset, value, true);
+        view.setUint32(0, value, true);
         return;
       case "u64":
-        view.setBigUint64(offset, BigInt(value), true);
+        view.setBigUint64(0, BigInt(value), true);
         return;
       default:
         throw new Error(`Unsupported libghostty-vt field type: ${field.type}`);
@@ -173,21 +162,20 @@ export class GhosttyRuntime {
   readField(pointer: number, structName: string, fieldName: string): number {
     const field = this.layout(structName).fields[fieldName];
     if (!field) throw new Error(`libghostty-vt field is unavailable: ${structName}.${fieldName}`);
-    const view = this.memoryDataView();
-    const offset = pointer + field.offset;
+    const view = this.view(pointer + field.offset, field.size);
     switch (field.type) {
       case "bool":
       case "u8":
-        return view.getUint8(offset);
+        return view.getUint8(0);
       case "u16":
-        return view.getUint16(offset, true);
+        return view.getUint16(0, true);
       case "i32":
-        return view.getInt32(offset, true);
+        return view.getInt32(0, true);
       case "u32":
       case "enum":
-        return view.getUint32(offset, true);
+        return view.getUint32(0, true);
       case "u64":
-        return Number(view.getBigUint64(offset, true));
+        return Number(view.getBigUint64(0, true));
       default:
         throw new Error(`Unsupported libghostty-vt field type: ${field.type}`);
     }

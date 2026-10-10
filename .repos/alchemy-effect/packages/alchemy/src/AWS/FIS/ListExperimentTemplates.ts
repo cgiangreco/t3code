@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Enumerates the account's experiment templates — the catalog a chaos
  * orchestrator picks its next run from. Provide the implementation with
  * `Effect.provide(AWS.FIS.ListExperimentTemplatesHttp)`.
- * ### Inspecting Templates
- * **Example:** List the Account's Templates
+ * @binding
+ * @section Inspecting Templates
+ * @example List the Account's Templates
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listExperimentTemplates = yield* AWS.FIS.ListExperimentTemplates();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const { experimentTemplates } = yield* listExperimentTemplates();
  * console.log((experimentTemplates ?? []).map((t) => t.id));
  * ```
- *
- * @binding
  */
 export interface ListExperimentTemplates extends Binding.Service<
   ListExperimentTemplates,

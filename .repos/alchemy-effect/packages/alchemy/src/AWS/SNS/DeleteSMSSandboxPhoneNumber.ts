@@ -11,14 +11,13 @@ export interface DeleteSMSSandboxPhoneNumberRequest
  * An account-scoped operation — removes a destination phone number from
  * the account's SMS sandbox.
  * Provide the `DeleteSMSSandboxPhoneNumberHttp` layer on the Function to implement the binding.
- * ### SMS Sandbox
- * **Example:** Delete a Sandbox Number
+ * @binding
+ * @section SMS Sandbox
+ * @example Delete a Sandbox Number
  * ```typescript
  * const deleteSandboxNumber = yield* SNS.DeleteSMSSandboxPhoneNumber();
  * yield* deleteSandboxNumber({ PhoneNumber: "+15555550123" });
  * ```
- *
- * @binding
  */
 export interface DeleteSMSSandboxPhoneNumber extends Binding.Service<
   DeleteSMSSandboxPhoneNumber,

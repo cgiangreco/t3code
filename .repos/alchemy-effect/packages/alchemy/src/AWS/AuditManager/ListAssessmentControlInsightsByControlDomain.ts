@@ -15,14 +15,13 @@ export interface ListAssessmentControlInsightsByControlDomainRequest extends Omi
  * Lists the latest control insights for a control domain within the
  * bound (active) assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.ListAssessmentControlInsightsByControlDomainHttp)`.
- * ### Insights
- * **Example:** Control Insights for a Domain in the Assessment
+ * @binding
+ * @section Insights
+ * @example Control Insights for a Domain in the Assessment
  * ```typescript
  * const listAssessmentControlInsightsByControlDomain = yield* AWS.AuditManager.ListAssessmentControlInsightsByControlDomain(assessment);
  * const result = yield* listAssessmentControlInsightsByControlDomain({ controlDomainId });
  * ```
- *
- * @binding
  */
 export interface ListAssessmentControlInsightsByControlDomain extends Binding.Service<
   ListAssessmentControlInsightsByControlDomain,

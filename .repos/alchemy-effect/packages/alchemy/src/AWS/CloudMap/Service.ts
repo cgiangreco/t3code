@@ -137,8 +137,9 @@ export interface Service extends Resource<
  * records per registered instance; every service is also queryable via the
  * `DiscoverInstances` API. This is what ECS `serviceRegistries[].registryArn`
  * consumes.
- * ### Creating Services
- * **Example:** DNS Service with A Records
+ * @resource
+ * @section Creating Services
+ * @example DNS Service with A Records
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -154,7 +155,7 @@ export interface Service extends Resource<
  * });
  * ```
  *
- * **Example:** API-only Service in an HTTP Namespace
+ * @example API-only Service in an HTTP Namespace
  * ```typescript
  * const namespace = yield* AWS.CloudMap.HttpNamespace("AppNamespace");
  * const service = yield* AWS.CloudMap.Service("Backend", {
@@ -162,7 +163,7 @@ export interface Service extends Resource<
  * });
  * ```
  *
- * **Example:** Service with Custom Health Checks
+ * @example Service with Custom Health Checks
  * ```typescript
  * const service = yield* AWS.CloudMap.Service("Backend", {
  *   namespaceId: namespace.namespaceId,
@@ -171,7 +172,7 @@ export interface Service extends Resource<
  * });
  * ```
  *
- * **Example:** Service with Custom Attributes
+ * @example Service with Custom Attributes
  * ```typescript
  * const service = yield* AWS.CloudMap.Service("Backend", {
  *   namespaceId: namespace.namespaceId,
@@ -179,8 +180,8 @@ export interface Service extends Resource<
  * });
  * ```
  *
- * ### Discovering Instances
- * **Example:** Discover Healthy Instances from a Lambda
+ * @section Discovering Instances
+ * @example Discover Healthy Instances from a Lambda
  * ```typescript
  * // init
  * const discover = yield* AWS.CloudMap.DiscoverInstances(service);
@@ -188,8 +189,6 @@ export interface Service extends Resource<
  * // runtime
  * const { Instances } = yield* discover({ HealthStatus: "HEALTHY" });
  * ```
- *
- * @resource
  */
 export const Service = Resource<Service>("AWS.CloudMap.Service");
 
@@ -453,7 +452,7 @@ export const ServiceProvider = () =>
           if (service?.Id === undefined || service.Arn === undefined) {
             return yield* Effect.fail(
               new sd.ServiceNotFound({
-                message: `service ${name} not visible after create`,
+                Message: `service ${name} not visible after create`,
               }),
             );
           }

@@ -1,6 +1,5 @@
 import * as Effect from "effect/Effect";
 import * as RpcServer from "./RpcServer.ts";
-import { SESSION_ENV_PARAM } from "./RpcServerEnvironment.ts";
 import type { ServerRpcSession } from "./RpcServerSession.ts";
 
 export const RpcServerBun = RpcServer.layerServer(
@@ -11,9 +10,7 @@ export const RpcServerBun = RpcServer.layerServer(
   }) {
     const server = yield* Effect.sync(() =>
       Bun.serve<
-        | { type: "session"; session: ServerRpcSession<any> }
-        | { type: "pending"; sessionEnv: string | undefined }
-        | { type: "parent" }
+        { type: "session"; session: ServerRpcSession<any> } | { type: "parent" }
       >({
         port: 0,
         fetch: (request, server) => {
@@ -21,13 +18,7 @@ export const RpcServerBun = RpcServer.layerServer(
           if (
             server.upgrade(request, {
               data:
-                url.pathname === "/parent"
-                  ? { type: "parent" }
-                  : {
-                      type: "pending",
-                      sessionEnv:
-                        url.searchParams.get(SESSION_ENV_PARAM) ?? undefined,
-                    },
+                url.pathname === "/parent" ? { type: "parent" } : undefined!,
             })
           ) {
             return;
@@ -39,13 +30,9 @@ export const RpcServerBun = RpcServer.layerServer(
             if (ws.data && ws.data.type === "parent") {
               parentConnected();
             } else {
-              const sessionEnv =
-                ws.data && ws.data.type === "pending"
-                  ? ws.data.sessionEnv
-                  : undefined;
               ws.data = {
                 type: "session",
-                session: createRpcSession(ws, sessionEnv),
+                session: createRpcSession(ws),
               };
             }
           },

@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * must accept the grant to get an entitled copy of the data set.
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.CreateDataGrantHttp)`.
- * ### Data Grants
- * **Example:** Grant A Data Set To Another Account
+ * @binding
+ * @section Data Grants
+ * @example Grant A Data Set To Another Account
  * ```typescript
  * const createDataGrant = yield* AWS.DataExchange.CreateDataGrant();
  *
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   GrantDistributionScope: "NONE",
  * });
  * ```
- *
- * @binding
  */
 export interface CreateDataGrant extends Binding.Service<
   CreateDataGrant,

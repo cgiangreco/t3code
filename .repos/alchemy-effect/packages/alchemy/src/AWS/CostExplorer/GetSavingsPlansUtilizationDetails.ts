@@ -14,8 +14,9 @@ export interface GetSavingsPlansUtilizationDetailsRequest
  * Retrieve per-Savings-Plan attribute, utilization, and savings
  * detail for a time period. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.GetSavingsPlansUtilizationDetailsHttp)`.
- * ### Savings Plans
- * **Example:** Per-Plan Utilization Details
+ * @binding
+ * @section Savings Plans
+ * @example Per-Plan Utilization Details
  * ```typescript
  * // init — account-level binding takes no resource
  * const getSavingsPlansUtilizationDetails = yield* AWS.CostExplorer.GetSavingsPlansUtilizationDetails();
@@ -25,8 +26,6 @@ export interface GetSavingsPlansUtilizationDetailsRequest
  *   TimePeriod: { Start: "2026-06-01", End: "2026-07-01" },
  * });
  * ```
- *
- * @binding
  */
 export interface GetSavingsPlansUtilizationDetails extends Binding.Service<
   GetSavingsPlansUtilizationDetails,

@@ -46,8 +46,9 @@ export interface EventTopic extends Resource<
  * To consume the notifications from a Lambda function, use
  * {@link consumeDirectoryStatus}, which creates this association and
  * subscribes the function to the topic.
- * ### Publishing Directory Status Notifications
- * **Example:** Publish Status Changes to an SNS Topic
+ * @resource
+ * @section Publishing Directory Status Notifications
+ * @example Publish Status Changes to an SNS Topic
  * ```typescript
  * const topic = yield* SNS.Topic("DirectoryStatus", {});
  * const eventTopic = yield* DirectoryService.EventTopic("Status", {
@@ -55,8 +56,6 @@ export interface EventTopic extends Resource<
  *   topicName: topic.topicName,
  * });
  * ```
- *
- * @resource
  */
 export const EventTopic = Resource<EventTopic>(
   "AWS.DirectoryService.EventTopic",

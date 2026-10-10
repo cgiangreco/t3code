@@ -12,12 +12,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-routes:SnapToRoads`. Requests and responses are raw distilled types
  * (positions are `[longitude, latitude]` pairs).
  *
- * ### Snapping GPS Traces to Roads
+ * @binding
+ * @section Snapping GPS Traces to Roads
  * Provide the `SnapToRoadsHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoRoutes.SnapToRoadsHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Snap a two-point GPS trace to the road network
+ * @example Snap a two-point GPS trace to the road network
  * ```typescript
  * // init
  * const snapToRoads = yield* AWS.GeoRoutes.SnapToRoads();
@@ -32,8 +33,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const snapped = result.SnappedTracePoints.map((p) => p.SnappedPosition);
  * ```
- *
- * @binding
  */
 export interface SnapToRoads extends Binding.Service<
   SnapToRoads,

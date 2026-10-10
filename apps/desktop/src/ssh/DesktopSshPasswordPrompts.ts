@@ -41,7 +41,7 @@ const DesktopSshPromptPresentationOperation = Schema.Literals([
 ]);
 type DesktopSshPromptPresentationOperation = typeof DesktopSshPromptPresentationOperation.Type;
 
-export class DesktopSshPromptRequestIdGenerationError extends Schema.TaggedError<DesktopSshPromptRequestIdGenerationError>()(
+export class DesktopSshPromptRequestIdGenerationError extends Schema.TaggedErrorClass<DesktopSshPromptRequestIdGenerationError>()(
   "DesktopSshPromptRequestIdGenerationError",
   {
     destination: Schema.String,
@@ -53,7 +53,7 @@ export class DesktopSshPromptRequestIdGenerationError extends Schema.TaggedError
   }
 }
 
-export class DesktopSshPromptWindowUnavailableError extends Schema.TaggedError<DesktopSshPromptWindowUnavailableError>()(
+export class DesktopSshPromptWindowUnavailableError extends Schema.TaggedErrorClass<DesktopSshPromptWindowUnavailableError>()(
   "DesktopSshPromptWindowUnavailableError",
   {
     destination: Schema.String,
@@ -67,7 +67,7 @@ export class DesktopSshPromptWindowUnavailableError extends Schema.TaggedError<D
   }
 }
 
-export class DesktopSshPromptPresentationError extends Schema.TaggedError<DesktopSshPromptPresentationError>()(
+export class DesktopSshPromptPresentationError extends Schema.TaggedErrorClass<DesktopSshPromptPresentationError>()(
   "DesktopSshPromptPresentationError",
   {
     requestId: Schema.NullOr(Schema.String),
@@ -81,7 +81,7 @@ export class DesktopSshPromptPresentationError extends Schema.TaggedError<Deskto
   }
 }
 
-export class DesktopSshPromptTimedOutError extends Schema.TaggedError<DesktopSshPromptTimedOutError>()(
+export class DesktopSshPromptTimedOutError extends Schema.TaggedErrorClass<DesktopSshPromptTimedOutError>()(
   "DesktopSshPromptTimedOutError",
   {
     requestId: Schema.String,
@@ -93,7 +93,7 @@ export class DesktopSshPromptTimedOutError extends Schema.TaggedError<DesktopSsh
   }
 }
 
-export class DesktopSshPromptCancelledError extends Schema.TaggedError<DesktopSshPromptCancelledError>()(
+export class DesktopSshPromptCancelledError extends Schema.TaggedErrorClass<DesktopSshPromptCancelledError>()(
   "DesktopSshPromptCancelledError",
   {
     requestId: Schema.String,
@@ -105,7 +105,7 @@ export class DesktopSshPromptCancelledError extends Schema.TaggedError<DesktopSs
   }
 }
 
-export class DesktopSshPromptWindowClosedError extends Schema.TaggedError<DesktopSshPromptWindowClosedError>()(
+export class DesktopSshPromptWindowClosedError extends Schema.TaggedErrorClass<DesktopSshPromptWindowClosedError>()(
   "DesktopSshPromptWindowClosedError",
   {
     requestId: Schema.String,
@@ -117,7 +117,7 @@ export class DesktopSshPromptWindowClosedError extends Schema.TaggedError<Deskto
   }
 }
 
-export class DesktopSshPromptServiceStoppedError extends Schema.TaggedError<DesktopSshPromptServiceStoppedError>()(
+export class DesktopSshPromptServiceStoppedError extends Schema.TaggedErrorClass<DesktopSshPromptServiceStoppedError>()(
   "DesktopSshPromptServiceStoppedError",
   {
     requestId: Schema.String,
@@ -129,7 +129,7 @@ export class DesktopSshPromptServiceStoppedError extends Schema.TaggedError<Desk
   }
 }
 
-export class DesktopSshPromptInvalidRequestIdError extends Schema.TaggedError<DesktopSshPromptInvalidRequestIdError>()(
+export class DesktopSshPromptInvalidRequestIdError extends Schema.TaggedErrorClass<DesktopSshPromptInvalidRequestIdError>()(
   "DesktopSshPromptInvalidRequestIdError",
   {
     requestId: Schema.String,
@@ -140,7 +140,7 @@ export class DesktopSshPromptInvalidRequestIdError extends Schema.TaggedError<De
   }
 }
 
-export class DesktopSshPromptExpiredError extends Schema.TaggedError<DesktopSshPromptExpiredError>()(
+export class DesktopSshPromptExpiredError extends Schema.TaggedErrorClass<DesktopSshPromptExpiredError>()(
   "DesktopSshPromptExpiredError",
   {
     requestId: Schema.String,
@@ -163,6 +163,10 @@ export type DesktopSshPasswordPromptRequestError =
 export type DesktopSshPasswordPromptResolveError =
   | DesktopSshPromptInvalidRequestIdError
   | DesktopSshPromptExpiredError;
+
+export type DesktopSshPasswordPromptError =
+  | DesktopSshPasswordPromptRequestError
+  | DesktopSshPasswordPromptResolveError;
 
 export const DesktopSshPasswordPromptCancellation = Schema.Union([
   DesktopSshPromptCancelledError,
@@ -218,7 +222,6 @@ const failPending = (
   error: DesktopSshPasswordPromptRequestError,
 ) => Deferred.fail(pending.deferred, error).pipe(Effect.asVoid);
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.fn("desktop.sshPasswordPrompts.make")(function* (
   options: DesktopSshPasswordPromptsOptions = {},
 ) {

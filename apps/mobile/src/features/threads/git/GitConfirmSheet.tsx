@@ -4,13 +4,11 @@ import * as Arr from "effect/Array";
 import * as Result from "effect/Result";
 import { StackActions, useNavigation, type StaticScreenProps } from "@react-navigation/native";
 import { useCallback, useMemo } from "react";
-import { Platform, ScrollView, useWindowDimensions, View } from "react-native";
+import { Platform, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AndroidSheetHeader } from "../../../components/AndroidScreenHeader";
-import { MaterialScreenContent } from "../../../components/MaterialScreenContent";
-import { NativeStackScreenOptions } from "../../../native/StackHeader";
 import { AppText as Text } from "../../../components/AppText";
 import { useSelectedThreadGitActions } from "../../../state/use-selected-thread-git-actions";
 import { useSelectedThreadGitState } from "../../../state/use-selected-thread-git-state";
@@ -29,10 +27,8 @@ type GitConfirmSheetProps = StaticScreenProps<{
 export function GitConfirmSheet(props: GitConfirmSheetProps) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
   const gitState = useSelectedThreadGitState();
   const gitActions = useSelectedThreadGitActions();
-  const { canWriteSourceControl, canChangeThreadBranch } = gitActions;
 
   const params = props.route.params;
 
@@ -60,25 +56,17 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
   );
 
   const continuePendingAction = useCallback(async () => {
-    if (!canWriteSourceControl || !confirmAction) return;
+    if (!confirmAction) return;
     navigation.dispatch(StackActions.replace("Thread", { environmentId, threadId }));
     await gitActions.onRunSelectedThreadGitAction({
       action: confirmAction,
       ...(params.commitMessage ? { commitMessage: params.commitMessage } : {}),
       ...(params.filePaths ? { filePaths: params.filePaths.split(",") } : {}),
     });
-  }, [
-    canWriteSourceControl,
-    confirmAction,
-    environmentId,
-    gitActions,
-    params,
-    navigation,
-    threadId,
-  ]);
+  }, [confirmAction, environmentId, gitActions, params, navigation, threadId]);
 
   const movePendingActionToFeatureBranch = useCallback(async () => {
-    if (!canChangeThreadBranch || !confirmAction) return;
+    if (!confirmAction) return;
     navigation.dispatch(StackActions.replace("Thread", { environmentId, threadId }));
 
     if (includesCommit) {
@@ -100,11 +88,9 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
         branch.isRemote ? Result.failVoid : Result.succeed(branch.name),
       ),
     );
-    const created = await gitActions.onCreateSelectedThreadBranch(newBranchName);
-    if (created === null) return;
+    await gitActions.onCreateSelectedThreadBranch(newBranchName);
     await gitActions.onRunSelectedThreadGitAction({ action: confirmAction });
   }, [
-    canChangeThreadBranch,
     confirmAction,
     gitActions,
     gitState.selectedThreadBranches,
@@ -116,78 +102,38 @@ export function GitConfirmSheet(props: GitConfirmSheetProps) {
   ]);
 
   return (
-    <View
-      collapsable={false}
-      className="bg-sheet ios:flex-1"
-      style={Platform.OS === "android" ? { maxHeight: windowHeight * 0.92 } : undefined}
-    >
+    <View collapsable={false} className="flex-1 bg-sheet">
       {Platform.OS === "android" ? (
-        <NativeStackScreenOptions
-          options={{
-            sheetCornerRadius: 28,
-            sheetAllowedDetents: "fitToContents",
-          }}
-        />
-      ) : null}
-      {Platform.OS === "android" ? (
-        <AndroidSheetHeader
-          title="Confirm action"
-          onBack={() => navigation.goBack()}
-          hideBottomBorder
-        />
+        <AndroidSheetHeader title="Confirm action" onBack={() => navigation.goBack()} />
       ) : (
         <View className="min-h-4 pt-2" />
       )}
 
-      <MaterialScreenContent fitToContents>
-        <ScrollView
-          className="android:shrink android:grow-0 ios:flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="android:gap-2 android:p-2"
-          contentContainerStyle={
-            Platform.OS === "android"
-              ? { paddingBottom: Math.max(insets.bottom, 18) + 8 }
-              : undefined
-          }
-        >
-          <View className="android:gap-2 android:rounded-[20px] android:bg-card android:p-3 ios:items-center ios:gap-1 ios:px-5 ios:pb-3 ios:pt-4">
-            {Platform.OS !== "android" ? (
-              <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
-                Confirm
-              </Text>
-            ) : null}
-            <Text className="android:text-xl android:font-t3-medium ios:text-center ios:text-3xl ios:font-t3-bold">
-              {copy?.title ?? "Run action on default branch?"}
-            </Text>
-            <Text className="text-foreground-secondary leading-normal android:text-base ios:text-center ios:text-sm ios:font-medium">
-              {copy?.description ?? "Choose how to continue."}
-            </Text>
-          </View>
+      <View className="items-center gap-1 px-5 pb-3 pt-4">
+        <Text className="text-xs font-t3-bold tracking-[1px] uppercase text-foreground-muted">
+          Confirm
+        </Text>
+        <Text className="text-center text-3xl font-t3-bold">
+          {copy?.title ?? "Run action on default branch?"}
+        </Text>
+        <Text className="text-center text-foreground-secondary text-sm font-medium leading-normal">
+          {copy?.description ?? "Choose how to continue."}
+        </Text>
+      </View>
 
-          <View
-            className="android:gap-2 ios:gap-3 ios:px-5 ios:pt-2"
-            style={
-              Platform.OS === "android"
-                ? undefined
-                : { paddingBottom: Math.max(insets.bottom, 18) + 8 }
-            }
-          >
-            <SheetActionButton
-              icon="arrow.right.circle"
-              label={copy?.continueLabel ?? "Continue"}
-              disabled={!canWriteSourceControl}
-              onPress={() => void continuePendingAction()}
-            />
-            <SheetActionButton
-              icon="arrow.branch"
-              label="Feature branch & continue"
-              disabled={!canChangeThreadBranch}
-              tone="primary"
-              onPress={() => void movePendingActionToFeatureBranch()}
-            />
-          </View>
-        </ScrollView>
-      </MaterialScreenContent>
+      <View className="gap-3 px-5 pt-2" style={{ paddingBottom: Math.max(insets.bottom, 18) + 8 }}>
+        <SheetActionButton
+          icon="arrow.right.circle"
+          label={copy?.continueLabel ?? "Continue"}
+          onPress={() => void continuePendingAction()}
+        />
+        <SheetActionButton
+          icon="arrow.branch"
+          label="Feature branch & continue"
+          tone="primary"
+          onPress={() => void movePendingActionToFeatureBranch()}
+        />
+      </View>
     </View>
   );
 }

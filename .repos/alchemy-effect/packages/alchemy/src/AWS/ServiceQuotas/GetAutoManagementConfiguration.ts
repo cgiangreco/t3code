@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * the account's Service Quotas Auto Management opt-in status (opt-in type,
  * notification target, excluded quotas) from inside a Function.
  *
- * ### Auto Management
- * **Example:** Check the Auto Management opt-in status
+ * @binding
+ * @section Auto Management
+ * @example Check the Auto Management opt-in status
  * ```typescript
  * // init
  * const getAutoManagementConfiguration =
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const config = yield* getAutoManagementConfiguration();
  * const optIn = config.OptInType; // NotifyOnly | NotifyAndAdjust
  * ```
- *
- * @binding
  */
 export interface GetAutoManagementConfiguration extends Binding.Service<
   GetAutoManagementConfiguration,

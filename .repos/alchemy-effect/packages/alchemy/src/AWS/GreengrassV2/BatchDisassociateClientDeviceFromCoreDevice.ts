@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * core device thing name and the client device entries at runtime. Provide
  * the implementation with
  * `Effect.provide(AWS.GreengrassV2.BatchDisassociateClientDeviceFromCoreDeviceHttp)`.
- * ### Managing Client Devices
- * **Example:** Disassociate Client Devices
+ * @binding
+ * @section Managing Client Devices
+ * @example Disassociate Client Devices
  * ```typescript
  * // init — account-level binding, no resource argument
  * const disassociateClientDevices =
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   entries: [{ thingName: "RetiredSensor" }],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchDisassociateClientDeviceFromCoreDevice extends Binding.Service<
   BatchDisassociateClientDeviceFromCoreDevice,

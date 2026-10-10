@@ -105,8 +105,9 @@ export interface Gateway extends Resource<
  * functions) behind a single MCP URL with centralized authorization (SigV4 or
  * JWT).
  *
- * ### Creating Gateways
- * **Example:** IAM-Authorized MCP Gateway
+ * @resource
+ * @section Creating Gateways
+ * @example IAM-Authorized MCP Gateway
  * ```typescript
  * import * as AgentCore from "alchemy/AWS/BedrockAgentCore";
  * import * as IAM from "alchemy/AWS/IAM";
@@ -130,7 +131,7 @@ export interface Gateway extends Resource<
  * });
  * ```
  *
- * **Example:** JWT-Authorized Gateway
+ * @example JWT-Authorized Gateway
  * ```typescript
  * const gateway = yield* AgentCore.Gateway("JwtGateway", {
  *   roleArn: role.roleArn,
@@ -143,8 +144,6 @@ export interface Gateway extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Gateway = Resource<Gateway>("AWS.BedrockAgentCore.Gateway");
 

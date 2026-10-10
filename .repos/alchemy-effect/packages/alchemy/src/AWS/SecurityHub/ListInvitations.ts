@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.ListInvitationsHttp)`.
- * ### Members & Organization
- * **Example:** List Invitations
+ * @binding
+ * @section Members & Organization
+ * @example List Invitations
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listInvitations = yield* AWS.SecurityHub.ListInvitations();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { Invitations } = yield* listInvitations();
  * ```
- *
- * @binding
  */
 export interface ListInvitations extends Binding.Service<
   ListInvitations,

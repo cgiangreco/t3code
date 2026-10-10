@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * are chosen per request at runtime, so the binding takes no resource
  * argument. Provide the implementation with
  * `Effect.provide(AWS.RAM.ListPermissionsHttp)`.
- * ### Managed Permissions
- * **Example:** List the Customer Managed Permissions
+ * @binding
+ * @section Managed Permissions
+ * @example List the Customer Managed Permissions
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listPermissions = yield* AWS.RAM.ListPermissions();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   permissionType: "CUSTOMER_MANAGED",
  * });
  * ```
- *
- * @binding
  */
 export interface ListPermissions extends Binding.Service<
   ListPermissions,

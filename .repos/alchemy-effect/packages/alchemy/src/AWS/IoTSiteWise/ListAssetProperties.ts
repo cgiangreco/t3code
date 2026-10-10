@@ -17,13 +17,14 @@ export interface ListAssetPropertiesRequest extends Omit<
  * bound asset's property summaries (ids, aliases, paths) from a deployed
  * Lambda or Task.
  *
- * ### Listing Asset Properties
+ * @binding
+ * @section Listing Asset Properties
  * Provide the `ListAssetPropertiesHttp` implementation layer on the
  * Function effect, bind the asset in the init phase, then call the returned
  * client at runtime. Pass `filter: "ALL"` to include properties inherited
  * from composite models.
  *
- * **Example:** List All Properties
+ * @example List All Properties
  * ```typescript
  * // init
  * const listProperties = yield* AWS.IoTSiteWise.ListAssetProperties(asset);
@@ -33,8 +34,6 @@ export interface ListAssetPropertiesRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTSiteWise.ListAssetPropertiesHttp))
  * ```
- *
- * @binding
  */
 export interface ListAssetProperties extends Binding.Service<
   ListAssetProperties,

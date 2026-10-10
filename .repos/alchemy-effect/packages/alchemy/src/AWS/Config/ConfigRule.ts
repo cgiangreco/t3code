@@ -165,8 +165,9 @@ export interface ConfigRule extends Resource<
  *
  * The account/region must have an AWS Config configuration recorder before
  * rules can be created (see `AWS.Config.ConfigurationRecorder`).
- * ### Creating Rules
- * **Example:** AWS-managed rule
+ * @resource
+ * @section Creating Rules
+ * @example AWS-managed rule
  * ```typescript
  * import * as Config from "alchemy/AWS/Config";
  *
@@ -178,7 +179,7 @@ export interface ConfigRule extends Resource<
  * });
  * ```
  *
- * **Example:** Managed rule with input parameters and scope
+ * @example Managed rule with input parameters and scope
  * ```typescript
  * const rule = yield* Config.ConfigRule("RequiredTags", {
  *   description: "All buckets must carry a team tag",
@@ -188,8 +189,8 @@ export interface ConfigRule extends Resource<
  * });
  * ```
  *
- * ### Periodic Evaluation
- * **Example:** Evaluate on a schedule
+ * @section Periodic Evaluation
+ * @example Evaluate on a schedule
  * ```typescript
  * const rule = yield* Config.ConfigRule("RootMfa", {
  *   source: {
@@ -199,8 +200,6 @@ export interface ConfigRule extends Resource<
  *   maximumExecutionFrequency: "TwentyFour_Hours",
  * });
  * ```
- *
- * @resource
  */
 export const ConfigRule = Resource<ConfigRule>("AWS.Config.ConfigRule");
 

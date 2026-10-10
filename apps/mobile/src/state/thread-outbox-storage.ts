@@ -1,7 +1,6 @@
 import { EnvironmentId, MessageId, ThreadId } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 
-import { writeFileAtomically } from "../lib/atomic-file";
 import {
   decodeQueuedThreadMessage,
   encodeQueuedThreadMessage,
@@ -10,25 +9,7 @@ import {
 
 const THREAD_OUTBOX_DIRECTORY = "thread-outbox";
 
-const inFlightWrites = new Set<Promise<void>>();
-
-function trackInFlightWrite(operation: Promise<void>): Promise<void> {
-  inFlightWrites.add(operation);
-  void operation.catch(() => undefined).finally(() => inFlightWrites.delete(operation));
-  return operation;
-}
-
-/**
- * Awaits queued-message writes so an app update restart cannot tear down the
- * runtime while one is mid-file.
- */
-export async function flushThreadOutboxWrites(): Promise<void> {
-  while (inFlightWrites.size > 0) {
-    await Promise.allSettled(inFlightWrites);
-  }
-}
-
-export class ThreadOutboxStorageError extends Schema.TaggedError<ThreadOutboxStorageError>()(
+export class ThreadOutboxStorageError extends Schema.TaggedErrorClass<ThreadOutboxStorageError>()(
   "ThreadOutboxStorageError",
   {
     operation: Schema.Literals(["load", "read-message", "write", "remove"]),
@@ -44,13 +25,8 @@ export class ThreadOutboxStorageError extends Schema.TaggedError<ThreadOutboxSto
   }
 }
 
-export interface ThreadOutboxLoadResult {
-  readonly messages: ReadonlyArray<QueuedThreadMessage>;
-  readonly errors: ReadonlyArray<ThreadOutboxStorageError>;
-}
-
 export interface ThreadOutboxStorage {
-  readonly load: () => Promise<ThreadOutboxLoadResult>;
+  readonly load: () => Promise<ReadonlyArray<QueuedThreadMessage>>;
   readonly write: (message: QueuedThreadMessage) => Promise<void>;
   readonly remove: (message: QueuedThreadMessage) => Promise<void>;
 }
@@ -74,7 +50,6 @@ async function getMessageFile(messageId: MessageId) {
 export const expoThreadOutboxStorage: ThreadOutboxStorage = {
   load: async () => {
     const messages: QueuedThreadMessage[] = [];
-    const errors: ThreadOutboxStorageError[] = [];
     try {
       const { File } = await import("expo-file-system");
       const directory = await getOutboxDirectory();
@@ -86,9 +61,8 @@ export const expoThreadOutboxStorage: ThreadOutboxStorage = {
         try {
           messages.push(decodeQueuedThreadMessage(JSON.parse(await entry.text()) as unknown));
         } catch (cause) {
-          // Recover readable messages without treating their attachment
-          // owners as the complete inventory needed for cleanup.
-          errors.push(
+          console.warn(
+            "[thread-outbox] ignored invalid persisted message",
             new ThreadOutboxStorageError({
               operation: "read-message",
               environmentId: null,
@@ -110,17 +84,16 @@ export const expoThreadOutboxStorage: ThreadOutboxStorage = {
         cause,
       });
     }
-    return { messages, errors };
+    return messages;
   },
   write: async (message) => {
     const fileName = messageFileName(message.messageId);
     try {
-      await trackInFlightWrite(
-        (async () => {
-          const file = await getMessageFile(message.messageId);
-          await writeFileAtomically(file, JSON.stringify(encodeQueuedThreadMessage(message)));
-        })(),
-      );
+      const file = await getMessageFile(message.messageId);
+      if (!file.exists) {
+        file.create({ intermediates: true, overwrite: true });
+      }
+      file.write(JSON.stringify(encodeQueuedThreadMessage(message)));
     } catch (cause) {
       throw new ThreadOutboxStorageError({
         operation: "write",

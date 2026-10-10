@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * typically paired with `PutSecretValue` for rotation. Provide the
  * implementation with
  * `Effect.provide(AWS.SecretsManager.GetRandomPasswordHttp)`.
- * ### Generating Passwords
- * **Example:** Generate and Store a New Password
+ * @binding
+ * @section Generating Passwords
+ * @example Generate and Store a New Password
  * ```typescript
  * // init — account-level, no resource argument
  * const getRandomPassword = yield* AWS.SecretsManager.GetRandomPassword();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * yield* putSecretValue({ SecretString: generated.RandomPassword });
  * ```
- *
- * @binding
  */
 export interface GetRandomPassword extends Binding.Service<
   GetRandomPassword,

@@ -71,15 +71,16 @@ export interface ReferenceStore extends Resource<
  * ID unless you provide one. HealthOmics offers no update-store API, so any
  * change to `name`, `description`, or `sseConfig` replaces the store. A store
  * can only be deleted once it contains no reference genomes.
- * ### Creating a Reference Store
- * **Example:** Basic Reference Store
+ * @resource
+ * @section Creating a Reference Store
+ * @example Basic Reference Store
  * ```typescript
  * import * as Omics from "alchemy/AWS/Omics";
  *
  * const store = yield* Omics.ReferenceStore("References");
  * ```
  *
- * **Example:** Named Reference Store with Description
+ * @example Named Reference Store with Description
  * ```typescript
  * const store = yield* Omics.ReferenceStore("References", {
  *   name: "human-references",
@@ -87,8 +88,8 @@ export interface ReferenceStore extends Resource<
  * });
  * ```
  *
- * ### Encryption
- * **Example:** Customer-managed KMS key
+ * @section Encryption
+ * @example Customer-managed KMS key
  * ```typescript
  * const store = yield* Omics.ReferenceStore("References", {
  *   sseConfig: {
@@ -97,8 +98,6 @@ export interface ReferenceStore extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const ReferenceStore = Resource<ReferenceStore>(
   "AWS.Omics.ReferenceStore",

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * Lists the private hosted zones associated with a VPC — discovery for
  * compute that audits or wires up split-horizon DNS at runtime. Provide the
  * implementation with `Effect.provide(AWS.Route53.ListHostedZonesByVPCHttp)`.
- * ### Discovering Zones
- * **Example:** List a VPC's private zones
+ * @binding
+ * @section Discovering Zones
+ * @example List a VPC's private zones
  * ```typescript
  * const listByVpc = yield* AWS.Route53.ListHostedZonesByVPC();
  *
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   VPCRegion: "us-east-1",
  * });
  * ```
- *
- * @binding
  */
 export interface ListHostedZonesByVPC extends Binding.Service<
   ListHostedZonesByVPC,

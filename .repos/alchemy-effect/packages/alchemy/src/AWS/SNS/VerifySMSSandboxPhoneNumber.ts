@@ -11,8 +11,9 @@ export interface VerifySMSSandboxPhoneNumberRequest
  * An account-scoped operation — verifies a sandbox destination phone
  * number with the one-time password SNS texted to it.
  * Provide the `VerifySMSSandboxPhoneNumberHttp` layer on the Function to implement the binding.
- * ### SMS Sandbox
- * **Example:** Verify a Sandbox Number
+ * @binding
+ * @section SMS Sandbox
+ * @example Verify a Sandbox Number
  * ```typescript
  * const verifySandboxNumber = yield* SNS.VerifySMSSandboxPhoneNumber();
  * yield* verifySandboxNumber({
@@ -20,8 +21,6 @@ export interface VerifySMSSandboxPhoneNumberRequest
  *   OneTimePassword: "123456",
  * });
  * ```
- *
- * @binding
  */
 export interface VerifySMSSandboxPhoneNumber extends Binding.Service<
   VerifySMSSandboxPhoneNumber,

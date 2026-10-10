@@ -13,11 +13,12 @@ export interface PublishRequest extends iotdata.PublishRequest {}
  * for the data-plane `Publish` API. Provide the {@link PublishHttp} layer on
  * the Function.
  *
- * ### Publishing Messages
- * **Example:** Publish MQTT Messages from a Lambda
+ * @binding
+ * @section Publishing Messages
+ * @example Publish MQTT Messages from a Lambda
  * ```typescript
  * export default TelemetryFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     // grants iot:Publish on sensors/* to this function
  *     const publish = yield* AWS.IoT.Publish("sensors/*");
@@ -34,8 +35,6 @@ export interface PublishRequest extends iotdata.PublishRequest {}
  *   }).pipe(Effect.provide(AWS.IoT.PublishHttp)),
  * );
  * ```
- *
- * @binding
  */
 export interface Publish extends Binding.Service<
   Publish,

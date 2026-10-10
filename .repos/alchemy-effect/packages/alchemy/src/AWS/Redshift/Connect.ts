@@ -103,15 +103,16 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * `publiclyAccessible`). Provide the implementation with
  * `Effect.provide(AWS.Redshift.ConnectHttp)`.
  *
- * ### Connecting to a Cluster
- * **Example:** Resolve Connection Info inside a Function (IAM identity)
+ * @binding
+ * @section Connecting to a Cluster
+ * @example Resolve Connection Info inside a Function (IAM identity)
  * ```typescript
  * const connect = yield* Redshift.Connect(cluster);
  * // inside a handler — mints fresh temporary credentials:
  * const { host, port, username, password, url } = yield* connect;
  * ```
  *
- * **Example:** Connect as a Named Database User
+ * @example Connect as a Named Database User
  * ```typescript
  * const connect = yield* Redshift.Connect(cluster, {
  *   dbUser: "etl",
@@ -121,7 +122,7 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * });
  * ```
  *
- * **Example:** Drizzle over the Connection URL
+ * @example Drizzle over the Connection URL
  * ```typescript
  * const connect = yield* Redshift.Connect(cluster);
  * const db = yield* Drizzle.Postgres(
@@ -129,8 +130,6 @@ export const connectEnvPrefix = (logicalId: string): string =>
  *   { prepare: false },
  * );
  * ```
- *
- * @binding
  */
 export interface Connect extends Binding.Service<
   Connect,

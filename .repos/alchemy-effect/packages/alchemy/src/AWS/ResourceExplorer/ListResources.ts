@@ -17,8 +17,9 @@ export interface ListResourcesRequest extends Omit<
  * view exposes and act on each one. The view's ARN is injected from the
  * binding. Provide the implementation with
  * `Effect.provide(AWS.ResourceExplorer.ListResourcesHttp)`.
- * ### Listing Resources
- * **Example:** List Resources Through a View
+ * @binding
+ * @section Listing Resources
+ * @example List Resources Through a View
  * ```typescript
  * // init — bind the operation to the view
  * const listResources = yield* AWS.ResourceExplorer.ListResources(view);
@@ -32,8 +33,6 @@ export interface ListResourcesRequest extends Omit<
  *   yield* Effect.log(`${resource.ResourceType}: ${resource.Arn}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListResources extends Binding.Service<
   ListResources,

@@ -9,8 +9,8 @@ import * as Option from "effect/Option";
 import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import * as Stream from "effect/Stream";
-import { Command, Flag } from "effect/cli";
-import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { Command, Flag } from "effect/unstable/cli";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 import { fromYaml } from "@t3tools/shared/schemaYaml";
 
 import { referenceRepos, type ReferenceRepo } from "./lib/reference-repos.ts";
@@ -31,7 +31,7 @@ export interface ReferenceRepoSyncPlan {
   readonly args: ReadonlyArray<string>;
 }
 
-export class ReferenceRepoSelectionError extends Schema.TaggedError<ReferenceRepoSelectionError>()(
+export class ReferenceRepoSelectionError extends Schema.TaggedErrorClass<ReferenceRepoSelectionError>()(
   "ReferenceRepoSelectionError",
   {
     repoId: Schema.String,
@@ -43,7 +43,7 @@ export class ReferenceRepoSelectionError extends Schema.TaggedError<ReferenceRep
   }
 }
 
-export class ReferenceRepoVersionSourceError extends Schema.TaggedError<ReferenceRepoVersionSourceError>()(
+export class ReferenceRepoVersionSourceError extends Schema.TaggedErrorClass<ReferenceRepoVersionSourceError>()(
   "ReferenceRepoVersionSourceError",
   {
     operation: Schema.Literals(["read", "parse"]),
@@ -57,7 +57,7 @@ export class ReferenceRepoVersionSourceError extends Schema.TaggedError<Referenc
   }
 }
 
-export class ReferenceRepoVersionResolutionError extends Schema.TaggedError<ReferenceRepoVersionResolutionError>()(
+export class ReferenceRepoVersionResolutionError extends Schema.TaggedErrorClass<ReferenceRepoVersionResolutionError>()(
   "ReferenceRepoVersionResolutionError",
   {
     repoId: Schema.String,
@@ -70,7 +70,7 @@ export class ReferenceRepoVersionResolutionError extends Schema.TaggedError<Refe
   }
 }
 
-export class ReferenceRepoGitSubtreeError extends Schema.TaggedError<ReferenceRepoGitSubtreeError>()(
+export class ReferenceRepoGitSubtreeError extends Schema.TaggedErrorClass<ReferenceRepoGitSubtreeError>()(
   "ReferenceRepoGitSubtreeError",
   {
     operation: Schema.Literals(["spawn", "communicate", "exit"]),
@@ -91,11 +91,14 @@ export class ReferenceRepoGitSubtreeError extends Schema.TaggedError<ReferenceRe
   }
 }
 
-export type ReferenceRepoSyncError =
-  | ReferenceRepoSelectionError
-  | ReferenceRepoVersionSourceError
-  | ReferenceRepoVersionResolutionError
-  | ReferenceRepoGitSubtreeError;
+export const ReferenceRepoSyncError = Schema.Union([
+  ReferenceRepoSelectionError,
+  ReferenceRepoVersionSourceError,
+  ReferenceRepoVersionResolutionError,
+  ReferenceRepoGitSubtreeError,
+]);
+export type ReferenceRepoSyncError = typeof ReferenceRepoSyncError.Type;
+export const isReferenceRepoSyncError = Schema.is(ReferenceRepoSyncError);
 
 const decodeJsonSource = Schema.decodeUnknownEffect(Schema.fromJsonString(Schema.Unknown));
 const decodeYamlSource = Schema.decodeEffect(fromYaml(Schema.Unknown));
@@ -293,21 +296,21 @@ export const syncReferenceRepos = Effect.fn("syncReferenceRepos")(function* (
 export const syncReferenceReposCommand = Command.make(
   "sync-reference-repos",
   {
-    repo: Flag.String("repo").pipe(
+    repo: Flag.string("repo").pipe(
       Flag.withDescription("Sync only the named reference repo. Defaults to all configured repos."),
       Flag.optional,
     ),
-    latest: Flag.Boolean("latest").pipe(
+    latest: Flag.boolean("latest").pipe(
       Flag.withDescription(
         "Sync each repo from its latest branch instead of the installed version.",
       ),
       Flag.withDefault(false),
     ),
-    root: Flag.String("root").pipe(
+    root: Flag.string("root").pipe(
       Flag.withDescription("Workspace root used to resolve versions and subtree prefixes."),
       Flag.optional,
     ),
-    dryRun: Flag.Boolean("dry-run").pipe(
+    dryRun: Flag.boolean("dry-run").pipe(
       Flag.withDescription("Print planned subtree operations without running git."),
       Flag.withDefault(false),
     ),

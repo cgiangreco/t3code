@@ -23,8 +23,9 @@ export interface GetWhatsAppFlowRequest extends Omit<
  * into every request.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.GetWhatsAppFlowHttp)`.
- * ### Managing WhatsApp Flows
- * **Example:** Read a Flow
+ * @binding
+ * @section Managing WhatsApp Flows
+ * @example Read a Flow
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const getFlow = yield* AWS.SocialMessaging.GetWhatsAppFlow(account);
@@ -33,8 +34,6 @@ export interface GetWhatsAppFlowRequest extends Omit<
  * const flow = yield* getFlow({ flowId: "1234567890" });
  * const publishable = flow.validationErrors?.length === 0;
  * ```
- *
- * @binding
  */
 export interface GetWhatsAppFlow extends Binding.Service<
   GetWhatsAppFlow,

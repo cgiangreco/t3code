@@ -1,36 +1,21 @@
 import { assert, describe, it } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessPlatform } from "@t3tools/shared/hostProcess";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { beforeEach, vi } from "vite-plus/test";
 
-const {
-  appendSwitchMock,
-  getSwitchValueMock,
-  hasSwitchMock,
-  registerSchemesMock,
-  setDesktopNameMock,
-  mkdirSyncMock,
-  writeFileSyncMock,
-  copyFileSyncMock,
-} = vi.hoisted(() => ({
-  appendSwitchMock: vi.fn(),
-  getSwitchValueMock: vi.fn(),
-  hasSwitchMock: vi.fn(),
-  registerSchemesMock: vi.fn(),
-  setDesktopNameMock: vi.fn(),
-  mkdirSyncMock: vi.fn(),
-  writeFileSyncMock: vi.fn(),
-  copyFileSyncMock: vi.fn(),
-}));
+const { appendSwitchMock, getSwitchValueMock, hasSwitchMock, registerSchemesMock } = vi.hoisted(
+  () => ({
+    appendSwitchMock: vi.fn(),
+    getSwitchValueMock: vi.fn(),
+    hasSwitchMock: vi.fn(),
+    registerSchemesMock: vi.fn(),
+  }),
+);
 
 vi.mock("electron", () => ({
   app: {
-    setDesktopName: setDesktopNameMock,
-    getVersion: () => "0.0.37",
-    isPackaged: true,
-    getAppPath: () => "/tmp/.mount_T3/resources/app.asar",
     commandLine: {
       appendSwitch: appendSwitchMock,
       getSwitchValue: getSwitchValueMock,
@@ -42,13 +27,6 @@ vi.mock("electron", () => ({
   },
 }));
 
-vi.mock("node:fs", () => ({
-  readFileSync: () => "{}",
-  mkdirSync: mkdirSyncMock,
-  writeFileSync: writeFileSyncMock,
-  copyFileSync: copyFileSyncMock,
-}));
-
 import * as DesktopPreReadyPlatform from "./DesktopPreReadyPlatform.ts";
 
 describe("DesktopPreReadyPlatform", () => {
@@ -57,101 +35,47 @@ describe("DesktopPreReadyPlatform", () => {
     getSwitchValueMock.mockReset();
     hasSwitchMock.mockReset();
     registerSchemesMock.mockReset();
-    setDesktopNameMock.mockReset();
-    mkdirSyncMock.mockReset();
-    writeFileSyncMock.mockReset();
-    copyFileSyncMock.mockReset();
   });
 
-  it.effect("preserves an explicit Linux password-store switch", () => {
-    hasSwitchMock.mockImplementation((switchName) => switchName === "password-store");
-    getSwitchValueMock.mockReturnValue(" basic ");
-
-    return Effect.gen(function* () {
-      const options = yield* DesktopPreReadyPlatform.DesktopPreReadyElectronOptions;
-
-      assert.equal(options.linuxPasswordStoreCommandLine, "basic");
-      assert.isFalse(appendSwitchMock.mock.calls.some(([name]) => name === "password-store"));
-    }).pipe(
-      Effect.provide(
-        DesktopPreReadyPlatform.layer.pipe(
-          Layer.provide(Layer.succeed(HostProcess.Platform, "linux")),
-        ),
-      ),
+  it("reads an explicit Electron command-line switch value", () => {
+    const value = DesktopPreReadyPlatform.readCommandLineSwitchValue(
+      {
+        hasSwitch: (switchName) => switchName === "password-store",
+        getSwitchValue: (switchName) => {
+          assert.equal(switchName, "password-store");
+          return "basic";
+        },
+      },
+      "password-store",
     );
+
+    assert.equal(value, "basic");
   });
 
-  it.effect.each([
-    { previousEntry: undefined, label: "missing" },
-    { previousEntry: 'Exec="/Applications/deleted-previous.AppImage" %U', label: "stale" },
-  ])("prepares a $label Linux desktop entry before startup yields", ({ previousEntry }) => {
-    vi.stubEnv("VITE_DEV_SERVER_URL", "");
-    vi.stubEnv("XDG_DATA_HOME", "/xdg");
-    vi.stubEnv("APPIMAGE", "/Applications/current.AppImage");
-    getSwitchValueMock.mockReturnValue("");
-    let desktopName = "t3code.desktop";
-    let desktopEntry = previousEntry;
-    let iconInstalled = false;
-    copyFileSyncMock.mockImplementation((_source: string, destination: string) => {
-      iconInstalled = destination === "/xdg/icons/com.t3tools.T3Code.desktop.png";
-    });
-    setDesktopNameMock.mockImplementation((name: string) => {
-      desktopName = name;
-    });
-    writeFileSyncMock.mockImplementation((path: string, contents: string) => {
-      if (path === "/xdg/applications/com.t3tools.T3Code.desktop") desktopEntry = contents;
-    });
-
-    return Effect.scoped(
-      Effect.gen(function* () {
-        const portalIdentity = Promise.resolve().then(() => ({
-          desktopName,
-          desktopEntry,
-          iconInstalled,
-        }));
-        yield* Layer.build(
-          DesktopPreReadyPlatform.layer.pipe(
-            Layer.provide(Layer.succeed(HostProcess.Platform, "linux")),
-          ),
-        );
-        const identity = yield* Effect.promise(() => portalIdentity);
-        assert.equal(identity.desktopName, "com.t3tools.T3Code.desktop");
-        assert.include(identity.desktopEntry ?? "", 'Exec="/Applications/current.AppImage" %U');
-        assert.include(identity.desktopEntry ?? "", "Name=T3 Code (Alpha)");
-        assert.include(identity.desktopEntry ?? "", "MimeType=x-scheme-handler/t3code;");
-        assert.include(
-          identity.desktopEntry ?? "",
-          "Icon=/xdg/icons/com.t3tools.T3Code.desktop.png",
-        );
-        assert.isTrue(identity.iconInstalled);
-      }),
-    ).pipe(Effect.ensuring(Effect.sync(() => vi.unstubAllEnvs())));
-  });
-
-  it.effect("keeps startup available when the early desktop entry cannot be written", () => {
-    getSwitchValueMock.mockReturnValue("");
-    mkdirSyncMock.mockImplementation(() => {
-      throw new Error("read-only filesystem");
-    });
-
-    return DesktopPreReadyPlatform.make.pipe(
-      Effect.provideService(HostProcess.Platform, "linux"),
-      Effect.asVoid,
+  it("treats valueless Electron command-line switches as absent", () => {
+    const value = DesktopPreReadyPlatform.readCommandLineSwitchValue(
+      {
+        hasSwitch: () => true,
+        getSwitchValue: () => "",
+      },
+      "password-store",
     );
+
+    assert.isNull(value);
   });
 
-  it.effect("still prepares the portal entry when the bundled icon cannot be copied", () => {
-    getSwitchValueMock.mockReturnValue("");
-    copyFileSyncMock.mockImplementation(() => {
-      throw new Error("missing bundled icon");
-    });
-    return Effect.gen(function* () {
-      yield* DesktopPreReadyPlatform.make;
-      const contents = writeFileSyncMock.mock.calls[0]?.[1];
-      assert.include(contents, "MimeType=x-scheme-handler/t3code;");
-      assert.include(contents, "Icon=");
-      assert.equal(setDesktopNameMock.mock.calls.length, 1);
-    }).pipe(Effect.provideService(HostProcess.Platform, "linux"));
+  it("returns null for missing Electron command-line switches", () => {
+    const value = DesktopPreReadyPlatform.readCommandLineSwitchValue(
+      {
+        hasSwitch: () => false,
+        getSwitchValue: () => {
+          throw new Error("Unexpected switch value read.");
+        },
+      },
+      "password-store",
+    );
+
+    assert.isNull(value);
   });
 
   it.effect(
@@ -167,11 +91,11 @@ describe("DesktopPreReadyPlatform", () => {
           events.push("pre-ready");
         });
 
-        const layerPreReady = DesktopPreReadyPlatform.layer.pipe(
-          Layer.provide(Layer.succeed(HostProcess.Platform, "darwin")),
+        const preReadyLayer = DesktopPreReadyPlatform.layer.pipe(
+          Layer.provide(Layer.succeed(HostProcessPlatform, "darwin")),
         );
 
-        const layerClerkShaped = Layer.effect(
+        const clerkShapedLayer = Layer.effect(
           ClerkShaped,
           Effect.promise(() => Promise.resolve()).pipe(
             Effect.map(() => {
@@ -181,15 +105,15 @@ describe("DesktopPreReadyPlatform", () => {
           ),
         );
 
-        const layerRuntime = layerClerkShaped.pipe(
+        const runtimeLayer = clerkShapedLayer.pipe(
           Layer.flatMap((clerkContext) => Layer.succeedContext(clerkContext)),
-          Layer.provideMerge(layerPreReady),
+          Layer.provideMerge(preReadyLayer),
         );
 
         const result = yield* Effect.all({
           clerk: ClerkShaped,
           preReady: DesktopPreReadyPlatform.DesktopPreReadyElectronOptions,
-        }).pipe(Effect.provide(layerRuntime));
+        }).pipe(Effect.provide(runtimeLayer));
 
         assert.deepEqual(result, {
           clerk: { ready: true },
@@ -201,7 +125,6 @@ describe("DesktopPreReadyPlatform", () => {
         assert.deepEqual(events, ["pre-ready", "clerk"]);
         assert.equal(registerSchemesMock.mock.calls.length, 1);
         assert.equal(appendSwitchMock.mock.calls.length, 0);
-        assert.equal(setDesktopNameMock.mock.calls.length, 0);
       }),
   );
 });

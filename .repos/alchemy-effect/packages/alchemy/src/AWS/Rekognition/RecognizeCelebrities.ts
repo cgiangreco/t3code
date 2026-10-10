@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.RecognizeCelebritiesHttp)`.
  *
- * ### Image Analysis
- * **Example:** Recognize Celebrities in a Photo
+ * @binding
+ * @section Image Analysis
+ * @example Recognize Celebrities in a Photo
  * ```typescript
  * // init
  * const recognizeCelebrities = yield* AWS.Rekognition.RecognizeCelebrities();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const names = (result.CelebrityFaces ?? []).map((c) => c.Name);
  * ```
- *
- * @binding
  */
 export interface RecognizeCelebrities extends Binding.Service<
   RecognizeCelebrities,

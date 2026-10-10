@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * supplies the core device thing name at runtime. Provide the implementation
  * with
  * `Effect.provide(AWS.GreengrassV2.ListClientDevicesAssociatedWithCoreDeviceHttp)`.
- * ### Managing Client Devices
- * **Example:** List A Core's Client Devices
+ * @binding
+ * @section Managing Client Devices
+ * @example List A Core's Client Devices
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listClientDevices =
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   coreDeviceThingName: "MyCore",
  * });
  * ```
- *
- * @binding
  */
 export interface ListClientDevicesAssociatedWithCoreDevice extends Binding.Service<
   ListClientDevicesAssociatedWithCoreDevice,

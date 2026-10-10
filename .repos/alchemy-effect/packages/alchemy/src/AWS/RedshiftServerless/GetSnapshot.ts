@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Reads one snapshot by name or ARN — e.g. polling a snapshot taken with
  * {@link CreateSnapshot} until its `status` reaches `AVAILABLE`. Provide the implementation with
  * `Effect.provide(AWS.RedshiftServerless.GetSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Poll a Snapshot Until Available
+ * @binding
+ * @section Managing Snapshots
+ * @example Poll a Snapshot Until Available
  * ```typescript
  * // init — resolve the runtime client
  * const getSnapshot = yield* AWS.RedshiftServerless.GetSnapshot();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const { snapshot } = yield* getSnapshot({ snapshotName: "pre-migration-1" });
  * // snapshot?.status -> "CREATING" | "AVAILABLE" | ...
  * ```
- *
- * @binding
  */
 export interface GetSnapshot extends Binding.Service<
   GetSnapshot,

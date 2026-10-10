@@ -35,8 +35,9 @@ export interface StartDICOMImportJobRequest extends Omit<
  * implementation with
  * `Effect.provide(AWS.MedicalImaging.StartDICOMImportJobHttp)`.
  *
- * ### Importing DICOM Data
- * **Example:** Start a Bulk DICOM Import Job
+ * @binding
+ * @section Importing DICOM Data
+ * @example Start a Bulk DICOM Import Job
  * ```typescript
  * // deploy time — bind the data store and the HealthImaging data-access role
  * const startImport = yield* MedicalImaging.StartDICOMImportJob(datastore, dataAccessRole);
@@ -49,8 +50,6 @@ export interface StartDICOMImportJobRequest extends Omit<
  * });
  * // job.jobId, job.jobStatus === "SUBMITTED"
  * ```
- *
- * @binding
  */
 export interface StartDICOMImportJob extends Binding.Service<
   StartDICOMImportJob,

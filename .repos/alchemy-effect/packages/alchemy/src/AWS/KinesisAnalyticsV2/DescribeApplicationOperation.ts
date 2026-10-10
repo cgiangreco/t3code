@@ -13,8 +13,9 @@ export interface DescribeApplicationOperationRequest extends Omit<
  * reads the status of an async operation on the bound application (the
  * `OperationId` returned by start/stop/rollback/update), e.g. to poll a
  * start to completion.
- * ### Operating the Application
- * **Example:** Poll an operation to completion
+ * @binding
+ * @section Operating the Application
+ * @example Poll an operation to completion
  * ```typescript
  * const describeOperation = yield* AWS.KinesisAnalyticsV2.DescribeApplicationOperation(app);
  *
@@ -22,8 +23,6 @@ export interface DescribeApplicationOperationRequest extends Omit<
  *   OperationId: operationId,
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeApplicationOperation extends Binding.Service<
   DescribeApplicationOperation,

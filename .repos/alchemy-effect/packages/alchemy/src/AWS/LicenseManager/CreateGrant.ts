@@ -16,8 +16,9 @@ export interface CreateGrantRequest extends licensemanager.CreateGrantRequest {}
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.CreateGrantHttp)`.
- * ### Managing Grants
- * **Example:** Grant a License to a Customer Account
+ * @binding
+ * @section Managing Grants
+ * @example Grant a License to a Customer Account
  * ```typescript
  * // init
  * const createGrant = yield* AWS.LicenseManager.CreateGrant();
@@ -32,8 +33,6 @@ export interface CreateGrantRequest extends licensemanager.CreateGrantRequest {}
  *   ClientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface CreateGrant extends Binding.Service<
   CreateGrant,

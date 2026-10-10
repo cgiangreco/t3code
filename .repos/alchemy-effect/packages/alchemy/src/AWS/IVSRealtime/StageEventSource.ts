@@ -76,8 +76,8 @@ export interface StageEventSourceProps extends EventRouteProps {
  * host-specific implementation layer (e.g. `AWS.Lambda.EventSource`) on the
  * Function effect.
  *
- * ### Consuming Stage Events
- * **Example:** React to participants joining
+ * @section Consuming Stage Events
+ * @example React to participants joining
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

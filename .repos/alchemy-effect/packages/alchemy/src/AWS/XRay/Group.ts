@@ -67,8 +67,9 @@ export interface Group extends Resource<
 /**
  * An AWS X-Ray group that collects traces matching a filter expression, for
  * focused service maps, analytics, and insights.
- * ### Creating Groups
- * **Example:** Group traces for one service
+ * @resource
+ * @section Creating Groups
+ * @example Group traces for one service
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -77,7 +78,7 @@ export interface Group extends Resource<
  * });
  * ```
  *
- * **Example:** Group slow requests with insights enabled
+ * @example Group slow requests with insights enabled
  * ```typescript
  * const group = yield* XRay.Group("SlowRequests", {
  *   filterExpression: "responsetime > 2",
@@ -85,8 +86,6 @@ export interface Group extends Resource<
  *   notificationsEnabled: true,
  * });
  * ```
- *
- * @resource
  */
 export const Group = Resource<Group>("AWS.XRay.Group");
 

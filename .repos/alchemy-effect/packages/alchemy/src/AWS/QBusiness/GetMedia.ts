@@ -20,15 +20,14 @@ export interface GetMediaRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.GetMediaHttp)`.
  *
- * ### Conversations
- * **Example:** Fetch Message Media
+ * @binding
+ * @section Conversations
+ * @example Fetch Message Media
  * ```typescript
  * const getMedia = yield* AWS.QBusiness.GetMedia(app);
  *
  * const media = yield* getMedia({ conversationId, messageId, mediaId });
  * ```
- *
- * @binding
  */
 export interface GetMedia extends Binding.Service<
   GetMedia,

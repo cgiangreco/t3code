@@ -17,8 +17,9 @@ export interface PutPackageOriginConfigurationRequest extends Omit<
  *
  * Sets a package's origin controls — whether new versions can be published directly and whether versions can be ingested from upstream/external sources. Provide the implementation with
  * `Effect.provide(AWS.CodeArtifact.PutPackageOriginConfigurationHttp)`.
- * ### Managing Package Origins
- * **Example:** Block Upstream Ingestion
+ * @binding
+ * @section Managing Package Origins
+ * @example Block Upstream Ingestion
  * ```typescript
  * const putOrigin = yield* AWS.CodeArtifact.PutPackageOriginConfiguration(repo);
  *
@@ -30,8 +31,6 @@ export interface PutPackageOriginConfigurationRequest extends Omit<
  * });
  * console.log(res.originConfiguration?.restrictions);
  * ```
- *
- * @binding
  */
 export interface PutPackageOriginConfiguration extends Binding.Service<
   PutPackageOriginConfiguration,

@@ -124,8 +124,9 @@ export interface Studio extends Resource<
  * A Studio itself is free; you pay for the clusters it attaches to. Each
  * Studio needs a VPC with subnets, a workspace and an engine security group,
  * an IAM service role, and an S3 backup location.
- * ### Creating a Studio
- * **Example:** IAM-Authenticated Studio
+ * @resource
+ * @section Creating a Studio
+ * @example IAM-Authenticated Studio
  * ```typescript
  * const studio = yield* Studio("Notebooks", {
  *   authMode: "IAM",
@@ -138,7 +139,7 @@ export interface Studio extends Resource<
  * });
  * ```
  *
- * **Example:** Studio with Description and Tags
+ * @example Studio with Description and Tags
  * ```typescript
  * const studio = yield* Studio("Notebooks", {
  *   authMode: "IAM",
@@ -152,8 +153,6 @@ export interface Studio extends Resource<
  *   tags: { team: "analytics" },
  * });
  * ```
- *
- * @resource
  */
 export const Studio = Resource<Studio>("AWS.EMR.Studio");
 

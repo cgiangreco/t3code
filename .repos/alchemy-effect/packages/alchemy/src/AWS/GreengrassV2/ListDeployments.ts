@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * thing/thing group or to the latest revision per target — a fleet-wide view
  * of what is rolling out where. Provide the implementation with
  * `Effect.provide(AWS.GreengrassV2.ListDeploymentsHttp)`.
- * ### Monitoring Deployments
- * **Example:** List The Latest Deployment Per Target
+ * @binding
+ * @section Monitoring Deployments
+ * @example List The Latest Deployment Per Target
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listDeployments = yield* AWS.GreengrassV2.ListDeployments();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   historyFilter: "LATEST_ONLY",
  * });
  * ```
- *
- * @binding
  */
 export interface ListDeployments extends Binding.Service<
   ListDeployments,

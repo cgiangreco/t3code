@@ -20,8 +20,9 @@ export interface UpdateAccessControlConfigurationRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.UpdateAccessControlConfigurationHttp)`.
  *
- * ### Access Control Configurations
- * **Example:** Update a Runtime ACL
+ * @binding
+ * @section Access Control Configurations
+ * @example Update a Runtime ACL
  * ```typescript
  * const updateAcl =
  *   yield* AWS.Kendra.UpdateAccessControlConfiguration(index);
@@ -31,8 +32,6 @@ export interface UpdateAccessControlConfigurationRequest extends Omit<
  *   AccessControlList: [{ Name: "sam", Type: "USER", Access: "ALLOW" }],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateAccessControlConfiguration extends Binding.Service<
   UpdateAccessControlConfiguration,

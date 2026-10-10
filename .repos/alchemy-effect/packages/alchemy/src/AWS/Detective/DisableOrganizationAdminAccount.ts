@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * only from the organization management account.
  * Provide the implementation with
  * `Effect.provide(AWS.Detective.DisableOrganizationAdminAccountHttp)`.
- * ### Organization Administration
- * **Example:** Revoke The Delegated Administrator
+ * @binding
+ * @section Organization Administration
+ * @example Revoke The Delegated Administrator
  * ```typescript
  * // init — account-level binding, no resource argument
  * const disableOrganizationAdminAccount =
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* disableOrganizationAdminAccount();
  * ```
- *
- * @binding
  */
 export interface DisableOrganizationAdminAccount extends Binding.Service<
   DisableOrganizationAdminAccount,

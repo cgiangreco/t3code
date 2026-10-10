@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.ListCoverageStatisticsHttp)`.
- * ### Coverage & Vulnerability Intel
- * **Example:** Coverage Statistics by Resource Type
+ * @binding
+ * @section Coverage & Vulnerability Intel
+ * @example Coverage Statistics by Resource Type
  * ```typescript
  * // init
  * const listCoverageStatistics = yield* AWS.Inspector2.ListCoverageStatistics();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { countsByGroup, totalCounts } = yield* listCoverageStatistics({ groupBy: "RESOURCE_TYPE" });
  * ```
- *
- * @binding
  */
 export interface ListCoverageStatistics extends Binding.Service<
   ListCoverageStatistics,

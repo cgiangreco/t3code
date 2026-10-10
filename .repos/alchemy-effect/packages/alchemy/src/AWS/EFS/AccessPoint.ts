@@ -88,8 +88,9 @@ export interface AccessPoint extends Resource<
  * pass `accessPoint.accessPointArn` to a Lambda Function's
  * `fileSystemConfigs`. The POSIX user and root directory are immutable —
  * changing them replaces the access point.
- * ### Creating Access Points
- * **Example:** Access point with a POSIX identity and auto-created root
+ * @resource
+ * @section Creating Access Points
+ * @example Access point with a POSIX identity and auto-created root
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -104,8 +105,8 @@ export interface AccessPoint extends Resource<
  * });
  * ```
  *
- * ### Mounting into Lambda
- * **Example:** Mount at /mnt/files
+ * @section Mounting into Lambda
+ * @example Mount at /mnt/files
  * ```typescript
  * const fn = yield* AWS.Lambda.Function("Api", {
  *   main: "./src/handler.ts",
@@ -115,8 +116,6 @@ export interface AccessPoint extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const AccessPoint = Resource<AccessPoint>("AWS.EFS.AccessPoint");
 

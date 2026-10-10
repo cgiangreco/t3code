@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.ECRPublic.GetRegistryCatalogDataHttp)`.
  *
- * ### Registry Access
- * **Example:** Read The Registry Display Name
+ * @binding
+ * @section Registry Access
+ * @example Read The Registry Display Name
  * ```typescript
  * // init — registry-level binding takes no resource
  * const getRegistryCatalogData = yield* AWS.ECRPublic.GetRegistryCatalogData();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* getRegistryCatalogData();
  * const displayName = result.registryCatalogData.displayName;
  * ```
- *
- * @binding
  */
 export interface GetRegistryCatalogData extends Binding.Service<
   GetRegistryCatalogData,

@@ -121,23 +121,24 @@ export interface TrustAnchor extends Resource<
  * uploaded PEM CA certificate bundle or a reference to an AWS Private CA.
  * Workloads outside AWS authenticate with certificates issued by the CA in
  * exchange for temporary AWS credentials.
- * ### Creating a Trust Anchor
- * **Example:** Certificate Bundle Trust Anchor
+ * @resource
+ * @section Creating a Trust Anchor
+ * @example Certificate Bundle Trust Anchor
  * ```typescript
  * const anchor = yield* RolesAnywhere.TrustAnchor("Anchor", {
  *   certificateBundle: CA_CERTIFICATE_PEM,
  * });
  * ```
  *
- * **Example:** AWS Private CA Trust Anchor
+ * @example AWS Private CA Trust Anchor
  * ```typescript
  * const anchor = yield* RolesAnywhere.TrustAnchor("Anchor", {
  *   acmPcaArn: privateCa.certificateAuthorityArn,
  * });
  * ```
  *
- * ### Disabling a Trust Anchor
- * **Example:** Disabled Trust Anchor
+ * @section Disabling a Trust Anchor
+ * @example Disabled Trust Anchor
  * ```typescript
  * const anchor = yield* RolesAnywhere.TrustAnchor("Anchor", {
  *   certificateBundle: CA_CERTIFICATE_PEM,
@@ -145,8 +146,8 @@ export interface TrustAnchor extends Resource<
  * });
  * ```
  *
- * ### Expiry Notifications
- * **Example:** Custom Notification Threshold
+ * @section Expiry Notifications
+ * @example Custom Notification Threshold
  * ```typescript
  * const anchor = yield* RolesAnywhere.TrustAnchor("Anchor", {
  *   certificateBundle: CA_CERTIFICATE_PEM,
@@ -155,8 +156,6 @@ export interface TrustAnchor extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const TrustAnchor = Resource<TrustAnchor>(
   "AWS.RolesAnywhere.TrustAnchor",

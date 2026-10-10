@@ -6,8 +6,9 @@ import type { ReportGroup } from "./ReportGroup.ts";
 /**
  * Runtime binding for `codebuild:DescribeTestCases` — reads the individual
  * test cases of a test report in the bound report group.
- * ### Reading Reports
- * **Example:** Read Failed Test Cases
+ * @binding
+ * @section Reading Reports
+ * @example Read Failed Test Cases
  * ```typescript
  * const describeTestCases = yield* AWS.CodeBuild.DescribeTestCases(reportGroup);
  *
@@ -16,8 +17,6 @@ import type { ReportGroup } from "./ReportGroup.ts";
  *   filter: { status: "FAILED" },
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeTestCases extends Binding.Service<
   DescribeTestCases,

@@ -43,8 +43,9 @@ const sanitizePathKey = (path: string, httpMethod: string) =>
  * `RestApiBinding` on the API so any `Deployment` of the same API is
  * ordered after them. At runtime it dispatches matching REST proxy events
  * to the registered handler.
- * ### Handling REST API routes
- * **Example:** JSON endpoint
+ * @binding
+ * @section Handling REST API routes
+ * @example JSON endpoint
  * ```typescript
  * yield* AWS.ApiGateway.onRestApiRoute(
  *   api,
@@ -56,8 +57,6 @@ const sanitizePathKey = (path: string, httpMethod: string) =>
  *     }),
  * );
  * ```
- *
- * @binding
  */
 export const RestApiEventSource = Layer.effect(
   AGRestApiEventSource,

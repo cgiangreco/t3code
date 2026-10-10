@@ -10,8 +10,9 @@ import type { Registry } from "./Registry.ts";
  * schema names and content — so a function can discover event contracts at
  * runtime. The registry name is injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Schemas.SearchSchemasHttp)`.
- * ### Searching a Registry
- * **Example:** Find Schemas By Keyword
+ * @binding
+ * @section Searching a Registry
+ * @example Find Schemas By Keyword
  * ```typescript
  * // init — bind the operation to the registry
  * const searchSchemas = yield* AWS.Schemas.SearchSchemas(registry);
@@ -20,8 +21,6 @@ import type { Registry } from "./Registry.ts";
  * const { Schemas } = yield* searchSchemas({ Keywords: "order" });
  * const names = (Schemas ?? []).map((s) => s.SchemaName);
  * ```
- *
- * @binding
  */
 export interface SearchSchemas extends Binding.Service<
   SearchSchemas,

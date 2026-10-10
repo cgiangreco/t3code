@@ -16,8 +16,9 @@ export interface BatchGetPartitionRequest extends Omit<
  * resolve come back in `UnprocessedKeys`. The database/table names and
  * catalog id are injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.BatchGetPartitionHttp)`.
- * ### Managing Partitions
- * **Example:** Bulk-Read Partitions
+ * @binding
+ * @section Managing Partitions
+ * @example Bulk-Read Partitions
  * ```typescript
  * // init
  * const batchGetPartition = yield* AWS.Glue.BatchGetPartition(table);
@@ -27,8 +28,6 @@ export interface BatchGetPartitionRequest extends Omit<
  *   PartitionsToGet: [{ Values: ["2026-01-01"] }, { Values: ["2026-01-02"] }],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchGetPartition extends Binding.Service<
   BatchGetPartition,

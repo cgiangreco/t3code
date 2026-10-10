@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — Organizations is a management-account-scoped
  * global service, so the binding takes no resource argument. Provide the
  * implementation with `Effect.provide(AWS.Organizations.InviteAccountToOrganizationHttp)`.
- * ### Handshakes & Invitations
- * **Example:** Invite an Account
+ * @binding
+ * @section Handshakes & Invitations
+ * @example Invite an Account
  * ```typescript
  * // init — account-level binding, no resource argument
  * const inviteAccountToOrganization = yield* AWS.Organizations.InviteAccountToOrganization();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   Target: { Id: "111122223333", Type: "ACCOUNT" },
  * });
  * ```
- *
- * @binding
  */
 export interface InviteAccountToOrganization extends Binding.Service<
   InviteAccountToOrganization,

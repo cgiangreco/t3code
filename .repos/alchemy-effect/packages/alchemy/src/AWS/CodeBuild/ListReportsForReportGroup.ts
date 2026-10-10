@@ -6,15 +6,14 @@ import type { ReportGroup } from "./ReportGroup.ts";
 /**
  * Runtime binding for `codebuild:ListReportsForReportGroup` — lists the
  * bound report group's report ARNs, newest first.
- * ### Reading Reports
- * **Example:** List Reports in the Group
+ * @binding
+ * @section Reading Reports
+ * @example List Reports in the Group
  * ```typescript
  * const listReports = yield* AWS.CodeBuild.ListReportsForReportGroup(reportGroup);
  *
  * const { reports } = yield* listReports();
  * ```
- *
- * @binding
  */
 export interface ListReportsForReportGroup extends Binding.Service<
   ListReportsForReportGroup,

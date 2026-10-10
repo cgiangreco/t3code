@@ -19,15 +19,14 @@ export interface GetPrefetchScheduleRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.MediaTailor.GetPrefetchScheduleHttp)`.
  *
- * ### Prefetching Ads
- * **Example:** Read a prefetch schedule
+ * @binding
+ * @section Prefetching Ads
+ * @example Read a prefetch schedule
  * ```typescript
  * const getPrefetchSchedule = yield* AWS.MediaTailor.GetPrefetchSchedule(config);
  *
  * const schedule = yield* getPrefetchSchedule({ Name: `event-${eventId}` });
  * ```
- *
- * @binding
  */
 export interface GetPrefetchSchedule extends Binding.Service<
   GetPrefetchSchedule,

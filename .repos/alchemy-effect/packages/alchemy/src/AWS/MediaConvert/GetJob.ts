@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * and grants `mediaconvert:GetJob` on `*`. Provide the implementation with
  * `Effect.provide(AWS.MediaConvert.GetJobHttp)`.
  *
- * ### Tracking Jobs
- * **Example:** Poll a Job's Status
+ * @binding
+ * @section Tracking Jobs
+ * @example Poll a Job's Status
  * ```typescript
  * // init
  * const getJob = yield* AWS.MediaConvert.GetJob();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * const { Job } = yield* getJob({ Id: jobId });
  * if (Job?.Status === "COMPLETE") { ... }
  * ```
- *
- * @binding
  */
 export interface GetJob extends Binding.Service<
   GetJob,

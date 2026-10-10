@@ -13,7 +13,7 @@ import { hasProperty } from "../Predicate.ts"
 import * as HashMap from "./hashMap.ts"
 
 /** @internal */
-export const HashSetTypeId = "~effect/HashSet"
+export const HashSetTypeId = "~effect/collections/HashSet"
 
 /** @internal */
 export type HashSetTypeId = typeof HashSetTypeId
@@ -23,11 +23,9 @@ export interface HashSet<out V> extends Iterable<V>, Equal.Equal, Pipeable, Insp
   readonly [HashSetTypeId]: HashSetTypeId
 }
 
-const hashSetSeed = Hash.string(HashSetTypeId)
-
 const HashSetProto: Omit<HashSet<unknown>, HashSetTypeId> = {
   [Hash.symbol]<V>(this: HashSet<V>): number {
-    return Hash.optimize(Hash.combine(hashSetSeed, Hash.hash(keyMap(this))))
+    return Hash.hash(HashSetTypeId)
   },
   [Equal.symbol]<V>(this: HashSet<V>, that: unknown): boolean {
     return isHashSet(that) && size(this) === size(that) && every(this, (value) => has(that, value))

@@ -11,14 +11,13 @@ export interface CancelJobRequest extends batch.CancelJobRequest {}
  * to `STARTING`/`RUNNING` are NOT cancelled (use `TerminateJob` for those) —
  * the request still succeeds.
  *
- * ### Cancelling Jobs
- * **Example:** Cancel a queued job
+ * @binding
+ * @section Cancelling Jobs
+ * @example Cancel a queued job
  * ```typescript
  * const cancelJob = yield* Batch.CancelJob(queue);
  * yield* cancelJob({ jobId, reason: "superseded" });
  * ```
- *
- * @binding
  */
 export interface CancelJob extends Binding.Service<
   CancelJob,

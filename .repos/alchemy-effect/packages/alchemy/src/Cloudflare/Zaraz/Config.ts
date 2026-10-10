@@ -153,8 +153,11 @@ export type ConfigAttributes = {
  * Destroy keeps the current Zaraz config by default to avoid wiping unrelated
  * zone-level analytics setup. Set `delete: true` to restore Cloudflare's
  * default Zaraz config on destroy.
- * ### Managing Zaraz
- * **Example:** Enable data layer compatibility
+ * @resource
+ * @product Zaraz
+ * @category Performance & Reliability
+ * @section Managing Zaraz
+ * @example Enable data layer compatibility
  * ```typescript
  * const zaraz = yield* Cloudflare.Zaraz.Config("Analytics", {
  *   zone: "example.com",
@@ -162,7 +165,7 @@ export type ConfigAttributes = {
  * });
  * ```
  *
- * **Example:** Update Zaraz settings
+ * @example Update Zaraz settings
  * ```typescript
  * const zaraz = yield* Cloudflare.Zaraz.Config("Analytics", {
  *   zone: "example.com",
@@ -173,17 +176,13 @@ export type ConfigAttributes = {
  * });
  * ```
  *
- * **Example:** Enable preview workflow
+ * @example Enable preview workflow
  * ```typescript
  * const zaraz = yield* Cloudflare.Zaraz.Config("Analytics", {
  *   zone: "example.com",
  *   workflow: "preview",
  * });
  * ```
- *
- * @resource
- * @product Zaraz
- * @category Performance & Reliability
  */
 export const Config = Object.assign(
   Resource<Config>("Cloudflare.Zaraz.Config", {

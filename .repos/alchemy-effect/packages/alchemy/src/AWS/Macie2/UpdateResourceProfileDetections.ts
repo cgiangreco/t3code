@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.UpdateResourceProfileDetectionsHttp)`.
- * ### Automated Discovery
- * **Example:** Suppress a Detection on a Bucket
+ * @binding
+ * @section Automated Discovery
+ * @example Suppress a Detection on a Bucket
  * ```typescript
  * // init — account-level binding, no resource argument
  * const updateResourceProfileDetections = yield* AWS.Macie2.UpdateResourceProfileDetections();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   suppressDataIdentifiers: [{ id: identifierId, type: "MANAGED" }],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateResourceProfileDetections extends Binding.Service<
   UpdateResourceProfileDetections,

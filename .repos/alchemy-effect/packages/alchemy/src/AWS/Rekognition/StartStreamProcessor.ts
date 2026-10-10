@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StartStreamProcessorHttp)`.
  *
- * ### Stream Processors
- * **Example:** Start a Stream Processor
+ * @binding
+ * @section Stream Processors
+ * @example Start a Stream Processor
  * ```typescript
  * // init
  * const startStreamProcessor = yield* AWS.Rekognition.StartStreamProcessor();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const started = yield* startStreamProcessor({ Name: "lobby-camera" });
  * // started.SessionId (connected-home processors)
  * ```
- *
- * @binding
  */
 export interface StartStreamProcessor extends Binding.Service<
   StartStreamProcessor,

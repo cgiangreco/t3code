@@ -1,21 +1,17 @@
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { it as effectIt } from "@effect/vitest";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessEnvironment, HostProcessPlatform } from "@t3tools/shared/hostProcess";
 import * as Effect from "effect/Effect";
-import * as FileSystem from "effect/FileSystem";
-import * as Path from "effect/Path";
-import * as TestClock from "effect/testing/TestClock";
 import { describe, expect, it, vi } from "vite-plus/test";
 
 import {
+  extractPathFromShellOutput,
   CommandAvailability,
-  CommandResolutionCache,
   type CommandAvailabilityChecker,
   isCommandAvailable,
   listLoginShellCandidates,
   mergePathEntries,
   mergePathValues,
-  preferGitForWindowsBinary,
   readEnvironmentFromLoginShell,
   readEnvironmentFromWindowsShell,
   readPathFromLaunchctl,
@@ -25,9 +21,7 @@ import {
   resolveSpawnCommand,
   resolveWindowsEnvironment,
   SpawnExecutableResolution,
-  type SpawnExecutableResolver,
   WindowsShellEnvironment,
-  withPathDirectoryListings,
   type WindowsShellEnvironmentReader,
 } from "./shell.ts";
 
@@ -40,6 +34,28 @@ const withWindowsEnvironmentMocks = <A, E, R>(
     Effect.provideService(WindowsShellEnvironment, readEnvironment),
     Effect.provideService(CommandAvailability, commandAvailable),
   );
+
+describe("extractPathFromShellOutput", () => {
+  it("extracts the path between capture markers", () => {
+    expect(
+      extractPathFromShellOutput(
+        "__T3CODE_PATH_START__\n/opt/homebrew/bin:/usr/bin\n__T3CODE_PATH_END__\n",
+      ),
+    ).toBe("/opt/homebrew/bin:/usr/bin");
+  });
+
+  it("ignores shell startup noise around the capture markers", () => {
+    expect(
+      extractPathFromShellOutput(
+        "Welcome to fish\n__T3CODE_PATH_START__\n/opt/homebrew/bin:/usr/bin\n__T3CODE_PATH_END__\nBye\n",
+      ),
+    ).toBe("/opt/homebrew/bin:/usr/bin");
+  });
+
+  it("returns null when the markers are missing", () => {
+    expect(extractPathFromShellOutput("/opt/homebrew/bin /usr/bin")).toBeNull();
+  });
+});
 
 describe("readPathFromLoginShell", () => {
   it("uses a shell-agnostic printenv PATH probe", () => {
@@ -288,7 +304,7 @@ describe("readEnvironmentFromWindowsShell", () => {
 });
 
 describe("mergePathValues", () => {
-  it("sanitizes and dedupes Windows entries while preserving preferred order", () => {
+  it("dedupes case-insensitively on Windows while preserving preferred order", () => {
     expect(
       mergePathValues(
         'C:\\Users\\testuser\\AppData\\Roaming\\npm;"C:\\Program Files\\nodejs"',
@@ -296,18 +312,8 @@ describe("mergePathValues", () => {
         "win32",
       ),
     ).toBe(
-      "C:\\Users\\testuser\\AppData\\Roaming\\npm;C:\\Program Files\\nodejs;C:\\Windows\\System32",
+      'C:\\Users\\testuser\\AppData\\Roaming\\npm;"C:\\Program Files\\nodejs";C:\\Windows\\System32',
     );
-  });
-
-  it("removes stray quotes from Windows entries", () => {
-    expect(
-      mergePathValues(
-        'C:\\Windows\\System32;C:\\cloudflared.exe;C:";C:\\Program Files\\nodejs',
-        undefined,
-        "win32",
-      ),
-    ).toBe("C:\\Windows\\System32;C:\\cloudflared.exe;C:;C:\\Program Files\\nodejs");
   });
 
   it("dedupes case-sensitively on POSIX", () => {
@@ -330,7 +336,6 @@ describe("resolveKnownWindowsCliDirs", () => {
       "C:\\Users\\testuser\\AppData\\Local\\Programs\\nodejs",
       "C:\\Users\\testuser\\AppData\\Local\\Volta\\bin",
       "C:\\Users\\testuser\\AppData\\Local\\pnpm",
-      "C:\\Users\\testuser\\.local\\bin",
       "C:\\Users\\testuser\\.bun\\bin",
       "C:\\Users\\testuser\\scoop\\shims",
     ]);
@@ -343,7 +348,7 @@ effectIt.layer(NodeServices.layer)("isCommandAvailable", (it) => {
       expect(
         yield* isCommandAvailable("definitely-not-installed", {
           env: { PATH: "", PATHEXT: ".COM;.EXE;.BAT;.CMD" },
-        }).pipe(Effect.provideService(HostProcess.Platform, "win32")),
+        }).pipe(Effect.provideService(HostProcessPlatform, "win32")),
       ).toBe(false);
     }),
   );
@@ -354,226 +359,11 @@ effectIt.layer(NodeServices.layer)("resolveCommandPath", (it) => {
     Effect.gen(function* () {
       const result = yield* resolveCommandPath("definitely-not-installed", {
         env: { PATH: "", PATHEXT: ".COM;.EXE;.BAT;.CMD" },
-      }).pipe(Effect.provideService(HostProcess.Platform, "win32"), Effect.result);
+      }).pipe(Effect.provideService(HostProcessPlatform, "win32"), Effect.result);
 
       expect(result._tag).toBe("Failure");
     }),
   );
-
-  // Records every path the scan stats, without ever reporting a match, so the
-  // walk runs to exhaustion and the probe set can be inspected. Assertions
-  // below count probes rather than naming paths: `Path` is the host's, so the
-  // separator differs between a Windows and a Linux CI runner.
-  const recordProbes = (env: NodeJS.ProcessEnv) =>
-    Effect.gen(function* () {
-      const probed: Array<string> = [];
-      const result = yield* resolveCommandPath("definitely-not-installed", { env }).pipe(
-        Effect.provideService(HostProcess.Platform, "win32"),
-        Effect.provideService(CommandResolutionCache, new Map()),
-        Effect.provide(
-          FileSystem.layerNoop({
-            stat: (filePath) =>
-              Effect.sync(() => {
-                probed.push(filePath);
-                return { type: "Directory" } as FileSystem.File.Info;
-              }),
-          }),
-        ),
-        Effect.result,
-      );
-
-      expect(result._tag).toBe("Failure");
-      return probed;
-    });
-
-  it.effect("visits a repeated PATH directory only once", () =>
-    Effect.gen(function* () {
-      const probed = yield* recordProbes({
-        PATH: "C:\\bin;C:\\other;C:\\bin;C:\\other",
-        PATHEXT: ".COM;.EXE",
-      });
-
-      // Two directories, two extensions, upper and lowercase spellings.
-      expect(probed).toHaveLength(8);
-      expect(new Set(probed).size).toBe(probed.length);
-    }),
-  );
-
-  it.effect("still visits a PATH entry that differs only in case", () =>
-    Effect.gen(function* () {
-      const probed = yield* recordProbes({
-        PATH: "C:\\bin;C:\\BIN",
-        PATHEXT: ".COM;.EXE",
-      });
-
-      // Deliberately not folded together. Windows 10+ can mark a directory
-      // case-sensitive, so the two spellings are not provably one directory and
-      // skipping the second could hide a command that is really there.
-      expect(probed).toHaveLength(8);
-    }),
-  );
-
-  it.effect.each(["audit-command", "audit-command.CMD"])(
-    "resolves lowercase executable files for %s in a case-sensitive Windows PATH directory",
-    (command) =>
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem;
-        const path = yield* Path.Path;
-        const cwd = yield* fs.makeTempDirectoryScoped({ prefix: "t3-case-sensitive-path-" });
-        const executable = path.join(cwd, "audit-command.cmd");
-        yield* fs.writeFileString(executable, "@echo off\n");
-
-        const resolved = yield* resolveCommandPath(command, {
-          env: { PATH: cwd, PATHEXT: ".CMD" },
-        }).pipe(
-          Effect.provideService(HostProcess.Platform, "win32"),
-          Effect.provideService(CommandResolutionCache, new Map()),
-          Effect.provideService(FileSystem.FileSystem, {
-            ...fs,
-            // Keep this case-sensitive fixture portable to case-insensitive hosts.
-            stat: (filePath) =>
-              fs.stat(filePath === executable ? filePath : path.join(cwd, "missing")),
-          }),
-        );
-
-        expect(resolved).toBe(executable);
-      }),
-  );
-
-  it.effect("keeps cached misses until expiry while allowing explicit paths", () =>
-    Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const path = yield* Path.Path;
-      const cwd = yield* fs.makeTempDirectoryScoped({ prefix: "t3-path-cache-" });
-      const executable = path.join(cwd, "appeared.CMD");
-      const options = { env: { PATH: `${cwd};${cwd}`, PATHEXT: ".CMD" } };
-
-      expect((yield* resolveCommandPath("appeared", options).pipe(Effect.result))._tag).toBe(
-        "Failure",
-      );
-      yield* fs.writeFileString(executable, "@echo off\n");
-      expect((yield* resolveCommandPath("appeared", options).pipe(Effect.result))._tag).toBe(
-        "Failure",
-      );
-      expect(yield* resolveCommandPath(executable, options)).toBe(executable);
-      yield* TestClock.adjust("30 seconds");
-      expect(yield* resolveCommandPath("appeared", options)).toBe(executable);
-    }).pipe(
-      Effect.provideService(HostProcess.Platform, "win32"),
-      Effect.provideService(CommandResolutionCache, new Map()),
-    ),
-  );
-
-  it.effect("keeps upper and lowercase PATHEXT candidates", () =>
-    Effect.gen(function* () {
-      const probed = yield* recordProbes({
-        PATH: "C:\\bin",
-        PATHEXT: ".COM;.EXE;.BAT;.CMD",
-      });
-
-      expect(probed).toHaveLength(8);
-      expect(probed.filter((filePath) => /\.(COM|EXE|BAT|CMD)$/.test(filePath))).toHaveLength(4);
-      expect(probed.filter((filePath) => /\.(com|exe|bat|cmd)$/.test(filePath))).toHaveLength(4);
-    }),
-  );
-
-  it.effect("probes only listed PATH names and relists a directory that changes", () =>
-    Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const path = yield* Path.Path;
-      const first = yield* fs.makeTempDirectoryScoped();
-      const second = yield* fs.makeTempDirectoryScoped();
-      yield* fs.writeFileString(path.join(first, "cursor.CMD"), "");
-      yield* fs.writeFileString(path.join(second, "cursor.EXE"), "");
-      const env = { PATH: `${first};${second}`, PATHEXT: ".EXE;.CMD" };
-      const probed: Array<string> = [];
-      yield* Effect.gen(function* () {
-        expect(yield* resolveCommandPath("cursor", { env })).toBe(path.join(first, "cursor.CMD"));
-        expect(yield* isCommandAvailable("absent", { env })).toBe(false);
-        yield* fs.writeFileString(path.join(second, "late.EXE"), "");
-        yield* fs.utimes(second, 4_102_444_800, 4_102_444_800); // seconds: 2100-01-01
-        expect(yield* resolveCommandPath("late", { env })).toBe(path.join(second, "late.EXE"));
-      }).pipe(
-        withPathDirectoryListings,
-        Effect.provideService(FileSystem.FileSystem, {
-          ...fs,
-          stat: (file) => {
-            // Record candidate probes, not the per-lookup directory mtime checks.
-            if (file !== first && file !== second) probed.push(file);
-            return fs.stat(file);
-          },
-        }),
-      );
-      expect(probed).toEqual([path.join(first, "cursor.CMD"), path.join(second, "late.EXE")]);
-    }).pipe(
-      Effect.provideService(HostProcess.Platform, "win32"),
-      Effect.provideService(CommandResolutionCache, new Map()),
-    ),
-  );
-});
-
-describe("preferGitForWindowsBinary", () => {
-  const files =
-    (...paths: Array<string>) =>
-    (filePath: string) =>
-      paths.includes(filePath);
-
-  it("runs the git.exe Git for Windows' launcher would start", () => {
-    // 2.56+ on x64. The PATHEXT scan returns the extension in PATHEXT's case.
-    expect(
-      preferGitForWindowsBinary(
-        "C:\\Program Files\\Git\\cmd\\git.EXE",
-        {},
-        files(
-          "C:\\Program Files\\Git\\ucrt64\\bin\\git.exe",
-          "C:\\Program Files\\Git\\mingw64\\bin\\git.exe",
-        ),
-      ),
-    ).toBe("C:\\Program Files\\Git\\ucrt64\\bin\\git.exe");
-    // Before 2.56, and the portable build's bin launcher.
-    expect(
-      preferGitForWindowsBinary(
-        "D:\\PortableGit\\bin\\git.exe",
-        {},
-        files("D:\\PortableGit\\mingw64\\bin\\git.exe"),
-      ),
-    ).toBe("D:\\PortableGit\\mingw64\\bin\\git.exe");
-    expect(
-      preferGitForWindowsBinary(
-        "C:\\Program Files\\Git\\cmd\\git.exe",
-        {},
-        files("C:\\Program Files\\Git\\clangarm64\\bin\\git.exe"),
-      ),
-    ).toBe("C:\\Program Files\\Git\\clangarm64\\bin\\git.exe");
-  });
-
-  it("keeps the launcher when MSYSTEM is set", () => {
-    // The real git.exe only adds its own folders to PATH when MSYSTEM is unset;
-    // without them a `#!/bin/sh` hook cannot start.
-    expect(
-      preferGitForWindowsBinary(
-        "C:\\Program Files\\Git\\cmd\\git.exe",
-        { MSYSTEM: "MINGW64" },
-        files("C:\\Program Files\\Git\\mingw64\\bin\\git.exe"),
-      ),
-    ).toBe("C:\\Program Files\\Git\\cmd\\git.exe");
-  });
-
-  it("keeps the launcher when no git.exe sits beside it", () => {
-    expect(preferGitForWindowsBinary("C:\\Program Files\\Git\\cmd\\git.exe", {}, () => false)).toBe(
-      "C:\\Program Files\\Git\\cmd\\git.exe",
-    );
-  });
-
-  it("leaves other gits and other launchers alone", () => {
-    const everything = () => true;
-    expect(preferGitForWindowsBinary("C:\\Users\\me\\scoop\\shims\\git.exe", {}, everything)).toBe(
-      "C:\\Users\\me\\scoop\\shims\\git.exe",
-    );
-    expect(preferGitForWindowsBinary("C:\\Program Files\\Git\\cmd\\gitk.exe", {}, everything)).toBe(
-      "C:\\Program Files\\Git\\cmd\\gitk.exe",
-    );
-  });
 });
 
 effectIt.layer(NodeServices.layer)("resolveSpawnCommand", (it) => {
@@ -581,10 +371,7 @@ effectIt.layer(NodeServices.layer)("resolveSpawnCommand", (it) => {
     Effect.gen(function* () {
       const command = yield* resolveSpawnCommand("node.exe", ["script.js", "hello & goodbye"], {
         env: { PATH: "", PATHEXT: ".COM;.EXE;.BAT;.CMD" },
-      }).pipe(
-        Effect.provideService(HostProcess.Platform, "win32"),
-        Effect.provideService(CommandResolutionCache, new Map()),
-      );
+      }).pipe(Effect.provideService(HostProcessPlatform, "win32"));
 
       expect(command).toEqual({
         command: "node.exe",
@@ -601,8 +388,7 @@ effectIt.layer(NodeServices.layer)("resolveSpawnCommand", (it) => {
         ["run", "value & calc", "%PATH%", 'quote"value'],
         { env: { PATH: "", PATHEXT: ".COM;.EXE;.BAT;.CMD" } },
       ).pipe(
-        Effect.provideService(HostProcess.Platform, "win32"),
-        Effect.provideService(CommandResolutionCache, new Map()),
+        Effect.provideService(HostProcessPlatform, "win32"),
         Effect.provideService(
           SpawnExecutableResolution,
           () => "C:\\Program Files\\npm & tools\\vp.cmd",
@@ -628,9 +414,8 @@ effectIt.layer(NodeServices.layer)("resolveSpawnCommand", (it) => {
         env: { CODEX_HOME: "C:\\Users\\tester\\.codex" },
         extendEnv: true,
       }).pipe(
-        Effect.provideService(HostProcess.Platform, "win32"),
-        Effect.provideService(CommandResolutionCache, new Map()),
-        Effect.provideService(HostProcess.Environment, {
+        Effect.provideService(HostProcessPlatform, "win32"),
+        Effect.provideService(HostProcessEnvironment, {
           PATH: "C:\\Users\\tester\\AppData\\Roaming\\npm",
           PATHEXT: ".COM;.EXE;.BAT;.CMD",
         }),
@@ -648,82 +433,11 @@ effectIt.layer(NodeServices.layer)("resolveSpawnCommand", (it) => {
     }),
   );
 
-  it.effect("scans PATH once per command until the search environment changes", () =>
-    Effect.gen(function* () {
-      const scans: Array<string> = [];
-      const scan: SpawnExecutableResolver = (name, _platform, env) => {
-        scans.push(`${name}@${env.PATH}`);
-        return name === "missing" ? undefined : `${env.PATH}\\${name}.exe`;
-      };
-      const resolve = (command: string, path: string, resolver = scan) =>
-        resolveSpawnCommand(command, [], { env: { PATH: path, PATHEXT: ".EXE" } }).pipe(
-          Effect.provideService(HostProcess.Platform, "win32"),
-          Effect.provideService(SpawnExecutableResolution, resolver),
-        );
-
-      expect((yield* resolve("git", "C:\\one")).command).toBe("C:\\one\\git.exe");
-      expect((yield* resolve("git", "C:\\one")).command).toBe("C:\\one\\git.exe");
-      // A failed spawn is how a provider reports "not installed", so a miss
-      // must clear the moment the binary appears.
-      yield* resolve("missing", "C:\\one");
-      yield* resolve("missing", "C:\\one");
-      expect((yield* resolve("git", "C:\\two")).command).toBe("C:\\two\\git.exe");
-      // Callers probe explicit paths they may have just written.
-      yield* resolve("C:\\tools\\git.exe", "C:\\one");
-      yield* resolve("C:\\tools\\git.exe", "C:\\one");
-      expect(scans).toEqual([
-        "git@C:\\one",
-        "missing@C:\\one",
-        "missing@C:\\one",
-        "git@C:\\two",
-        "C:\\tools\\git.exe@C:\\one",
-        "C:\\tools\\git.exe@C:\\one",
-      ]);
-
-      yield* TestClock.adjust("31 seconds");
-      yield* resolve("git", "C:\\one");
-      expect(scans).toHaveLength(7);
-
-      // Another resolver sharing the cache gets its own answer, not the cached one.
-      const elsewhere = yield* resolve("git", "C:\\one", () => "D:\\elsewhere\\git.exe");
-      expect(elsewhere.command).toBe("D:\\elsewhere\\git.exe");
-      expect((yield* resolve("git", "C:\\one")).command).toBe("C:\\one\\git.exe");
-      expect(scans).toHaveLength(7);
-    }).pipe(Effect.provideService(CommandResolutionCache, new Map())),
-  );
-
-  it.effect("keeps launcher swaps apart for environments with and without MSYSTEM", () =>
-    Effect.gen(function* () {
-      let scans = 0;
-      const scan: SpawnExecutableResolver = () => {
-        scans++;
-        return "C:\\Git\\cmd\\git.exe";
-      };
-      const resolve = (env: NodeJS.ProcessEnv) =>
-        resolveSpawnCommand("git", [], {
-          env: { PATH: "C:\\Git\\cmd", PATHEXT: ".EXE", ...env },
-        }).pipe(
-          Effect.provideService(HostProcess.Platform, "win32"),
-          Effect.provideService(SpawnExecutableResolution, scan),
-        );
-
-      yield* resolve({});
-      yield* resolve({});
-      expect(scans).toBe(1);
-      // A swap made without MSYSTEM must not reach a child that has it set.
-      yield* resolve({ MSYSTEM: "MINGW64" });
-      expect(scans).toBe(2);
-    }).pipe(Effect.provideService(CommandResolutionCache, new Map())),
-  );
-
   it.effect("does not fall back to a shell for unresolved Windows commands", () =>
     Effect.gen(function* () {
       const command = yield* resolveSpawnCommand("missing & calc", ["unsafe & value"], {
         env: { PATH: "", PATHEXT: ".COM;.EXE;.BAT;.CMD" },
-      }).pipe(
-        Effect.provideService(HostProcess.Platform, "win32"),
-        Effect.provideService(CommandResolutionCache, new Map()),
-      );
+      }).pipe(Effect.provideService(HostProcessPlatform, "win32"));
 
       expect(command).toEqual({
         command: "missing & calc",
@@ -735,7 +449,7 @@ effectIt.layer(NodeServices.layer)("resolveSpawnCommand", (it) => {
 });
 
 effectIt.layer(NodeServices.layer)("resolveWindowsEnvironment", (it) => {
-  it.effect("uses known CLI directories as a fallback without changing shell PATH priority", () =>
+  it.effect("returns the baseline no-profile PATH patch when node is already available", () =>
     Effect.gen(function* () {
       const readEnvironment = vi.fn(
         (_names: ReadonlyArray<string>, options?: { loadProfile?: boolean }) =>
@@ -758,15 +472,14 @@ effectIt.layer(NodeServices.layer)("resolveWindowsEnvironment", (it) => {
         ),
       ).toEqual({
         PATH: [
-          "C:\\Shell\\Bin",
-          "C:\\Windows\\System32",
           "C:\\Users\\testuser\\AppData\\Roaming\\npm",
           "C:\\Users\\testuser\\AppData\\Local\\Programs\\nodejs",
           "C:\\Users\\testuser\\AppData\\Local\\Volta\\bin",
           "C:\\Users\\testuser\\AppData\\Local\\pnpm",
-          "C:\\Users\\testuser\\.local\\bin",
           "C:\\Users\\testuser\\.bun\\bin",
           "C:\\Users\\testuser\\scoop\\shims",
+          "C:\\Shell\\Bin",
+          "C:\\Windows\\System32",
         ].join(";"),
       });
       expect(readEnvironment).toHaveBeenCalledTimes(1);
@@ -807,14 +520,13 @@ effectIt.layer(NodeServices.layer)("resolveWindowsEnvironment", (it) => {
         PATH: [
           "C:\\Profile\\Node",
           "C:\\Windows\\System32",
-          "C:\\Shell\\Bin",
           "C:\\Users\\testuser\\AppData\\Roaming\\npm",
           "C:\\Users\\testuser\\AppData\\Local\\Programs\\nodejs",
           "C:\\Users\\testuser\\AppData\\Local\\Volta\\bin",
           "C:\\Users\\testuser\\AppData\\Local\\pnpm",
-          "C:\\Users\\testuser\\.local\\bin",
           "C:\\Users\\testuser\\.bun\\bin",
           "C:\\Users\\testuser\\scoop\\shims",
+          "C:\\Shell\\Bin",
         ].join(";"),
         FNM_DIR: "C:\\Users\\testuser\\AppData\\Roaming\\fnm",
         FNM_MULTISHELL_PATH: "C:\\Users\\testuser\\AppData\\Local\\fnm_multishells\\123",
@@ -851,11 +563,10 @@ effectIt.layer(NodeServices.layer)("resolveWindowsEnvironment", (it) => {
         ),
       ).toEqual({
         PATH: [
-          "C:\\Windows\\System32",
           "C:\\Users\\testuser\\AppData\\Roaming\\npm",
-          "C:\\Users\\testuser\\.local\\bin",
           "C:\\Users\\testuser\\.bun\\bin",
           "C:\\Users\\testuser\\scoop\\shims",
+          "C:\\Windows\\System32",
         ].join(";"),
         FNM_DIR: "C:\\Users\\testuser\\AppData\\Roaming\\fnm",
       });

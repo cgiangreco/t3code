@@ -56,8 +56,9 @@ export interface ResourcePolicy extends Resource<
  *
  * Resource policies are not taggable; ownership is keyed by the
  * deterministic policy name.
- * ### Creating Resource Policies
- * **Example:** Allow SNS active tracing to send trace data
+ * @resource
+ * @section Creating Resource Policies
+ * @example Allow SNS active tracing to send trace data
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -75,8 +76,6 @@ export interface ResourcePolicy extends Resource<
  *   }),
  * });
  * ```
- *
- * @resource
  */
 export const ResourcePolicy = Resource<ResourcePolicy>(
   "AWS.XRay.ResourcePolicy",

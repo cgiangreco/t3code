@@ -11,8 +11,9 @@ import type { Graph } from "./Graph.ts";
  * state last changed. The graph ARN is injected from the bound {@link Graph}.
  * Provide the implementation with
  * `Effect.provide(AWS.Detective.BatchGetGraphMemberDatasourcesHttp)`.
- * ### Managing Data Source Packages
- * **Example:** Inspect Member Ingest History
+ * @binding
+ * @section Managing Data Source Packages
+ * @example Inspect Member Ingest History
  * ```typescript
  * // init
  * const batchGetGraphMemberDatasources =
@@ -23,8 +24,6 @@ import type { Graph } from "./Graph.ts";
  *   AccountIds: ["111122223333"],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchGetGraphMemberDatasources extends Binding.Service<
   BatchGetGraphMemberDatasources,

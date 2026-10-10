@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.BatchUpdateStandardsControlAssociationsHttp)`.
- * ### Standards & Controls
- * **Example:** Disable a Control in One Standard
+ * @binding
+ * @section Standards & Controls
+ * @example Disable a Control in One Standard
  * ```typescript
  * // init — account-level binding, no resource argument
  * const batchUpdateStandardsControlAssociations = yield* AWS.SecurityHub.BatchUpdateStandardsControlAssociations();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *   }],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchUpdateStandardsControlAssociations extends Binding.Service<
   BatchUpdateStandardsControlAssociations,

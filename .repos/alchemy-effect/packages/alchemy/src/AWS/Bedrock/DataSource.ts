@@ -87,8 +87,9 @@ export interface DataSource extends Resource<
  * Ingestion is not part of the desired-state lifecycle — trigger it whenever
  * the underlying documents change.
  *
- * ### Creating Data Sources
- * **Example:** S3 Data Source
+ * @resource
+ * @section Creating Data Sources
+ * @example S3 Data Source
  * ```typescript
  * import * as Bedrock from "alchemy/AWS/Bedrock";
  *
@@ -101,8 +102,6 @@ export interface DataSource extends Resource<
  *   dataDeletionPolicy: "DELETE",
  * });
  * ```
- *
- * @resource
  */
 export const DataSource = Resource<DataSource>("AWS.Bedrock.DataSource");
 

@@ -2,12 +2,7 @@ import { useEffect } from "react";
 
 import { getCachedNativeReviewDiffData } from "./nativeReviewDiffAdapter";
 import type { ReviewSectionItem } from "./reviewModel";
-import {
-  getCachedReviewParsedDiff,
-  getReviewParsedDiffSourceCharacterCount,
-  MAX_CACHED_REVIEW_DIFFS,
-  MAX_CACHED_REVIEW_SOURCE_CHARACTERS,
-} from "./reviewState";
+import { getCachedReviewParsedDiff } from "./reviewState";
 
 interface IdleDeadlineLike {
   readonly didTimeout: boolean;
@@ -40,7 +35,7 @@ export function prewarmReviewDiffSection(input: {
   readonly section: ReviewSectionItem;
 }): void {
   const { section, threadKey } = input;
-  if (section.diff === null || section.diff.length > MAX_CACHED_REVIEW_SOURCE_CHARACTERS) {
+  if (section.diff === null) {
     return;
   }
 
@@ -52,54 +47,7 @@ export function prewarmReviewDiffSection(input: {
   getCachedNativeReviewDiffData({ parsedDiff, comments: [] });
 }
 
-/** Selects nearby loaded sections that fit in the cache with the selected section. */
-export function getReviewDiffPrewarmSections(input: {
-  readonly threadKey: string;
-  readonly sections: ReadonlyArray<ReviewSectionItem>;
-  readonly selectedSectionId: string | null;
-}): ReadonlyArray<ReviewSectionItem> {
-  const { threadKey, sections, selectedSectionId } = input;
-  const selectedIndex = sections.findIndex((section) => section.id === selectedSectionId);
-  const selectedSection = sections[selectedIndex];
-  if (!selectedSection) {
-    return [];
-  }
-
-  let sourceCharacterCount = getReviewParsedDiffSourceCharacterCount({
-    threadKey,
-    sectionId: selectedSection.id,
-    diff: selectedSection.diff,
-  });
-  if (sourceCharacterCount > MAX_CACHED_REVIEW_SOURCE_CHARACTERS) {
-    return [];
-  }
-
-  const pendingSections: ReviewSectionItem[] = [];
-  for (let distance = 1; distance < sections.length; distance += 1) {
-    for (const index of [selectedIndex - distance, selectedIndex + distance]) {
-      if (pendingSections.length >= MAX_CACHED_REVIEW_DIFFS - 1) {
-        return pendingSections;
-      }
-      const section = sections[index];
-      if (!section || section.diff === null) {
-        continue;
-      }
-      const sectionCharacterCount = getReviewParsedDiffSourceCharacterCount({
-        threadKey,
-        sectionId: section.id,
-        diff: section.diff,
-      });
-      if (sourceCharacterCount + sectionCharacterCount > MAX_CACHED_REVIEW_SOURCE_CHARACTERS) {
-        continue;
-      }
-      pendingSections.push(section);
-      sourceCharacterCount += sectionCharacterCount;
-    }
-  }
-  return pendingSections;
-}
-
-/** Warms one nearby section per idle period, after navigation animations finish. */
+/** Warms one cached section per idle period, after navigation animations finish. */
 export function useReviewDiffPrewarming(input: {
   readonly threadKey: string | null;
   readonly sections: ReadonlyArray<ReviewSectionItem>;
@@ -112,11 +60,9 @@ export function useReviewDiffPrewarming(input: {
       return;
     }
 
-    const pendingSections = getReviewDiffPrewarmSections({
-      threadKey,
-      sections,
-      selectedSectionId,
-    });
+    const pendingSections = sections.filter(
+      (section) => section.id !== selectedSectionId && section.diff !== null,
+    );
     if (pendingSections.length === 0) {
       return;
     }

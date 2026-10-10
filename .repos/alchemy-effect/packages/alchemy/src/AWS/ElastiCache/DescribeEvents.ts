@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * parameter groups from the last hour (up to 14 days with an explicit time
  * window) — snapshot completions, failovers, configuration changes. Provide
  * the implementation with `Effect.provide(AWS.ElastiCache.DescribeEventsHttp)`.
- * ### Monitoring Caches
- * **Example:** Read a Cache's Recent Events
+ * @binding
+ * @section Monitoring Caches
+ * @example Read a Cache's Recent Events
  * ```typescript
  * const describeEvents = yield* ElastiCache.DescribeEvents();
  *
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   yield* Effect.logInfo(`${event.Date}: ${event.Message}`);
  * }
  * ```
- *
- * @binding
  */
 export interface DescribeEvents extends Binding.Service<
   DescribeEvents,

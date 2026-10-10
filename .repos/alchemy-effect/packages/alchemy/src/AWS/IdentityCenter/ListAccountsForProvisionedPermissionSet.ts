@@ -10,8 +10,9 @@ import type { Instance } from "./Instance.ts";
  * Lists the AWS accounts where a permission set is provisioned, one page per call (`NextToken` paginates). The instance's
  * `InstanceArn` is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IdentityCenter.ListAccountsForProvisionedPermissionSetHttp)`.
- * ### Auditing Access
- * **Example:** List a Permission Set's Accounts
+ * @binding
+ * @section Auditing Access
+ * @example List a Permission Set's Accounts
  * ```typescript
  * // init — bind the operation to the Identity Center instance
  * const listAccountsForProvisionedPermissionSet = yield* AWS.IdentityCenter.ListAccountsForProvisionedPermissionSet(instance);
@@ -21,8 +22,6 @@ import type { Instance } from "./Instance.ts";
  *   PermissionSetArn: permissionSetArn,
  * });
  * ```
- *
- * @binding
  */
 export interface ListAccountsForProvisionedPermissionSet extends Binding.Service<
   ListAccountsForProvisionedPermissionSet,

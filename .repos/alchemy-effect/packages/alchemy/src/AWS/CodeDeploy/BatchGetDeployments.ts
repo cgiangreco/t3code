@@ -7,8 +7,9 @@ import type { DeploymentGroup } from "./DeploymentGroup.ts";
  * Runtime binding for `codedeploy:BatchGetDeployments` — reads up to 25
  * deployments in one call. CodeDeploy authorizes the call against the
  * deployment group the deployments belong to.
- * ### Observing Deployments
- * **Example:** Read Several Deployments
+ * @binding
+ * @section Observing Deployments
+ * @example Read Several Deployments
  * ```typescript
  * const batchGetDeployments = yield* AWS.CodeDeploy.BatchGetDeployments(group);
  *
@@ -16,8 +17,6 @@ import type { DeploymentGroup } from "./DeploymentGroup.ts";
  *   deploymentIds: ["d-ABCDEF123", "d-GHIJKL456"],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchGetDeployments extends Binding.Service<
   BatchGetDeployments,

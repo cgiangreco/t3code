@@ -14,8 +14,9 @@ export interface StartCostAllocationTagBackfillRequest
  * Backfill cost allocation tag activation status to past billing
  * periods (allowed once every 24 hours). Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.StartCostAllocationTagBackfillHttp)`.
- * ### Cost Allocation Tags
- * **Example:** Backfill Tag Activation
+ * @binding
+ * @section Cost Allocation Tags
+ * @example Backfill Tag Activation
  * ```typescript
  * // init — account-level binding takes no resource
  * const startCostAllocationTagBackfill = yield* AWS.CostExplorer.StartCostAllocationTagBackfill();
@@ -25,8 +26,6 @@ export interface StartCostAllocationTagBackfillRequest
  *   BackfillFrom: "2026-01-01T00:00:00Z",
  * });
  * ```
- *
- * @binding
  */
 export interface StartCostAllocationTagBackfill extends Binding.Service<
   StartCostAllocationTagBackfill,

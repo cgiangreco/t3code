@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:GetKxScalingGroup` — reads a scaling group's status, host type, and the clusters placed on it in the bound environment.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.GetKxScalingGroupHttp)`.
- * ### Managing Scaling Groups
- * **Example:** Poll a Scaling Group to Active
+ * @binding
+ * @section Managing Scaling Groups
+ * @example Poll a Scaling Group to Active
  * ```typescript
  * const getScalingGroup = yield* AWS.FinSpace.GetKxScalingGroup(kdb);
  *
@@ -17,8 +18,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   yield* Effect.log(`clusters: ${group.clusters?.join(", ")}`);
  * }
  * ```
- *
- * @binding
  */
 export interface GetKxScalingGroup extends Binding.Service<
   GetKxScalingGroup,

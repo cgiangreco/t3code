@@ -19,8 +19,9 @@ export interface DescribeBudgetActionsForBudgetRequest extends Omit<
  * their execution status — e.g. to check whether a cost kill-switch has
  * fired. Provide the implementation with
  * `Effect.provide(AWS.Budgets.DescribeBudgetActionsForBudgetHttp)`.
- * ### Reading Budget Actions
- * **Example:** List a Budget's Actions and Statuses
+ * @binding
+ * @section Reading Budget Actions
+ * @example List a Budget's Actions and Statuses
  * ```typescript
  * // init — bind the operation to the budget
  * const listActions = yield* AWS.Budgets.DescribeBudgetActionsForBudget(budget);
@@ -29,8 +30,6 @@ export interface DescribeBudgetActionsForBudgetRequest extends Omit<
  * const result = yield* listActions();
  * const statuses = (result.Actions ?? []).map((a) => a.Status);
  * ```
- *
- * @binding
  */
 export interface DescribeBudgetActionsForBudget extends Binding.Service<
   DescribeBudgetActionsForBudget,

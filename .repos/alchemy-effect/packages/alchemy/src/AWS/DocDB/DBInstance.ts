@@ -133,16 +133,15 @@ export interface DBInstance extends Resource<
  * Mutable fields (`dbInstanceClass`, `promotionTier`, maintenance window,
  * monitoring) are reconciled in place; immutable fields (`engine`,
  * `dbClusterIdentifier`, `availabilityZone`) force a replacement.
- * ### Adding an Instance
- * **Example:** A DocumentDB writer instance
+ * @resource
+ * @section Adding an Instance
+ * @example A DocumentDB writer instance
  * ```typescript
  * const writer = yield* DBInstance("Writer", {
  *   dbClusterIdentifier: cluster.dbClusterIdentifier,
  *   dbInstanceClass: "db.t3.medium",
  * });
  * ```
- *
- * @resource
  */
 export const DBInstance = Resource<DBInstance>("AWS.DocDB.DBInstance");
 

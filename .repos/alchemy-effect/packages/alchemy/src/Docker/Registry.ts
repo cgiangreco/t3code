@@ -5,7 +5,7 @@ export interface ImageRegistry {
   server: string;
   /** Registry username. */
   username: string;
-  /** Registry password. Use `Redacted.make(...)` or `Config.Redacted(...)`. */
+  /** Registry password. Use `Redacted.make(...)` or `Config.redacted(...)`. */
   password: Redacted.Redacted<string>;
 }
 

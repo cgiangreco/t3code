@@ -78,8 +78,9 @@ export interface PublicDnsNamespace extends Resource<
  *
  * Namespace creation and deletion are asynchronous — the provider polls the
  * Cloud Map operations API (bounded) until they complete.
- * ### Creating Namespaces
- * **Example:** Public DNS Namespace
+ * @resource
+ * @section Creating Namespaces
+ * @example Public DNS Namespace
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -87,8 +88,6 @@ export interface PublicDnsNamespace extends Resource<
  *   name: "discovery.example.com",
  * });
  * ```
- *
- * @resource
  */
 export const PublicDnsNamespace = Resource<PublicDnsNamespace>(
   "AWS.CloudMap.PublicDnsNamespace",
@@ -209,7 +208,7 @@ export const PublicDnsNamespaceProvider = () =>
           if (namespace?.Id === undefined) {
             return yield* Effect.fail(
               new sd.NamespaceNotFound({
-                message: `namespace ${name} not visible after create`,
+                Message: `namespace ${name} not visible after create`,
               }),
             );
           }

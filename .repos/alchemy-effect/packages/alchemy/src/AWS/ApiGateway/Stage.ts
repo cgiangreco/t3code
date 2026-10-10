@@ -109,8 +109,9 @@ export interface ApiGatewayStage extends Resource<
  * ```
  * https://<restApiId>.execute-api.<region>.amazonaws.com/<stageName>/
  * ```
- * ### Stages
- * **Example:** A dev stage pointing at the latest deployment
+ * @resource
+ * @section Stages
+ * @example A dev stage pointing at the latest deployment
  * ```typescript
  * const stage = yield* ApiGateway.Stage("Dev", {
  *   restApi: api,
@@ -119,8 +120,8 @@ export interface ApiGatewayStage extends Resource<
  * });
  * ```
  *
- * ### Stage variables
- * **Example:** Override values per stage
+ * @section Stage variables
+ * @example Override values per stage
  * ```typescript
  * const stage = yield* ApiGateway.Stage("Prod", {
  *   restApi: api,
@@ -133,12 +134,12 @@ export interface ApiGatewayStage extends Resource<
  * });
  * ```
  *
- * ### Canary deployments
+ * @section Canary deployments
  * Point `canarySettings` at a different `Deployment` to split traffic
  * between the stable and canary versions. `percentTraffic` is the
  * percent of requests routed to the canary deployment.
  *
- * **Example:** Shift 10% of traffic to a canary deployment
+ * @example Shift 10% of traffic to a canary deployment
  * ```typescript
  * const stage = yield* ApiGateway.Stage("Prod", {
  *   restApi: api,
@@ -150,8 +151,6 @@ export interface ApiGatewayStage extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const StageResource = Resource<ApiGatewayStage>("AWS.ApiGateway.Stage");
 

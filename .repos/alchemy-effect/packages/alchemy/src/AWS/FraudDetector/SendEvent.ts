@@ -20,13 +20,14 @@ export interface SendEventRequest extends Omit<
  * labeled later via `UpdateEventLabel`. The bound event type must have
  * `eventIngestion: "ENABLED"`.
  *
- * ### Ingesting Events
+ * @binding
+ * @section Ingesting Events
  * Provide the `SendEventHttp` implementation layer on the Function effect,
  * bind the event type in the init phase, then call the returned client at
  * runtime. The binding grants `frauddetector:SendEvent` on the event type
  * and injects its `eventTypeName` automatically.
  *
- * **Example:** Ingest from a Lambda
+ * @example Ingest from a Lambda
  * ```typescript
  * // init
  * const sendEvent = yield* FraudDetector.SendEvent(eventType);
@@ -46,8 +47,6 @@ export interface SendEventRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(FraudDetector.SendEventHttp))
  * ```
- *
- * @binding
  */
 export interface SendEvent extends Binding.Service<
   SendEvent,

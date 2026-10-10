@@ -33,17 +33,15 @@ const TypeId = "~effect/RcRef"
  *
  * **Example** (Sharing a lazily acquired resource)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, RcRef } from "effect"
- *
- * const events: Array<string> = []
  *
  * // Create an RcRef for a database connection
  * const createConnectionRef = (connectionString: string) =>
  *   RcRef.make({
  *     acquire: Effect.acquireRelease(
  *       Effect.succeed(`Connected to ${connectionString}`),
- *       (connection) => Effect.sync(() => events.push(`closed ${connection}`))
+ *       (connection) => Effect.log(`Closing connection: ${connection}`)
  *     )
  *   })
  *
@@ -55,10 +53,8 @@ const TypeId = "~effect/RcRef"
  *   const connection1 = yield* RcRef.get(connectionRef)
  *   const connection2 = yield* RcRef.get(connectionRef)
  *
- *   return [connection1 === connection2, events] as const
+ *   return [connection1, connection2]
  * })
- *
- * await Effect.runPromise(Effect.scoped(program)) // => [true, ["closed Connected to postgres://localhost"]]
  * ```
  *
  * @category models
@@ -73,13 +69,12 @@ export interface RcRef<out A, out E = never> extends Pipeable {
  *
  * **Example** (Referencing namespace types)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { RcRef } from "effect"
  *
  * // Use RcRef namespace types
  * type MyRcRef = RcRef.RcRef<string, Error>
  * type MyVariance = RcRef.RcRef.Variance<string, Error>
- *
  * ```
  *
  * @since 3.5.0
@@ -126,16 +121,14 @@ export declare namespace RcRef {
  *
  * **Example** (Creating a reference-counted resource)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, RcRef } from "effect"
  *
- * const events: Array<string> = []
- *
- * const program = Effect.gen(function*() {
+ * Effect.gen(function*() {
  *   const ref = yield* RcRef.make({
  *     acquire: Effect.acquireRelease(
  *       Effect.succeed("foo"),
- *       () => Effect.sync(() => events.push("released foo"))
+ *       () => Effect.log("release foo")
  *     )
  *   })
  *
@@ -146,9 +139,6 @@ export declare namespace RcRef {
  *     Effect.scoped
  *   )
  * })
- *
- * await Effect.runPromise(Effect.scoped(program))
- * events // => ["released foo"]
  * ```
  *
  * @category constructors
@@ -158,16 +148,8 @@ export const make: <A, E, R>(
   options: {
     readonly acquire: Effect.Effect<A, E, R>
     /**
-     * How long to keep an idle resource after its last reference is released.
-     *
-     * If the resource has not been invalidated, finite durations, including `0`,
-     * schedule release in a forked fiber that the scope releasing the last
-     * reference does not await. An infinite duration keeps the idle resource
-     * until invalidation or the RcRef's scope closes.
-     *
-     * If this option is omitted or the resource has been invalidated with
-     * `RcRef.invalidate`, the scope releasing the last reference releases the
-     * resource and awaits completion.
+     * When the reference count reaches zero, the resource will be released
+     * after this duration.
      */
     readonly idleTimeToLive?: Duration.Input | undefined
   }
@@ -190,17 +172,15 @@ export const make: <A, E, R>(
  *
  * **Example** (Sharing one acquired value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, RcRef } from "effect"
- *
- * const events: Array<string> = []
  *
  * const program = Effect.gen(function*() {
  *   // Create an RcRef with a resource
  *   const ref = yield* RcRef.make({
  *     acquire: Effect.acquireRelease(
  *       Effect.succeed("shared resource"),
- *       (resource) => Effect.sync(() => events.push(`released ${resource}`))
+ *       (resource) => Effect.log(`Releasing ${resource}`)
  *     )
  *   })
  *
@@ -208,10 +188,11 @@ export const make: <A, E, R>(
  *   const value1 = yield* RcRef.get(ref)
  *   const value2 = yield* RcRef.get(ref)
  *
- *   return [value1 === value2, events] as const
- * })
+ *   // Both values are the same instance
+ *   console.log(value1 === value2) // true
  *
- * await Effect.runPromise(Effect.scoped(program)) // => [true, ["released shared resource"]]
+ *   return value1
+ * })
  * ```
  *
  * @category combinators

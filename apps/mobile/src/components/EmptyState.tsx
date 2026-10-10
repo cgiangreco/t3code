@@ -1,5 +1,4 @@
 import { Pressable, View } from "react-native";
-import type { ReactNode } from "react";
 
 import { AppText as Text } from "./AppText";
 
@@ -8,7 +7,6 @@ export function EmptyState(props: {
   readonly detail: string;
   readonly actionLabel?: string;
   readonly onAction?: () => void;
-  readonly action?: ReactNode;
   readonly variant?: "card" | "plain";
 }) {
   if (props.variant === "plain") {
@@ -18,9 +16,7 @@ export function EmptyState(props: {
         <Text className="mt-2 text-center font-sans text-base leading-normal text-foreground-muted">
           {props.detail}
         </Text>
-        {props.action ? (
-          <View className="mt-5">{props.action}</View>
-        ) : props.actionLabel && props.onAction ? (
+        {props.actionLabel && props.onAction ? (
           <Pressable
             className="mt-5 rounded-full bg-primary px-5 py-3 active:opacity-70"
             onPress={props.onAction}
@@ -40,9 +36,7 @@ export function EmptyState(props: {
       <Text className="mt-2 font-sans text-sm leading-relaxed text-foreground-muted">
         {props.detail}
       </Text>
-      {props.action ? (
-        <View className="mt-4 self-start">{props.action}</View>
-      ) : props.actionLabel && props.onAction ? (
+      {props.actionLabel && props.onAction ? (
         <Pressable
           className="mt-4 self-start rounded-full bg-primary px-4 py-2.5 active:opacity-70"
           onPress={props.onAction}

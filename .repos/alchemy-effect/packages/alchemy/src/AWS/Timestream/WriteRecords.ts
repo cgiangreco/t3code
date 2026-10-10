@@ -20,8 +20,9 @@ export interface WriteRecordsRequest extends Omit<
  * Provide `Timestream.WriteRecordsHttp` on the Function to implement the
  * binding.
  *
- * ### Writing Records
- * **Example:** Write a measurement
+ * @binding
+ * @section Writing Records
+ * @example Write a measurement
  * ```typescript
  * // init — bind the operation to the table
  * const writeRecords = yield* Timestream.WriteRecords(table);
@@ -41,8 +42,6 @@ export interface WriteRecordsRequest extends Omit<
  * });
  * // result.RecordsIngested reports how many records landed
  * ```
- *
- * @binding
  */
 export interface WriteRecords extends Binding.Service<
   WriteRecords,

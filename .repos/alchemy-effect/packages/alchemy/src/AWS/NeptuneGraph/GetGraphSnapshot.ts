@@ -7,16 +7,15 @@ import * as Binding from "../../Binding.ts";
  *
  * Reads one graph snapshot by id — status, source graph, and encryption key. Snapshot ids are server-generated runtime data, so the grant spans the account's snapshots. Provide the implementation with
  * `Effect.provide(AWS.NeptuneGraph.GetGraphSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Poll a snapshot until available
+ * @binding
+ * @section Managing Snapshots
+ * @example Poll a snapshot until available
  * ```typescript
  * const getSnapshot = yield* NeptuneGraph.GetGraphSnapshot();
  *
  * const snapshot = yield* getSnapshot({ snapshotIdentifier });
  * // snapshot.status → "AVAILABLE"
  * ```
- *
- * @binding
  */
 export interface GetGraphSnapshot extends Binding.Service<
   GetGraphSnapshot,

@@ -86,8 +86,8 @@ export interface BackupEventSourceProps extends EventRouteProps {
  * host-specific implementation layer (e.g. `AWS.Lambda.EventSource`) on the
  * Function effect.
  *
- * ### Consuming Backup Events
- * **Example:** Alert On Failed Backup Jobs
+ * @section Consuming Backup Events
+ * @example Alert On Failed Backup Jobs
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

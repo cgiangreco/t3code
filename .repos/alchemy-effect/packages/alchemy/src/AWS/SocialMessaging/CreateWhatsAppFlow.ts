@@ -24,8 +24,9 @@ export interface CreateWhatsAppFlowRequest extends Omit<
  * into every request.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.CreateWhatsAppFlowHttp)`.
- * ### Managing WhatsApp Flows
- * **Example:** Create a Flow
+ * @binding
+ * @section Managing WhatsApp Flows
+ * @example Create a Flow
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const createFlow = yield* AWS.SocialMessaging.CreateWhatsAppFlow(account);
@@ -36,8 +37,6 @@ export interface CreateWhatsAppFlowRequest extends Omit<
  *   categories: ["APPOINTMENT_BOOKING"],
  * });
  * ```
- *
- * @binding
  */
 export interface CreateWhatsAppFlow extends Binding.Service<
   CreateWhatsAppFlow,

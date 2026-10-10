@@ -64,8 +64,9 @@ export interface Revision extends Resource<
  * assets. Providers import assets into a revision (via DataExchange jobs) and
  * then finalize it to make the snapshot available to subscribers.
  *
- * ### Creating Revisions
- * **Example:** Revision with a comment
+ * @resource
+ * @section Creating Revisions
+ * @example Revision with a comment
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -79,12 +80,12 @@ export interface Revision extends Resource<
  * });
  * ```
  *
- * ### Finalizing
+ * @section Finalizing
  * Once assets have been imported into the revision (via a DataExchange
  * import job), flip `finalized` to publish it. Finalizing an empty revision
  * fails.
  *
- * **Example:** Finalize a revision that has assets
+ * @example Finalize a revision that has assets
  * ```typescript
  * const revision = yield* AWS.DataExchange.Revision("PricesV1", {
  *   dataSetId: dataSet.dataSetId,
@@ -92,8 +93,6 @@ export interface Revision extends Resource<
  *   finalized: true,
  * });
  * ```
- *
- * @resource
  */
 export const Revision = Resource<Revision>("AWS.DataExchange.Revision");
 

@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.CreateMembersHttp)`.
- * ### Member Administration
- * **Example:** Add a Member Account
+ * @binding
+ * @section Member Administration
+ * @example Add a Member Account
  * ```typescript
  * // init
  * const createMembers = yield* AWS.GuardDuty.CreateMembers(detector);
@@ -21,8 +22,6 @@ import type { Detector } from "./Detector.ts";
  *   AccountDetails: [{ AccountId: "111122223333", Email: "security@example.com" }],
  * });
  * ```
- *
- * @binding
  */
 export interface CreateMembers extends Binding.Service<
   CreateMembers,

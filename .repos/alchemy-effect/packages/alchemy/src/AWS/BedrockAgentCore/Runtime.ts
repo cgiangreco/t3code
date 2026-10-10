@@ -115,8 +115,9 @@ export interface Runtime extends Resource<
  * isolation, scaling, and identity built in. Each configuration change
  * publishes a new immutable runtime version.
  *
- * ### Creating Runtimes
- * **Example:** Container-Backed Agent Runtime
+ * @resource
+ * @section Creating Runtimes
+ * @example Container-Backed Agent Runtime
  * ```typescript
  * import * as AgentCore from "alchemy/AWS/BedrockAgentCore";
  *
@@ -130,8 +131,8 @@ export interface Runtime extends Resource<
  * });
  * ```
  *
- * ### Invoking from a Function
- * **Example:** Invoke the Agent
+ * @section Invoking from a Function
+ * @example Invoke the Agent
  * ```typescript
  * // init
  * const invoke = yield* AgentCore.InvokeAgentRuntime(runtime);
@@ -147,8 +148,6 @@ export interface Runtime extends Resource<
  *   }),
  * };
  * ```
- *
- * @resource
  */
 export const Runtime = Resource<Runtime>("AWS.BedrockAgentCore.Runtime");
 

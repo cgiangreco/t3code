@@ -18,8 +18,9 @@ export interface ListConnectorEntitiesRequest extends Omit<
  * automatically and `appflow:ListConnectorEntities` is granted on the
  * profile. Provide the implementation with
  * `Effect.provide(AWS.AppFlow.ListConnectorEntitiesHttp)`.
- * ### Discovering Connector Entities
- * **Example:** List the Entities Behind a Connector Profile
+ * @binding
+ * @section Discovering Connector Entities
+ * @example List the Entities Behind a Connector Profile
  * ```typescript
  * // init — bind the operation to the connector profile
  * const listConnectorEntities =
@@ -29,8 +30,6 @@ export interface ListConnectorEntitiesRequest extends Omit<
  * const result = yield* listConnectorEntities();
  * // result.connectorEntityMap groups entities by category
  * ```
- *
- * @binding
  */
 export interface ListConnectorEntities extends Binding.Service<
   ListConnectorEntities,

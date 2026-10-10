@@ -16,8 +16,9 @@ export interface PutRecordsRequest extends Omit<
  * granted on the stream. Provide the implementation with
  * `Effect.provide(AWS.Kinesis.PutRecordsHttp)`. For unbounded batching with
  * automatic partial-failure retry, use `AWS.Kinesis.StreamSink` instead.
- * ### Writing Batches
- * **Example:** Put a Batch of Records
+ * @binding
+ * @section Writing Batches
+ * @example Put a Batch of Records
  * ```typescript
  * // init — bind the operation to the stream
  * const putRecords = yield* AWS.Kinesis.PutRecords(stream);
@@ -31,8 +32,6 @@ export interface PutRecordsRequest extends Omit<
  * });
  * // result.FailedRecordCount > 0 means some entries need re-submission
  * ```
- *
- * @binding
  */
 export interface PutRecords extends Binding.Service<
   PutRecords,

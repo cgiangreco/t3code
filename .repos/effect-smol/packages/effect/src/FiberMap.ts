@@ -10,6 +10,7 @@
  * @since 2.0.0
  */
 import * as Cause from "./Cause.ts"
+import type { Context } from "./Context.ts"
 import * as Deferred from "./Deferred.ts"
 import * as Effect from "./Effect.ts"
 import * as Exit from "./Exit.ts"
@@ -18,7 +19,6 @@ import * as Filter from "./Filter.ts"
 import { constVoid, dual } from "./Function.ts"
 import type * as Inspectable from "./Inspectable.ts"
 import { PipeInspectableProto } from "./internal/core.ts"
-import * as internalEffect from "./internal/effect.ts"
 import * as Iterable from "./Iterable.ts"
 import * as MutableHashMap from "./MutableHashMap.ts"
 import * as Option from "./Option.ts"
@@ -35,7 +35,7 @@ const TypeId = "~effect/FiberMap"
  *
  * **Example** (Managing fibers in a map)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * // Create a FiberMap with string keys
@@ -47,11 +47,9 @@ const TypeId = "~effect/FiberMap"
  *   yield* FiberMap.run(map, "task2", Effect.never)
  *
  *   // Get the size of the map
- *   return yield* FiberMap.size(map)
+ *   const size = yield* FiberMap.size(map)
+ *   console.log(size) // 2
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => 2
  * ```
  *
  * @category models
@@ -79,20 +77,19 @@ export interface FiberMap<in out K, out A = unknown, out E = unknown>
  *
  * **Example** (Checking if a value is a FiberMap)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
  *
- *   return [FiberMap.isFiberMap(map), FiberMap.isFiberMap({}), FiberMap.isFiberMap(null)]
+ *   console.log(FiberMap.isFiberMap(map)) // true
+ *   console.log(FiberMap.isFiberMap({})) // false
+ *   console.log(FiberMap.isFiberMap(null)) // false
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => [true, false, false]
  * ```
  *
- * @category guards
+ * @category refinements
  * @since 2.0.0
  */
 export const isFiberMap = (u: unknown): u is FiberMap<unknown> => Predicate.hasProperty(u, TypeId)
@@ -136,24 +133,20 @@ const makeUnsafe = <K, A = unknown, E = unknown>(
  *
  * **Example** (Creating a scoped FiberMap)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
- * const program = Effect.gen(function*() {
+ * Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
  *
  *   // run some effects and add the fibers to the map
  *   yield* FiberMap.run(map, "fiber a", Effect.never)
  *   yield* FiberMap.run(map, "fiber b", Effect.never)
  *
- *   yield* Effect.yieldNow
- *   return yield* FiberMap.size(map)
+ *   yield* Effect.sleep(1000)
  * }).pipe(
  *   Effect.scoped // The fibers will be interrupted when the scope is closed
  * )
- *
- * const actual = await Effect.runPromise(program)
- * actual // => 2
  * ```
  *
  * @category constructors
@@ -190,7 +183,7 @@ export const make = <K, A = unknown, E = unknown>(): Effect.Effect<FiberMap<K, A
  *
  * **Example** (Creating a scoped runtime)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Fiber, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -201,11 +194,11 @@ export const make = <K, A = unknown, E = unknown>(): Effect.Effect<FiberMap<K, A
  *   const fiber2 = run("task2", Effect.succeed("World"))
  *
  *   // Join the fibers to get their successful values
- *   return [yield* Fiber.join(fiber1), yield* Fiber.join(fiber2)]
- * })
+ *   const result1 = yield* Fiber.join(fiber1)
+ *   const result2 = yield* Fiber.join(fiber2)
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => ["Hello", "World"]
+ *   console.log(result1, result2) // "Hello", "World"
+ * })
  * ```
  *
  * @category constructors
@@ -247,7 +240,7 @@ export const makeRuntime = <R, K, E = unknown, A = unknown>(): Effect.Effect<
  *
  * **Example** (Creating a promise runtime)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -258,11 +251,11 @@ export const makeRuntime = <R, K, E = unknown, A = unknown>(): Effect.Effect<
  *   const promise2 = run("task2", Effect.succeed("World"))
  *
  *   // Convert to Effect and await
- *   return [yield* Effect.promise(() => promise1), yield* Effect.promise(() => promise2)]
- * })
+ *   const result1 = yield* Effect.promise(() => promise1)
+ *   const result2 = yield* Effect.promise(() => promise2)
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => ["Hello", "World"]
+ *   console.log(result1, result2) // "Hello", "World"
+ * })
  * ```
  *
  * @category constructors
@@ -305,12 +298,11 @@ const isInternalInterruption = Filter.toPredicate(Filter.compose(
  *
  * When the fiber completes, it is removed from the map. If the key already has
  * a fiber, that previous fiber is interrupted unless `onlyIfMissing` is set;
- * in that case a different new fiber is interrupted and the existing entry is
- * kept, while re-registering the existing fiber is a no-op.
+ * in that case the new fiber is interrupted and the existing entry is kept.
  *
  * **Example** (Adding a fiber unsafely)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Deferred, Effect, Fiber, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -324,11 +316,9 @@ const isInternalInterruption = Filter.toPredicate(Filter.compose(
  *   yield* Deferred.succeed(deferred, "Hello")
  *
  *   // Join the fiber to get its successful value
- *   return yield* Fiber.join(fiber)
+ *   const result = yield* Fiber.join(fiber)
+ *   console.log(result) // "Hello"
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => "Hello"
  * ```
  *
  * @category combinators
@@ -368,19 +358,16 @@ export const setUnsafe: {
 
   const previous = MutableHashMap.get(self.state.backing, key)
   if (previous._tag === "Some") {
-    if (previous.value === fiber) {
-      return
-    } else if (options?.onlyIfMissing === true) {
+    if (options?.onlyIfMissing === true) {
       fiber.interruptUnsafe(internalFiberId)
       return
+    } else if (previous.value === fiber) {
+      return
     }
-  }
-
-  // Install the replacement before interruption can re-enter the map through a finalizer.
-  MutableHashMap.set(self.state.backing, key, fiber)
-  if (previous._tag === "Some") {
     previous.value.interruptUnsafe(internalFiberId)
   }
+
+  MutableHashMap.set(self.state.backing, key, fiber)
   fiber.addObserver((exit) => {
     if (self.state._tag === "Closed") {
       return
@@ -409,14 +396,13 @@ export const setUnsafe: {
  *
  * When the fiber completes, it is removed from the map. If the key already has
  * a fiber, that previous fiber is interrupted unless `onlyIfMissing` is set;
- * in that case a different new fiber is interrupted and the existing entry is
- * kept, while re-registering the existing fiber is a no-op.
+ * in that case the new fiber is interrupted and the existing entry is kept.
  *
  * This is the Effect-wrapped version of `setUnsafe`.
  *
  * **Example** (Adding a fiber)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Deferred, Effect, Fiber, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -430,11 +416,9 @@ export const setUnsafe: {
  *   yield* Deferred.succeed(deferred, "Hello")
  *
  *   // Join the fiber to get its successful value
- *   return yield* Fiber.join(fiber)
+ *   const result = yield* Fiber.join(fiber)
+ *   console.log(result) // "Hello"
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => "Hello"
  * ```
  *
  * @category combinators
@@ -478,8 +462,8 @@ export const set: {
  *
  * **Example** (Retrieving a fiber unsafely)
  *
- * ```ts import.meta.vitest
- * import { Deferred, Effect, Fiber, FiberMap, Option } from "effect"
+ * ```ts
+ * import { Deferred, Effect, Fiber, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
@@ -491,13 +475,13 @@ export const set: {
  *
  *   // Retrieve the fiber
  *   const retrieved = FiberMap.getUnsafe(map, "greeting")
- *   yield* Deferred.succeed(deferred, "Hello")
- *   const result = yield* Fiber.join(fiber)
- *   return Option.map(retrieved, () => result)
- * })
+ *   if (retrieved._tag === "Some") {
+ *     yield* Deferred.succeed(deferred, "Hello")
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => Option.some("Hello")
+ *     const result = yield* Fiber.join(retrieved.value)
+ *     console.log(result) // "Hello"
+ *   }
+ * })
  * ```
  *
  * @category combinators
@@ -522,8 +506,8 @@ export const getUnsafe: {
  *
  * **Example** (Retrieving a fiber)
  *
- * ```ts import.meta.vitest
- * import { Deferred, Effect, Fiber, FiberMap, Option } from "effect"
+ * ```ts
+ * import { Deferred, Effect, Fiber, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
@@ -535,13 +519,13 @@ export const getUnsafe: {
  *
  *   // Retrieve the fiber with error handling
  *   const retrieved = yield* FiberMap.get(map, "greeting")
- *   yield* Deferred.succeed(deferred, "Hello")
- *   const result = yield* Fiber.join(fiber)
- *   return Option.map(retrieved, () => result)
- * })
+ *   if (retrieved._tag === "Some") {
+ *     yield* Deferred.succeed(deferred, "Hello")
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => Option.some("Hello")
+ *     const result = yield* Fiber.join(retrieved.value)
+ *     console.log(result) // "Hello"
+ *   }
+ * })
  * ```
  *
  * @category combinators
@@ -561,7 +545,7 @@ export const get: {
  *
  * **Example** (Checking if a key exists unsafely)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -571,11 +555,9 @@ export const get: {
  *   yield* FiberMap.run(map, "task1", Effect.never)
  *
  *   // Check if keys exist
- *   return [FiberMap.hasUnsafe(map, "task1"), FiberMap.hasUnsafe(map, "task2")]
+ *   console.log(FiberMap.hasUnsafe(map, "task1")) // true
+ *   console.log(FiberMap.hasUnsafe(map, "task2")) // false
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => [true, false]
  * ```
  *
  * @category combinators
@@ -596,7 +578,7 @@ export const hasUnsafe: {
  *
  * **Example** (Checking if a key exists)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -606,11 +588,12 @@ export const hasUnsafe: {
  *   yield* FiberMap.run(map, "task1", Effect.never)
  *
  *   // Check if keys exist using Effect
- *   return [yield* FiberMap.has(map, "task1"), yield* FiberMap.has(map, "task2")]
- * })
+ *   const exists1 = yield* FiberMap.has(map, "task1")
+ *   const exists2 = yield* FiberMap.has(map, "task2")
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => [true, false]
+ *   console.log(exists1) // true
+ *   console.log(exists2) // false
+ * })
  * ```
  *
  * @category combinators
@@ -629,7 +612,7 @@ export const has: {
  *
  * **Example** (Removing a fiber)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -639,16 +622,13 @@ export const has: {
  *   yield* FiberMap.run(map, "task1", Effect.never)
  *   yield* FiberMap.run(map, "task2", Effect.never)
  *
- *   const sizeBefore = yield* FiberMap.size(map)
+ *   console.log(yield* FiberMap.size(map)) // 2
  *
  *   // Remove a specific fiber (this will interrupt it)
  *   yield* FiberMap.remove(map, "task1")
  *
- *   return [sizeBefore, yield* FiberMap.size(map)]
+ *   console.log(yield* FiberMap.size(map)) // 1
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => [2, 1]
  * ```
  *
  * @category combinators
@@ -682,7 +662,7 @@ export const remove: {
  *
  * **Example** (Clearing all fibers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -693,16 +673,13 @@ export const remove: {
  *   yield* FiberMap.run(map, "task2", Effect.never)
  *   yield* FiberMap.run(map, "task3", Effect.never)
  *
- *   const sizeBefore = yield* FiberMap.size(map)
+ *   console.log(yield* FiberMap.size(map)) // 3
  *
  *   // Clear all fibers (this will interrupt all of them)
  *   yield* FiberMap.clear(map)
  *
- *   return [sizeBefore, yield* FiberMap.size(map)]
+ *   console.log(yield* FiberMap.size(map)) // 0
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => [3, 0]
  * ```
  *
  * @category combinators
@@ -733,12 +710,10 @@ const constInterruptedFiber = (function() {
  *
  * When the fiber completes, it is removed from the map. If the key already has
  * a fiber, the previous fiber is interrupted unless `onlyIfMissing` is set.
- * Set `startImmediately: false` to defer startup. By default, the effect starts
- * immediately.
  *
  * **Example** (Forking effects into a map)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Fiber, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -751,11 +726,10 @@ const constInterruptedFiber = (function() {
  *   // Join the fibers to get their successful values
  *   const result1 = yield* Fiber.join(fiber1)
  *   const result2 = yield* Fiber.join(fiber2)
- *   return [result1, result2, yield* FiberMap.size(map)]
- * })
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => ["Hello", "World", 0]
+ *   console.log(result1, result2) // "Hello", "World"
+ *   console.log(yield* FiberMap.size(map)) // 0 (fibers are removed after completion)
+ * })
  * ```
  *
  * @category combinators
@@ -798,23 +772,17 @@ const runImpl = <K, A, E, R, XE extends E, XA extends A>(
   key: K,
   effect: Effect.Effect<XA, XE, R>,
   options?: {
-    readonly startImmediately?: boolean | undefined
     readonly onlyIfMissing?: boolean
     readonly propagateInterruption?: boolean | undefined
   }
-): Effect.Effect<Fiber.Fiber<XA, XE>, never, R> =>
+) =>
   Effect.withFiber((parent) => {
     if (self.state._tag === "Closed") {
       return Effect.interrupt
     } else if (options?.onlyIfMissing === true && hasUnsafe(self, key)) {
       return Effect.sync(constInterruptedFiber)
     }
-    const fiber: Fiber.Fiber<XA, XE> = internalEffect.forkUnsafe(
-      parent,
-      effect,
-      options?.startImmediately ?? true,
-      true
-    )
+    const fiber = Effect.runForkWith(parent.context as Context<R>)(effect)
     setUnsafe(self, key, fiber, options)
     return Effect.succeed(fiber)
   })
@@ -830,29 +798,26 @@ const runImpl = <K, A, E, R, XE extends E, XA extends A>(
  *
  * **Example** (Capturing a runtime)
  *
- * ```ts import.meta.vitest
- * import { Context, Effect, Fiber, FiberMap } from "effect"
+ * ```ts
+ * import { Context, Effect, FiberMap } from "effect"
  *
- * class Users extends Context.Service<Users, {
- *   readonly getAll: Effect.Effect<Array<unknown>>
- * }>()("Users") {}
+ * interface Users {
+ *   readonly _: unique symbol
+ * }
+ * const Users = Context.Service<Users, {
+ *   getAll: Effect.Effect<Array<unknown>>
+ * }>("Users")
  *
- * const program = Effect.gen(function*() {
+ * Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
  *   const run = yield* FiberMap.runtime(map)<Users>()
  *
  *   // run some effects and add the fibers to the map
- *   const fiberA = run("effect-a", Effect.andThen(Users, (_) => _.getAll))
- *   const fiberB = run("effect-b", Effect.andThen(Users, (_) => _.getAll))
- *   return [(yield* Fiber.join(fiberA)).length, (yield* Fiber.join(fiberB)).length]
+ *   run("effect-a", Effect.andThen(Users, (_) => _.getAll))
+ *   run("effect-b", Effect.andThen(Users, (_) => _.getAll))
  * }).pipe(
  *   Effect.scoped // The fibers will be interrupted when the scope is closed
  * )
- *
- * const actual = await Effect.runPromise(Effect.provideService(program, Users, {
- *   getAll: Effect.succeed([])
- * }))
- * actual // => [0, 0]
  * ```
  *
  * @category combinators
@@ -913,7 +878,7 @@ export const runtime: <K, A, E>(
  *
  * **Example** (Running effects as promises)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -925,11 +890,11 @@ export const runtime: <K, A, E>(
  *   const promise2 = runPromise("task2", Effect.succeed("World"))
  *
  *   // Convert promises back to Effects and await
- *   return [yield* Effect.promise(() => promise1), yield* Effect.promise(() => promise2)]
- * })
+ *   const result1 = yield* Effect.promise(() => promise1)
+ *   const result2 = yield* Effect.promise(() => promise2)
  *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => ["Hello", "World"]
+ *   console.log(result1, result2) // "Hello", "World"
+ * })
  * ```
  *
  * @category combinators
@@ -976,23 +941,20 @@ export const runtimePromise = <K, A, E>(self: FiberMap<K, A, E>): <R = never>() 
  *
  * **Example** (Checking the map size)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
  *
- *   const sizeBefore = yield* FiberMap.size(map)
+ *   console.log(yield* FiberMap.size(map)) // 0
  *
  *   // Add some fibers
  *   yield* FiberMap.run(map, "task1", Effect.never)
  *   yield* FiberMap.run(map, "task2", Effect.never)
  *
- *   return [sizeBefore, yield* FiberMap.size(map)]
+ *   console.log(yield* FiberMap.size(map)) // 2
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => [0, 2]
  * ```
  *
  * @category combinators
@@ -1013,19 +975,16 @@ export const size = <K, A, E>(self: FiberMap<K, A, E>): Effect.Effect<number> =>
  *
  * **Example** (Joining failing fibers)
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, FiberMap } from "effect"
+ * ```ts
+ * import { Effect, FiberMap } from "effect"
  *
- * const program = Effect.gen(function*() {
+ * Effect.gen(function*() {
  *   const map = yield* FiberMap.make()
  *   yield* FiberMap.set(map, "a", Effect.runFork(Effect.fail("error")))
  *
  *   // parent fiber will fail with "error"
  *   yield* FiberMap.join(map)
  * })
- *
- * const actual = await Effect.runPromise(Effect.exit(Effect.scoped(program)))
- * actual // => Exit.fail("error")
  * ```
  *
  * @category combinators
@@ -1040,23 +999,24 @@ export const join = <K, A, E>(self: FiberMap<K, A, E>): Effect.Effect<void, E> =
  *
  * **Example** (Waiting for an empty map)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, FiberMap } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const map = yield* FiberMap.make<string>()
  *
- *   yield* FiberMap.run(map, "task1", Effect.yieldNow)
- *   yield* FiberMap.run(map, "task2", Effect.yieldNow)
+ *   // Add some fibers that will complete after a delay
+ *   yield* FiberMap.run(map, "task1", Effect.sleep(1000))
+ *   yield* FiberMap.run(map, "task2", Effect.sleep(2000))
+ *
+ *   console.log("Waiting for all fibers to complete...")
  *
  *   // Wait for the map to be empty
  *   yield* FiberMap.awaitEmpty(map)
  *
- *   return yield* FiberMap.size(map)
+ *   console.log("All fibers completed!")
+ *   console.log(yield* FiberMap.size(map)) // 0
  * })
- *
- * const actual = await Effect.runPromise(Effect.scoped(program))
- * actual // => 0
  * ```
  *
  * @category combinators

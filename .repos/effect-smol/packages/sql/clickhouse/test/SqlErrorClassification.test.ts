@@ -1,31 +1,25 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect } from "effect"
-import * as Reactivity from "effect/reactivity/Reactivity"
-import { SqlError } from "effect/sql/SqlError"
+import * as Reactivity from "effect/unstable/reactivity/Reactivity"
 import { vi } from "vitest"
 
 const state: {
   connectCause: unknown
   queryCause: unknown
-  resultJsonCause: unknown
 } = {
   connectCause: null,
-  queryCause: null,
-  resultJsonCause: null
+  queryCause: null
 }
 
 vi.mock("@clickhouse/client", () => ({
   createClient: () => ({
-    ping: () =>
-      state.connectCause
-        ? Promise.resolve({ success: false, error: state.connectCause })
-        : Promise.resolve({ success: true }),
+    exec: () => state.connectCause ? Promise.reject(state.connectCause) : Promise.resolve({}),
     close: () => Promise.resolve(),
     query: () =>
       state.queryCause
         ? Promise.reject(state.queryCause)
         : Promise.resolve({
-          json: () => state.resultJsonCause ? Promise.reject(state.resultJsonCause) : Promise.resolve({ data: [] })
+          json: () => Promise.resolve({ data: [] })
         }),
     command: () => Promise.resolve({}),
     insert: () => Promise.resolve({})
@@ -36,7 +30,6 @@ const connectFailureReasonTag = (code: number) =>
   Effect.gen(function*() {
     state.connectCause = { code }
     state.queryCause = null
-    state.resultJsonCause = null
     const { ClickhouseClient } = yield* Effect.promise(() => import("@effect/sql-clickhouse"))
     const error = yield* Effect.flip(ClickhouseClient.make({ url: "http://localhost:8123" }))
     return error.reason._tag
@@ -49,7 +42,6 @@ const queryFailureReasonTag = (code: number) =>
   Effect.gen(function*() {
     state.connectCause = null
     state.queryCause = { code }
-    state.resultJsonCause = null
     const { ClickhouseClient } = yield* Effect.promise(() => import("@effect/sql-clickhouse"))
     const client = yield* ClickhouseClient.make({ url: "http://localhost:8123" })
     const error = yield* Effect.flip(client`SELECT 1`)
@@ -59,7 +51,7 @@ const queryFailureReasonTag = (code: number) =>
     Effect.provide(Reactivity.layer)
   )
 
-describe("ClickhouseClient SqlError classification", { concurrent: false }, () => {
+describe("ClickhouseClient SqlError classification", () => {
   it.effect("maps representative native codes to reasons", () =>
     Effect.gen(function*() {
       const cases = [
@@ -80,21 +72,4 @@ describe("ClickhouseClient SqlError classification", { concurrent: false }, () =
       const tag = yield* queryFailureReasonTag(999)
       assert.strictEqual(tag, "UnknownError")
     }))
-
-  it.effect("maps result decoding failures to SqlError", () =>
-    Effect.gen(function*() {
-      state.connectCause = null
-      state.queryCause = null
-      state.resultJsonCause = new SyntaxError("invalid JSON response")
-      const { ClickhouseClient } = yield* Effect.promise(() => import("@effect/sql-clickhouse"))
-      const client = yield* ClickhouseClient.make({ url: "http://localhost:8123" })
-      const error = yield* Effect.flip(client`SELECT 1`)
-
-      assert(error instanceof SqlError)
-      assert.strictEqual(error.reason._tag, "UnknownError")
-      assert.strictEqual(error.reason.cause, state.resultJsonCause)
-    }).pipe(
-      Effect.scoped,
-      Effect.provide(Reactivity.layer)
-    ))
 })

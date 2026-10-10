@@ -78,15 +78,16 @@ export interface Workspace extends Resource<
  * via remote-write and queried through the workspace's Prometheus-compatible
  * endpoint.
  *
- * ### Creating a Workspace
- * **Example:** Basic Workspace
+ * @resource
+ * @section Creating a Workspace
+ * @example Basic Workspace
  * ```typescript
  * const workspace = yield* AMP.Workspace("Metrics", {
  *   alias: "production-metrics",
  * });
  * ```
  *
- * **Example:** Workspace with Customer-Managed Encryption
+ * @example Workspace with Customer-Managed Encryption
  * ```typescript
  * const workspace = yield* AMP.Workspace("Metrics", {
  *   alias: "production-metrics",
@@ -95,7 +96,7 @@ export interface Workspace extends Resource<
  * });
  * ```
  *
- * **Example:** Workspace with Custom Retention and Series Limits
+ * @example Workspace with Custom Retention and Series Limits
  * ```typescript
  * const workspace = yield* AMP.Workspace("Metrics", {
  *   alias: "production-metrics",
@@ -107,15 +108,15 @@ export interface Workspace extends Resource<
  * });
  * ```
  *
- * ### Using the Endpoint
- * **Example:** Read the Remote-Write URL
+ * @section Using the Endpoint
+ * @example Read the Remote-Write URL
  * ```typescript
  * // prometheusEndpoint ends in a trailing slash; append `api/v1/remote_write`
  * const remoteWrite = `${workspace.prometheusEndpoint}api/v1/remote_write`;
  * ```
  *
- * ### Runtime Bindings
- * **Example:** Write and Query Metrics from a Function
+ * @section Runtime Bindings
+ * @example Write and Query Metrics from a Function
  * ```typescript
  * // inside a Lambda Function's effect (provide the *Http layers):
  * const remoteWrite = yield* AMP.RemoteWrite(workspace);
@@ -126,8 +127,6 @@ export interface Workspace extends Resource<
  * });
  * const result = yield* metrics.query({ query: "jobs_done_total" });
  * ```
- *
- * @resource
  */
 export const Workspace = Resource<Workspace>("AWS.AMP.Workspace");
 

@@ -12,8 +12,9 @@ export interface PutActionRevisionRequest extends Omit<
  * Runtime binding for `codepipeline:PutActionRevision` — informs
  * CodePipeline about a new revision available to a source action, starting
  * an execution if the revision is new.
- * ### Sources
- * **Example:** Report a New Source Revision
+ * @binding
+ * @section Sources
+ * @example Report a New Source Revision
  * ```typescript
  * const putRevision = yield* AWS.CodePipeline.PutActionRevision(pipeline);
  *
@@ -27,8 +28,6 @@ export interface PutActionRevisionRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface PutActionRevision extends Binding.Service<
   PutActionRevision,

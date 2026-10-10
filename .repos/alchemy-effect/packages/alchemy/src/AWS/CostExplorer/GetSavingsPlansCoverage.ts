@@ -14,8 +14,9 @@ export interface GetSavingsPlansCoverageRequest
  * Retrieve how much of your eligible spend was covered by Savings
  * Plans over a time period. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.GetSavingsPlansCoverageHttp)`.
- * ### Savings Plans
- * **Example:** Check Savings Plans Coverage
+ * @binding
+ * @section Savings Plans
+ * @example Check Savings Plans Coverage
  * ```typescript
  * // init — account-level binding takes no resource
  * const getSavingsPlansCoverage = yield* AWS.CostExplorer.GetSavingsPlansCoverage();
@@ -25,8 +26,6 @@ export interface GetSavingsPlansCoverageRequest
  *   TimePeriod: { Start: "2026-06-01", End: "2026-07-01" },
  * });
  * ```
- *
- * @binding
  */
 export interface GetSavingsPlansCoverage extends Binding.Service<
   GetSavingsPlansCoverage,

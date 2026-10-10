@@ -142,15 +142,16 @@ export interface SigningProfile extends Resource<
  * profiles (the name stays reserved) and deletes them per its data-retention
  * policy, so prefer generated names over fixed `profileName`s.
  *
- * ### Creating a Signing Profile
- * **Example:** Lambda Code-Signing Profile
+ * @resource
+ * @section Creating a Signing Profile
+ * @example Lambda Code-Signing Profile
  * ```typescript
  * const profile = yield* Signer.SigningProfile("release-profile", {
  *   platformId: "AWSLambda-SHA384-ECDSA",
  * });
  * ```
  *
- * **Example:** Profile with Signature Validity Period
+ * @example Profile with Signature Validity Period
  * ```typescript
  * const profile = yield* Signer.SigningProfile("release-profile", {
  *   platformId: "AWSLambda-SHA384-ECDSA",
@@ -158,8 +159,6 @@ export interface SigningProfile extends Resource<
  *   tags: { team: "platform" },
  * });
  * ```
- *
- * @resource
  */
 export const SigningProfile = Resource<SigningProfile>(
   "AWS.Signer.SigningProfile",

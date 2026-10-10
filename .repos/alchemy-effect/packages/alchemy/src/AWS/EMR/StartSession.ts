@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:StartSession` — starts an interactive Spark Connect session on the bound cluster (EMR 7.8+ with sessions enabled).
- * ### Interactive Sessions
- * **Example:** Start a Session
+ * @binding
+ * @section Interactive Sessions
+ * @example Start a Session
  * ```typescript
  * const startSession = yield* AWS.EMR.StartSession(cluster);
  *
@@ -15,8 +16,6 @@ import type { Cluster } from "./Cluster.ts";
  *   ExecutionRoleArn: runtimeRoleArn,
  * });
  * ```
- *
- * @binding
  */
 export interface StartSession extends Binding.Service<
   StartSession,

@@ -112,8 +112,9 @@ export interface SlackChannelConfiguration extends Resource<
  * console OAuth flow (Chatbot console -> Configure new client -> Slack) —
  * workspace authorization cannot be automated.
  *
- * ### Creating Slack Channel Configurations
- * **Example:** Notify a Slack channel from an SNS topic
+ * @resource
+ * @section Creating Slack Channel Configurations
+ * @example Notify a Slack channel from an SNS topic
  * ```typescript
  * import * as Chatbot from "alchemy/AWS/Chatbot";
  * import { Role } from "alchemy/AWS/IAM/Role";
@@ -142,8 +143,6 @@ export interface SlackChannelConfiguration extends Resource<
  *   loggingLevel: "ERROR",
  * });
  * ```
- *
- * @resource
  */
 export const SlackChannelConfiguration = Resource<SlackChannelConfiguration>(
   "AWS.Chatbot.SlackChannelConfiguration",

@@ -16,8 +16,9 @@ export interface StartFlowFlushRequest extends Omit<
  *
  * Provide `NetworkFirewall.StartFlowFlushHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Flow Operations
- * **Example:** Flush Flows to a Host
+ * @binding
+ * @section Flow Operations
+ * @example Flush Flows to a Host
  * ```typescript
  * // init — grants network-firewall:StartFlowFlush on the firewall
  * const startFlowFlush = yield* AWS.NetworkFirewall.StartFlowFlush(firewall);
@@ -27,8 +28,6 @@ export interface StartFlowFlushRequest extends Omit<
  *   FlowFilters: [{ SourceAddress: { AddressDefinition: "10.0.1.10/32" } }],
  * });
  * ```
- *
- * @binding
  */
 export interface StartFlowFlush extends Binding.Service<
   StartFlowFlush,

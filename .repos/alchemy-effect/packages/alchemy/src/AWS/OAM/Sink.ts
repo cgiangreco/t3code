@@ -62,15 +62,16 @@ export interface Sink extends Resource<
  * attach a sink policy (the `policy` prop) that authorizes source accounts
  * (or an entire organization) to create links to it.
  *
- * ### Creating a Sink
- * **Example:** Basic Sink
+ * @resource
+ * @section Creating a Sink
+ * @example Basic Sink
  * ```typescript
  * import * as OAM from "alchemy/AWS/OAM";
  *
  * const sink = yield* OAM.Sink("MonitoringSink");
  * ```
  *
- * **Example:** Sink with a policy authorizing source accounts
+ * @example Sink with a policy authorizing source accounts
  * ```typescript
  * const sink = yield* OAM.Sink("MonitoringSink", {
  *   policy: {
@@ -95,7 +96,7 @@ export interface Sink extends Resource<
  * });
  * ```
  *
- * **Example:** Authorize an entire organization
+ * @example Authorize an entire organization
  * ```typescript
  * const sink = yield* OAM.Sink("OrgSink", {
  *   policy: {
@@ -114,8 +115,6 @@ export interface Sink extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Sink = Resource<Sink>("AWS.OAM.Sink");
 

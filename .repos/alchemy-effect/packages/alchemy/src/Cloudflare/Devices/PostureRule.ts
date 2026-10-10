@@ -117,8 +117,11 @@ export type DevicePostureRule = Resource<
  *
  * Everything except `type` is mutable in place (full PUT). Changing
  * `type` replaces the rule.
- * ### Infrastructure-free checks
- * **Example:** Require a minimum Windows version
+ * @resource
+ * @product Devices
+ * @category Cloudflare One (Zero Trust)
+ * @section Infrastructure-free checks
+ * @example Require a minimum Windows version
  * ```typescript
  * const rule = yield* Cloudflare.Devices.DevicePostureRule("WindowsOsVersion", {
  *   type: "os_version",
@@ -133,7 +136,7 @@ export type DevicePostureRule = Resource<
  * });
  * ```
  *
- * **Example:** Require the OS firewall to be enabled
+ * @example Require the OS firewall to be enabled
  * ```typescript
  * yield* Cloudflare.Devices.DevicePostureRule("Firewall", {
  *   type: "firewall",
@@ -142,7 +145,7 @@ export type DevicePostureRule = Resource<
  * });
  * ```
  *
- * **Example:** Require disk encryption on all drives
+ * @example Require disk encryption on all drives
  * ```typescript
  * yield* Cloudflare.Devices.DevicePostureRule("DiskEncryption", {
  *   type: "disk_encryption",
@@ -152,10 +155,6 @@ export type DevicePostureRule = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/identity/devices/
- *
- * @resource
- * @product Devices
- * @category Cloudflare One (Zero Trust)
  */
 export const DevicePostureRule = Resource<DevicePostureRule>(TypeId);
 

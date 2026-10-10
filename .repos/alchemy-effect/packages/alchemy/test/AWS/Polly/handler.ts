@@ -7,8 +7,8 @@ import * as Layer from "effect/Layer";
 import * as Redacted from "effect/Redacted";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 
 // Deterministic bucket for async synthesis output. Polly writes the audio
 // with the CALLER's credentials, so the Lambda role is granted s3:PutObject
@@ -62,7 +62,7 @@ export const PollyFixturesLive = Layer.effect(
 export default PollyTestFunction.make(
   {
     main: import.meta.url,
-    functionUrl: true,
+    url: true,
     timeout: Duration.minutes(2),
   },
   Effect.gen(function* () {

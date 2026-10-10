@@ -4,7 +4,7 @@ import * as Effect from "effect/Effect";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
 
-import type { ScopedPlanStatusSession } from "../../Report.ts";
+import type { ScopedPlanStatusSession } from "../../Cli/Cli.ts";
 import { isResolved } from "../../Diff.ts";
 import * as Provider from "../../Provider.ts";
 import { Resource } from "../../Resource.ts";
@@ -149,8 +149,9 @@ export interface NetworkInterface extends Resource<
  * Changing `subnetId` or the primary `privateIpAddress` replaces the interface.
  * `description`, `securityGroupIds`, and `sourceDestCheck` are applied in place.
  *
- * ### Creating a Network Interface
- * **Example:** Basic ENI
+ * @resource
+ * @section Creating a Network Interface
+ * @example Basic ENI
  * ```typescript
  * const eni = yield* AWS.EC2.NetworkInterface("AppEni", {
  *   subnetId: subnet.subnetId,
@@ -163,8 +164,8 @@ export interface NetworkInterface extends Resource<
  * instance replacement — detach it from a failed instance and attach it to a
  * new one to keep the same address.
  *
- * ### Fixed Private IP
- * **Example:** ENI with a Fixed Private IP
+ * @section Fixed Private IP
+ * @example ENI with a Fixed Private IP
  * ```typescript
  * const eni = yield* AWS.EC2.NetworkInterface("FixedIpEni", {
  *   subnetId: subnet.subnetId,
@@ -176,8 +177,8 @@ export interface NetworkInterface extends Resource<
  * Pinning `privateIpAddress` gives the interface a predictable address —
  * useful for appliances and services other resources reference by IP.
  *
- * ### Forwarding Appliances
- * **Example:** ENI with Source/Dest Check Disabled
+ * @section Forwarding Appliances
+ * @example ENI with Source/Dest Check Disabled
  * ```typescript
  * const eni = yield* AWS.EC2.NetworkInterface("NatEni", {
  *   subnetId: subnet.subnetId,
@@ -188,8 +189,6 @@ export interface NetworkInterface extends Resource<
  *
  * Disable `sourceDestCheck` when the interface belongs to a NAT instance,
  * firewall, or router that forwards packets not addressed to itself.
- *
- * @resource
  */
 export const NetworkInterface = Resource<NetworkInterface>(
   "AWS.EC2.NetworkInterface",

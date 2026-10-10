@@ -14,8 +14,9 @@ export interface GetDataSourceRunRequest extends Omit<
  * Reads the status of a data source run in the bound domain. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.GetDataSourceRunHttp)`.
- * ### Data Source Runs
- * **Example:** Poll a Run to Completion
+ * @binding
+ * @section Data Source Runs
+ * @example Poll a Run to Completion
  * ```typescript
  * // init — bind the operation to the domain
  * const getDataSourceRun = yield* AWS.DataZone.GetDataSourceRun(domain);
@@ -24,8 +25,6 @@ export interface GetDataSourceRunRequest extends Omit<
  * const run = yield* getDataSourceRun({ identifier: runId });
  * if (run.status === "FAILED") { yield* Effect.logError(run.errorMessage); }
  * ```
- *
- * @binding
  */
 export interface GetDataSourceRun extends Binding.Service<
   GetDataSourceRun,

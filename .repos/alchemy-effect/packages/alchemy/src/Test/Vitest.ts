@@ -29,8 +29,6 @@ export {
 export type MakeOptions<ROut = any> = Core.MakeOptions<ROut>;
 export type ScratchStack = Core.ScratchStack;
 export type TestEffect<A, R = never> = Core.TestEffect<A, R>;
-export const defaultStage = Core.defaultStage;
-export const resolveStage = Core.resolveStage;
 
 type TestOptions = number | { timeout?: number };
 
@@ -93,10 +91,13 @@ export interface TestApi {
   beforeEach: BeforeEachFn;
   afterAll: AfterAllFn;
   afterEach: AfterEachFn;
-  deploy: Core.Deploy;
+  deploy: <A>(
+    stack: TestEffect<CompiledStack<A>, Stage | AlchemyContext>,
+    options?: { stage?: string },
+  ) => ReturnType<typeof Core.deploy<A>>;
   destroy: (
     stack: TestEffect<CompiledStack, Stage | AlchemyContext>,
-    options?: { stage?: string; include?: never; exclude?: never },
+    options?: { stage?: string },
   ) => ReturnType<typeof Core.destroy>;
 }
 
@@ -112,15 +113,9 @@ export const make = <ROut = any>(options: MakeOptions<ROut>): TestApi => {
   // single `runPromise` boundary, so all hooks share one scope that's only
   // closed after `destroy(...)` runs.
   const sharedScope = Scope.makeUnsafe("sequential");
-  // In dev mode, run local providers behind one file-scoped RPC sidecar
-  // (the `alchemy dev` topology). Lives in its own scope — NOT sharedScope,
-  // which `destroy(Stack)` closes mid-file in self-contained tests — and is
-  // closed by the fallback afterAll below.
-  const sidecar = Core.makeSidecarHandle(options);
   const wrap = <A>(eff: TestEffect<A>) =>
-    Core.toEffect(eff, options, sharedScope, sidecar);
-  const runEff = <A>(eff: TestEffect<A>) =>
-    Core.run(eff, options, sharedScope, sidecar);
+    Core.toEffect(eff, options, sharedScope);
+  const runEff = <A>(eff: TestEffect<A>) => Core.run(eff, options, sharedScope);
 
   const test = ((name, eff, opts) => {
     it.live(name, () => wrap(eff), timeoutOf(opts));
@@ -164,7 +159,6 @@ export const make = <ROut = any>(options: MakeOptions<ROut>): TestApi => {
       body,
       { ...options, state: scratch.state },
       sharedScope,
-      sidecar,
     );
   };
 
@@ -227,16 +221,11 @@ export const make = <ROut = any>(options: MakeOptions<ROut>): TestApi => {
   // Fallback cleanup: if the user never calls `destroy(Stack)` (e.g.
   // `NO_DESTROY=1`), nothing else closes the shared scope and the sidecar
   // child process leaks past the test process. Register an `afterAll` that
-  // closes it (and the RPC sidecar, which lives in its own scope so that
-  // mid-file `destroy(Stack)` calls can't kill it for later tests). We defer
-  // registration to a microtask so it runs AFTER any user-registered
-  // `afterAll` (including `destroy(Stack)`); vitest runs afterAll hooks in
-  // registration order.
-  const closeAll = sidecar
-    ? Effect.andThen(closeScope, sidecar.close)
-    : closeScope;
+  // closes it. We defer registration to a microtask so it runs AFTER any
+  // user-registered `afterAll` (including `destroy(Stack)`); vitest runs
+  // afterAll hooks in registration order.
   queueMicrotask(() => {
-    vitestAfterAll(() => Effect.runPromise(closeAll), DEFAULT_TIMEOUT);
+    vitestAfterAll(() => Effect.runPromise(closeScope), DEFAULT_TIMEOUT);
   });
 
   return {
@@ -245,7 +234,8 @@ export const make = <ROut = any>(options: MakeOptions<ROut>): TestApi => {
     beforeEach,
     afterAll,
     afterEach,
-    deploy: Core.makeDeploy(options, sharedScope),
+    deploy: (stack, callOpts) =>
+      Core.deploy(options, stack, { ...callOpts, scope: sharedScope }),
     destroy: (stack, callOpts) =>
       Core.destroy(options, stack, { ...callOpts, scope: sharedScope }).pipe(
         Effect.ensuring(closeScope),

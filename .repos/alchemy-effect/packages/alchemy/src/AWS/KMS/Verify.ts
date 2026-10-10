@@ -19,8 +19,9 @@ export interface VerifyRequest extends Omit<kms.VerifyRequest, "KeyId"> {}
  * `KMSInvalidSignatureException` — a valid signature returns
  * `SignatureValid: true`.
  *
- * ### Signing
- * **Example:** Verify a Signature
+ * @binding
+ * @section Signing
+ * @example Verify a Signature
  * ```typescript
  * const verify = yield* AWS.KMS.Verify(signingKey);
  *
@@ -31,7 +32,7 @@ export interface VerifyRequest extends Omit<kms.VerifyRequest, "KeyId"> {}
  * });
  * ```
  *
- * **Example:** Treat a Bad Signature as a Value
+ * @example Treat a Bad Signature as a Value
  * ```typescript
  * const valid = yield* verify({ Message, Signature, SigningAlgorithm }).pipe(
  *   Effect.map(() => true),
@@ -40,8 +41,6 @@ export interface VerifyRequest extends Omit<kms.VerifyRequest, "KeyId"> {}
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface Verify extends Binding.Service<
   Verify,

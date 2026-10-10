@@ -16,8 +16,9 @@ export interface GetImagesRequest extends Omit<
  * callable that resolves the per-stream data endpoint (`GetDataEndpoint`)
  * and extracts base64-encoded still images (JPEG/PNG) from the stored
  * media at the requested sampling interval.
- * ### Reading Media
- * **Example:** Extract Thumbnails
+ * @binding
+ * @section Reading Media
+ * @example Extract Thumbnails
  * ```typescript
  * // init
  * const getImages = yield* AWS.KinesisVideo.GetImages(stream);
@@ -30,8 +31,6 @@ export interface GetImagesRequest extends Omit<
  *   Format: "JPEG",
  * });
  * ```
- *
- * @binding
  */
 export interface GetImages extends Binding.Service<
   GetImages,

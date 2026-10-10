@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * id or state — the observation half of backup-retention and disaster-
  * recovery automation. Provide the implementation with
  * `Effect.provide(AWS.CloudHSMV2.DescribeBackupsHttp)`.
- * ### Managing Backups
- * **Example:** List A Cluster's Ready Backups
+ * @binding
+ * @section Managing Backups
+ * @example List A Cluster's Ready Backups
  * ```typescript
  * const describeBackups = yield* AWS.CloudHSMV2.DescribeBackups();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   Filters: { clusterIds: [clusterId], states: ["READY"] },
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeBackups extends Binding.Service<
   DescribeBackups,

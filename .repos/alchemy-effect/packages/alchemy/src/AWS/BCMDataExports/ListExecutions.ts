@@ -20,8 +20,9 @@ export interface ListExecutionsRequest extends Omit<
  * Useful for delivery dashboards and monitors that scan for failed
  * refreshes. Provide the implementation with
  * `Effect.provide(AWS.BCMDataExports.ListExecutionsHttp)`.
- * ### Monitoring Executions
- * **Example:** List Recent Executions
+ * @binding
+ * @section Monitoring Executions
+ * @example List Recent Executions
  * ```typescript
  * // init — bind the operation to the export
  * const listExecutions = yield* AWS.BCMDataExports.ListExecutions(cur);
@@ -33,8 +34,6 @@ export interface ListExecutionsRequest extends Omit<
  *     execution.ExecutionStatus.StatusCode === "DELIVERY_FAILURE",
  * );
  * ```
- *
- * @binding
  */
 export interface ListExecutions extends Binding.Service<
   ListExecutions,

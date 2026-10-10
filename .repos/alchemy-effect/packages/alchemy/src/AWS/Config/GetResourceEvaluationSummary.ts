@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.GetResourceEvaluationSummaryHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Proactive Resource Evaluation
- * **Example:** Read an Evaluation's Summary
+ * @binding
+ * @section Proactive Resource Evaluation
+ * @example Read an Evaluation's Summary
  * ```typescript
  * // init — grants config:GetResourceEvaluationSummary
  * const getResourceEvaluationSummary = yield* AWS.Config.GetResourceEvaluationSummary();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.EvaluationStatus?.Status, result.Compliance);
  * ```
- *
- * @binding
  */
 export interface GetResourceEvaluationSummary extends Binding.Service<
   GetResourceEvaluationSummary,

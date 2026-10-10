@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `clusterName` is injected from the bound {@link Cluster} and `eks:DescribeInsightsRefresh` is granted on the cluster's ARN.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.DescribeInsightsRefreshHttp)`.
- * ### Cluster Insights
- * **Example:** Check an Insights Refresh's Status
+ * @binding
+ * @section Cluster Insights
+ * @example Check an Insights Refresh's Status
  * ```typescript
  * // init
  * const describeInsightsRefresh = yield* AWS.EKS.DescribeInsightsRefresh(cluster);
@@ -19,8 +20,6 @@ import type { Cluster } from "./Cluster.ts";
  * // runtime
  * const { status } = yield* describeInsightsRefresh();
  * ```
- *
- * @binding
  */
 export interface DescribeInsightsRefresh extends Binding.Service<
   DescribeInsightsRefresh,

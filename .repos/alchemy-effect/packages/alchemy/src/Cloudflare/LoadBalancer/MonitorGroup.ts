@@ -84,8 +84,11 @@ export type MonitorGroup = Resource<
  *
  * Monitor groups are an Enterprise-only feature; on non-entitled accounts
  * creation fails with the typed `MonitorGroupsNotEnabled` error.
- * ### Creating a Monitor Group
- * **Example:** Group of two monitors
+ * @resource
+ * @product Load Balancers
+ * @category Performance & Reliability
+ * @section Creating a Monitor Group
+ * @example Group of two monitors
  * ```typescript
  * const group = yield* Cloudflare.LoadBalancer.MonitorGroup("ApiChecks", {
  *   members: [
@@ -95,8 +98,8 @@ export type MonitorGroup = Resource<
  * });
  * ```
  *
- * ### Using with a Pool
- * **Example:** Attach the group to a pool
+ * @section Using with a Pool
+ * @example Attach the group to a pool
  * ```typescript
  * yield* Cloudflare.LoadBalancer.Pool("ApiPool", {
  *   origins: [{ name: "origin-1", address: "203.0.113.10" }],
@@ -105,10 +108,6 @@ export type MonitorGroup = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/load-balancing/monitors/
- *
- * @resource
- * @product Load Balancers
- * @category Performance & Reliability
  */
 export const MonitorGroup = Resource<MonitorGroup>(TypeId);
 

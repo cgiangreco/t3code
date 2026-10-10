@@ -10,8 +10,9 @@ export interface GetMetricDataRequest extends cloudwatch.GetMetricDataInput {}
  *
  * Provide `CloudWatch.GetMetricDataHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Querying Metrics
- * **Example:** Query the Last Hour of a Custom Metric
+ * @binding
+ * @section Querying Metrics
+ * @example Query the Last Hour of a Custom Metric
  * ```typescript
  * // init — grants cloudwatch:GetMetricData
  * const getMetricData = yield* AWS.CloudWatch.GetMetricData();
@@ -34,8 +35,6 @@ export interface GetMetricDataRequest extends cloudwatch.GetMetricDataInput {}
  * });
  * const series = result.MetricDataResults ?? [];
  * ```
- *
- * @binding
  */
 export interface GetMetricData extends Binding.Service<
   GetMetricData,

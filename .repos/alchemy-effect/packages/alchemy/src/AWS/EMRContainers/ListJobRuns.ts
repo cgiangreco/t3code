@@ -10,8 +10,9 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * state, name, or creation time. The virtual cluster ID is injected from the
  * binding. Provide the implementation with
  * `Effect.provide(AWS.EMRContainers.ListJobRunsHttp)`.
- * ### Running Jobs
- * **Example:** Count Active Job Runs
+ * @binding
+ * @section Running Jobs
+ * @example Count Active Job Runs
  * ```typescript
  * // init
  * const listJobRuns = yield* AWS.EMRContainers.ListJobRuns(virtualCluster);
@@ -22,8 +23,6 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * });
  * yield* Effect.log(`${jobRuns?.length ?? 0} active job runs`);
  * ```
- *
- * @binding
  */
 export interface ListJobRuns extends Binding.Service<
   ListJobRuns,

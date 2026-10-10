@@ -9,7 +9,7 @@ optional mobile notifications and Live Activities.
 
 The relay is intentionally not in the hot path for normal T3 Code traffic. After a client connects,
 regular API and WebSocket traffic goes directly between that client and the selected environment.
-See the [T3 Connect architecture note](../../docs/internals/t3-connect.md) for the larger system
+See the [T3 Connect architecture overview](../../docs/internals/t3-code-connect-auth-flow.html) for the larger system
 design.
 
 ## Responsibilities
@@ -20,7 +20,7 @@ The relay currently owns:
 - Provisioning and tracking managed environment endpoints.
 - Issuing short-lived credentials used to connect clients to linked environments.
 - Listing linked environments and registered mobile devices for an account.
-- Registering mobile notification preferences and APNs or FCM tokens.
+- Registering mobile notification preferences and APNs tokens.
 - Receiving published agent activity and delivering notifications or Live Activity updates.
 - Persisting relay state and exposing relay-specific traces for diagnostics.
 
@@ -37,7 +37,7 @@ credential, or authorization behavior.
 - [`src/environments`](./src/environments) contains environment linking, credentials, endpoint
   provisioning, and connection flows.
 - [`src/agentActivity`](./src/agentActivity) contains mobile device registration, activity state,
-  APNs and FCM delivery, and queue processing.
+  APNs delivery, and queue processing.
 - [`src/auth`](./src/auth) contains relay token and DPoP proof handling.
 - [`src/persistence/schema.ts`](./src/persistence/schema.ts) defines persisted relay state. Keep
   schema and migration changes together.
@@ -76,8 +76,7 @@ dependencies represented at their boundary rather than mocking internal behavior
 
 ## Deployment
 
-The relay deploys with the Alchemy CLI (`vp run --filter t3code-relay deploy` is `alchemy deploy`
-in this directory):
+The relay deploys through Alchemy:
 
 ```sh
 vp run --filter t3code-relay deploy
@@ -86,8 +85,7 @@ vp run --filter t3code-relay deploy
 The stack provisions the Cloudflare Worker and queues, managed endpoint resources, database
 connectivity, and relay tracing resources. Copy [`infra/relay/.env.example`](./.env.example) to
 `infra/relay/.env` and fill in the deployment-specific values before deploying. Alchemy loads that
-file from the relay directory. Runtime secrets include Clerk, APNs, and optional FCM credentials. Set
-`APNS_ENABLED=false` for an Android-only development deployment without Apple credentials. Production adopts
+file from the relay directory. Runtime secrets include Clerk and APNs credentials. Production adopts
 the configured API and tunnel DNS zones as retained Cloudflare resources. Personal stages reference
 the production-owned zones.
 
@@ -110,10 +108,9 @@ DNS-safe sanitization as Alchemy physical resource names, so `prod` uses
 `<stage>-<digest>.<RELAY_TUNNEL_ZONE_NAME>`. `RELAY_DOMAIN` remains available as an explicit API
 domain override.
 
-The stack's `PublishClientConfig` action ([`src/clientConfig.ts`](./src/clientConfig.ts)) writes the
-deployed relay URL and tracing configuration into the repository-root `.env`, so subsequent source
-builds point at the relay that was just deployed without copying values manually. It runs only when
-one of those outputs changed, and `T3CODE_RELAY_CLIENT_CONFIG_ENV` redirects it to another file.
+After a successful deploy, the wrapper updates the repository-root `.env` file with the derived relay
+URL. That makes subsequent source builds point at the relay that was just deployed without copying
+the URL manually.
 
 ### Deployment CI
 
@@ -153,7 +150,6 @@ The `production` GitHub environment must define these Actions secrets:
 
 - `CLERK_SECRET_KEY`
 - `APNS_PRIVATE_KEY`
-- `FCM_SERVICE_ACCOUNT` when Android push is enabled
 
 The account-scoped repository credentials are consumed by Alchemy while provisioning relay stages; they
 are not bound into the relay Worker. The production deployment uses an Axiom personal access token,
@@ -163,6 +159,8 @@ and hosted web builds.
 
 See:
 
-- [T3 Connect setup](../../docs/operations/connect-setup.md) for Clerk keys, JWT templates, and sign-up restrictions.
+- [T3 Connect Clerk Setup](../../docs/internals/t3-connect.md) for Clerk keys, JWT templates, and sign-up restrictions
+  setup.
 - [Relay Observability](../../docs/operations/relay-observability.md) for deployment tracing and diagnostics.
-- [T3 Connect architecture](../../docs/internals/t3-connect.md) for environment linking and trust boundaries.
+- [T3 Connect Architecture Overview](../../docs/internals/t3-code-connect-auth-flow.html) for the full link,
+  connect, endpoint, and notification flows.

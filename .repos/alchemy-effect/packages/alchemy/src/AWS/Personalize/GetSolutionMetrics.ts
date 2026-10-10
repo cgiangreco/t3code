@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.GetSolutionMetricsHttp)`.
  *
- * ### Retraining Loop
- * **Example:** Evaluate a Trained Model
+ * @binding
+ * @section Retraining Loop
+ * @example Evaluate a Trained Model
  * ```typescript
  * // init
  * const getSolutionMetrics = yield* Personalize.GetSolutionMetrics();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const { metrics } = yield* getSolutionMetrics({ solutionVersionArn });
  * const ndcg = metrics?.["normalized_discounted_cumulative_gain_at_25"];
  * ```
- *
- * @binding
  */
 export interface GetSolutionMetrics extends Binding.Service<
   GetSolutionMetrics,

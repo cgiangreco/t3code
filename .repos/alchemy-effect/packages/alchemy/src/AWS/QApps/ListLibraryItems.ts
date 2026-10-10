@@ -16,8 +16,9 @@ export interface ListLibraryItemsRequest extends Omit<
  *
  * Lists the library items published in the bound app's Q Business application environment instance. Provide the implementation with
  * `Effect.provide(AWS.QApps.ListLibraryItemsHttp)`.
- * ### Library Items
- * **Example:** List Library Items
+ * @binding
+ * @section Library Items
+ * @example List Library Items
  * ```typescript
  * // init — bind the operation to the Q App
  * const listLibraryItems = yield* AWS.QApps.ListLibraryItems(app);
@@ -26,8 +27,6 @@ export interface ListLibraryItemsRequest extends Omit<
  * const page = yield* listLibraryItems({ limit: 25 });
  * console.log(page.libraryItems?.length);
  * ```
- *
- * @binding
  */
 export interface ListLibraryItems extends Binding.Service<
   ListLibraryItems,

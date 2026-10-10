@@ -10,16 +10,15 @@ import type { ServerlessCluster } from "./ServerlessCluster.ts";
  * Reads a topic's partition count, replication factor, configuration, and
  * status through the MSK control plane. Provide the implementation with
  * `Effect.provide(AWS.Kafka.DescribeTopicHttp)`.
- * ### Managing Topics
- * **Example:** Describe a Topic
+ * @binding
+ * @section Managing Topics
+ * @example Describe a Topic
  * ```typescript
  * const describeTopic = yield* Kafka.DescribeTopic(cluster);
  *
  * const topic = yield* describeTopic({ TopicName: "orders" });
  * // topic.PartitionCount, topic.Configs, topic.Status
  * ```
- *
- * @binding
  */
 export interface DescribeTopic extends Binding.Service<
   DescribeTopic,

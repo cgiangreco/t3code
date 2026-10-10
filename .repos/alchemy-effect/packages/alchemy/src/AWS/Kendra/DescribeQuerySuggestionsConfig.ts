@@ -12,8 +12,9 @@ import type { Index } from "./SearchIndex.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.DescribeQuerySuggestionsConfigHttp)`.
  *
- * ### Query Suggestions
- * **Example:** Read Suggestions Settings
+ * @binding
+ * @section Query Suggestions
+ * @example Read Suggestions Settings
  * ```typescript
  * const suggestionsConfig =
  *   yield* AWS.Kendra.DescribeQuerySuggestionsConfig(index);
@@ -21,8 +22,6 @@ import type { Index } from "./SearchIndex.ts";
  * const config = yield* suggestionsConfig();
  * console.log(config.Mode, config.Status);
  * ```
- *
- * @binding
  */
 export interface DescribeQuerySuggestionsConfig extends Binding.Service<
   DescribeQuerySuggestionsConfig,

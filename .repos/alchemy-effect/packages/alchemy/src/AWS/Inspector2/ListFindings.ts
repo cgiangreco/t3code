@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.ListFindingsHttp)`.
- * ### Querying Findings
- * **Example:** List Critical Findings
+ * @binding
+ * @section Querying Findings
+ * @example List Critical Findings
  * ```typescript
  * // init
  * const listFindings = yield* AWS.Inspector2.ListFindings();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   filterCriteria: { severity: [{ comparison: "EQUALS", value: "CRITICAL" }] },
  * });
  * ```
- *
- * @binding
  */
 export interface ListFindings extends Binding.Service<
   ListFindings,

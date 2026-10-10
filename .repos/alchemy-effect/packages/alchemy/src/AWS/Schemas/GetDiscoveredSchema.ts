@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * exposed as an on-demand call. The operation is account-level (it is not
  * scoped to any registry or schema). Provide the implementation with
  * `Effect.provide(AWS.Schemas.GetDiscoveredSchemaHttp)`.
- * ### Discovering Schemas
- * **Example:** Infer A Schema From Sample Events
+ * @binding
+ * @section Discovering Schemas
+ * @example Infer A Schema From Sample Events
  * ```typescript
  * // init — account-level, no resource to bind
  * const getDiscoveredSchema = yield* AWS.Schemas.GetDiscoveredSchema();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   Events: [JSON.stringify(sampleEvent)],
  * });
  * ```
- *
- * @binding
  */
 export interface GetDiscoveredSchema extends Binding.Service<
   GetDiscoveredSchema,

@@ -19,21 +19,18 @@ const { test } = Test.make({ providers: AWS.providers() });
 // isn't an org management/delegated account, which `list()` catches and maps to
 // `[]`. So this case passes on any account — it just returns `[]` when the
 // account can't enumerate delegated administrators.
-test.provider(
-  "list enumerates delegated administrators",
-  () =>
-    Effect.gen(function* () {
-      const provider = yield* Provider.findProvider(DelegatedAdministrator);
-      const all = yield* provider.list();
+test.provider("list enumerates delegated administrators", () =>
+  Effect.gen(function* () {
+    const provider = yield* Provider.findProvider(DelegatedAdministrator);
+    const all = yield* provider.list();
 
-      expect(Array.isArray(all)).toBe(true);
+    expect(Array.isArray(all)).toBe(true);
 
-      for (const item of all) {
-        expect(typeof item.accountId).toBe("string");
-        expect(typeof item.servicePrincipal).toBe("string");
-      }
-    }),
-  { tags: ["provider:aws", "provider:aws:organizations", "live"] },
+    for (const item of all) {
+      expect(typeof item.accountId).toBe("string");
+      expect(typeof item.servicePrincipal).toBe("string");
+    }
+  }),
 );
 
 // Full lifecycle list test — requires an org MANAGEMENT account plus a member
@@ -75,7 +72,6 @@ test.provider.skipIf(!memberAccountId)(
 
       yield* stack.destroy();
     }),
-  { tags: ["provider:aws", "provider:aws:organizations", "live"] },
 );
 
 // Regression test for https://github.com/alchemy-run/alchemy/issues/736.
@@ -120,7 +116,7 @@ test.provider.skipIf(!memberAccountId)(
       // interrupted deploy leaves behind: `creating`, no attributes, and
       // every Output-valued prop lost in the round-trip.
       const state = yield* yield* State;
-      const stage = stack.stage;
+      const stage = "test"; // scratch stacks default to the "test" stage
       const fqns = yield* state.list({ stack: stack.name, stage });
       const rows = yield* Effect.forEach(fqns, (fqn) =>
         state
@@ -164,8 +160,5 @@ test.provider.skipIf(!memberAccountId)(
 
       yield* stack.destroy();
     }),
-  {
-    tags: ["provider:aws", "provider:aws:organizations", "live"],
-    timeout: 240_000,
-  },
+  { timeout: 240_000 },
 );

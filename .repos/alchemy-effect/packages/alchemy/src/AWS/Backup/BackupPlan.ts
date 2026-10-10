@@ -128,8 +128,9 @@ export interface BackupPlan extends Resource<
  * Pair a plan with a {@link BackupSelection} to assign the AWS resources it
  * protects.
  *
- * ### Creating a Plan
- * **Example:** Daily backups retained for 30 days
+ * @resource
+ * @section Creating a Plan
+ * @example Daily backups retained for 30 days
  * ```typescript
  * import * as Backup from "alchemy/AWS/Backup";
  *
@@ -149,7 +150,7 @@ export interface BackupPlan extends Resource<
  * });
  * ```
  *
- * **Example:** Move to cold storage then delete
+ * @example Move to cold storage then delete
  * ```typescript
  * const plan = yield* Backup.BackupPlan("ArchivePlan", {
  *   rules: [
@@ -165,8 +166,6 @@ export interface BackupPlan extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const BackupPlan = Resource<BackupPlan>("AWS.Backup.BackupPlan");
 

@@ -10,8 +10,9 @@ import type { ServiceLevelObjective } from "./ServiceLevelObjective.ts";
  * Returns the bound SLO's full configuration (SLI, goal, burn rates).
  * Provide the implementation with
  * `Effect.provide(AWS.ApplicationSignals.GetServiceLevelObjectiveHttp)`.
- * ### Reading SLOs
- * **Example:** Read the Bound SLO
+ * @binding
+ * @section Reading SLOs
+ * @example Read the Bound SLO
  * ```typescript
  * // init — bind the operation to the SLO
  * const getSlo = yield* AWS.ApplicationSignals.GetServiceLevelObjective(slo);
@@ -20,8 +21,6 @@ import type { ServiceLevelObjective } from "./ServiceLevelObjective.ts";
  * const result = yield* getSlo();
  * yield* Effect.log(result.Slo.Goal.AttainmentGoal);
  * ```
- *
- * @binding
  */
 export interface GetServiceLevelObjective extends Binding.Service<
   GetServiceLevelObjective,

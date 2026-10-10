@@ -9,15 +9,14 @@ import type { ServerlessCluster } from "./ServerlessCluster.ts";
  *
  * Deletes a Kafka topic on the bound cluster through the MSK control plane.
  * Provide the implementation with `Effect.provide(AWS.Kafka.DeleteTopicHttp)`.
- * ### Managing Topics
- * **Example:** Delete a Topic
+ * @binding
+ * @section Managing Topics
+ * @example Delete a Topic
  * ```typescript
  * const deleteTopic = yield* Kafka.DeleteTopic(cluster);
  *
  * yield* deleteTopic({ TopicName: "orders" });
  * ```
- *
- * @binding
  */
 export interface DeleteTopic extends Binding.Service<
   DeleteTopic,

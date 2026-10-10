@@ -138,7 +138,7 @@ export const layer = Layer.effect(
       const primaryConfig = yield* serverExposure.backendConfig;
       const port = yield* scanForWslPort(primaryConfig.port + 1).pipe(
         Effect.provideService(NetService.NetService, net),
-        Effect.asSome,
+        Effect.map((value) => Option.some(value)),
         Effect.catch((error) =>
           logWslBackendWarning("could not allocate port for WSL backend", {
             error: error.message,
@@ -171,7 +171,7 @@ export const layer = Layer.effect(
           onReady: () => Ref.set(preflightErrorRef, Option.none()),
         })
         .pipe(
-          Effect.asSome,
+          Effect.map((registered) => Option.some(registered)),
           Effect.catch((error) =>
             logWslBackendWarning("WSL backend already registered, skipping start", {
               id: targetId,
@@ -188,7 +188,6 @@ export const layer = Layer.effect(
 
     const reconcileBody = Effect.gen(function* () {
       const settings = yield* appSettings.get;
-      if (!settings.localEnvironmentEnabled) return;
       const available = yield* wslEnvironment.isAvailable;
       const existing = yield* findExistingWslInstance;
       const existingId = Option.map(existing, (instance) => instance.id);

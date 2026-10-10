@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { buildNativeReviewTokensResetKey } from "./reviewDiffBridgeKeys";
+import { buildNativeReviewTokensResetKey, hashReviewDiffKey } from "./reviewDiffBridgeKeys";
 
 describe("native review diff bridge", () => {
-  it("changes reset keys when the rendered diff identity changes", () => {
+  it("builds stable reset keys from the rendered diff identity", () => {
     const input = {
       threadKey: "env:thread",
       sectionId: "turn:2",
@@ -13,12 +13,15 @@ describe("native review diff bridge", () => {
       rowCount: 4,
     };
 
-    const resetKey = buildNativeReviewTokensResetKey(input);
+    expect(buildNativeReviewTokensResetKey(input)).toBe(buildNativeReviewTokensResetKey(input));
+    expect(buildNativeReviewTokensResetKey({ ...input, rowCount: 5 })).not.toBe(
+      buildNativeReviewTokensResetKey(input),
+    );
+    expect(buildNativeReviewTokensResetKey({ ...input, diff: null })).toContain(":empty:");
+  });
 
-    expect(
-      buildNativeReviewTokensResetKey({ ...input, diff: "diff --git a/b.ts b/b.ts" }),
-    ).not.toBe(resetKey);
-    expect(buildNativeReviewTokensResetKey({ ...input, rowCount: 5 })).not.toBe(resetKey);
-    expect(buildNativeReviewTokensResetKey({ ...input, diff: null })).not.toBe(resetKey);
+  it("includes diff length in the hash key to reduce accidental collisions", () => {
+    expect(hashReviewDiffKey("abc")).toMatch(/^3:/);
+    expect(hashReviewDiffKey("abcd")).toMatch(/^4:/);
   });
 });

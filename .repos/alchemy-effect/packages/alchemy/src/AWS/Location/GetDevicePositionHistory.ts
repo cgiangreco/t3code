@@ -19,16 +19,15 @@ export interface GetDevicePositionHistoryRequest extends Omit<
  * `geo:GetDevicePositionHistory`), scoped to one {@link Tracker}. Provide the implementation with
  * `Effect.provide(AWS.Location.GetDevicePositionHistoryHttp)`.
  *
- * ### Reading Device Positions
- * **Example:** Read a Device's Position History
+ * @binding
+ * @section Reading Device Positions
+ * @example Read a Device's Position History
  * ```typescript
  * const getHistory = yield* Location.GetDevicePositionHistory(tracker);
  *
  * const history = yield* getHistory({ DeviceId: "vehicle-1" });
  * // history.DevicePositions → chronological position samples
  * ```
- *
- * @binding
  */
 export interface GetDevicePositionHistory extends Binding.Service<
   GetDevicePositionHistory,

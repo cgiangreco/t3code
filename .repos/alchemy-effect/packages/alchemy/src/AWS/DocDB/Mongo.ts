@@ -1,19 +1,9 @@
 import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import * as Redacted from "effect/Redacted";
-import type { Db, MongoClient, MongoClientOptions } from "mongodb";
+import { type Db, MongoClient, type MongoClientOptions } from "mongodb";
 import { makeExecutionMemo } from "../../Runtime/ExecutionMemo.ts";
 import type { MongoConnectionInfo } from "./Connect.ts";
-
-// `mongodb` is an optional peer dependency — loaded lazily so importing the
-// AWS provider barrel never requires the driver unless a client is built.
-const importMongodb = () =>
-  import("mongodb").catch((cause) => {
-    throw new Error(
-      "Failed to load the 'mongodb' driver. Install the optional peer dependency 'mongodb' to connect to DocumentDB.",
-      { cause },
-    );
-  });
 
 /** A failure raised by the underlying `mongodb` driver. */
 export class MongoError extends Data.TaggedError("AWS.DocDB.MongoError")<{
@@ -76,8 +66,9 @@ export interface MongoOptions {
  * and their built-in roles (`read`, `readWrite`, `dbAdmin`,
  * `clusterAdmin`, …) are managed *inside* the database with
  * `db.createUser(...)` — IAM only governs the management plane.
- * ### Connecting to a Cluster
- * **Example:** Query a Collection inside a Function
+ * @binding
+ * @section Connecting to a Cluster
+ * @example Query a Collection inside a Function
  * ```typescript
  * // init — bind the cluster, then build the client
  * const connect = yield* AWS.DocDB.Connect(cluster, { database: "app" });
@@ -90,7 +81,7 @@ export interface MongoOptions {
  * );
  * ```
  *
- * **Example:** Create a Database User (DB-plane auth)
+ * @example Create a Database User (DB-plane auth)
  * ```typescript
  * const { use } = yield* db;
  * yield* use((db) =>
@@ -101,8 +92,6 @@ export interface MongoOptions {
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export const mongo = <E, R>(
   connection: Effect.Effect<MongoConnectionInfo, E, R>,
@@ -113,17 +102,15 @@ export const mongo = <E, R>(
       const info = yield* connection;
       const client = yield* Effect.acquireRelease(
         Effect.tryPromise({
-          try: async () => {
-            const { MongoClient } = await importMongodb();
-            return new MongoClient(Redacted.value(info.url), {
+          try: () =>
+            new MongoClient(Redacted.value(info.url), {
               ...(options?.ca !== undefined
                 ? // A caller-supplied CA restores full identity verification
                   // (overriding the URL's tlsAllowInvalidCertificates).
                   { ca: options.ca, tlsAllowInvalidCertificates: false }
                 : {}),
               ...options?.clientOptions,
-            }).connect();
-          },
+            }).connect(),
           catch: (cause) => new MongoError({ cause }),
         }),
         (client) => Effect.promise(() => client.close().catch(() => {})),

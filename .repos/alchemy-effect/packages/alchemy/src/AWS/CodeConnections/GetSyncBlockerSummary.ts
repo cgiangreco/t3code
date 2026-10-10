@@ -11,8 +11,9 @@ import type { SyncConfiguration } from "./SyncConfiguration.ts";
  * from inside a function runtime. Pair with {@link UpdateSyncBlocker} to
  * resolve them. Provide the implementation with
  * `Effect.provide(AWS.CodeConnections.GetSyncBlockerSummaryHttp)`.
- * ### Monitoring Git Sync
- * **Example:** Read the Latest Sync Blockers
+ * @binding
+ * @section Monitoring Git Sync
+ * @example Read the Latest Sync Blockers
  * ```typescript
  * // init — bind the operation to the sync configuration
  * const getSyncBlockerSummary =
@@ -22,8 +23,6 @@ import type { SyncConfiguration } from "./SyncConfiguration.ts";
  * const { SyncBlockerSummary } = yield* getSyncBlockerSummary();
  * const blockers = SyncBlockerSummary.LatestBlockers ?? [];
  * ```
- *
- * @binding
  */
 export interface GetSyncBlockerSummary extends Binding.Service<
   GetSyncBlockerSummary,

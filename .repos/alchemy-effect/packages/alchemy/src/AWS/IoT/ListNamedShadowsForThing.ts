@@ -15,15 +15,14 @@ export interface ListNamedShadowsForThingRequest extends Omit<
  * Bind it to a {@link Thing} to list the thing's named shadows — the thing
  * name is injected automatically. Provide the implementation with
  * `Effect.provide(AWS.IoT.ListNamedShadowsForThingHttp)`.
- * ### Device Shadows
- * **Example:** List Named Shadows
+ * @binding
+ * @section Device Shadows
+ * @example List Named Shadows
  * ```typescript
  * const listShadows = yield* AWS.IoT.ListNamedShadowsForThing(thing);
  *
  * const { results } = yield* listShadows();
  * ```
- *
- * @binding
  */
 export interface ListNamedShadowsForThing extends Binding.Service<
   ListNamedShadowsForThing,

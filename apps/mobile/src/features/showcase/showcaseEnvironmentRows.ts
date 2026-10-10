@@ -43,7 +43,6 @@ export const SHOWCASE_CONNECTED_CLOUD_ENVIRONMENTS: ReadonlyArray<ConnectedEnvir
     environmentLabel: "Aurora GPU Pod",
     displayUrl: "https://aurora-gpu.t3.sh",
     isRelayManaged: true,
-    isEnabled: true,
     connectionState: "connected",
     connectionError: null,
     connectionErrorTraceId: null,

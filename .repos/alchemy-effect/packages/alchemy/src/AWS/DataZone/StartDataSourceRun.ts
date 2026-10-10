@@ -14,8 +14,9 @@ export interface StartDataSourceRunRequest extends Omit<
  * Triggers an on-demand run of a data source in the bound domain, ingesting new technical assets into the inventory. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.StartDataSourceRunHttp)`.
- * ### Data Source Runs
- * **Example:** Trigger an Ingestion Run
+ * @binding
+ * @section Data Source Runs
+ * @example Trigger an Ingestion Run
  * ```typescript
  * // init — bind the operation to the domain
  * const startDataSourceRun = yield* AWS.DataZone.StartDataSourceRun(domain);
@@ -23,8 +24,6 @@ export interface StartDataSourceRunRequest extends Omit<
  * // runtime
  * const run = yield* startDataSourceRun({ dataSourceIdentifier: dataSourceId });
  * ```
- *
- * @binding
  */
 export interface StartDataSourceRun extends Binding.Service<
   StartDataSourceRun,

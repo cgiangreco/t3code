@@ -7,15 +7,14 @@ import * as Binding from "../../Binding.ts";
  *
  * Lists the account's Neptune Analytics import tasks. Provide the implementation with
  * `Effect.provide(AWS.NeptuneGraph.ListImportTasksHttp)`.
- * ### Importing and Exporting Data
- * **Example:** List import tasks
+ * @binding
+ * @section Importing and Exporting Data
+ * @example List import tasks
  * ```typescript
  * const listImportTasks = yield* NeptuneGraph.ListImportTasks();
  *
  * const { tasks } = yield* listImportTasks();
  * ```
- *
- * @binding
  */
 export interface ListImportTasks extends Binding.Service<
   ListImportTasks,

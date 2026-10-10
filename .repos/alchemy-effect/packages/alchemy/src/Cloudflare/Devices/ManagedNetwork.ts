@@ -76,8 +76,11 @@ export type DeviceManagedNetwork = Resource<
  *
  * Name and config are mutable in place (PUT). `tls` is the only network
  * type Cloudflare supports.
- * ### Creating a managed network
- * **Example:** Detect the office network by TLS fingerprint
+ * @resource
+ * @product Devices
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a managed network
+ * @example Detect the office network by TLS fingerprint
  * ```typescript
  * const network = yield* Cloudflare.Devices.DeviceManagedNetwork("Office", {
  *   config: {
@@ -88,7 +91,7 @@ export type DeviceManagedNetwork = Resource<
  * });
  * ```
  *
- * **Example:** Use the network in a custom device profile
+ * @example Use the network in a custom device profile
  * ```typescript
  * yield* Cloudflare.Devices.DeviceCustomProfile("OnPrem", {
  *   match: `network == "${network.name}"`,
@@ -98,10 +101,6 @@ export type DeviceManagedNetwork = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/configure-warp/managed-networks/
- *
- * @resource
- * @product Devices
- * @category Cloudflare One (Zero Trust)
  */
 export const DeviceManagedNetwork = Resource<DeviceManagedNetwork>(TypeId);
 
@@ -216,7 +215,7 @@ type ObservedNetwork = {
   config?: { tlsSockaddr: string; sha256?: string | null } | null;
   name?: string | null;
   networkId?: string | null;
-  type?: "tls" | (string & {}) | null;
+  type?: "tls" | null;
 };
 
 /**

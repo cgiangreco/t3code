@@ -11,8 +11,9 @@ import type { DBCluster } from "./DBCluster.ts";
  * function that wakes a development cluster on a schedule. The cluster
  * identifier is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.DocDB.StartDBClusterHttp)`.
- * ### Operating a Cluster
- * **Example:** Start a Stopped Cluster
+ * @binding
+ * @section Operating a Cluster
+ * @example Start a Stopped Cluster
  * ```typescript
  * // init — bind the operation to the cluster
  * const startDBCluster = yield* AWS.DocDB.StartDBCluster(cluster);
@@ -20,8 +21,6 @@ import type { DBCluster } from "./DBCluster.ts";
  * // runtime
  * yield* startDBCluster();
  * ```
- *
- * @binding
  */
 export interface StartDBCluster extends Binding.Service<
   StartDBCluster,

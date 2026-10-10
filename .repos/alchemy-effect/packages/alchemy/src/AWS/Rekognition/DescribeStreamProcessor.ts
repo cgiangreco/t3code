@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.DescribeStreamProcessorHttp)`.
  *
- * ### Stream Processors
- * **Example:** Describe a Stream Processor
+ * @binding
+ * @section Stream Processors
+ * @example Describe a Stream Processor
  * ```typescript
  * // init
  * const describeStreamProcessor = yield* AWS.Rekognition.DescribeStreamProcessor();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const info = yield* describeStreamProcessor({ Name: "lobby-camera" });
  * // info.Status, info.Input, info.Output
  * ```
- *
- * @binding
  */
 export interface DescribeStreamProcessor extends Binding.Service<
   DescribeStreamProcessor,

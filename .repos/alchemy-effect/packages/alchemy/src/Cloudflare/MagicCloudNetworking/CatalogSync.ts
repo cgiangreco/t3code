@@ -108,8 +108,11 @@ export type CatalogSync = Resource<
  * Magic Cloud Networking is an entitlement-gated add-on (Magic WAN family).
  * On accounts without the entitlement every API call fails with the typed
  * `FeatureNotEnabled` error (Cloudflare code 1012, "feature not enabled").
- * ### Creating a sync
- * **Example:** Sync discovered VPC CIDRs into a Zero Trust list
+ * @resource
+ * @product Magic Cloud Networking
+ * @category Network
+ * @section Creating a sync
+ * @example Sync discovered VPC CIDRs into a Zero Trust list
  * ```typescript
  * const sync = yield* Cloudflare.MagicCloudNetworking.CatalogSync("VpcCidrs", {
  *   destinationType: "ZERO_TRUST_LIST",
@@ -119,7 +122,7 @@ export type CatalogSync = Resource<
  * // sync.destinationId is the provisioned Zero Trust list
  * ```
  *
- * **Example:** Manual sync without a destination
+ * @example Manual sync without a destination
  * ```typescript
  * yield* Cloudflare.MagicCloudNetworking.CatalogSync("DryRun", {
  *   destinationType: "NONE",
@@ -127,8 +130,8 @@ export type CatalogSync = Resource<
  * });
  * ```
  *
- * ### Destroy behavior
- * **Example:** Keep the destination list on destroy
+ * @section Destroy behavior
+ * @example Keep the destination list on destroy
  * ```typescript
  * yield* Cloudflare.MagicCloudNetworking.CatalogSync("VpcCidrs", {
  *   destinationType: "ZERO_TRUST_LIST",
@@ -138,10 +141,6 @@ export type CatalogSync = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/magic-cloud-networking/
- *
- * @resource
- * @product Magic Cloud Networking
- * @category Network
  */
 export const CatalogSync = Resource<CatalogSync>(TypeId);
 

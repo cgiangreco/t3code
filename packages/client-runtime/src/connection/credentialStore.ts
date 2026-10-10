@@ -1,5 +1,6 @@
 import * as Context from "effect/Context";
 import type * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
 import type * as Option from "effect/Option";
 
 import type { ConnectionCredential } from "./catalog.ts";
@@ -21,3 +22,6 @@ export class ConnectionCredentialStore extends Context.Service<
 
 export const make = (service: ConnectionCredentialStore["Service"]) =>
   ConnectionCredentialStore.of(service);
+
+export const layer = (service: ConnectionCredentialStore["Service"]) =>
+  Layer.succeed(ConnectionCredentialStore, make(service));

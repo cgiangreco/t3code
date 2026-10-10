@@ -11,13 +11,13 @@
  */
 
 import * as Effect from "effect/Effect"
-import * as Yaml from "effect/encoding/Yaml"
 import * as FileSystem from "effect/FileSystem"
 import { constFalse, constUndefined } from "effect/Function"
 import * as JsonPatch from "effect/JsonPatch"
 import * as Path from "effect/Path"
 import * as Predicate from "effect/Predicate"
 import * as Schema from "effect/Schema"
+import * as Yaml from "yaml"
 
 // =============================================================================
 // Error Types
@@ -35,21 +35,22 @@ import * as Schema from "effect/Schema"
  *
  * **Example** (Creating a parse error)
  *
- * ```ts import.meta.vitest
- * import { JsonPatchParseError } from "@effect/openapi-generator/OpenApiPatch"
+ * ```ts
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
- * const error = new JsonPatchParseError({
+ * const error = new OpenApiPatch.JsonPatchParseError({
  *   source: "./patches/fix.json",
  *   reason: "Unexpected token at position 42"
  * })
  *
- * error.message // => "Failed to parse patch from ./patches/fix.json: Unexpected token at position 42"
+ * console.log(error.message)
+ * // "Failed to parse patch from ./patches/fix.json: Unexpected token at position 42"
  * ```
  *
  * @category errors
  * @since 4.0.0
  */
-export class JsonPatchParseError extends Schema.Error<JsonPatchParseError>("JsonPatchParseError")({
+export class JsonPatchParseError extends Schema.ErrorClass<JsonPatchParseError>("JsonPatchParseError")({
   _tag: Schema.tag("JsonPatchParseError"),
   source: Schema.String,
   reason: Schema.String
@@ -72,21 +73,22 @@ export class JsonPatchParseError extends Schema.Error<JsonPatchParseError>("Json
  *
  * **Example** (Creating a validation error)
  *
- * ```ts import.meta.vitest
- * import { JsonPatchValidationError } from "@effect/openapi-generator/OpenApiPatch"
+ * ```ts
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
- * const error = new JsonPatchValidationError({
+ * const error = new OpenApiPatch.JsonPatchValidationError({
  *   source: "inline",
  *   reason: "Expected 'add' | 'remove' | 'replace' at [0].op, got 'copy'"
  * })
  *
- * error.message // => "Invalid JSON Patch from inline: Expected 'add' | 'remove' | 'replace' at [0].op, got 'copy'"
+ * console.log(error.message)
+ * // "Invalid JSON Patch from inline: Expected 'add' | 'remove' | 'replace' at [0].op, got 'copy'"
  * ```
  *
  * @category errors
  * @since 4.0.0
  */
-export class JsonPatchValidationError extends Schema.Error<JsonPatchValidationError>("JsonPatchValidationError")({
+export class JsonPatchValidationError extends Schema.ErrorClass<JsonPatchValidationError>("JsonPatchValidationError")({
   _tag: Schema.tag("JsonPatchValidationError"),
   source: Schema.String,
   reason: Schema.String
@@ -108,10 +110,10 @@ export class JsonPatchValidationError extends Schema.Error<JsonPatchValidationEr
  *
  * **Example** (Creating an application error)
  *
- * ```ts import.meta.vitest
- * import { JsonPatchApplicationError } from "@effect/openapi-generator/OpenApiPatch"
+ * ```ts
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
- * const error = new JsonPatchApplicationError({
+ * const error = new OpenApiPatch.JsonPatchApplicationError({
  *   source: "./patches/fix.json",
  *   operationIndex: 2,
  *   operation: "remove",
@@ -119,20 +121,23 @@ export class JsonPatchValidationError extends Schema.Error<JsonPatchValidationEr
  *   reason: "Property \"users\" does not exist"
  * })
  *
- * error.message // => 'Failed to apply patch from ./patches/fix.json: operation 2 (remove at /paths/~1users): Property "users" does not exist'
+ * console.log(error.message)
+ * // "Failed to apply patch from ./patches/fix.json: operation 2 (remove at /paths/~1users): Property \"users\" does not exist"
  * ```
  *
  * @category errors
  * @since 4.0.0
  */
-export class JsonPatchApplicationError extends Schema.Error<JsonPatchApplicationError>("JsonPatchApplicationError")({
-  _tag: Schema.tag("JsonPatchApplicationError"),
-  source: Schema.String,
-  operationIndex: Schema.Natural,
-  operation: Schema.String,
-  path: Schema.String,
-  reason: Schema.String
-}) {
+export class JsonPatchApplicationError
+  extends Schema.ErrorClass<JsonPatchApplicationError>("JsonPatchApplicationError")({
+    _tag: Schema.tag("JsonPatchApplicationError"),
+    source: Schema.String,
+    operationIndex: Schema.Natural,
+    operation: Schema.String,
+    path: Schema.String,
+    reason: Schema.String
+  })
+{
   override get message() {
     return `Failed to apply patch from ${this.source}: operation ${this.operationIndex} ` +
       `(${this.operation} at ${this.path}): ${this.reason}`
@@ -149,19 +154,19 @@ export class JsonPatchApplicationError extends Schema.Error<JsonPatchApplication
  *
  * **Example** (Creating an aggregate error)
  *
- * ```ts import.meta.vitest
- * import { JsonPatchAggregateError, JsonPatchApplicationError } from "@effect/openapi-generator/OpenApiPatch"
+ * ```ts
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
- * const error = new JsonPatchAggregateError({
+ * const error = new OpenApiPatch.JsonPatchAggregateError({
  *   errors: [
- *     new JsonPatchApplicationError({
+ *     new OpenApiPatch.JsonPatchApplicationError({
  *       source: "./fix.json",
  *       operationIndex: 0,
  *       operation: "replace",
  *       path: "/info/x",
  *       reason: "Property does not exist"
  *     }),
- *     new JsonPatchApplicationError({
+ *     new OpenApiPatch.JsonPatchApplicationError({
  *       source: "./fix.json",
  *       operationIndex: 2,
  *       operation: "remove",
@@ -171,13 +176,14 @@ export class JsonPatchApplicationError extends Schema.Error<JsonPatchApplication
  *   ]
  * })
  *
- * error.message.split("\n")[0] // => "2 patch operations failed:"
+ * console.log(error.message)
+ * // "2 patch operations failed:\n  1. ..."
  * ```
  *
  * @category errors
  * @since 4.0.0
  */
-export class JsonPatchAggregateError extends Schema.Error<JsonPatchAggregateError>("JsonPatchAggregateError")({
+export class JsonPatchAggregateError extends Schema.ErrorClass<JsonPatchAggregateError>("JsonPatchAggregateError")({
   _tag: Schema.tag("JsonPatchAggregateError"),
   errors: Schema.Array(Schema.Unknown)
 }) {
@@ -277,17 +283,15 @@ export const JsonPatchOperation: Schema.Codec<JsonPatch.JsonPatchOperation> = Sc
  *
  * **Example** (Decoding a patch document)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Schema } from "effect"
- * import { JsonPatchDocument } from "@effect/openapi-generator/OpenApiPatch"
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
- * const patch = Schema.decodeUnknownSync(JsonPatchDocument)([
+ * const patch = Schema.decodeUnknownSync(OpenApiPatch.JsonPatchDocument)([
  *   { op: "add", path: "/foo", value: "bar" },
  *   { op: "remove", path: "/baz" },
  *   { op: "replace", path: "/qux", value: 42 }
  * ])
- *
- * patch.map((operation) => operation.op) // => ["add", "remove", "replace"]
  * ```
  *
  * @category schemas
@@ -298,7 +302,7 @@ export const JsonPatchDocument = Schema.Array(JsonPatchOperation)
 /**
  * Type for a JSON Patch document.
  *
- * @category models
+ * @category types
  * @since 4.0.0
  */
 export type JsonPatchDocument = typeof JsonPatchDocument.Type
@@ -430,21 +434,23 @@ const parseInlinePatch = Effect.fn("parseInlinePatch")(function*(input: string) 
  *
  * **Example** (Parsing patch input)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
- * import { parsePatchInput } from "@effect/openapi-generator/OpenApiPatch"
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
  * // From inline JSON
- * const fromInline = parsePatchInput(
+ * const fromInline = OpenApiPatch.parsePatchInput(
  *   '[{"op":"replace","path":"/info/title","value":"My API"}]'
  * )
  *
+ * // From file path
+ * const fromFile = OpenApiPatch.parsePatchInput("./patches/fix-api.json")
+ *
  * const program = Effect.gen(function*() {
  *   const patch = yield* fromInline
- *   return [patch[0].op, patch[0].path]
+ *   console.log(patch)
+ *   // [{ op: "replace", path: "/info/title", value: "My API" }]
  * })
- *
- * Effect.runSync(program) // => ["replace", "/info/title"]
  * ```
  *
  * @category parsing
@@ -475,9 +481,9 @@ export const parsePatchInput = Effect.fn("parsePatchInput")(function*(input: str
  *
  * **Example** (Applying patches)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
- * import { applyPatches } from "@effect/openapi-generator/OpenApiPatch"
+ * import * as OpenApiPatch from "@effect/openapi-generator/OpenApiPatch"
  *
  * const document = { info: { title: "Old Title" }, paths: {} }
  * const patches = [
@@ -488,14 +494,13 @@ export const parsePatchInput = Effect.fn("parsePatchInput")(function*(input: str
  * ]
  *
  * const program = Effect.gen(function*() {
- *   const result = yield* applyPatches(patches, document)
- *   return (result as typeof document).info.title
+ *   const result = yield* OpenApiPatch.applyPatches(patches, document)
+ *   console.log(result)
+ *   // { info: { title: "New Title" }, paths: {} }
  * })
- *
- * Effect.runSync(program) // => "New Title"
  * ```
  *
- * @category transforming
+ * @category application
  * @since 4.0.0
  */
 export const applyPatches = Effect.fn("applyPatches")(function*(

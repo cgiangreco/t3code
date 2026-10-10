@@ -168,8 +168,9 @@ export interface Crawler extends Resource<
  * store, infers schemas, and populates the Glue Data Catalog with tables.
  * Runs are asynchronous: create the crawler, then invoke `startCrawler` (or
  * attach a schedule).
- * ### Creating Crawlers
- * **Example:** S3 Crawler
+ * @resource
+ * @section Creating Crawlers
+ * @example S3 Crawler
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -186,7 +187,7 @@ export interface Crawler extends Resource<
  * });
  * ```
  *
- * **Example:** Scheduled Crawler with Schema Policy
+ * @example Scheduled Crawler with Schema Policy
  * ```typescript
  * const crawler = yield* AWS.Glue.Crawler("EventsCrawler", {
  *   role: crawlerRole.roleArn,
@@ -200,8 +201,6 @@ export interface Crawler extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Crawler = Resource<Crawler>("AWS.Glue.Crawler");
 
@@ -414,7 +413,7 @@ export const CrawlerProvider = () =>
           if (remaining !== undefined) {
             return yield* Effect.fail(
               new glue.OperationTimeoutException({
-                message: `crawler ${name} remained visible after delete for 30 seconds`,
+                Message: `crawler ${name} remained visible after delete for 30 seconds`,
               }),
             );
           }

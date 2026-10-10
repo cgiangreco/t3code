@@ -11,17 +11,19 @@ import {
 import type { SourceControlProviderKind } from "@t3tools/contracts";
 import { detectSourceControlProviderFromRemoteUrl } from "@t3tools/shared/sourceControl";
 
-import * as BuiltInDrivers from "./builtInDrivers.ts";
-import * as SourceControlProvider from "@t3tools/source-control-core/server/SourceControlProvider";
+import * as AzureDevOpsSourceControlProvider from "./AzureDevOpsSourceControlProvider.ts";
+import * as BitbucketSourceControlProvider from "./BitbucketSourceControlProvider.ts";
+import * as GitHubSourceControlProvider from "./GitHubSourceControlProvider.ts";
+import * as GitLabSourceControlProvider from "./GitLabSourceControlProvider.ts";
+import * as SourceControlProvider from "./SourceControlProvider.ts";
 import {
   probeSourceControlProvider,
   refineUnknownRemoteProvider,
   type SourceControlProviderDiscoverySpec,
-} from "@t3tools/source-control-core/server/discovery";
-import * as SourceControlHost from "@t3tools/source-control-core/server/SourceControlHost";
-
-import * as ServerConfig from "../config.ts";
+} from "./SourceControlProviderDiscovery.ts";
+import { ServerConfig } from "../config.ts";
 import * as VcsDriverRegistry from "../vcs/VcsDriverRegistry.ts";
+import * as VcsProcess from "../vcs/VcsProcess.ts";
 
 const PROVIDER_DETECTION_CACHE_CAPACITY = 2_048;
 const PROVIDER_DETECTION_CACHE_TTL = Duration.seconds(5);
@@ -40,7 +42,6 @@ export interface SourceControlProviderHandle {
 export class SourceControlProviderRegistry extends Context.Service<
   SourceControlProviderRegistry,
   {
-    readonly resolveLink: SourceControlProvider.ResolveSourceControlLink;
     readonly get: (
       kind: SourceControlProviderKind,
     ) => Effect.Effect<
@@ -49,7 +50,6 @@ export class SourceControlProviderRegistry extends Context.Service<
     >;
     readonly resolveHandle: (input: {
       readonly cwd: string;
-      readonly context?: SourceControlProvider.SourceControlProviderContext;
     }) => Effect.Effect<SourceControlProviderHandle, SourceControlProviderError>;
     readonly resolve: (input: {
       readonly cwd: string;
@@ -158,7 +158,7 @@ function bindProviderContext(
   }
 
   return SourceControlProvider.SourceControlProvider.of({
-    ...provider,
+    kind: provider.kind,
     listChangeRequests: (input) =>
       provider.listChangeRequests({
         ...input,
@@ -193,11 +193,10 @@ function bindProviderContext(
   });
 }
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const makeWithProviders = Effect.fn("makeSourceControlProviderRegistryWithProviders")(
   function* (registrations: ReadonlyArray<SourceControlProviderRegistration>) {
-    const config = yield* ServerConfig.ServerConfig;
-    const { process } = yield* SourceControlHost.SourceControlHost;
+    const config = yield* ServerConfig;
+    const process = yield* VcsProcess.VcsProcess;
     const vcsRegistry = yield* VcsDriverRegistry.VcsDriverRegistry;
     const providers = new Map<
       SourceControlProviderKind,
@@ -255,15 +254,7 @@ export const makeWithProviders = Effect.fn("makeSourceControlProviderRegistryWit
     });
 
     const resolveHandle: SourceControlProviderRegistry["Service"]["resolveHandle"] = (input) =>
-      (input.context === undefined
-        ? Cache.get(providerContextCache, input.cwd)
-        : refineUnknownRemoteProvider({
-            specs: discoverySpecs,
-            process,
-            cwd: input.cwd,
-            context: input.context,
-          })
-      ).pipe(
+      Cache.get(providerContextCache, input.cwd).pipe(
         Effect.map((context) => {
           const kind = context?.provider.kind ?? "unknown";
           const provider = providers.get(kind) ?? unsupportedProvider(kind);
@@ -275,24 +266,17 @@ export const makeWithProviders = Effect.fn("makeSourceControlProviderRegistryWit
       );
 
     return SourceControlProviderRegistry.of({
-      resolveLink: (input) => {
-        if (input.url.protocol !== "https:" || input.url.username || input.url.password) {
-          return undefined;
-        }
-        const kind = detectSourceControlProviderFromRemoteUrl(input.url.href)?.kind;
-        return kind ? providers.get(kind)?.resolveLink?.(input) : undefined;
-      },
       get,
       resolveHandle,
       resolve: (input) => resolveHandle(input).pipe(Effect.map((handle) => handle.provider)),
-      discover: Effect.forEach(
-        discoverySpecs,
-        (spec) =>
+      discover: Effect.all(
+        discoverySpecs.map((spec) =>
           probeSourceControlProvider({
             spec,
             process,
             cwd: config.cwd,
           }),
+        ),
         { concurrency: "unbounded" },
       ),
     });
@@ -300,16 +284,33 @@ export const makeWithProviders = Effect.fn("makeSourceControlProviderRegistryWit
 );
 
 export const make = Effect.gen(function* () {
-  const drivers = yield* Effect.forEach(BuiltInDrivers.BUILT_IN_SOURCE_CONTROL_DRIVERS, (driver) =>
-    driver.make.pipe(
-      Effect.map((instance): SourceControlProviderRegistration => ({
-        kind: driver.kind,
-        provider: instance.sourceControl,
-        discovery: instance.discovery,
-      })),
-    ),
-  );
-  return yield* makeWithProviders(drivers);
+  const github = yield* GitHubSourceControlProvider.make;
+  const gitlab = yield* GitLabSourceControlProvider.make;
+  const bitbucket = yield* BitbucketSourceControlProvider.make;
+  const bitbucketDiscovery = yield* BitbucketSourceControlProvider.makeDiscovery;
+  const azureDevOps = yield* AzureDevOpsSourceControlProvider.make;
+  return yield* makeWithProviders([
+    {
+      kind: "github",
+      provider: github,
+      discovery: GitHubSourceControlProvider.discovery,
+    },
+    {
+      kind: "gitlab",
+      provider: gitlab,
+      discovery: GitLabSourceControlProvider.discovery,
+    },
+    {
+      kind: "azure-devops",
+      provider: azureDevOps,
+      discovery: AzureDevOpsSourceControlProvider.discovery,
+    },
+    {
+      kind: "bitbucket",
+      provider: bitbucket,
+      discovery: bitbucketDiscovery,
+    },
+  ]);
 });
 
 export const layer = Layer.effect(SourceControlProviderRegistry, make);

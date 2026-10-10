@@ -28,8 +28,9 @@ export type TableSinkError =
  * init, drive it with `Stream.run` inside a handler, and let it drain fully
  * before the handler returns.
  *
- * ### Streaming Writes
- * **Example:** Stream Put Requests into a Table
+ * @binding
+ * @section Streaming Writes
+ * @example Stream Put Requests into a Table
  * ```typescript
  * const sink = yield* AWS.DynamoDB.TableSink(table);
  *
@@ -46,7 +47,7 @@ export type TableSinkError =
  * );
  * ```
  *
- * **Example:** Stream Delete Requests into a Table
+ * @example Stream Delete Requests into a Table
  * ```typescript
  * yield* Stream.fromIterable(keys).pipe(
  *   Stream.map((key): AWS.DynamoDB.TableSinkEntry => ({
@@ -60,8 +61,6 @@ export type TableSinkError =
  *   Stream.run(sink),
  * );
  * ```
- *
- * @binding
  */
 export interface TableSink extends Binding.Service<
   TableSink,

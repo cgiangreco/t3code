@@ -1,11 +1,10 @@
 import * as AppRunner from "@/AWS/AppRunner";
 import * as Lambda from "@/AWS/Lambda";
-import * as Cause from "effect/Cause";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import path from "pathe";
 
 const main = path.resolve(import.meta.dirname, "handler.ts");
@@ -23,7 +22,7 @@ export class AppRunnerTestFunction extends Lambda.Function<Lambda.Function>()(
 export default AppRunnerTestFunction.make(
   {
     main,
-    functionUrl: true,
+    url: true,
     // Pause/resume calls fan out SDK calls; AWS's 3s default intermittently
     // times out on a cold start.
     timeout: Duration.seconds(30),
@@ -107,20 +106,7 @@ export default AppRunnerTestFunction.make(
           { error: "Not found", method: request.method, pathname },
           { status: 404 },
         );
-      }).pipe(
-        // Render the failure into the response instead of dying: a binding
-        // that is rejected (an IAM grant that has not propagated yet, an
-        // InvalidStateException) otherwise reaches the test as an opaque
-        // Lambda 502, and the assertion blows up on a missing field rather
-        // than saying what App Runner actually refused.
-        Effect.catchCause((cause) =>
-          HttpServerResponse.json(
-            { error: Cause.pretty(cause) },
-            { status: 500 },
-          ),
-        ),
-        Effect.orDie,
-      ),
+      }).pipe(Effect.orDie),
     };
   }).pipe(
     Effect.provide(

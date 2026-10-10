@@ -16,16 +16,15 @@ export interface GetChannelRequest extends Omit<
  * status, and per-accessor channel roles.
  * Provide the implementation with
  * `Effect.provide(AWS.RePostSpace.GetChannelHttp)`.
- * ### Managing Channels
- * **Example:** Read a channel
+ * @binding
+ * @section Managing Channels
+ * @example Read a channel
  * ```typescript
  * const getChannel = yield* AWS.RePostSpace.GetChannel(space);
  *
  * const channel = yield* getChannel({ channelId });
  * console.log(channel.channelName, channel.channelStatus);
  * ```
- *
- * @binding
  */
 export interface GetChannel extends Binding.Service<
   GetChannel,

@@ -18,8 +18,9 @@ export interface ReceiveMessageRequest extends Omit<
  *
  * For push-based consumption (Lambda event-source mapping) use
  * {@link consumeQueueMessages} instead of polling manually.
- * ### Receiving Messages
- * **Example:** Poll for Messages
+ * @binding
+ * @section Receiving Messages
+ * @example Poll for Messages
  * ```typescript
  * // init (provide SQS.ReceiveMessageHttp on the Function)
  * const receiveMessage = yield* SQS.ReceiveMessage(queue);
@@ -33,8 +34,6 @@ export interface ReceiveMessageRequest extends Omit<
  *   // message.Body, message.ReceiptHandle
  * }
  * ```
- *
- * @binding
  */
 export interface ReceiveMessage extends Binding.Service<
   ReceiveMessage,

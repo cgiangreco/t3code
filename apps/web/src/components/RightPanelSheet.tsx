@@ -1,9 +1,9 @@
 import { type ReactNode } from "react";
 
+import { RIGHT_PANEL_SHEET_CLASS_NAME } from "../rightPanelLayout";
 import { Sheet, SheetPopup } from "./ui/sheet";
 
 export function RightPanelSheet(props: {
-  animationDurationMs: number;
   children: ReactNode;
   open: boolean;
   onClose: () => void;
@@ -18,11 +18,10 @@ export function RightPanelSheet(props: {
       }}
     >
       <SheetPopup
-        transitionDurationMs={props.animationDurationMs}
         side="right"
         showCloseButton={false}
         keepMounted
-        className="w-[min(42vw,28rem)] min-w-80 max-w-[28rem] max-[760px]:w-[min(88vw,24rem)] max-[760px]:min-w-0 wco:mt-(--workspace-topbar-height) wco:h-[calc(100%-var(--workspace-topbar-height))] wco:max-h-[calc(100%-var(--workspace-topbar-height))]"
+        className={RIGHT_PANEL_SHEET_CLASS_NAME}
       >
         {props.children}
       </SheetPopup>

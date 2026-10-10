@@ -14,8 +14,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.IAM.GenerateServiceLastAccessedDetailsHttp)`.
  *
- * ### Access Advisor
- * **Example:** Start an Access Report for a Role
+ * @binding
+ * @section Access Advisor
+ * @example Start an Access Report for a Role
  * ```typescript
  * // init
  * const generateServiceLastAccessedDetails =
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  *   Arn: roleArn,
  * });
  * ```
- *
- * @binding
  */
 export interface GenerateServiceLastAccessedDetails extends Binding.Service<
   GenerateServiceLastAccessedDetails,

@@ -13,8 +13,9 @@ export interface PutObjectRequest extends Omit<S3.PutObjectRequest, "Bucket"> {}
  * manually supplying the bucket name on every request. `s3:PutObject` is
  * granted on the bucket automatically. Provide the implementation with
  * `Effect.provide(AWS.S3.PutObjectHttp)`.
- * ### Writing Objects
- * **Example:** Put an Object
+ * @binding
+ * @section Writing Objects
+ * @example Put an Object
  * ```typescript
  * const putObject = yield* PutObject(bucket);
  *
@@ -24,8 +25,6 @@ export interface PutObjectRequest extends Omit<S3.PutObjectRequest, "Bucket"> {}
  *   ContentType: "text/plain",
  * });
  * ```
- *
- * @binding
  */
 export interface PutObject extends Binding.Service<
   PutObject,

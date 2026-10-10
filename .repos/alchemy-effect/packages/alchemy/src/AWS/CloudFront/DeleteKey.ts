@@ -15,8 +15,9 @@ export interface DeleteKeyRequest extends Omit<
  * optimistic concurrency: pass the store's current `ETag` as `IfMatch` (from
  * {@link DescribeKeyValueStore} or a previous write's response). Provide the
  * implementation with `Effect.provide(AWS.CloudFront.DeleteKeyHttp)`.
- * ### Writing KeyValueStore Data
- * **Example:** Delete a Key
+ * @binding
+ * @section Writing KeyValueStore Data
+ * @example Delete a Key
  * ```typescript
  * // init — bind the operations to the store
  * const describeStore = yield* CloudFront.DescribeKeyValueStore(store);
@@ -26,8 +27,6 @@ export interface DeleteKeyRequest extends Omit<
  * const meta = yield* describeStore({});
  * yield* deleteKey({ Key: "routes:/about", IfMatch: meta.ETag });
  * ```
- *
- * @binding
  */
 export interface DeleteKey extends Binding.Service<
   DeleteKey,

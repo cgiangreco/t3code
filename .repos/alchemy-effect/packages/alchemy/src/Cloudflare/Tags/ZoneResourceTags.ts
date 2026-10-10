@@ -119,8 +119,11 @@ export type ZoneResourceTags = Resource<
  * a non-empty tag set on the target resource is reported as `Unowned`, and
  * the engine refuses to take it over (i.e. clobber the existing tags)
  * unless `--adopt` or `adopt(true)` is set.
- * ### Tagging a resource
- * **Example:** Tag a DNS record
+ * @resource
+ * @product Resource Tagging
+ * @category Account & Identity
+ * @section Tagging a resource
+ * @example Tag a DNS record
  * ```typescript
  * const record = yield* Cloudflare.DNS.Record("api", {
  *   zoneId: zone.zoneId,
@@ -137,7 +140,7 @@ export type ZoneResourceTags = Resource<
  * });
  * ```
  *
- * **Example:** Tag the zone itself
+ * @example Tag the zone itself
  * ```typescript
  * yield* Cloudflare.Tags.ZoneResourceTags("zone-tags", {
  *   zoneId: zone.zoneId,
@@ -148,10 +151,6 @@ export type ZoneResourceTags = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/fundamentals/account/tags/
- *
- * @resource
- * @product Resource Tagging
- * @category Account & Identity
  */
 export const ZoneResourceTags = Resource<ZoneResourceTags>(TypeId);
 
@@ -180,17 +179,19 @@ export const ZoneResourceTagsProvider = () =>
             Array.from(chunk).flatMap((page) =>
               (page.result ?? [])
                 .filter((item): item is ZoneScopedTagging => "zoneId" in item)
-                .map((item): ZoneResourceTagsAttributes => ({
-                  zoneId: item.zoneId,
-                  resourceType: item.type,
-                  resourceId: item.id,
-                  accessApplicationId:
-                    "accessApplicationId" in item
-                      ? item.accessApplicationId
-                      : undefined,
-                  tags: narrowTags(item.tags),
-                  etag: item.etag,
-                })),
+                .map(
+                  (item): ZoneResourceTagsAttributes => ({
+                    zoneId: item.zoneId,
+                    resourceType: item.type,
+                    resourceId: item.id,
+                    accessApplicationId:
+                      "accessApplicationId" in item
+                        ? item.accessApplicationId
+                        : undefined,
+                    tags: narrowTags(item.tags),
+                    etag: item.etag,
+                  }),
+                ),
             ),
           ),
         );

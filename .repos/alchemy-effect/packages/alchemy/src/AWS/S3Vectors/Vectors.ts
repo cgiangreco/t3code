@@ -23,8 +23,9 @@ export interface VectorsClient extends ReadVectorsClient, WriteVectorsClient {}
  * Vectors. For least privilege, prefer {@link VectorsRead} (query/get/list)
  * or {@link VectorsWrite} (put/delete) where one direction suffices.
  *
- * ### Reading and Writing Vectors
- * **Example:** Insert and Query Vectors
+ * @binding
+ * @section Reading and Writing Vectors
+ * @example Insert and Query Vectors
  * ```typescript
  * // init
  * const vectors = yield* AWS.S3Vectors.Vectors(index);
@@ -43,8 +44,6 @@ export interface VectorsClient extends ReadVectorsClient, WriteVectorsClient {}
  *   returnDistance: true,
  * });
  * ```
- *
- * @binding
  */
 export interface Vectors extends Binding.Service<
   Vectors,

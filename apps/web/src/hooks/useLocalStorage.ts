@@ -2,7 +2,7 @@ import * as Schema from "effect/Schema";
 import * as Record from "effect/Record";
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 
-export class LocalStorageOperationError extends Schema.TaggedError<LocalStorageOperationError>()(
+export class LocalStorageOperationError extends Schema.TaggedErrorClass<LocalStorageOperationError>()(
   "LocalStorageOperationError",
   {
     operation: Schema.Literals(["read", "decode", "encode", "update", "write", "remove", "notify"]),
@@ -15,26 +15,26 @@ export class LocalStorageOperationError extends Schema.TaggedError<LocalStorageO
   }
 }
 
-const fallbackStorage: Storage = (() => {
-  const store = new Map<string, string>();
-  return {
-    clear: () => store.clear(),
-    getItem: (_) => store.get(_) ?? null,
-    key: (_) => Record.keys(store).at(_) ?? null,
-    get length() {
-      return store.size;
-    },
-    removeItem: (_) => store.delete(_),
-    setItem: (_, value) => store.set(_, value),
-  };
-})();
-
-const getStorage = (): Storage =>
-  typeof window !== "undefined" ? window.localStorage : fallbackStorage;
+const isomorphicLocalStorage: Storage =
+  typeof window !== "undefined"
+    ? window.localStorage
+    : (function () {
+        const store = new Map<string, string>();
+        return {
+          clear: () => store.clear(),
+          getItem: (_) => store.get(_) ?? null,
+          key: (_) => Record.keys(store).at(_) ?? null,
+          get length() {
+            return store.size;
+          },
+          removeItem: (_) => store.delete(_),
+          setItem: (_, value) => store.set(_, value),
+        };
+      })();
 
 const read = (key: string) => {
   try {
-    return getStorage().getItem(key);
+    return isomorphicLocalStorage.getItem(key);
   } catch (cause) {
     throw new LocalStorageOperationError({ operation: "read", storageKey: key, cause });
   }
@@ -58,13 +58,13 @@ const encode = <T, E>(key: string, schema: Schema.Codec<T, E>, value: T) => {
 
 export const getLocalStorageItem = <T, E>(key: string, schema: Schema.Codec<T, E>): T | null => {
   const item = read(key);
-  return item === null ? null : decode(key, schema, item);
+  return item ? decode(key, schema, item) : null;
 };
 
 export const setLocalStorageItem = <T, E>(key: string, value: T, schema: Schema.Codec<T, E>) => {
   const valueToSet = encode(key, schema, value);
   try {
-    getStorage().setItem(key, valueToSet);
+    isomorphicLocalStorage.setItem(key, valueToSet);
   } catch (cause) {
     throw new LocalStorageOperationError({ operation: "write", storageKey: key, cause });
   }
@@ -72,7 +72,7 @@ export const setLocalStorageItem = <T, E>(key: string, value: T, schema: Schema.
 
 export const removeLocalStorageItem = (key: string) => {
   try {
-    getStorage().removeItem(key);
+    isomorphicLocalStorage.removeItem(key);
   } catch (cause) {
     throw new LocalStorageOperationError({ operation: "remove", storageKey: key, cause });
   }

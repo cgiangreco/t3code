@@ -19,7 +19,7 @@ export class HostPowerMonitor extends Context.Service<
   }
 >()("t3/background/HostPowerMonitor") {}
 
-const makeUnknownSnapshot = (
+export const makeUnknownSnapshot = (
   source: HostPowerSnapshot["source"],
   updatedAt: HostPowerSnapshot["updatedAt"],
 ): HostPowerSnapshot => ({

@@ -16,8 +16,9 @@ import type { LinkedWhatsAppBusinessAccount } from "./LinkedWhatsAppBusinessAcco
  * the deploy-time half grants `social-messaging:SendWhatsAppMessage` on `*`.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.SendWhatsAppMessageHttp)`.
- * ### Sending Messages
- * **Example:** Send a Text Message
+ * @binding
+ * @section Sending Messages
+ * @example Send a Text Message
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const sendMessage = yield* AWS.SocialMessaging.SendWhatsAppMessage(account);
@@ -36,8 +37,6 @@ import type { LinkedWhatsAppBusinessAccount } from "./LinkedWhatsAppBusinessAcco
  *   ),
  * });
  * ```
- *
- * @binding
  */
 export interface SendWhatsAppMessage extends Binding.Service<
   SendWhatsAppMessage,

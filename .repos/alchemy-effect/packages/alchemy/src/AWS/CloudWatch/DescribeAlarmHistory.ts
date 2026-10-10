@@ -12,8 +12,9 @@ export interface DescribeAlarmHistoryRequest
  *
  * Provide `CloudWatch.DescribeAlarmHistoryHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Reading Alarm State
- * **Example:** Read an Alarm's Recent History
+ * @binding
+ * @section Reading Alarm State
+ * @example Read an Alarm's Recent History
  * ```typescript
  * // init — grants cloudwatch:DescribeAlarmHistory
  * const describeAlarmHistory = yield* AWS.CloudWatch.DescribeAlarmHistory();
@@ -25,8 +26,6 @@ export interface DescribeAlarmHistoryRequest
  * });
  * const items = result.AlarmHistoryItems ?? [];
  * ```
- *
- * @binding
  */
 export interface DescribeAlarmHistory extends Binding.Service<
   DescribeAlarmHistory,

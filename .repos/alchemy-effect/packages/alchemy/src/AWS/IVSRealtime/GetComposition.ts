@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * destination progress. Compositions are addressed by the server-generated
  * ARN returned by `StartComposition`.
  *
- * ### Compositing a Stage
- * **Example:** Poll a composition's state
+ * @binding
+ * @section Compositing a Stage
+ * @example Poll a composition's state
  * ```typescript
  * // init
  * const getComposition = yield* IVSRealtime.GetComposition();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * const { composition } = yield* getComposition({ arn: compositionArn });
  * // composition.state → "ACTIVE" | "STOPPED" | "FAILED" | …
  * ```
- *
- * @binding
  */
 export interface GetComposition extends Binding.Service<
   GetComposition,

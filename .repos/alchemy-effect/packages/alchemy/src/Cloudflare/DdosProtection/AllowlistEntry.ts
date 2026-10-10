@@ -78,8 +78,11 @@ export type DdosAllowlistEntry = Resource<
  * prior state, `read` scans for an existing entry with the same prefix and
  * reports it as `Unowned`, so the engine refuses to take it over unless
  * `--adopt` (or `adopt(true)`) is set.
- * ### Creating an allowlist entry
- * **Example:** Allowlist a trusted prefix
+ * @resource
+ * @product DDoS Protection
+ * @category Network
+ * @section Creating an allowlist entry
+ * @example Allowlist a trusted prefix
  * ```typescript
  * const entry = yield* Cloudflare.DdosProtection.DdosAllowlistEntry("OfficeEgress", {
  *   prefix: "192.0.2.0/24",
@@ -87,7 +90,7 @@ export type DdosAllowlistEntry = Resource<
  * });
  * ```
  *
- * **Example:** Staged entry with an explicit comment
+ * @example Staged entry with an explicit comment
  * ```typescript
  * // `enabled: false` keeps the entry inert until you flip it on.
  * yield* Cloudflare.DdosProtection.DdosAllowlistEntry("PartnerRange", {
@@ -98,10 +101,6 @@ export type DdosAllowlistEntry = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ddos-protection/advanced-ddos-systems/overview/advanced-tcp-protection/
- *
- * @resource
- * @product DDoS Protection
- * @category Network
  */
 export const DdosAllowlistEntry = Resource<DdosAllowlistEntry>(TypeId);
 

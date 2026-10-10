@@ -5,9 +5,9 @@ import * as Data from "effect/Data";
 import * as Effect from "effect/Effect";
 import { MinimumLogLevel } from "effect/References";
 import * as Schedule from "effect/Schedule";
-import * as HttpClient from "effect/http/HttpClient";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
-import * as HttpClientResponse from "effect/http/HttpClientResponse";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import * as HttpClientResponse from "effect/unstable/http/HttpClientResponse";
 import QueueWorker from "./round-trip-worker.ts";
 
 const { test } = Test.make({ providers: Cloudflare.providers() });
@@ -103,13 +103,15 @@ test.provider.skipIf(!!process.env.FAST)(
               : Effect.fail(new Error(`Worker not ready: ${res.status}`)),
           ),
           Effect.retry({
-            // Bound fresh workers.dev readiness to roughly 25 seconds.
+            // Cap the exponential at 3s — uncapped, the sleeps double each
+            // attempt and a handful of misses burns minutes of the test
+            // timeout on a single send.
             schedule: Schedule.max([
               Schedule.min([
                 Schedule.exponential("500 millis"),
                 Schedule.spaced("3 seconds"),
               ]),
-              Schedule.recurs(10),
+              Schedule.recurs(15),
             ]),
           }),
         );
@@ -163,24 +165,25 @@ test.provider.skipIf(!!process.env.FAST)(
                 );
           }),
           Effect.retry({
-            // Bound consumer catch-up to roughly 35 seconds.
+            // Cap the exponential at 4s so 40 attempts sample for ~2.5 minutes.
+            // Uncapped, the doubling sleeps pass the whole 240s test budget
+            // after ~9 attempts and the test dies in a single long sleep even
+            // though the consumer would have caught up moments later.
             schedule: Schedule.max([
               Schedule.min([
                 Schedule.exponential("500 millis"),
                 Schedule.spaced("4 seconds"),
               ]),
-              Schedule.recurs(10),
+              Schedule.recurs(40),
             ]),
           }),
         );
 
       // Poll the DO snapshot until each consumer has caught up.
-      const [snapshot, secondarySnapshot] = yield* Effect.all(
-        [
-          readSnapshot(name, messages.length),
-          readSnapshot(secondaryName, secondaryMessages.length),
-        ],
-        { concurrency: "unbounded" },
+      const snapshot = yield* readSnapshot(name, messages.length);
+      const secondarySnapshot = yield* readSnapshot(
+        secondaryName,
+        secondaryMessages.length,
       );
 
       // The DO observed every message. Cloudflare Queues are
@@ -203,13 +206,5 @@ test.provider.skipIf(!!process.env.FAST)(
 
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:queue",
-      "provider:cloudflare:worker",
-      "live",
-    ],
-    timeout: 120_000,
-  },
+  { timeout: 240_000 },
 );

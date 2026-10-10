@@ -11,8 +11,9 @@ import type { Server } from "./Server.ts";
  * server is `ONLINE`/`OFFLINE` before a {@link StartServer}/{@link StopServer}
  * call or surfacing endpoint details to an admin portal. Provide the
  * implementation with `Effect.provide(AWS.Transfer.DescribeServerHttp)`.
- * ### Observing the Server
- * **Example:** Read the Server State
+ * @binding
+ * @section Observing the Server
+ * @example Read the Server State
  * ```typescript
  * // init — bind the operation to the server
  * const describeServer = yield* AWS.Transfer.DescribeServer(server);
@@ -21,8 +22,6 @@ import type { Server } from "./Server.ts";
  * const { Server } = yield* describeServer();
  * yield* Effect.log(`server is ${Server.State}`);
  * ```
- *
- * @binding
  */
 export interface DescribeServer extends Binding.Service<
   DescribeServer,

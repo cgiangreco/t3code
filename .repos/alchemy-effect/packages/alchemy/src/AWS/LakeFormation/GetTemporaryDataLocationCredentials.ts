@@ -16,8 +16,9 @@ export interface GetTemporaryDataLocationCredentialsRequest
  * `SecretAccessKey` and `SessionToken` are `Redacted`. Provide the
  * implementation with
  * `Effect.provide(AWS.LakeFormation.GetTemporaryDataLocationCredentialsHttp)`.
- * ### Vending Data Access Credentials
- * **Example:** Vend Location-Scoped S3 Credentials
+ * @binding
+ * @section Vending Data Access Credentials
+ * @example Vend Location-Scoped S3 Credentials
  * ```typescript
  * // init — account-level binding takes no resource
  * const getLocationCredentials =
@@ -29,8 +30,6 @@ export interface GetTemporaryDataLocationCredentialsRequest
  *   CredentialsScope: "READ",
  * });
  * ```
- *
- * @binding
  */
 export interface GetTemporaryDataLocationCredentials extends Binding.Service<
   GetTemporaryDataLocationCredentials,

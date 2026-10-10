@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.DescribeProvisioningParametersHttp)`.
- * ### Browsing the Catalog
- * **Example:** Read a Product's Template Parameters
+ * @binding
+ * @section Browsing the Catalog
+ * @example Read a Product's Template Parameters
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeProvisioningParameters = yield* AWS.ServiceCatalog.DescribeProvisioningParameters();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *     ProvisioningArtifactId: "pa-abc123",
  *   });
  * ```
- *
- * @binding
  */
 export interface DescribeProvisioningParameters extends Binding.Service<
   DescribeProvisioningParameters,

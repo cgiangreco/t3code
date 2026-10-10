@@ -13,8 +13,9 @@ import type { InvestigationGroup } from "./InvestigationGroup.ts";
  * policy is attached. The group's ARN is injected from the binding. Provide
  * the implementation with
  * `Effect.provide(AWS.AIOps.GetInvestigationGroupPolicyHttp)`.
- * ### Reading the Resource Policy
- * **Example:** Audit Who Can Start Investigations
+ * @binding
+ * @section Reading the Resource Policy
+ * @example Audit Who Can Start Investigations
  * ```typescript
  * // init — grants aiops:GetInvestigationGroupPolicy on the group
  * const getInvestigationGroupPolicy =
@@ -28,8 +29,6 @@ import type { InvestigationGroup } from "./InvestigationGroup.ts";
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GetInvestigationGroupPolicy extends Binding.Service<
   GetInvestigationGroupPolicy,

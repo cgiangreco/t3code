@@ -60,8 +60,9 @@ export interface Association extends Resource<
  * links a resource — a {@link CustomAction} — to a Slack or Microsoft Teams
  * channel configuration so the action is available in that channel.
  *
- * ### Associating Custom Actions
- * **Example:** Attach a custom action to a Slack channel configuration
+ * @resource
+ * @section Associating Custom Actions
+ * @example Attach a custom action to a Slack channel configuration
  * ```typescript
  * import * as Chatbot from "alchemy/AWS/Chatbot";
  *
@@ -80,8 +81,6 @@ export interface Association extends Resource<
  *   resource: action.customActionArn,
  * });
  * ```
- *
- * @resource
  */
 export const Association = Resource<Association>("AWS.Chatbot.Association");
 

@@ -17,8 +17,9 @@ export interface GetPackageVersionAssetRequest extends Omit<
  *
  * Downloads one asset (file) of a package version from the bound repository. The result's `asset` is a `Stream` of bytes. Provide the implementation with
  * `Effect.provide(AWS.CodeArtifact.GetPackageVersionAssetHttp)`.
- * ### Reading Assets
- * **Example:** Download an Asset
+ * @binding
+ * @section Reading Assets
+ * @example Download an Asset
  * ```typescript
  * import * as Stream from "effect/Stream";
  *
@@ -35,8 +36,6 @@ export interface GetPackageVersionAssetRequest extends Omit<
  *   Stream.decodeText(res.asset!),
  * );
  * ```
- *
- * @binding
  */
 export interface GetPackageVersionAsset extends Binding.Service<
   GetPackageVersionAsset,

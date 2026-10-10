@@ -87,8 +87,9 @@ export interface IdMappingWorkflow extends Resource<
  * The workflow definition itself is cheap and instant; a mapping RUN
  * (`StartIdMappingJob`) processes the full input and takes many minutes.
  *
- * ### Creating ID Mapping Workflows
- * **Example:** Rule-based ID mapping between two namespaces
+ * @resource
+ * @section Creating ID Mapping Workflows
+ * @example Rule-based ID mapping between two namespaces
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -111,8 +112,6 @@ export interface IdMappingWorkflow extends Resource<
  *   roleArn: role.roleArn,
  * });
  * ```
- *
- * @resource
  */
 export const IdMappingWorkflow = Resource<IdMappingWorkflow>(
   "AWS.EntityResolution.IdMappingWorkflow",

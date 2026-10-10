@@ -129,19 +129,22 @@ export type IpsecTunnel = Resource<
  * The tunnel `name` is unique per account and immutable in practice —
  * changing it triggers a replacement. The `psk` is write-only: Cloudflare
  * never returns it, so the configured value is carried in state.
- * ### Creating an IPsec tunnel
- * **Example:** Basic tunnel with a provided PSK
+ * @resource
+ * @product Magic Transit
+ * @category Network
+ * @section Creating an IPsec tunnel
+ * @example Basic tunnel with a provided PSK
  * ```typescript
  * const tunnel = yield* Cloudflare.MagicTransit.IpsecTunnel("branch", {
  *   name: "branch-ipsec-1",
  *   cloudflareEndpoint: "203.0.113.1",
  *   customerEndpoint: "198.51.100.1",
  *   interfaceAddress: "10.213.0.10/31",
- *   psk: yield* Config.Redacted("IPSEC_PSK"),
+ *   psk: alchemy.secret.env.IPSEC_PSK,
  * });
  * ```
  *
- * **Example:** Tunnel with replay protection and health checks
+ * @example Tunnel with replay protection and health checks
  * ```typescript
  * const tunnel = yield* Cloudflare.MagicTransit.IpsecTunnel("branch", {
  *   name: "branch-ipsec-1",
@@ -153,10 +156,6 @@ export type IpsecTunnel = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/magic-wan/reference/tunnels/
- *
- * @resource
- * @product Magic Transit
- * @category Network
  */
 export const IpsecTunnel = Resource<IpsecTunnel>(TypeId);
 

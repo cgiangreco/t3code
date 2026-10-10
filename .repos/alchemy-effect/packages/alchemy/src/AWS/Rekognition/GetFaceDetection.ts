@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.GetFaceDetectionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Poll Face Detection Results
+ * @binding
+ * @section Video Analysis
+ * @example Poll Face Detection Results
  * ```typescript
  * // init
  * const getFaceDetection = yield* AWS.Rekognition.GetFaceDetection();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   // consume the detections
  * }
  * ```
- *
- * @binding
  */
 export interface GetFaceDetection extends Binding.Service<
   GetFaceDetection,

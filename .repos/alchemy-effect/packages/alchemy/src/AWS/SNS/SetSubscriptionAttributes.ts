@@ -17,8 +17,9 @@ export interface SetSubscriptionAttributesRequest extends Omit<
  * `sns:SetSubscriptionAttributes` on the subscription. Provide the
  * `SetSubscriptionAttributesHttp` layer on the Function to implement the
  * binding.
- * ### Updating Subscription Attributes
- * **Example:** Set a Filter Policy
+ * @binding
+ * @section Updating Subscription Attributes
+ * @example Set a Filter Policy
  * ```typescript
  * // init (provide SNS.SetSubscriptionAttributesHttp on the Function)
  * const setSubscriptionAttributes =
@@ -30,8 +31,6 @@ export interface SetSubscriptionAttributesRequest extends Omit<
  *   AttributeValue: JSON.stringify({ type: ["order"] }),
  * });
  * ```
- *
- * @binding
  */
 export interface SetSubscriptionAttributes extends Binding.Service<
   SetSubscriptionAttributes,

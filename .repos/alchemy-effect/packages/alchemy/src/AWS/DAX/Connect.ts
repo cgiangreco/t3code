@@ -45,15 +45,14 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * The DAX data plane is VPC-only — the host Function must be attached to the
  * cluster's VPC and allowed ingress by the cluster's security groups.
  * Provide the implementation with `Effect.provide(AWS.DAX.ConnectReadHttp)`.
- * ### Connecting to a Cluster
- * **Example:** Resolve Read-Only Connection Info inside a Function
+ * @binding
+ * @section Connecting to a Cluster
+ * @example Resolve Read-Only Connection Info inside a Function
  * ```typescript
  * const connect = yield* DAX.ConnectRead(cluster);
  * // inside a handler:
  * const { url, tls } = yield* connect;
  * ```
- *
- * @binding
  */
 export interface ConnectRead extends Binding.Service<
   ConnectRead,
@@ -78,15 +77,14 @@ export const ConnectRead = Binding.Service<ConnectRead>("AWS.DAX.ConnectRead");
  * The DAX data plane is VPC-only — the host Function must be attached to the
  * cluster's VPC and allowed ingress by the cluster's security groups.
  * Provide the implementation with `Effect.provide(AWS.DAX.ConnectWriteHttp)`.
- * ### Connecting to a Cluster
- * **Example:** Resolve Write-Only Connection Info inside a Function
+ * @binding
+ * @section Connecting to a Cluster
+ * @example Resolve Write-Only Connection Info inside a Function
  * ```typescript
  * const connect = yield* DAX.ConnectWrite(cluster);
  * // inside a handler:
  * const { url } = yield* connect;
  * ```
- *
- * @binding
  */
 export interface ConnectWrite extends Binding.Service<
   ConnectWrite,
@@ -112,15 +110,14 @@ export const ConnectWrite = Binding.Service<ConnectWrite>(
  * cluster's VPC and allowed ingress by the cluster's security groups.
  * Provide the implementation with
  * `Effect.provide(AWS.DAX.ConnectReadWriteHttp)`.
- * ### Connecting to a Cluster
- * **Example:** Resolve Connection Info inside a Function
+ * @binding
+ * @section Connecting to a Cluster
+ * @example Resolve Connection Info inside a Function
  * ```typescript
  * const connect = yield* DAX.ConnectReadWrite(cluster);
  * // inside a handler:
  * const { host, port, url, tls } = yield* connect;
  * ```
- *
- * @binding
  */
 export interface ConnectReadWrite extends Binding.Service<
   ConnectReadWrite,

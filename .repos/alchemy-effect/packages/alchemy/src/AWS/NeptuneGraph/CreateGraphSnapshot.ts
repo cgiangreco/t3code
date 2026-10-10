@@ -9,16 +9,15 @@ import type { Graph } from "./Graph.ts";
  *
  * Takes an on-demand snapshot of the bound graph — e.g. a pre-import backup from an operational Lambda. Snapshot creation is asynchronous; poll it with {@link GetGraphSnapshot}. Provide the implementation with
  * `Effect.provide(AWS.NeptuneGraph.CreateGraphSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Take an on-demand snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Take an on-demand snapshot
  * ```typescript
  * const createSnapshot = yield* NeptuneGraph.CreateGraphSnapshot(graph);
  *
  * const snapshot = yield* createSnapshot({ snapshotName: "pre-import" });
  * // snapshot.status → "CREATING"
  * ```
- *
- * @binding
  */
 export interface CreateGraphSnapshot extends Binding.Service<
   CreateGraphSnapshot,

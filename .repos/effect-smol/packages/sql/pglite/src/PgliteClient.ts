@@ -9,7 +9,6 @@
  * types. It also provides layers and maps common PostgreSQL-style failures into
  * Effect SQL errors.
  *
- * @stability unstable
  * @since 4.0.0
  */
 import { PGlite, type PGliteInterface, type PGliteOptions } from "@electric-sql/pglite"
@@ -19,11 +18,12 @@ import * as Effect from "effect/Effect"
 import * as Fiber from "effect/Fiber"
 import * as Layer from "effect/Layer"
 import * as Queue from "effect/Queue"
-import * as Reactivity from "effect/reactivity/Reactivity"
 import * as Scope from "effect/Scope"
 import * as Semaphore from "effect/Semaphore"
-import * as Client from "effect/sql/SqlClient"
-import type { Connection } from "effect/sql/SqlConnection"
+import * as Stream from "effect/Stream"
+import * as Reactivity from "effect/unstable/reactivity/Reactivity"
+import * as Client from "effect/unstable/sql/SqlClient"
+import type { Connection } from "effect/unstable/sql/SqlConnection"
 import {
   AuthenticationError,
   AuthorizationError,
@@ -37,15 +37,13 @@ import {
   StatementTimeoutError,
   UniqueViolation,
   UnknownError
-} from "effect/sql/SqlError"
-import type { Custom, Fragment } from "effect/sql/Statement"
-import * as Statement from "effect/sql/Statement"
-import * as Stream from "effect/Stream"
+} from "effect/unstable/sql/SqlError"
+import type { Custom, Fragment } from "effect/unstable/sql/Statement"
+import * as Statement from "effect/unstable/sql/Statement"
 
 /**
  * Runtime type identifier used to mark `PgliteClient` values.
  *
- * @stability unstable
  * @category type IDs
  * @since 4.0.0
  */
@@ -54,7 +52,6 @@ export const TypeId: TypeId = "~@effect/sql-pglite/PgliteClient"
 /**
  * Type-level identifier used to mark `PgliteClient` values.
  *
- * @stability unstable
  * @category type IDs
  * @since 4.0.0
  */
@@ -63,8 +60,7 @@ export type TypeId = "~@effect/sql-pglite/PgliteClient"
 /**
  * PGlite-backed PostgreSQL client service, extending `SqlClient` with access to the PGlite instance, JSON fragments, LISTEN/NOTIFY, data directory dumps, and array type refresh.
  *
- * @stability unstable
- * @category services
+ * @category models
  * @since 4.0.0
  */
 export interface PgliteClient extends Client.SqlClient {
@@ -72,18 +68,7 @@ export interface PgliteClient extends Client.SqlClient {
   readonly config: PgliteClientConfig
   readonly pglite: PGliteInterface
   readonly json: (_: unknown) => Fragment
-  /**
-   * Subscribes to a PGlite notification channel.
-   *
-   * **Details**
-   *
-   * The effect completes after the listener is installed. Notifications are
-   * buffered in the returned dequeue, and the subscription remains active
-   * until the required scope closes.
-   */
-  readonly listen: (
-    channel: string
-  ) => Effect.Effect<Queue.Dequeue<string>, SqlError, Scope.Scope>
+  readonly listen: (channel: string) => Stream.Stream<string, SqlError>
   readonly notify: (channel: string, payload: string) => Effect.Effect<void, SqlError>
   readonly dumpDataDir: (compression?: "none" | "gzip" | "auto") => Effect.Effect<File | Blob, SqlError>
   readonly refreshArrayTypes: Effect.Effect<void, SqlError>
@@ -96,7 +81,6 @@ export interface PgliteClient extends Client.SqlClient {
  *
  * Use to access or provide a PGlite client through the Effect context.
  *
- * @stability unstable
  * @category services
  * @since 4.0.0
  */
@@ -105,7 +89,6 @@ export const PgliteClient = Context.Service<PgliteClient>("@effect/sql-pglite/Pg
 /**
  * Configuration for a PGlite client, either by supplying PGlite creation options or an existing live PGlite client.
  *
- * @stability unstable
  * @category models
  * @since 4.0.0
  */
@@ -114,14 +97,12 @@ export type PgliteClientConfig = PgliteClientConfig.Create | PgliteClientConfig.
 /**
  * Namespace containing the configuration variants for `PgliteClient`.
  *
- * @stability unstable
  * @since 4.0.0
  */
 export declare namespace PgliteClientConfig {
   /**
    * Shared PGlite client options for span attributes, query/result name transformations, and JSON value transformation.
    *
-   * @stability unstable
    * @category models
    * @since 4.0.0
    */
@@ -135,7 +116,6 @@ export declare namespace PgliteClientConfig {
   /**
    * Configuration used to create a managed PGlite instance from PGlite constructor options.
    *
-   * @stability unstable
    * @category models
    * @since 4.0.0
    */
@@ -144,7 +124,6 @@ export declare namespace PgliteClientConfig {
   /**
    * Configuration that uses an existing PGlite client. The supplied `liveClient` is caller-owned and is not closed by the Effect client.
    *
-   * @stability unstable
    * @category models
    * @since 4.0.0
    */
@@ -155,7 +134,6 @@ export declare namespace PgliteClientConfig {
   /**
    * Config-friendly subset of PGlite creation options, including data directory, username, database, relaxed durability, and shared transform options.
    *
-   * @stability unstable
    * @category models
    * @since 4.0.0
    */
@@ -170,7 +148,6 @@ export declare namespace PgliteClientConfig {
 /**
  * Creates a scoped PGlite SQL client. When no live client is supplied it creates and closes a PGlite instance; when `liveClient` is supplied, the caller retains ownership.
  *
- * @stability unstable
  * @category constructors
  * @since 4.0.0
  */
@@ -199,7 +176,6 @@ export const make = (
 /**
  * Builds a `PgliteClient` around an existing PGlite instance, adding SQL client operations, LISTEN/NOTIFY, dump helpers, and serialized access.
  *
- * @stability unstable
  * @category constructors
  * @since 4.0.0
  */
@@ -242,7 +218,6 @@ export const fromClient = (
       acquirer,
       compiler,
       transactionAcquirer,
-      releaseSavepoint: (name) => `RELEASE SAVEPOINT ${name}`,
       spanAttributes,
       transformRows
     })
@@ -254,22 +229,20 @@ export const fromClient = (
         config,
         pglite,
         json: (_: unknown) => Statement.fragment([PgJson(_)]),
-        listen: Effect.fnUntraced(function*(channel: string) {
-          const queue = yield* Queue.unbounded<string>()
-          yield* Effect.acquireRelease(
-            Effect.tryPromise({
-              try: () =>
-                pglite.listen(channel, (payload) => {
-                  Queue.offerUnsafe(queue, payload)
-                }),
-              catch: (cause) => new SqlError({ reason: classifyError(cause, "Failed to listen", "listen") })
-            }),
-            (unlisten) => Effect.promise(() => unlisten()),
-            { interruptible: true }
-          )
-          yield* Effect.addFinalizer(() => Queue.shutdown(queue))
-          return queue
-        }),
+        listen: (channel: string) =>
+          Stream.callback<string, SqlError>((queue) =>
+            Effect.acquireRelease(
+              Effect.tryPromise({
+                try: () =>
+                  pglite.listen(channel, (payload) => {
+                    Queue.offerUnsafe(queue, payload)
+                  }),
+                catch: (cause) => new SqlError({ reason: classifyError(cause, "Failed to listen", "listen") })
+              }),
+              (unlisten) => Effect.promise(() => unlisten()),
+              { interruptible: true }
+            )
+          ),
         notify: (channel: string, payload: string) =>
           Effect.tryPromise({
             try: () => pglite.exec(`NOTIFY ${escape(channel)}, ${escapeLiteral(payload)}`),
@@ -369,7 +342,6 @@ class PgliteConnection implements Connection {
 /**
  * Creates a layer from an effect that acquires a `PgliteClient`, providing both `PgliteClient` and `SqlClient`.
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -386,7 +358,6 @@ export const layerFrom = <E, R>(
 /**
  * Creates a layer from a `Config`-wrapped PGlite client configuration, providing both `PgliteClient` and `SqlClient`.
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -403,7 +374,6 @@ export const layerConfig: (
 /**
  * Creates a layer from a concrete PGlite client configuration, providing both `PgliteClient` and `SqlClient`.
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -414,7 +384,6 @@ export const layer = (
 /**
  * Creates the PGlite statement compiler, using PostgreSQL `$1` placeholders, double-quoted identifiers, returning clauses, and optional JSON value transformation.
  *
- * @stability unstable
  * @category constructors
  * @since 4.0.0
  */
@@ -447,12 +416,13 @@ export const makeCompiler = (
     onCustom(type, placeholder, withoutTransform) {
       switch (type.kind) {
         case "PgJson": {
-          const value = withoutTransform || transformValue === undefined
-            ? type.paramA
-            : transformValue(type.paramA)
           return [
             placeholder(undefined),
-            [typeof value === "string" ? JSON.stringify(value) : value]
+            [
+              withoutTransform || transformValue === undefined
+                ? type.paramA
+                : transformValue(type.paramA)
+            ]
           ]
         }
       }
@@ -466,14 +436,13 @@ const escapeLiteral = (value: string) => `'${value.replace(/'/g, "''")}'`
 /**
  * PGlite-specific custom statement fragments supported by the compiler, currently JSON parameter fragments.
  *
- * @stability unstable
- * @category models
+ * @category custom types
  * @since 4.0.0
  */
 export type PgCustom = PgJson
 
 /**
- * @category models
+ * @category custom types
  * @since 4.0.0
  */
 interface PgJson extends Custom<"PgJson", unknown> {}

@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * Useful for governance functions that discover the landing zone before
  * reading its drift status. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ListLandingZonesHttp)`.
- * ### Inspecting the Landing Zone
- * **Example:** Discover the Landing Zone ARN
+ * @binding
+ * @section Inspecting the Landing Zone
+ * @example Discover the Landing Zone ARN
  * ```typescript
  * // init — account-level binding takes no resource
  * const listLandingZones = yield* AWS.ControlTower.ListLandingZones();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * const result = yield* listLandingZones();
  * const arn = result.landingZones[0]?.arn;
  * ```
- *
- * @binding
  */
 export interface ListLandingZones extends Binding.Service<
   ListLandingZones,

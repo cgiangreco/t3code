@@ -16,8 +16,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StartLabelDetectionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Start Label Detection
+ * @binding
+ * @section Video Analysis
+ * @example Start Label Detection
  * ```typescript
  * // init
  * const startLabelDetection = yield* AWS.Rekognition.StartLabelDetection();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // started.JobId
  * ```
- *
- * @binding
  */
 export interface StartLabelDetection extends Binding.Service<
   StartLabelDetection,

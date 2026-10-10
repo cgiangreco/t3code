@@ -15,8 +15,9 @@ export interface GetDimensionValuesRequest
  * (services, linked accounts, regions, usage types, …) — the building
  * blocks of query filter expressions. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.GetDimensionValuesHttp)`.
- * ### Exploring Dimensions and Tags
- * **Example:** List Available Services
+ * @binding
+ * @section Exploring Dimensions and Tags
+ * @example List Available Services
  * ```typescript
  * // init — account-level binding takes no resource
  * const getDimensionValues = yield* AWS.CostExplorer.GetDimensionValues();
@@ -28,8 +29,6 @@ export interface GetDimensionValuesRequest
  * });
  * const services = (result.DimensionValues ?? []).map((v) => v.Value);
  * ```
- *
- * @binding
  */
 export interface GetDimensionValues extends Binding.Service<
   GetDimensionValues,

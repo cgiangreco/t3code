@@ -20,8 +20,9 @@ export interface ListExclusionWindowsRequest extends Omit<
  * Lists the exclusion (maintenance) windows configured on the bound SLO.
  * Provide the implementation with
  * `Effect.provide(AWS.ApplicationSignals.ListServiceLevelObjectiveExclusionWindowsHttp)`.
- * ### Managing Exclusion Windows
- * **Example:** List the SLO's Exclusion Windows
+ * @binding
+ * @section Managing Exclusion Windows
+ * @example List the SLO's Exclusion Windows
  * ```typescript
  * // init — bind the operation to the SLO
  * const listExclusionWindows =
@@ -31,8 +32,6 @@ export interface ListExclusionWindowsRequest extends Omit<
  * const page = yield* listExclusionWindows();
  * yield* Effect.log(`${page.ExclusionWindows.length} windows`);
  * ```
- *
- * @binding
  */
 export interface ListServiceLevelObjectiveExclusionWindows extends Binding.Service<
   ListServiceLevelObjectiveExclusionWindows,

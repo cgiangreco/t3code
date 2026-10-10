@@ -131,8 +131,9 @@ export interface Budget extends Resource<
  * Budgets are a global (account-level) resource; they are free and take
  * effect immediately.
  *
- * ### Creating a Budget
- * **Example:** Monthly cost budget with an email alert at 80%
+ * @resource
+ * @section Creating a Budget
+ * @example Monthly cost budget with an email alert at 80%
  * ```typescript
  * import * as Budgets from "alchemy/AWS/Budgets";
  *
@@ -152,7 +153,7 @@ export interface Budget extends Resource<
  * });
  * ```
  *
- * **Example:** Budget scoped to a single service
+ * @example Budget scoped to a single service
  * ```typescript
  * const budget = yield* Budgets.Budget("EC2Spend", {
  *   budgetLimit: { amount: "500", unit: "USD" },
@@ -161,8 +162,6 @@ export interface Budget extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Budget = Resource<Budget>("AWS.Budgets.Budget");
 

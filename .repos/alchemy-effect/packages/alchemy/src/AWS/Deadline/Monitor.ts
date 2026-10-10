@@ -96,8 +96,9 @@ export interface Monitor extends Resource<
  * administrators view farms, queues, and jobs, authenticated through IAM
  * Identity Center.
  *
- * ### Creating Monitors
- * **Example:** Basic Monitor
+ * @resource
+ * @section Creating Monitors
+ * @example Basic Monitor
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -108,7 +109,7 @@ export interface Monitor extends Resource<
  * });
  * ```
  *
- * **Example:** Export the Monitor URL
+ * @example Export the Monitor URL
  * ```typescript
  * // The monitor's web console URL is available as an output attribute —
  * // return it from the stack so users know where to sign in.
@@ -119,8 +120,6 @@ export interface Monitor extends Resource<
  * });
  * return { monitorUrl: monitor.url };
  * ```
- *
- * @resource
  */
 export const Monitor = Resource<Monitor>("AWS.Deadline.Monitor");
 

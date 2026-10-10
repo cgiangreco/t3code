@@ -15,8 +15,9 @@ export interface ListAssociatedResourcesRequest extends Omit<
  * Pages through the resources associated with the bound application.
  * Provide the implementation with
  * `Effect.provide(AWS.AppRegistry.ListAssociatedResourcesHttp)`.
- * ### Reading Associated Resources
- * **Example:** List the Application's Resources
+ * @binding
+ * @section Reading Associated Resources
+ * @example List the Application's Resources
  * ```typescript
  * // init — bind the operation to the application
  * const listAssociatedResources =
@@ -26,8 +27,6 @@ export interface ListAssociatedResourcesRequest extends Omit<
  * const page = yield* listAssociatedResources({ maxResults: 25 });
  * console.log(page.resources?.map((r) => r.arn));
  * ```
- *
- * @binding
  */
 export interface ListAssociatedResources extends Binding.Service<
   ListAssociatedResources,

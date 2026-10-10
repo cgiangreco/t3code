@@ -23,7 +23,7 @@ import type { Result } from "./Result.ts"
 import * as Res from "./Result.ts"
 import * as TxRef from "./TxRef.ts"
 
-const TypeId = "~effect/TxDeferred"
+const TypeId = "~effect/transactions/TxDeferred"
 
 /**
  * A transactional deferred is a write-once cell readable within transactions.
@@ -37,7 +37,7 @@ const TypeId = "~effect/TxDeferred"
  *
  * **Example** (Completing a transactional deferred)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -45,16 +45,16 @@ const TypeId = "~effect/TxDeferred"
  *
  *   // Complete the deferred
  *   const first = yield* TxDeferred.succeed(deferred, 42)
+ *   console.log(first) // true
  *
  *   // Second write is a no-op
  *   const second = yield* TxDeferred.succeed(deferred, 99)
+ *   console.log(second) // false
  *
  *   // Read the value
  *   const value = yield* TxDeferred.await(deferred)
- *   return [first, second, value]
+ *   console.log(value) // 42
  * })
- *
- * await Effect.runPromise(program) // => [true, false, 42]
  * ```
  *
  * @category models
@@ -95,15 +95,14 @@ const makeTxDeferred = <A, E>(ref: TxRef.TxRef<Option<Result<A, E>>>): TxDeferre
  *
  * **Example** (Creating a transactional deferred)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<string, Error>()
- *   return yield* TxDeferred.poll(deferred)
+ *   const state = yield* TxDeferred.poll(deferred)
+ *   console.log(Option.isNone(state)) // true
  * })
- *
- * await Effect.runPromise(program) // => Option.none()
  * ```
  *
  * @category constructors
@@ -118,16 +117,15 @@ export const make = <A, E = never>(): Effect.Effect<TxDeferred<A, E>> =>
  *
  * **Example** (Awaiting a deferred value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<number>()
  *   yield* TxDeferred.succeed(deferred, 42)
- *   return yield* TxDeferred.await(deferred)
+ *   const value = yield* TxDeferred.await(deferred)
+ *   console.log(value) // 42
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
  * @category getters
@@ -172,19 +170,18 @@ export {
  *
  * **Example** (Polling a deferred)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, Result, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<number>()
  *   const before = yield* TxDeferred.poll(deferred)
+ *   console.log(Option.isNone(before)) // true
  *
  *   yield* TxDeferred.succeed(deferred, 42)
  *   const after = yield* TxDeferred.poll(deferred)
- *   return [before, after]
+ *   console.log(after) // Some(Success(42))
  * })
- *
- * await Effect.runPromise(program) // => [Option.none(), Option.some(Result.succeed(42))]
  * ```
  *
  * @category getters
@@ -202,17 +199,16 @@ export const poll = <A, E>(self: TxDeferred<A, E>): Effect.Effect<Option<Result<
  *
  * **Example** (Completing with a result)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Result, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<number, string>()
  *   const first = yield* TxDeferred.done(deferred, Result.succeed(42))
+ *   console.log(first) // true
  *   const second = yield* TxDeferred.done(deferred, Result.succeed(99))
- *   return [first, second]
+ *   console.log(second) // false
  * })
- *
- * await Effect.runPromise(program) // => [true, false]
  * ```
  *
  * @category mutations
@@ -242,17 +238,16 @@ export const done: {
  *
  * **Example** (Completing with a success value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<number>()
  *   const first = yield* TxDeferred.succeed(deferred, 42)
+ *   console.log(first) // true
  *   const second = yield* TxDeferred.succeed(deferred, 99)
- *   return [first, second]
+ *   console.log(second) // false
  * })
- *
- * await Effect.runPromise(program) // => [true, false]
  * ```
  *
  * @category mutations
@@ -276,18 +271,16 @@ export const succeed: {
  *
  * **Example** (Completing with a failure)
  *
- * ```ts import.meta.vitest
- * import { Cause, Effect, Exit, Option, TxDeferred } from "effect"
+ * ```ts
+ * import { Effect, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<number, string>()
  *   const first = yield* TxDeferred.fail(deferred, "boom")
+ *   console.log(first) // true
  *   const second = yield* TxDeferred.fail(deferred, "boom2")
- *   const exit = yield* Effect.exit(TxDeferred.await(deferred))
- *   return [first, second, exit, Exit.getCause(exit)]
+ *   console.log(second) // false
  * })
- *
- * await Effect.runPromise(program) // => [true, false, Exit.fail("boom"), Option.some(Cause.fail("boom"))]
  * ```
  *
  * @category mutations
@@ -310,15 +303,14 @@ export const fail: {
  *
  * **Example** (Checking transactional deferreds)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxDeferred } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const deferred = yield* TxDeferred.make<number>()
- *   return [TxDeferred.isTxDeferred(deferred), TxDeferred.isTxDeferred("not a deferred")]
+ *   console.log(TxDeferred.isTxDeferred(deferred)) // true
+ *   console.log(TxDeferred.isTxDeferred("not a deferred")) // false
  * })
- *
- * await Effect.runPromise(program) // => [true, false]
  * ```
  *
  * @category guards

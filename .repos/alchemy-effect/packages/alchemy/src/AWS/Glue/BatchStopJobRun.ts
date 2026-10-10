@@ -16,8 +16,9 @@ export interface BatchStopJobRunRequest extends Omit<
  * succeeds), so inspect `SuccessfulSubmissions`/`Errors` rather than the
  * error channel. The job name is injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Glue.BatchStopJobRunHttp)`.
- * ### Running Jobs
- * **Example:** Stop a Run
+ * @binding
+ * @section Running Jobs
+ * @example Stop a Run
  * ```typescript
  * // init
  * const batchStopJobRun = yield* AWS.Glue.BatchStopJobRun(job);
@@ -27,8 +28,6 @@ export interface BatchStopJobRunRequest extends Omit<
  *   JobRunIds: [runId],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchStopJobRun extends Binding.Service<
   BatchStopJobRun,

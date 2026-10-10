@@ -13,8 +13,9 @@ export interface ListCommitmentPurchaseAnalysesRequest
  *
  * List the commitment purchase analyses run in your account. Provide the implementation with
  * `Effect.provide(AWS.CostExplorer.ListCommitmentPurchaseAnalysesHttp)`.
- * ### Commitment Purchase Analysis
- * **Example:** List Analyses
+ * @binding
+ * @section Commitment Purchase Analysis
+ * @example List Analyses
  * ```typescript
  * // init — account-level binding takes no resource
  * const listCommitmentPurchaseAnalyses = yield* AWS.CostExplorer.ListCommitmentPurchaseAnalyses();
@@ -23,8 +24,6 @@ export interface ListCommitmentPurchaseAnalysesRequest
  * const result = yield* listCommitmentPurchaseAnalyses();
  * const analyses = result.AnalysisSummaryList;
  * ```
- *
- * @binding
  */
 export interface ListCommitmentPurchaseAnalyses extends Binding.Service<
   ListCommitmentPurchaseAnalyses,

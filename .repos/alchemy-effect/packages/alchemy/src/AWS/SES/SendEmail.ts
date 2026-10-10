@@ -30,8 +30,9 @@ export interface SendEmailRequest extends Omit<
  * Note: while the account is in the SES sandbox, both the sender identity
  * must be verified and every recipient must be a verified identity or the
  * SES mailbox simulator (e.g. `success@simulator.amazonses.com`).
- * ### Sending Email
- * **Example:** Send a Simple Message
+ * @binding
+ * @section Sending Email
+ * @example Send a Simple Message
  * ```typescript
  * // init
  * const sendEmail = yield* SES.SendEmail(identity);
@@ -49,12 +50,12 @@ export interface SendEmailRequest extends Omit<
  * // result.MessageId
  * ```
  *
- * **Example:** Send Through a Configuration Set
+ * @example Send Through a Configuration Set
  * ```typescript
  * const sendEmail = yield* SES.SendEmail(identity, configSet);
  * ```
  *
- * **Example:** Send a Templated Message
+ * @example Send a Templated Message
  * ```typescript
  * const result = yield* sendEmail({
  *   Destination: { ToAddresses: ["customer@example.com"] },
@@ -66,8 +67,6 @@ export interface SendEmailRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface SendEmail extends Binding.Service<
   SendEmail,

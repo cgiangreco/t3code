@@ -208,8 +208,9 @@ export interface Trail extends Resource<
  * `cloudtrail.amazonaws.com` service principal to call `s3:GetBucketAcl`
  * on the bucket and `s3:PutObject` under `AWSLogs/{accountId}/*`, both
  * scoped with an `aws:SourceArn` condition on the trail's ARN.
- * ### Creating Trails
- * **Example:** Basic Trail
+ * @resource
+ * @section Creating Trails
+ * @example Basic Trail
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -245,7 +246,7 @@ export interface Trail extends Resource<
  * });
  * ```
  *
- * **Example:** Multi-Region Trail with Log File Validation
+ * @example Multi-Region Trail with Log File Validation
  * ```typescript
  * const trail = yield* AWS.CloudTrail.Trail("Audit", {
  *   trailName: "org-audit-trail",
@@ -255,8 +256,8 @@ export interface Trail extends Resource<
  * });
  * ```
  *
- * ### Controlling Logging
- * **Example:** Pause logging without deleting the trail
+ * @section Controlling Logging
+ * @example Pause logging without deleting the trail
  * ```typescript
  * const trail = yield* AWS.CloudTrail.Trail("Audit", {
  *   trailName: "audit-trail",
@@ -265,8 +266,8 @@ export interface Trail extends Resource<
  * });
  * ```
  *
- * ### Selecting Events
- * **Example:** Advanced Event Selectors and Insights
+ * @section Selecting Events
+ * @example Advanced Event Selectors and Insights
  * ```typescript
  * const trail = yield* AWS.CloudTrail.Trail("Audit", {
  *   trailName: "audit-trail",
@@ -282,8 +283,6 @@ export interface Trail extends Resource<
  *   insightSelectors: [{ insightType: "ApiCallRateInsight" }],
  * });
  * ```
- *
- * @resource
  */
 export const Trail = Resource<Trail>("AWS.CloudTrail.Trail");
 

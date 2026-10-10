@@ -91,8 +91,9 @@ export interface ScalingPolicy extends Resource<
  * A target-tracking scaling policy for an Auto Scaling Group. EC2 Auto
  * Scaling creates and manages the CloudWatch alarms that keep the tracked
  * metric at `targetValue` by adjusting the group's desired capacity.
- * ### Creating a Scaling Policy
- * **Example:** Track average CPU utilization
+ * @resource
+ * @section Creating a Scaling Policy
+ * @example Track average CPU utilization
  * ```typescript
  * import { AutoScalingGroup, ScalingPolicy } from "alchemy/AWS/AutoScaling";
  *
@@ -110,7 +111,7 @@ export interface ScalingPolicy extends Resource<
  * });
  * ```
  *
- * **Example:** Scale on ALB requests per target without scale-in
+ * @example Scale on ALB requests per target without scale-in
  * ```typescript
  * const policy = yield* ScalingPolicy("RequestPolicy", {
  *   autoScalingGroup: group,
@@ -120,8 +121,6 @@ export interface ScalingPolicy extends Resource<
  *   estimatedInstanceWarmup: "3 minutes",
  * });
  * ```
- *
- * @resource
  */
 export const ScalingPolicy = Resource<ScalingPolicy>(
   "AWS.AutoScaling.ScalingPolicy",

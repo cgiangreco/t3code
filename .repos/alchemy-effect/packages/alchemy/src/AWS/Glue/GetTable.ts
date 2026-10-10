@@ -16,8 +16,9 @@ export interface GetTableRequest extends Omit<
  * the schema it is writing against. The database/table names and catalog id
  * are injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.GetTableHttp)`.
- * ### Reading the Data Catalog
- * **Example:** Introspect the Table Schema
+ * @binding
+ * @section Reading the Data Catalog
+ * @example Introspect the Table Schema
  * ```typescript
  * // init
  * const getTable = yield* AWS.Glue.GetTable(table);
@@ -26,8 +27,6 @@ export interface GetTableRequest extends Omit<
  * const { Table } = yield* getTable();
  * const columns = Table?.StorageDescriptor?.Columns ?? [];
  * ```
- *
- * @binding
  */
 export interface GetTable extends Binding.Service<
   GetTable,

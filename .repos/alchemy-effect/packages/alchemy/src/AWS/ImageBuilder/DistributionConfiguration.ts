@@ -58,8 +58,9 @@ export interface DistributionConfiguration extends Resource<
  * An EC2 Image Builder distribution configuration — defines where and how
  * the output AMIs (or containers) of a pipeline are distributed across
  * regions and accounts.
- * ### Creating a Distribution Configuration
- * **Example:** Distribute in the Build Region
+ * @resource
+ * @section Creating a Distribution Configuration
+ * @example Distribute in the Build Region
  * ```typescript
  * const distribution = yield* ImageBuilder.DistributionConfiguration("Dist", {
  *   distributions: [{
@@ -72,8 +73,8 @@ export interface DistributionConfiguration extends Resource<
  * });
  * ```
  *
- * ### Using in a Pipeline
- * **Example:** Wire into an Image Pipeline
+ * @section Using in a Pipeline
+ * @example Wire into an Image Pipeline
  * ```typescript
  * const pipeline = yield* ImageBuilder.ImagePipeline("Pipeline", {
  *   imageRecipeArn: recipe.imageRecipeArn,
@@ -81,8 +82,6 @@ export interface DistributionConfiguration extends Resource<
  *   distributionConfigurationArn: distribution.distributionConfigurationArn,
  * });
  * ```
- *
- * @resource
  */
 export const DistributionConfiguration = Resource<DistributionConfiguration>(
   "AWS.ImageBuilder.DistributionConfiguration",

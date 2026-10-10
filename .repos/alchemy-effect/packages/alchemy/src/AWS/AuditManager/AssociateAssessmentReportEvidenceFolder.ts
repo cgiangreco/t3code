@@ -15,14 +15,13 @@ export interface AssociateAssessmentReportEvidenceFolderRequest extends Omit<
  * Adds an evidence folder to the (in-progress) assessment report of
  * the bound assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.AssociateAssessmentReportEvidenceFolderHttp)`.
- * ### Assessment Reports
- * **Example:** Include an Evidence Folder in the Report
+ * @binding
+ * @section Assessment Reports
+ * @example Include an Evidence Folder in the Report
  * ```typescript
  * const associateAssessmentReportEvidenceFolder = yield* AWS.AuditManager.AssociateAssessmentReportEvidenceFolder(assessment);
  * const result = yield* associateAssessmentReportEvidenceFolder({ evidenceFolderId });
  * ```
- *
- * @binding
  */
 export interface AssociateAssessmentReportEvidenceFolder extends Binding.Service<
   AssociateAssessmentReportEvidenceFolder,

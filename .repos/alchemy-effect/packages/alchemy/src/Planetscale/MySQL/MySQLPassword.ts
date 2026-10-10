@@ -1,5 +1,5 @@
 import { Credentials } from "@distilled.cloud/planetscale/Credentials";
-import * as planetscale from "@distilled.cloud/planetscale";
+import * as planetscale from "@distilled.cloud/planetscale/Operations";
 import * as Effect from "effect/Effect";
 import * as Redacted from "effect/Redacted";
 import * as Stream from "effect/Stream";
@@ -82,7 +82,7 @@ export interface MySQLPasswordAttributes {
   /** Resolved branch name. */
   branch: string;
   /** The role granted. */
-  role: "reader" | "writer" | "admin" | "readwriter" | (string & {});
+  role: "reader" | "writer" | "admin" | "readwriter";
   /** Whether this password is for a read replica. */
   replica: boolean | undefined;
   /** TTL in seconds (if set). */
@@ -96,8 +96,8 @@ export interface MySQLPasswordAttributes {
  *
  * For PostgreSQL databases, use {@link PostgresRole} instead.
  *
- * ### Creating a Password
- * **Example:** Reader password
+ * @section Creating a Password
+ * @example Reader password
  * ```typescript
  * const reader = yield* Planetscale.MySQLPassword("AppReader", {
  *   database: "my-db",
@@ -105,7 +105,7 @@ export interface MySQLPasswordAttributes {
  * });
  * ```
  *
- * **Example:** Writer password with TTL
+ * @example Writer password with TTL
  * ```typescript
  * const writer = yield* Planetscale.MySQLPassword("AppWriter", {
  *   database: "my-db",
@@ -114,7 +114,7 @@ export interface MySQLPasswordAttributes {
  * });
  * ```
  *
- * **Example:** Admin password with IP allowlist
+ * @example Admin password with IP allowlist
  * ```typescript
  * const admin = yield* Planetscale.MySQLPassword("Admin", {
  *   database: "my-db",
@@ -412,7 +412,7 @@ const buildAttributes = (
     expires_at: string | null;
     access_host_url: string;
     username: string;
-    role: "reader" | "writer" | "admin" | "readwriter" | (string & {});
+    role: "reader" | "writer" | "admin" | "readwriter";
     replica: boolean;
     ttl_seconds: number | null;
     cidrs: readonly string[] | null;

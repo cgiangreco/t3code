@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * Management is an account singleton, so the binding takes no resource
  * argument. Provide the implementation with
  * `Effect.provide(AWS.Account.GetContactInformationHttp)`.
- * ### Reading Account Settings
- * **Example:** Read the Primary Contact
+ * @binding
+ * @section Reading Account Settings
+ * @example Read the Primary Contact
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getContactInformation = yield* AWS.Account.GetContactInformation();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const { ContactInformation } = yield* getContactInformation();
  * console.log(ContactInformation?.CountryCode);
  * ```
- *
- * @binding
  */
 export interface GetContactInformation extends Binding.Service<
   GetContactInformation,

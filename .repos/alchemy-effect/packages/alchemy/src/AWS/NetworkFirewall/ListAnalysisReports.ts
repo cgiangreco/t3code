@@ -15,8 +15,9 @@ export interface ListAnalysisReportsRequest extends Omit<
  *
  * Provide `NetworkFirewall.ListAnalysisReportsHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Analysis Reports
- * **Example:** List Analysis Reports
+ * @binding
+ * @section Analysis Reports
+ * @example List Analysis Reports
  * ```typescript
  * // init — grants network-firewall:ListAnalysisReports on the firewall
  * const listAnalysisReports =
@@ -25,8 +26,6 @@ export interface ListAnalysisReportsRequest extends Omit<
  * // runtime
  * const { AnalysisReports } = yield* listAnalysisReports();
  * ```
- *
- * @binding
  */
 export interface ListAnalysisReports extends Binding.Service<
   ListAnalysisReports,

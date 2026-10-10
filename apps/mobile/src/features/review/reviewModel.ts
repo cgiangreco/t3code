@@ -1,16 +1,15 @@
 import { parsePatchFiles } from "@pierre/diffs/utils/parsePatchFiles";
 import type { ChangeTypes, FileDiffMetadata } from "@pierre/diffs/types";
-import type { ThreadCheckpointSummary } from "@t3tools/client-runtime/state/thread-checkpoints";
-import type { ReviewDiffPreviewSource } from "@t3tools/contracts";
+import type { OrchestrationCheckpointSummary, ReviewDiffPreviewSource } from "@t3tools/contracts";
 import * as Arr from "effect/Array";
 import { pipe } from "effect/Function";
 import * as Order from "effect/Order";
 
 export type ReviewSectionKind = "turn" | "working-tree" | "branch-range";
 
-const CHANGES_SECTION_ID = "git:branch-range";
-const CHANGES_TITLE = "Changes";
-const UNCOMMITTED_SUBTITLE = "Staged, unstaged, and untracked files";
+const DIRTY_WORKTREE_SECTION_ID = "git:working-tree";
+const DIRTY_WORKTREE_TITLE = "Dirty worktree";
+const DIRTY_WORKTREE_SUBTITLE = "Tracked, staged, and untracked worktree changes";
 
 export interface ReviewSectionItem {
   readonly id: string;
@@ -19,9 +18,6 @@ export interface ReviewSectionItem {
   readonly subtitle: string | null;
   readonly diff: string | null;
   readonly isLoading: boolean;
-  readonly files?: ReviewDiffPreviewSource["files"];
-  readonly truncated?: boolean;
-  readonly source?: ReviewDiffPreviewSource;
 }
 
 export interface ReviewRenderableHunkRow {
@@ -51,7 +47,6 @@ export type ReviewRenderableRow = ReviewRenderableHunkRow | ReviewRenderableLine
 export interface ReviewRenderableFile {
   readonly id: string;
   readonly cacheKey: string;
-  readonly notice?: string;
   readonly path: string;
   readonly previousPath: string | null;
   readonly changeType: ChangeTypes;
@@ -62,6 +57,45 @@ export interface ReviewRenderableFile {
   readonly deletionLines: ReadonlyArray<string>;
   readonly rows: ReadonlyArray<ReviewRenderableRow>;
 }
+
+export interface ReviewFileHeaderListItem {
+  readonly kind: "file-header";
+  readonly id: string;
+  readonly fileId: string;
+  readonly file: ReviewRenderableFile;
+  readonly expanded: boolean;
+}
+
+export interface ReviewFileSuppressedListItem {
+  readonly kind: "file-suppressed";
+  readonly id: string;
+  readonly fileId: string;
+  readonly message: string;
+  readonly actionLabel: string | null;
+}
+
+export interface ReviewHunkListItem {
+  readonly kind: "hunk";
+  readonly id: string;
+  readonly fileId: string;
+  readonly file: ReviewRenderableFile;
+  readonly row: ReviewRenderableHunkRow;
+}
+
+export interface ReviewLineListItem {
+  readonly kind: "line";
+  readonly id: string;
+  readonly fileId: string;
+  readonly file: ReviewRenderableFile;
+  readonly row: ReviewRenderableLineRow;
+  readonly lineIndex: number;
+}
+
+export type ReviewListItem =
+  | ReviewFileHeaderListItem
+  | ReviewFileSuppressedListItem
+  | ReviewHunkListItem
+  | ReviewLineListItem;
 
 export type ReviewFilePreviewState =
   | {
@@ -94,11 +128,11 @@ export type ReviewParsedDiff =
       readonly notice: string | null;
     };
 
-function checkpointTitle(checkpoint: ThreadCheckpointSummary): string {
+function checkpointTitle(checkpoint: OrchestrationCheckpointSummary): string {
   return `Turn ${checkpoint.checkpointTurnCount}`;
 }
 
-function checkpointSubtitle(checkpoint: ThreadCheckpointSummary): string {
+function checkpointSubtitle(checkpoint: OrchestrationCheckpointSummary): string {
   const fileCount = checkpoint.files.length;
   if (checkpoint.status !== "ready") {
     return `Diff ${checkpoint.status}`;
@@ -107,8 +141,8 @@ function checkpointSubtitle(checkpoint: ThreadCheckpointSummary): string {
 }
 
 function compareCheckpointTurnCountDescending(
-  left: ThreadCheckpointSummary,
-  right: ThreadCheckpointSummary,
+  left: OrchestrationCheckpointSummary,
+  right: OrchestrationCheckpointSummary,
 ): -1 | 0 | 1 {
   if (left.checkpointTurnCount === right.checkpointTurnCount) {
     return 0;
@@ -117,18 +151,28 @@ function compareCheckpointTurnCountDescending(
   return left.checkpointTurnCount > right.checkpointTurnCount ? -1 : 1;
 }
 
-const readyCheckpointOrder = Order.make<ThreadCheckpointSummary>(
+const readyCheckpointOrder = Order.make<OrchestrationCheckpointSummary>(
   compareCheckpointTurnCountDescending,
 );
 
 function gitSubtitle(section: ReviewDiffPreviewSource): string | null {
   if (section.kind === "working-tree") {
-    return UNCOMMITTED_SUBTITLE;
+    return DIRTY_WORKTREE_SUBTITLE;
   }
   if (section.baseRef) {
     return `${section.baseRef} ... ${section.headRef ?? "HEAD"}`;
   }
   return "Base branch unavailable";
+}
+
+function stripGitPrefix(pathValue: string | undefined): string | null {
+  if (!pathValue) {
+    return null;
+  }
+  if (pathValue.startsWith("a/") || pathValue.startsWith("b/")) {
+    return pathValue.slice(2);
+  }
+  return pathValue;
 }
 
 function stripTrailingNewline(value: string): string {
@@ -272,6 +316,77 @@ export function getReviewFilePreviewState(file: ReviewRenderableFile): ReviewFil
   return { kind: "render" };
 }
 
+// The flattened review list item model is inspired by pierre/diffs' iterator-first
+// virtualization architecture, adapted here for React Native virtualization.
+// Original project: https://github.com/pingdotgg/pierre/tree/main/packages/diffs
+// Reference files:
+// - src/utils/iterateOverDiff.ts
+// - src/components/VirtualizedFileDiff.ts
+export function buildReviewListItems(input: {
+  readonly files: ReadonlyArray<ReviewRenderableFile>;
+  readonly expandedFileIds: ReadonlyArray<string>;
+  readonly revealedLargeFileIds: ReadonlyArray<string>;
+}): ReadonlyArray<ReviewListItem> {
+  const expandedFileIds = new Set(input.expandedFileIds);
+  const revealedLargeFileIds = new Set(input.revealedLargeFileIds);
+  const items: ReviewListItem[] = [];
+
+  input.files.forEach((file) => {
+    const expanded = expandedFileIds.has(file.id);
+    items.push({
+      kind: "file-header",
+      id: `${file.id}:header`,
+      fileId: file.id,
+      file,
+      expanded,
+    });
+
+    if (!expanded) {
+      return;
+    }
+
+    const previewState = getReviewFilePreviewState(file);
+    if (previewState.kind === "suppressed") {
+      if (previewState.reason !== "large" || !revealedLargeFileIds.has(file.id)) {
+        items.push({
+          kind: "file-suppressed",
+          id: `${file.id}:suppressed`,
+          fileId: file.id,
+          message: previewState.message,
+          actionLabel: previewState.actionLabel,
+        });
+        return;
+      }
+    }
+
+    let lineIndex = 0;
+    file.rows.forEach((row, rowIndex) => {
+      if (row.kind === "hunk") {
+        items.push({
+          kind: "hunk",
+          id: `${file.id}:row:${rowIndex}:${row.id}`,
+          fileId: file.id,
+          file,
+          row,
+        });
+        return;
+      }
+
+      items.push({
+        kind: "line",
+        id: `${file.id}:row:${rowIndex}:${row.id}`,
+        fileId: file.id,
+        file,
+        row,
+        lineIndex,
+      });
+      lineIndex += 1;
+    });
+  });
+
+  return items;
+}
+
 function fallbackHunkHeader(hunk: FileDiffMetadata["hunks"][number]): string {
   return `@@ -${hunk.deletionStart},${hunk.deletionCount} +${hunk.additionStart},${hunk.additionCount} @@`;
 }
@@ -373,8 +488,8 @@ function buildRenderableRows(file: FileDiffMetadata): ReadonlyArray<ReviewRender
 }
 
 function mapRenderableFile(file: FileDiffMetadata): ReviewRenderableFile {
-  const path = file.name || file.prevName || "";
-  const previousPath = file.prevName || null;
+  const path = stripGitPrefix(file.name) ?? stripGitPrefix(file.prevName) ?? file.name;
+  const previousPath = stripGitPrefix(file.prevName);
   const additions = file.hunks.reduce((total, hunk) => total + hunk.additionLines, 0);
   const deletions = file.hunks.reduce((total, hunk) => total + hunk.deletionLines, 0);
   const cacheKey = file.cacheKey ?? `${previousPath ?? "none"}:${path}:${file.type}`;
@@ -395,14 +510,14 @@ function mapRenderableFile(file: FileDiffMetadata): ReviewRenderableFile {
 }
 
 export function getReviewSectionIdForCheckpoint(
-  checkpoint: Pick<ThreadCheckpointSummary, "checkpointTurnCount">,
+  checkpoint: Pick<OrchestrationCheckpointSummary, "checkpointTurnCount">,
 ): string {
   return `turn:${checkpoint.checkpointTurnCount}`;
 }
 
 export function getReadyReviewCheckpoints(
-  checkpoints: ReadonlyArray<ThreadCheckpointSummary>,
-): ReadonlyArray<ThreadCheckpointSummary> {
+  checkpoints: ReadonlyArray<OrchestrationCheckpointSummary>,
+): ReadonlyArray<OrchestrationCheckpointSummary> {
   return pipe(
     checkpoints,
     Arr.filter((checkpoint) => checkpoint.status === "ready"),
@@ -411,7 +526,7 @@ export function getReadyReviewCheckpoints(
 }
 
 export function buildReviewSectionItems(input: {
-  readonly checkpoints: ReadonlyArray<ThreadCheckpointSummary>;
+  readonly checkpoints: ReadonlyArray<OrchestrationCheckpointSummary>;
   readonly gitSections: ReadonlyArray<ReviewDiffPreviewSource>;
   readonly turnDiffById: Readonly<Record<string, string | undefined>>;
   readonly loadingTurnIds: Readonly<Record<string, boolean | undefined>>;
@@ -437,21 +552,17 @@ export function buildReviewSectionItems(input: {
     title: section.title,
     subtitle: gitSubtitle(section),
     diff: section.diff,
-    source: section,
-    ...(section.files ? { files: section.files } : {}),
-    truncated: section.truncated,
     isLoading: false,
   }));
-  // Changes is the default section, so it holds the place while git sources load.
-  const hasChangesItem = gitItems.some((item) => item.id === CHANGES_SECTION_ID);
+  const hasDirtyWorktreeItem = gitItems.some((item) => item.id === DIRTY_WORKTREE_SECTION_ID);
   const visibleGitItems =
-    input.loadingGitSections && !hasChangesItem
+    input.loadingGitSections && !hasDirtyWorktreeItem
       ? [
           {
-            id: CHANGES_SECTION_ID,
-            kind: "branch-range",
-            title: CHANGES_TITLE,
-            subtitle: null,
+            id: DIRTY_WORKTREE_SECTION_ID,
+            kind: "working-tree",
+            title: DIRTY_WORKTREE_TITLE,
+            subtitle: DIRTY_WORKTREE_SUBTITLE,
             diff: null,
             isLoading: true,
           } satisfies ReviewSectionItem,
@@ -462,11 +573,10 @@ export function buildReviewSectionItems(input: {
   return [...turnItems, ...visibleGitItems];
 }
 
-/** Prefers Changes, then the first section (a turn when the project is not a git repo). */
 export function getDefaultReviewSectionId(
   sections: ReadonlyArray<ReviewSectionItem>,
 ): string | null {
-  return (sections.find((section) => section.id === CHANGES_SECTION_ID) ?? sections[0])?.id ?? null;
+  return sections[0]?.id ?? null;
 }
 
 export function buildReviewParsedDiff(
@@ -526,28 +636,4 @@ export function buildReviewParsedDiff(
       notice,
     };
   }
-}
-
-export function applyReviewDiffMetadata(
-  previewDiff: ReviewParsedDiff,
-  selectedSection: Pick<ReviewSectionItem, "files" | "truncated"> | null,
-): ReviewParsedDiff {
-  if (previewDiff.kind === "empty") return previewDiff;
-  const notice = selectedSection?.truncated
-    ? `This preview exceeds the size limit. Changes shown are incomplete.${selectedSection.files ? " Counts include all changes." : ""}`
-    : previewDiff.notice;
-  if (previewDiff.kind !== "files" || !selectedSection?.files) return { ...previewDiff, notice };
-  const totals = selectedSection.files.reduce(
-    (total, file) => ({
-      additions: total.additions + file.additions,
-      deletions: total.deletions + file.deletions,
-    }),
-    { additions: 0, deletions: 0 },
-  );
-  const stats = new Map(selectedSection.files.map((file) => [file.path, file]));
-  const files = previewDiff.files.map((file) => {
-    const stat = stats.get(file.path);
-    return stat ? { ...file, additions: stat.additions, deletions: stat.deletions } : file;
-  });
-  return { ...previewDiff, ...totals, files, fileCount: selectedSection.files.length, notice };
 }

@@ -26,8 +26,9 @@ export interface GetManagedEndpointSessionCredentialsRequest extends Omit<
  * `Redacted` value — call `Redacted.value(...)` at the point of use.
  * Provide the implementation with
  * `Effect.provide(AWS.EMRContainers.GetManagedEndpointSessionCredentialsHttp)`.
- * ### Managed Endpoints
- * **Example:** Mint A Session Token
+ * @binding
+ * @section Managed Endpoints
+ * @example Mint A Session Token
  * ```typescript
  * // init
  * const getSessionCredentials =
@@ -42,8 +43,6 @@ export interface GetManagedEndpointSessionCredentialsRequest extends Omit<
  * });
  * const token = Redacted.value(credentials!.token);
  * ```
- *
- * @binding
  */
 export interface GetManagedEndpointSessionCredentials extends Binding.Service<
   GetManagedEndpointSessionCredentials,

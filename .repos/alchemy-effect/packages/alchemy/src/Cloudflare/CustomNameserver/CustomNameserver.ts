@@ -108,8 +108,11 @@ export type CustomNameserver = Resource<
  * prior state, `read` scans the account for an existing nameserver with
  * the same `nsName` and reports it as `Unowned`, so the engine refuses to
  * take it over unless `--adopt` (or `adopt(true)`) is set.
- * ### Creating a custom nameserver
- * **Example:** Vanity nameserver on the default set
+ * @resource
+ * @product Custom Nameservers
+ * @category Domains & DNS
+ * @section Creating a custom nameserver
+ * @example Vanity nameserver on the default set
  * ```typescript
  * const ns1 = yield* Cloudflare.CustomNameserver.CustomNameserver("Ns1", {
  *   nsName: "ns1.yourbrand.com",
@@ -119,7 +122,7 @@ export type CustomNameserver = Resource<
  * const glue = ns1.dnsRecords; // [{ type: "A", value: "..." }, ...]
  * ```
  *
- * **Example:** Nameserver on a specific set
+ * @example Nameserver on a specific set
  * ```typescript
  * yield* Cloudflare.CustomNameserver.CustomNameserver("Ns2", {
  *   nsName: "ns2.yourbrand.com",
@@ -128,10 +131,6 @@ export type CustomNameserver = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/dns/nameservers/custom-nameservers/account-custom-nameservers/
- *
- * @resource
- * @product Custom Nameservers
- * @category Domains & DNS
  */
 export const CustomNameserver = Resource<CustomNameserver>(TypeId, {
   aliases: ["Cloudflare.CustomNameserver"],
@@ -250,7 +249,7 @@ export const CustomNameserverProvider = () =>
       yield* customNameservers
         .deleteCustomNameserver({
           accountId: output.accountId,
-          customNsId: output.nsName,
+          customNSId: output.nsName,
         })
         .pipe(Effect.catchTag("CustomNameserverNotFound", () => Effect.void));
     }),

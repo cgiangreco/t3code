@@ -18,11 +18,11 @@ import {
   readThreadPreviewState,
   reconcilePreviewServerSessions,
   rememberPreviewUrl,
+  removePreviewThread,
   resetPreviewStateForTests,
   setActivePreviewTab,
   updatePreviewServerSnapshot,
 } from "./previewStateStore";
-import { appAtomRegistry } from "./rpc/atomRegistry";
 
 const environmentId = "env-1" as EnvironmentId;
 const ref = scopeThreadRef(environmentId, ThreadId.make("thread-1"));
@@ -321,46 +321,11 @@ describe("previewStateStore (single-tab)", () => {
       zoomFactor: 1,
       pictureInPicture: false,
       colorScheme: "system",
-      audioMuted: false,
-      audible: false,
       controller: "none",
-      favicon: null,
     });
     const state = readThreadPreviewState(ref);
     expect(state.desktopOverlay?.canGoBack).toBe(true);
     expect(state.snapshot?.canGoBack).toBe(false);
-  });
-
-  it("does not publish duplicate desktop browser state", () => {
-    const snapshot = makeSnapshot();
-    applyPreviewServerSnapshot(ref, snapshot);
-    const overlay = {
-      hasWebContents: true,
-      canGoBack: true,
-      canGoForward: false,
-      loading: false,
-      zoomFactor: 1,
-      pictureInPicture: false,
-      colorScheme: "system" as const,
-      audioMuted: false,
-      audible: false,
-      controller: "none" as const,
-      favicon: {
-        dataUrl: "data:image/png;base64,AA==",
-        pageUrl: "https://example.com",
-        capturedAt: 1,
-      },
-    };
-    let updateCount = 0;
-    const unsubscribe = appAtomRegistry.subscribe(previewStateAtom(scopedThreadKey(ref)), () => {
-      updateCount += 1;
-    });
-
-    applyPreviewDesktopState(ref, snapshot.tabId, overlay);
-    applyPreviewDesktopState(ref, snapshot.tabId, { ...overlay, favicon: { ...overlay.favicon } });
-    unsubscribe();
-
-    expect(updateCount).toBe(1);
   });
 
   it("retains multiple tabs and switches active desktop state", () => {
@@ -376,10 +341,7 @@ describe("previewStateStore (single-tab)", () => {
       zoomFactor: 1,
       pictureInPicture: false,
       colorScheme: "system",
-      audioMuted: false,
-      audible: false,
       controller: "none",
-      favicon: null,
     });
     setActivePreviewTab(ref, first.tabId);
 
@@ -427,10 +389,7 @@ describe("previewStateStore (single-tab)", () => {
       zoomFactor: 1,
       pictureInPicture: false,
       colorScheme: "system",
-      audioMuted: false,
-      audible: false,
       controller: "none",
-      favicon: null,
     });
 
     reconcilePreviewServerSessions(ref, { sessions: [active], serverEpoch, revision: 1 });
@@ -466,19 +425,6 @@ describe("previewStateStore (single-tab)", () => {
     reconcilePreviewServerSessions(ref, { sessions: [], serverEpoch, revision: 0 });
 
     expect(readThreadPreviewState(ref).sessions).toEqual({ [snapshot.tabId]: snapshot });
-    expect(readThreadPreviewState(ref).listLoaded).toBe(false);
-
-    const olderTab = makeSnapshot({ tabId: "tab_before_event" });
-    reconcilePreviewServerSessions(ref, {
-      sessions: [olderTab, snapshot],
-      serverEpoch,
-      revision: 2,
-    });
-    expect(readThreadPreviewState(ref).listLoaded).toBe(true);
-    expect(readThreadPreviewState(ref).sessions).toEqual({
-      [olderTab.tabId]: olderTab,
-      [snapshot.tabId]: snapshot,
-    });
   });
 
   it("does not resurrect a tab from an event older than its close", () => {
@@ -557,10 +503,7 @@ describe("previewStateStore (single-tab)", () => {
       zoomFactor: 1,
       pictureInPicture: false,
       colorScheme: "system",
-      audioMuted: false,
-      audible: false,
       controller: "none",
-      favicon: null,
     });
     const restarted = makeSnapshot({
       navStatus: { _tag: "Success", url: "https://new.example", title: "New" },
@@ -620,5 +563,13 @@ describe("previewStateStore (single-tab)", () => {
     expect(state.recentlySeenUrls[0]).toBe(
       `http://localhost:${5000 + __testing.RECENT_URL_LIMIT + 4}/`,
     );
+  });
+
+  it("removeThread strips the entry", () => {
+    const snapshot = makeSnapshot();
+    applyPreviewServerSnapshot(ref, snapshot);
+    removePreviewThread(ref);
+    const state = readThreadPreviewState(ref);
+    expect(state).toEqual(__testing.EMPTY_THREAD_PREVIEW_STATE);
   });
 });

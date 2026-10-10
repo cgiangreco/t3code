@@ -208,8 +208,9 @@ export interface Cluster extends Resource<
  * instance-hour while they exist. Each cluster needs an EMR service role and
  * an EC2 instance profile (job-flow role); destroy clusters you are not
  * using, or set `autoTerminationPolicy` as a safety net.
- * ### Creating a Cluster
- * **Example:** Spark Cluster in a Default-VPC Subnet
+ * @resource
+ * @section Creating a Cluster
+ * @example Spark Cluster in a Default-VPC Subnet
  * ```typescript
  * const cluster = yield* Cluster("Analytics", {
  *   releaseLabel: "emr-7.5.0",
@@ -226,7 +227,7 @@ export interface Cluster extends Resource<
  * });
  * ```
  *
- * **Example:** Cluster with an Auto-Termination Safety Net
+ * @example Cluster with an Auto-Termination Safety Net
  * ```typescript
  * const cluster = yield* Cluster("Batch", {
  *   releaseLabel: "emr-7.5.0",
@@ -238,8 +239,8 @@ export interface Cluster extends Resource<
  * });
  * ```
  *
- * ### Applying a Security Configuration
- * **Example:** Cluster with Encryption Settings
+ * @section Applying a Security Configuration
+ * @example Cluster with Encryption Settings
  * ```typescript
  * const config = yield* SecurityConfiguration("Encryption", {
  *   securityConfiguration: {
@@ -256,8 +257,6 @@ export interface Cluster extends Resource<
  *   securityConfiguration: config.securityConfigurationName,
  * });
  * ```
- *
- * @resource
  */
 export const Cluster = Resource<Cluster>("AWS.EMR.Cluster");
 

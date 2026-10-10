@@ -71,8 +71,11 @@ export type LeakedCredentialDetection = Resource<
  * state, `read` scans the zone for an existing detection with the same
  * expressions and reports it as `Unowned`, so the engine refuses to take
  * it over unless `--adopt` (or `adopt(true)`) is set.
- * ### Custom detection locations
- * **Example:** Detect credentials in a JSON login body
+ * @resource
+ * @product Leaked Credential Checks
+ * @category Application Security
+ * @section Custom detection locations
+ * @example Detect credentials in a JSON login body
  * ```typescript
  * const check = yield* Cloudflare.LeakedCredentialCheck.LeakedCredentialCheck("Lcc", {
  *   zoneId: zone.zoneId,
@@ -86,7 +89,7 @@ export type LeakedCredentialDetection = Resource<
  * });
  * ```
  *
- * **Example:** Username-only detection
+ * @example Username-only detection
  * ```typescript
  * yield* Cloudflare.LeakedCredentialCheck.LeakedCredentialDetection("UsernameHeader",  {
  *   zoneId: check.zoneId,
@@ -95,10 +98,6 @@ export type LeakedCredentialDetection = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/waf/detections/leaked-credentials/#custom-detection-locations
- *
- * @resource
- * @product Leaked Credential Checks
- * @category Application Security
  */
 export const LeakedCredentialDetection =
   Resource<LeakedCredentialDetection>(TypeId);

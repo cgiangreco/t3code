@@ -18,8 +18,9 @@ type AlarmResources = [AlarmResource, ...AlarmResource[]];
  *
  * Provide `CloudWatch.DescribeAlarmsHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Reading Alarm State
- * **Example:** Read the State of a Bound Alarm
+ * @binding
+ * @section Reading Alarm State
+ * @example Read the State of a Bound Alarm
  * ```typescript
  * const alarm = yield* CloudWatch.Alarm("HighErrors", {
  *   MetricName: "Errors",
@@ -38,8 +39,6 @@ type AlarmResources = [AlarmResource, ...AlarmResource[]];
  * const result = yield* describeAlarms();
  * const state = result.MetricAlarms?.[0]?.StateValue; // "OK" | "ALARM" | ...
  * ```
- *
- * @binding
  */
 export interface DescribeAlarms extends Binding.Service<
   DescribeAlarms,

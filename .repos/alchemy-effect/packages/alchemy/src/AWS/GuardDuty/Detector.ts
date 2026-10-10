@@ -65,13 +65,13 @@ export interface Detector extends Resource<
  * resource is a capture-and-restore singleton: adopting a pre-existing detector
  * that Alchemy did not create requires `--adopt`.
  *
- * ### Enabling GuardDuty
- * **Example:** Enable with default settings
+ * @section Enabling GuardDuty
+ * @example Enable with default settings
  * ```typescript
  * const detector = yield* GuardDuty.Detector("Detector", {});
  * ```
  *
- * **Example:** Frequent finding publishing
+ * @example Frequent finding publishing
  * ```typescript
  * const detector = yield* GuardDuty.Detector("Detector", {
  *   enable: true,

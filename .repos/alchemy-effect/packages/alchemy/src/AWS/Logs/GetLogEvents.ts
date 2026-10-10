@@ -14,8 +14,9 @@ export interface GetLogEventsRequest extends Omit<
  * Bind this operation to a `LogGroup` inside a function runtime to get a
  * callable that reads log events from a single stream of the group,
  * automatically injecting the log group name.
- * ### Reading Logs
- * **Example:** Read a Stream from the Beginning
+ * @binding
+ * @section Reading Logs
+ * @example Read a Stream from the Beginning
  * ```typescript
  * const getLogEvents = yield* AWS.Logs.GetLogEvents(logGroup);
  *
@@ -25,12 +26,12 @@ export interface GetLogEventsRequest extends Omit<
  * });
  * ```
  *
- * **Example:** Wire into a Lambda Function
+ * @example Wire into a Lambda Function
  * ```typescript
  * // Provide the GetLogEventsHttp layer on the Function's init Effect;
  * // combine with Layer.mergeAll when using several Logs bindings.
  * export default TailFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     const logGroup = yield* AWS.Logs.LogGroup("AppLogs", {});
  *     const getLogEvents = yield* AWS.Logs.GetLogEvents(logGroup);
@@ -46,8 +47,6 @@ export interface GetLogEventsRequest extends Omit<
  *   }).pipe(Effect.provide(AWS.Logs.GetLogEventsHttp)),
  * );
  * ```
- *
- * @binding
  */
 export interface GetLogEvents extends Binding.Service<
   GetLogEvents,

@@ -57,8 +57,9 @@ export interface Schedule extends Resource<
  * An AWS Glue DataBrew schedule — a cron expression that starts one or more
  * DataBrew jobs at recurring times. The schedule definition is free; only
  * the job runs it triggers are billed.
- * ### Creating Schedules
- * **Example:** Nightly Job Schedule
+ * @resource
+ * @section Creating Schedules
+ * @example Nightly Job Schedule
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -68,14 +69,12 @@ export interface Schedule extends Resource<
  * });
  * ```
  *
- * **Example:** Schedule Without Jobs (attach later)
+ * @example Schedule Without Jobs (attach later)
  * ```typescript
  * const schedule = yield* AWS.DataBrew.Schedule("Standing", {
  *   cronExpression: "cron(0 12 ? * MON-FRI *)",
  * });
  * ```
- *
- * @resource
  */
 export const Schedule = Resource<Schedule>("AWS.DataBrew.Schedule");
 

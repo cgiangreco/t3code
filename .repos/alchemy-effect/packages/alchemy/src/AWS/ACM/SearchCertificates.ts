@@ -13,8 +13,9 @@ export interface SearchCertificatesRequest
  * {@link ListCertificates} — X.509 attributes, status, type, and renewal
  * eligibility can be combined in a filter statement. Provide the
  * implementation with `Effect.provide(AWS.ACM.SearchCertificatesHttp)`.
- * ### Inspecting Certificates
- * **Example:** Search Certificates by ARN
+ * @binding
+ * @section Inspecting Certificates
+ * @example Search Certificates by ARN
  * ```typescript
  * // init — account-level binding takes no resource
  * const searchCertificates = yield* AWS.ACM.SearchCertificates();
@@ -25,8 +26,6 @@ export interface SearchCertificatesRequest
  * });
  * const arns = (result.Results ?? []).map((r) => r.CertificateArn);
  * ```
- *
- * @binding
  */
 export interface SearchCertificates extends Binding.Service<
   SearchCertificates,

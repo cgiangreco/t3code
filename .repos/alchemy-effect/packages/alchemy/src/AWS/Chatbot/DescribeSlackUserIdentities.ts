@@ -9,16 +9,15 @@ import * as Binding from "../../Binding.ts";
  * filtered to one channel configuration — the read half of identity
  * offboarding automation. Provide the implementation with
  * `Effect.provide(AWS.Chatbot.DescribeSlackUserIdentitiesHttp)`.
- * ### Slack Identity Management
- * **Example:** List linked Slack user identities
+ * @binding
+ * @section Slack Identity Management
+ * @example List linked Slack user identities
  * ```typescript
  * const describeSlackUserIdentities =
  *   yield* AWS.Chatbot.DescribeSlackUserIdentities();
  * const result = yield* describeSlackUserIdentities();
  * const users = (result.SlackUserIdentities ?? []).map((u) => u.SlackUserId);
  * ```
- *
- * @binding
  */
 export interface DescribeSlackUserIdentities extends Binding.Service<
   DescribeSlackUserIdentities,

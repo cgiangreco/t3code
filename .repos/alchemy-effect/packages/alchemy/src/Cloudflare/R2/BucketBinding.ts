@@ -69,23 +69,6 @@ export const makeHelpers = (env: Record<string, any>, bucket: Bucket) => {
   ): Effect.Effect<T, R2Error> =>
     raw.pipe(Effect.flatMap((raw) => tryPromise(() => fn(raw))));
 
-  return {
-    raw,
-    use,
-    tryPromise,
-    ...makeR2ObjectWrappers(tryPromise),
-  };
-};
-
-/**
- * The `R2Object`/`R2ObjectBody` → Effect-client wrappers, shared by the
- * Worker-binding helpers above and the local platform-proxy helpers
- * (`LocalR2Gateway.ts`), which differ only in how `raw`/`use` obtain the
- * native bucket.
- */
-export const makeR2ObjectWrappers = (
-  tryPromise: <T>(fn: () => Promise<T>) => Effect.Effect<T, R2Error>,
-) => {
   const wrapR2Object = (object: runtime.R2Object): R2Object => ({
     ...object,
     writeHttpMetadata: (headers: Headers) =>
@@ -102,7 +85,6 @@ export const makeR2ObjectWrappers = (
           cause: error,
         }),
     }),
-    readable: object.body as any as ReadableStream<Uint8Array>,
     bodyUsed: object.bodyUsed,
     arrayBuffer: () => tryPromise(() => object.arrayBuffer()),
     bytes: () => tryPromise(() => object.bytes()),
@@ -124,6 +106,9 @@ export const makeR2ObjectWrappers = (
         : wrapR2Object(object);
 
   return {
+    raw,
+    use,
+    tryPromise,
     wrapR2Object,
     wrapR2ObjectOrBody,
   };

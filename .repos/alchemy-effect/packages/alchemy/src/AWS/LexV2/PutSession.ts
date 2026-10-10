@@ -19,8 +19,9 @@ export interface PutSessionRequest extends Omit<
  * application steer the dialog (e.g. pre-fill slots or elicit a specific
  * intent).
  *
- * ### Managing Sessions
- * **Example:** Steer the Conversation
+ * @binding
+ * @section Managing Sessions
+ * @example Steer the Conversation
  * ```typescript
  * // init
  * const putSession = yield* AWS.LexV2.PutSession(alias);
@@ -35,8 +36,6 @@ export interface PutSessionRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface PutSession extends Binding.Service<
   PutSession,

@@ -114,8 +114,9 @@ export interface LinkedWhatsAppBusinessAccount extends Resource<
  * its event destinations and tags. Destroying the resource disassociates
  * the WhatsApp Business Account from your AWS account.
  * :::
- * ### Managing a Linked Account
- * **Example:** Adopt a console-linked WABA and route events to SNS
+ * @resource
+ * @section Managing a Linked Account
+ * @example Adopt a console-linked WABA and route events to SNS
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -132,8 +133,8 @@ export interface LinkedWhatsAppBusinessAccount extends Resource<
  * );
  * ```
  *
- * ### Consuming WhatsApp Events
- * **Example:** Handle Inbound Messages in a Lambda
+ * @section Consuming WhatsApp Events
+ * @example Handle Inbound Messages in a Lambda
  * WhatsApp events (inbound messages, message status updates) are delivered
  * exclusively to the SNS topics listed in `eventDestinations` — there is no
  * separate event source for this service. Compose the resource with
@@ -158,8 +159,6 @@ export interface LinkedWhatsAppBusinessAccount extends Resource<
  *   ),
  * );
  * ```
- *
- * @resource
  */
 export const LinkedWhatsAppBusinessAccount =
   Resource<LinkedWhatsAppBusinessAccount>(

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * {@link RevokePipelineEndpointConnections} to cut off access). Account-level:
  * no resource argument. Provide the implementation with
  * `Effect.provide(AWS.OSIS.ListPipelineEndpointConnectionsHttp)`.
- * ### Managing Endpoint Connections
- * **Example:** Audit Endpoint Connections
+ * @binding
+ * @section Managing Endpoint Connections
+ * @example Audit Endpoint Connections
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listConnections = yield* AWS.OSIS.ListPipelineEndpointConnections();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *   );
  * }
  * ```
- *
- * @binding
  */
 export interface ListPipelineEndpointConnections extends Binding.Service<
   ListPipelineEndpointConnections,

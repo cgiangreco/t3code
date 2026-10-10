@@ -145,8 +145,11 @@ export type Domain = Resource<
  *
  * Requires the Email Security enterprise add-on; accounts without the
  * entitlement receive the typed `EmailSecurityNotEntitled` error.
- * ### Configuring a Domain
- * **Example:** Drop malicious mail before delivery
+ * @resource
+ * @product Email Security
+ * @category Email
+ * @section Configuring a Domain
+ * @example Drop malicious mail before delivery
  * ```typescript
  * yield* Cloudflare.Email.Domain("MailDomain", {
  *   domain: "example.com",
@@ -154,7 +157,7 @@ export type Domain = Resource<
  * });
  * ```
  *
- * **Example:** Restrict inbound delivery and require TLS
+ * @example Restrict inbound delivery and require TLS
  * ```typescript
  * yield* Cloudflare.Email.Domain("MailDomain", {
  *   domain: "example.com",
@@ -166,10 +169,6 @@ export type Domain = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/email-security/
- *
- * @resource
- * @product Email Security
- * @category Email
  */
 export const Domain = Resource<Domain>(EmailSecurityDomainTypeId, {
   aliases: ["Cloudflare.EmailSecurity.Domain"],

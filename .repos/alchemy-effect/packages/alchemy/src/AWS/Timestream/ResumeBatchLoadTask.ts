@@ -15,8 +15,9 @@ export interface ResumeBatchLoadTaskRequest
  * Provide `Timestream.ResumeBatchLoadTaskHttp` on the Function to implement
  * the binding.
  *
- * ### Batch Loading
- * **Example:** Resume a paused import
+ * @binding
+ * @section Batch Loading
+ * @example Resume a paused import
  * ```typescript
  * // init — account-level binding, no resource argument
  * const resumeBatchLoadTask = yield* Timestream.ResumeBatchLoadTask();
@@ -24,8 +25,6 @@ export interface ResumeBatchLoadTaskRequest
  * // runtime
  * yield* resumeBatchLoadTask({ TaskId: task.TaskId });
  * ```
- *
- * @binding
  */
 export interface ResumeBatchLoadTask extends Binding.Service<
   ResumeBatchLoadTask,

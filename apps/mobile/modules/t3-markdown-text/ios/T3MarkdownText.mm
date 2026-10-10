@@ -2,7 +2,6 @@
 #import "T3MarkdownTextShadowNode.h"
 #import "T3MarkdownTextComponentDescriptor.h"
 #import "T3MarkdownTextRun.h"
-#import "T3ContextChip.h"
 #import <React/RCTConversions.h>
 #import <objc/runtime.h>
 
@@ -10,86 +9,9 @@
 #import <react/renderer/components/T3MarkdownTextSpec/EventEmitters.h>
 #import <react/renderer/components/T3MarkdownTextSpec/Props.h>
 #import <react/renderer/components/T3MarkdownTextSpec/RCTComponentViewHelpers.h>
-#import <React/RCTFabricComponentsPlugins.h>
+#import "RCTFabricComponentsPlugins.h"
 
 using namespace facebook::react;
-
-@interface T3ContextChipAccessibilityElement : UIAccessibilityElement
-@property(nonatomic, weak) T3MarkdownTextRun *run;
-@end
-
-@implementation T3ContextChipAccessibilityElement
-- (BOOL)accessibilityActivate
-{
-  if (self.run == nil) return NO;
-  [self.run onPress];
-  return YES;
-}
-@end
-
-/** Preserve canonical references and their payload when copying a native text selection. */
-@interface T3ContextCopyTextView : UITextView
-@property(nonatomic, copy) NSDictionary *contextClipboardConfig;
-@end
-
-@implementation T3ContextCopyTextView
-// Read-only text still supports selecting the entire document after selecting a word.
-- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
-{
-  if (action == @selector(selectAll:)) {
-    return self.selectable && self.text.length > 0 && self.selectedRange.length < self.text.length;
-  }
-  return [super canPerformAction:action withSender:sender];
-}
-
-- (void)copy:(id)sender
-{
-  NSRange selected = self.selectedRange;
-  NSArray *ranges = self.contextClipboardConfig[@"ranges"];
-  if (selected.location == NSNotFound || selected.length == 0 || NSMaxRange(selected) > self.text.length || ranges.count == 0) {
-    [super copy:sender];
-    return;
-  }
-  NSMutableString *text = [[self.text substringWithRange:selected] mutableCopy];
-  BOOL hasContext = NO;
-  for (NSDictionary *range in [ranges reverseObjectEnumerator]) {
-    NSUInteger start = [range[@"start"] unsignedIntegerValue];
-    NSUInteger end = [range[@"end"] unsignedIntegerValue];
-    if (end <= start || end > self.text.length) continue;
-    NSRange overlap = NSIntersectionRange(selected, NSMakeRange(start, end - start));
-    if (overlap.length == 0 || ![range[@"text"] isKindOfClass:NSString.class]) continue;
-    [text replaceCharactersInRange:NSMakeRange(overlap.location - selected.location, overlap.length) withString:range[@"text"]];
-    hasContext = YES;
-  }
-  if (!hasContext) { [super copy:sender]; return; }
-  [text replaceOccurrencesOfString:@"\uFFFC\u00A0" withString:@"" options:0 range:NSMakeRange(0, text.length)];
-  NSString *fragment = self.contextClipboardConfig[@"fragment"];
-  NSMutableDictionary *payload = [[NSJSONSerialization JSONObjectWithData:[fragment dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingMutableContainers error:nil] mutableCopy];
-  NSArray *records = payload[@"records"];
-  NSMutableArray *copied = [NSMutableArray array];
-  NSMutableSet *screenshots = [NSMutableSet set];
-  for (NSDictionary *record in records) {
-    if ([text containsString:[NSString stringWithFormat:@"/%@)", record[@"contextId"]]]) {
-      [copied addObject:record];
-      if ([record[@"screenshotContextId"] isKindOfClass:NSString.class]) [screenshots addObject:record[@"screenshotContextId"]];
-    }
-  }
-  for (NSDictionary *record in records) {
-    if ([screenshots containsObject:record[@"contextId"]] && ![copied containsObject:record]) [copied addObject:record];
-  }
-  payload[@"records"] = copied;
-  NSData *encoded = payload ? [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil] : nil;
-  NSMutableDictionary *item = [@{@"public.utf8-plain-text": text} mutableCopy];
-  if (encoded && copied.count > 0) {
-    NSString *raw = [[NSString alloc] initWithData:encoded encoding:NSUTF8StringEncoding];
-    NSString *attribute = [raw stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.alphanumericCharacterSet];
-    NSString *escaped = [[[text stringByReplacingOccurrencesOfString:@"&" withString:@"&amp;"] stringByReplacingOccurrencesOfString:@"<" withString:@"&lt;"] stringByReplacingOccurrencesOfString:@">" withString:@"&gt;"];
-    item[@"app.t3.context-fragment"] = encoded;
-    item[@"public.html"] = [[NSString stringWithFormat:@"<pre data-t3-context-fragment=\"%@\">%@</pre>", attribute, escaped] dataUsingEncoding:NSUTF8StringEncoding];
-  }
-  UIPasteboard.generalPasteboard.items = @[item];
-}
-@end
 
 static void T3MarkdownTextApplyParagraphStyles(
     NSMutableAttributedString *attributedString,
@@ -138,16 +60,14 @@ static void T3MarkdownTextApplyAttachments(
     NSString *imageUri = [NSString stringWithUTF8String:attachmentRange.imageUri.c_str()];
     NSTextAttachment *attachment = [[NSTextAttachment alloc] init];
     UIImage *image = images[imageUri];
-    const BOOL isSymbol = [imageUri hasPrefix:@"sf:"];
-    if (isSymbol) {
-      image = [UIImage systemImageNamed:[imageUri substringFromIndex:3]];
-    }
-    NSDictionary *runAttributes =
-        [attributedString attributesAtIndex:attachmentRange.location effectiveRange:nil];
-    UIColor *foregroundColor = runAttributes[NSForegroundColorAttributeName];
-    if (image != nil && (isSymbol || attachmentRange.tintWithForeground)) {
-      image = [image imageWithTintColor:foregroundColor ?: UIColor.labelColor
-                          renderingMode:UIImageRenderingModeAlwaysOriginal];
+    if ([imageUri hasPrefix:@"sf:"]) {
+      NSString *symbolName = [imageUri substringFromIndex:3];
+      UIColor *foregroundColor =
+          [attributedString attribute:NSForegroundColorAttributeName
+                              atIndex:attachmentRange.location
+                       effectiveRange:nil] ?: UIColor.labelColor;
+      image = [[UIImage systemImageNamed:symbolName] imageWithTintColor:foregroundColor
+                                                          renderingMode:UIImageRenderingModeAlwaysOriginal];
     }
     attachment.image = image ?: [[UIImage alloc] init];
     const CGFloat attachmentSize = T3MarkdownTextAttachmentSize(attachmentRange);
@@ -156,18 +76,12 @@ static void T3MarkdownTextApplyAttachments(
         T3MarkdownTextAttachmentBaselineOffset(attachmentRange),
         attachmentSize,
         attachmentSize);
-    NSDictionary *chip = T3ContextChipPayload(imageUri);
-    if (chip != nil) {
-      CGSize size = CGSizeMake(attachmentRange.chipWidth, attachmentRange.chipHeight);
-      attachment.bounds = T3ContextChipBounds(runAttributes[NSFontAttributeName], size);
-      NSString *iconUri = [chip[@"iconUri"] isKindOfClass:NSString.class] ? chip[@"iconUri"] : nil;
-      attachment.image = T3ContextChipImage(chip, size, iconUri ? images[iconUri] : nil);
-    }
     const NSRange range = NSMakeRange(
         attachmentRange.location,
         MIN(attachmentRange.length, attributedString.length - attachmentRange.location));
-    [attributedString replaceCharactersInRange:range
-                          withAttributedString:T3MarkdownTextAttachmentString(attachment, runAttributes)];
+    NSAttributedString *attachmentString =
+        [NSAttributedString attributedStringWithAttachment:attachment];
+    [attributedString replaceCharactersInRange:range withAttributedString:attachmentString];
   }
 }
 
@@ -278,16 +192,12 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
 
 @implementation T3MarkdownText {
   UIView * _view;
-  T3ContextCopyTextView * _textView;
+  UITextView * _textView;
   T3MarkdownTextShadowNode::ConcreteState::Shared _state;
   __weak UIWindow * _outsideTapWindow;
   BOOL _suppressSelectionChange;
   NSMutableDictionary<NSString *, UIImage *> * _attachmentImages;
   NSMutableSet<NSString *> * _pendingAttachmentUris;
-  UILongPressGestureRecognizer *_longPressGestureRecognizer;
-  UITapGestureRecognizer *_pressGestureRecognizer;
-  NSArray *_contextAccessibilityElements;
-  BOOL _textLayoutNeedsUpdate;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
@@ -305,38 +215,29 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
     self.contentView = _view;
     self.clipsToBounds = true;
 
-    _textView = [[T3ContextCopyTextView alloc] init];
+    _textView = [[UITextView alloc] init];
     _attachmentImages = [[NSMutableDictionary alloc] init];
     _pendingAttachmentUris = [[NSMutableSet alloc] init];
     _textView.scrollEnabled = false;
     _textView.editable = false;
     _textView.textContainerInset = UIEdgeInsetsZero;
     _textView.textContainer.lineFragmentPadding = 0;
-    // The shadow node already sized this view to fit every line. A container
-    // that tracks the frame can come out a fraction of a point shorter after
-    // pixel rounding, and TextKit then drops the last line. Size it by hand
-    // with unbounded height and let the view's bounds clip.
-    _textView.textContainer.widthTracksTextView = NO;
-    _textView.textContainer.heightTracksTextView = NO;
     _textView.delegate = self;
-    // Chat text supports selection and contextual actions, but not drag-and-drop.
-    _textView.textDragInteraction.enabled = NO;
-    _textView.linkTextAttributes = @{};
     // Must match RCTTextLayoutManager, which measures with usesFontLeading = NO.
     _textView.layoutManager.usesFontLeading = NO;
     [self addSubview:_textView];
 
-    _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                                                 action:@selector(handleLongPressIfNecessary:)];
-    _longPressGestureRecognizer.delegate = self;
+    const auto longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self
+                                                                                          action:@selector(handleLongPressIfNecessary:)];
+    longPressGestureRecognizer.delegate = self;
 
-    _pressGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                       action:@selector(handlePressIfNecessary:)];
-    _pressGestureRecognizer.delegate = self;
-    [_pressGestureRecognizer requireGestureRecognizerToFail:_longPressGestureRecognizer];
+    const auto pressGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                action:@selector(handlePressIfNecessary:)];
+    pressGestureRecognizer.delegate = self;
+    [pressGestureRecognizer requireGestureRecognizerToFail:longPressGestureRecognizer];
 
-    [_textView addGestureRecognizer:_pressGestureRecognizer];
-    [_textView addGestureRecognizer:_longPressGestureRecognizer];
+    [_textView addGestureRecognizer:pressGestureRecognizer];
+    [_textView addGestureRecognizer:longPressGestureRecognizer];
   }
 
   return self;
@@ -366,11 +267,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
   [coordinator removeTarget:self];
 }
 
-- (NSArray *)accessibilityElements
-{
-  return _contextAccessibilityElements ?: [super accessibilityElements];
-}
-
 // See RCTParagraphComponentView
 - (void)prepareForRecycle
 {
@@ -384,19 +280,16 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
   // Reset the frame to zero so that when it properly lays out on the next use
   _textView.frame = CGRectZero;
   _textView.attributedText = nil;
-  _contextAccessibilityElements = nil;
-  _textLayoutNeedsUpdate = YES;
 }
 
 - (void)layoutSubviews
 {
   [super layoutSubviews];
-  // Resize during UIKit's layout pass. Doing this in drawRect can leave the
-  // text view's drawing surface clipped to its previous width after a pane
-  // expands, even though TextKit has already rewrapped the lines.
+  // _textView's frame is assigned inside drawRect, which only fires when
+  // state changes. Trigger a redraw whenever the host frame moves out from
+  // under it (rotation, parent relayout) so the text view resizes and
+  // onTextLayout re-fires with the new line wrapping.
   if (!CGRectEqualToRect(_textView.frame, _view.frame)) {
-    _textView.frame = _view.frame;
-    _textLayoutNeedsUpdate = YES;
     [self setNeedsDisplay];
   }
 }
@@ -419,38 +312,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
       convertedAttrString,
       _state->getData().attachmentRanges,
       _attachmentImages);
-  // Matches the shadow node so drawn lines sit where measurement put them.
-  RCTApplyBaselineOffset(convertedAttrString);
-  NSUInteger runLocation = 0;
-  for (UIView *child in self.subviews) {
-    if (![child isKindOfClass:[T3MarkdownTextRun class]]) {
-      continue;
-    }
-
-    T3MarkdownTextRun *textChild = (T3MarkdownTextRun *)child;
-    const NSRange runRange = NSMakeRange(runLocation, textChild.text.length);
-    runLocation = NSMaxRange(runRange);
-    if (![textChild hasContextMenu] || runRange.length == 0 ||
-        NSMaxRange(runRange) > convertedAttrString.length) {
-      continue;
-    }
-
-    NSURL *link = [NSURL URLWithString:
-        [NSString stringWithFormat:@"t3-markdown-run://%ld", (long)textChild.tag]];
-    if (link != nil) {
-      // A glyph must not be both a link and an attachment. UIKit caches them as
-      // different text-item classes and can send `attachment` to a cached link
-      // on a later tap. Attachment actions already use primaryActionForTextItem.
-      [convertedAttrString enumerateAttribute:NSAttachmentAttributeName
-                                     inRange:runRange
-                                     options:0
-                                  usingBlock:^(id attachment, NSRange range, BOOL *stop) {
-        if (attachment == nil) {
-          [convertedAttrString addAttribute:NSLinkAttributeName value:link range:range];
-        }
-      }];
-    }
-  }
   [self loadAttachmentImages:_state->getData().attachmentRanges];
 
   // Setting attributedText clears any active text selection, and re-assigning
@@ -458,7 +319,7 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
   // entirely when nothing actually changed so a JS-side state update made in
   // response to onSelectionChange doesn't deselect what the user is selecting.
   const BOOL textChanged = ![_textView.attributedText isEqualToAttributedString:convertedAttrString];
-  const BOOL frameChanged = _textLayoutNeedsUpdate;
+  const BOOL frameChanged = !CGRectEqualToRect(_textView.frame, _view.frame);
   if (!textChanged && !frameChanged) {
     return;
   }
@@ -470,54 +331,14 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
     const NSRange savedRange = _textView.selectedRange;
     _suppressSelectionChange = YES;
     _textView.attributedText = convertedAttrString;
-    NSMutableString *accessibleText = [convertedAttrString.string mutableCopy];
-    for (auto it = _state->getData().attachmentRanges.rbegin();
-         it != _state->getData().attachmentRanges.rend(); ++it) {
-      NSDictionary *chip = T3ContextChipPayload([NSString stringWithUTF8String:it->imageUri.c_str()]);
-      if (chip != nil && it->location < accessibleText.length) {
-        [accessibleText replaceCharactersInRange:NSMakeRange(it->location, 1) withString:chip[@"label"]];
-      }
-    }
-    _textView.accessibilityLabel = accessibleText;
     if (savedRange.length > 0 && NSMaxRange(savedRange) <= _textView.attributedText.length) {
       _textView.selectedRange = savedRange;
     }
     _suppressSelectionChange = NO;
   }
   if (frameChanged) {
-    _textView.textContainer.size = CGSizeMake(CGRectGetWidth(_view.frame), CGFLOAT_MAX);
+    _textView.frame = _view.frame;
   }
-  _textLayoutNeedsUpdate = NO;
-
-  // Text attachments have no native link element. Expose their existing runs
-  // at the measured glyph bounds, without inserting views into text layout.
-  NSMutableArray *accessibleElements = [NSMutableArray arrayWithObject:_textView];
-  for (UIView *child in self.subviews) {
-    if (![child isKindOfClass:T3MarkdownTextRun.class]) continue;
-    T3MarkdownTextRun *run = (T3MarkdownTextRun *)child;
-    run.contextChipInteractive = NO;
-  }
-  for (const auto &attachmentRange : _state->getData().attachmentRanges) {
-    NSDictionary *chip = T3ContextChipPayload(
-        [NSString stringWithUTF8String:attachmentRange.imageUri.c_str()]);
-    if (![chip[@"interactive"] boolValue]) continue;
-    NSRange range = NSMakeRange(attachmentRange.location, 1);
-    T3MarkdownTextRun *run = [self childForCharacterRange:range];
-    if (!run || NSMaxRange(range) > convertedAttrString.length) continue;
-    NSRange glyphRange = [_textView.layoutManager glyphRangeForCharacterRange:range actualCharacterRange:nil];
-    CGRect bounds = [_textView.layoutManager boundingRectForGlyphRange:glyphRange
-                                                     inTextContainer:_textView.textContainer];
-    bounds = CGRectOffset(bounds, _textView.textContainerInset.left, _textView.textContainerInset.top);
-    run.contextChipInteractive = YES;
-    T3ContextChipAccessibilityElement *element =
-        [[T3ContextChipAccessibilityElement alloc] initWithAccessibilityContainer:self];
-    element.run = run;
-    element.accessibilityLabel = chip[@"label"];
-    element.accessibilityTraits = UIAccessibilityTraitButton;
-    element.accessibilityFrameInContainerSpace = [_textView convertRect:bounds toView:self];
-    [accessibleElements addObject:element];
-  }
-  _contextAccessibilityElements = accessibleElements;
 
   __block std::vector<std::string> lines;
   const int maxLines = props.numberOfLines;
@@ -548,11 +369,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
     NSString *imageUri = [NSString stringWithUTF8String:attachmentRange.imageUri.c_str()];
     if ([imageUri hasPrefix:@"sf:"]) {
       continue;
-    }
-    NSDictionary *chip = T3ContextChipPayload(imageUri);
-    if (chip != nil) {
-      imageUri = [chip[@"iconUri"] isKindOfClass:NSString.class] ? chip[@"iconUri"] : nil;
-      if (imageUri.length == 0) continue;
     }
     if (_attachmentImages[imageUri] != nil || [_pendingAttachmentUris containsObject:imageUri]) {
       continue;
@@ -615,10 +431,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
 {
   const auto &oldViewProps = *std::static_pointer_cast<T3MarkdownTextProps const>(_props);
   const auto &newViewProps = *std::static_pointer_cast<T3MarkdownTextProps const>(props);
-  if (oldViewProps.contextClipboardConfig != newViewProps.contextClipboardConfig) {
-    NSString *config = RCTNSStringFromString(newViewProps.contextClipboardConfig);
-    _textView.contextClipboardConfig = config.length ? [NSJSONSerialization JSONObjectWithData:[config dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil] : nil;
-  }
 
   if (oldViewProps.numberOfLines != newViewProps.numberOfLines) {
     _textView.textContainer.maximumNumberOfLines = newViewProps.numberOfLines;
@@ -672,18 +484,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
   return YES;
 }
 
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
-{
-  if (gestureRecognizer != _longPressGestureRecognizer &&
-      gestureRecognizer != _pressGestureRecognizer) {
-    return YES;
-  }
-
-  const auto location = [self getLocationOfPress:gestureRecognizer];
-  const auto child = [self getTouchChild:location];
-  return ![child hasContextMenu];
-}
-
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
   return YES;
@@ -706,24 +506,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
 }
 
 // MARK: - Touch handling
-
-- (nullable T3MarkdownTextRun *)childForCharacterRange:(NSRange)characterRange
-{
-  NSUInteger location = 0;
-  for (UIView *child in self.subviews) {
-    if (![child isKindOfClass:[T3MarkdownTextRun class]]) {
-      continue;
-    }
-
-    T3MarkdownTextRun *textChild = (T3MarkdownTextRun *)child;
-    const NSRange range = NSMakeRange(location, textChild.text.length);
-    if (NSIntersectionRange(range, characterRange).length > 0) {
-      return textChild;
-    }
-    location = NSMaxRange(range);
-  }
-  return nil;
-}
 
 - (CGPoint)getLocationOfPress:(UIGestureRecognizer*)sender
 {
@@ -768,10 +550,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
 
 - (void)handleLongPressIfNecessary:(UILongPressGestureRecognizer*)sender
 {
-  if (sender.state != UIGestureRecognizerStateBegan) {
-    return;
-  }
-
   const auto location = [self getLocationOfPress:sender];
   const auto child = [self getTouchChild:location];
 
@@ -781,31 +559,6 @@ T3MarkdownOutsideTapCoordinatorForWindow(UIWindow *window)
 }
 
 // MARK: - UITextViewDelegate
-
-- (nullable UIAction *)textView:(UITextView *)textView
-    primaryActionForTextItem:(UITextItem *)textItem
-               defaultAction:(UIAction *)defaultAction API_AVAILABLE(ios(17.0))
-{
-  T3MarkdownTextRun *child = [self childForCharacterRange:textItem.range];
-  if (![child hasContextMenu] && !child.contextChipInteractive) {
-    return defaultAction;
-  }
-
-  __weak T3MarkdownTextRun *weakChild = child;
-  return [UIAction actionWithHandler:^(__kindof UIAction *action) {
-    [weakChild onPress];
-  }];
-}
-
-- (nullable UITextItemMenuConfiguration *)textView:(UITextView *)textView
-                      menuConfigurationForTextItem:(UITextItem *)textItem
-                                       defaultMenu:(UIMenu *)defaultMenu API_AVAILABLE(ios(17.0))
-{
-  T3MarkdownTextRun *child = [self childForCharacterRange:textItem.range];
-  UIMenu *menu = [child contextMenu];
-  if (child.contextChipInteractive && menu == nil) return nil;
-  return [UITextItemMenuConfiguration configurationWithMenu:menu ?: defaultMenu];
-}
 
 - (void)textViewDidChangeSelection:(UITextView *)textView
 {

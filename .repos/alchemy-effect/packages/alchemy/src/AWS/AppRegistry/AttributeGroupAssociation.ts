@@ -42,8 +42,9 @@ export interface AttributeGroupAssociation extends Resource<
  * {@link Application} so the group's user-defined JSON metadata augments the
  * application's machine-readable description.
  *
- * ### Associating an Attribute Group
- * **Example:** Attach an Attribute Group to an Application
+ * @resource
+ * @section Associating an Attribute Group
+ * @example Attach an Attribute Group to an Application
  * ```typescript
  * import * as AppRegistry from "alchemy/AWS/AppRegistry";
  *
@@ -57,8 +58,6 @@ export interface AttributeGroupAssociation extends Resource<
  *   attributeGroup: group.attributeGroupId,
  * });
  * ```
- *
- * @resource
  */
 export const AttributeGroupAssociation = Resource<AttributeGroupAssociation>(
   "AWS.AppRegistry.AttributeGroupAssociation",

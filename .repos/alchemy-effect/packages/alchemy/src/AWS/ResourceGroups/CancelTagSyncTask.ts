@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * the tag, but resources already grouped keep their membership. The task
  * ARN is chosen per request, so the grant is on `*`. Provide the
  * implementation with `Effect.provide(AWS.ResourceGroups.CancelTagSyncTaskHttp)`.
- * ### Tag-Sync Tasks
- * **Example:** Cancel A Task
+ * @binding
+ * @section Tag-Sync Tasks
+ * @example Cancel A Task
  * ```typescript
  * // init
  * const cancelTagSyncTask = yield* AWS.ResourceGroups.CancelTagSyncTask();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* cancelTagSyncTask({ TaskArn: taskArn });
  * ```
- *
- * @binding
  */
 export interface CancelTagSyncTask extends Binding.Service<
   CancelTagSyncTask,

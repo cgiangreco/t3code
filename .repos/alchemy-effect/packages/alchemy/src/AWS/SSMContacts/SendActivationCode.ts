@@ -12,16 +12,15 @@ import type { ContactChannel } from "./ContactChannel.ts";
  * `ContactChannelId`.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMContacts.SendActivationCodeHttp)`.
- * ### Activating Contact Channels
- * **Example:** Send the Activation Code
+ * @binding
+ * @section Activating Contact Channels
+ * @example Send the Activation Code
  * ```typescript
  * const sendActivationCode = yield* AWS.SSMContacts.SendActivationCode(email);
  *
  * // runtime — e.g. behind a "resend code" button
  * yield* sendActivationCode();
  * ```
- *
- * @binding
  */
 export interface SendActivationCode extends Binding.Service<
   SendActivationCode,

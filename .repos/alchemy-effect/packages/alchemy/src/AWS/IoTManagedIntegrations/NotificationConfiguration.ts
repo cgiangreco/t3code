@@ -60,8 +60,9 @@ export interface NotificationConfiguration extends Resource<
  * IoT Managed Integrations is a regional service available in a limited set
  * of regions (e.g. `eu-west-1`, `ca-central-1`).
  *
- * ### Routing Events
- * **Example:** Route Device State Events to a Kinesis Destination
+ * @resource
+ * @section Routing Events
+ * @example Route Device State Events to a Kinesis Destination
  * ```typescript
  * const destination = yield* Destination("EventDestination", {
  *   deliveryDestinationArn: stream.streamArn,
@@ -73,7 +74,7 @@ export interface NotificationConfiguration extends Resource<
  * });
  * ```
  *
- * **Example:** Route Lifecycle Events with Tags
+ * @example Route Lifecycle Events with Tags
  * ```typescript
  * const routing = yield* NotificationConfiguration("Lifecycle", {
  *   eventType: "DEVICE_LIFE_CYCLE",
@@ -81,8 +82,6 @@ export interface NotificationConfiguration extends Resource<
  *   tags: { team: "iot" },
  * });
  * ```
- *
- * @resource
  */
 export const NotificationConfiguration = Resource<NotificationConfiguration>(
   "AWS.IoTManagedIntegrations.NotificationConfiguration",

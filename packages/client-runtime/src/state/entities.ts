@@ -7,7 +7,7 @@ import {
 } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 
-export class InvalidScopedProjectKeyError extends Schema.TaggedError<InvalidScopedProjectKeyError>()(
+export class InvalidScopedProjectKeyError extends Schema.TaggedErrorClass<InvalidScopedProjectKeyError>()(
   "InvalidScopedProjectKeyError",
   {
     key: Schema.String,
@@ -18,7 +18,7 @@ export class InvalidScopedProjectKeyError extends Schema.TaggedError<InvalidScop
   }
 }
 
-export class InvalidScopedThreadKeyError extends Schema.TaggedError<InvalidScopedThreadKeyError>()(
+export class InvalidScopedThreadKeyError extends Schema.TaggedErrorClass<InvalidScopedThreadKeyError>()(
   "InvalidScopedThreadKeyError",
   {
     key: Schema.String,
@@ -29,7 +29,7 @@ export class InvalidScopedThreadKeyError extends Schema.TaggedError<InvalidScope
   }
 }
 
-export class InvalidScopedProjectRefCollectionKeyError extends Schema.TaggedError<InvalidScopedProjectRefCollectionKeyError>()(
+export class InvalidScopedProjectRefCollectionKeyError extends Schema.TaggedErrorClass<InvalidScopedProjectRefCollectionKeyError>()(
   "InvalidScopedProjectRefCollectionKeyError",
   {
     key: Schema.String,

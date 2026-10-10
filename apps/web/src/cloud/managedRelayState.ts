@@ -1,24 +1,18 @@
 import { useAtomValue } from "@effect/atom-react";
 import {
   createManagedRelayQueryManager,
-  deregisterManagedRelayEnvironment,
   ManagedRelay,
   managedRelaySessionAtom,
   readManagedRelaySnapshotState,
 } from "@t3tools/client-runtime/relay";
-import {
-  createAtomCommandScheduler,
-  createRuntimeCommand,
-} from "@t3tools/client-runtime/state/runtime";
 import type {
   RelayClientDeviceRecord,
   RelayClientEnvironmentRecord,
 } from "@t3tools/contracts/relay";
-import type { EnvironmentId } from "@t3tools/contracts";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import { AsyncResult, Atom } from "effect/reactivity";
+import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { useCallback, useEffect } from "react";
 
 import { runtime } from "../lib/runtime";
@@ -33,23 +27,7 @@ const managedRelayAtomRuntime = Atom.runtime(
   ),
 );
 
-const managedRelayQueryManager = createManagedRelayQueryManager(managedRelayAtomRuntime);
-
-const managedRelayMutationScheduler = createAtomCommandScheduler();
-
-export const deregisterManagedRelayEnvironmentCommand = createRuntimeCommand(
-  managedRelayAtomRuntime,
-  {
-    label: "web:managed-relay:deregister-environment",
-    scheduler: managedRelayMutationScheduler,
-    concurrency: {
-      mode: "serial",
-      key: (input: { readonly accountId: string; readonly environmentId: EnvironmentId }) =>
-        input.accountId,
-    },
-    execute: (input, registry) => deregisterManagedRelayEnvironment(registry, input),
-  },
-);
+export const managedRelayQueryManager = createManagedRelayQueryManager(managedRelayAtomRuntime);
 
 const EMPTY_ENVIRONMENTS_ATOM = Atom.make(
   AsyncResult.success<ReadonlyArray<RelayClientEnvironmentRecord>>([]),
@@ -113,4 +91,11 @@ export function useManagedRelayDevices() {
     accountId,
     refresh,
   };
+}
+
+export function refreshManagedRelayEnvironments(): void {
+  const session = appAtomRegistry.get(managedRelaySessionAtom);
+  if (session) {
+    managedRelayQueryManager.refreshEnvironments(appAtomRegistry, session.accountId);
+  }
 }

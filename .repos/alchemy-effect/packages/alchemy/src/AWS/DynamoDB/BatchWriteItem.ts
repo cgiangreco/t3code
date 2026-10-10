@@ -30,8 +30,9 @@ export interface BatchWriteItemRequest extends Omit<
  *
  * Bind this operation to one or more tables and key the request by each bound
  * table's `LogicalId`.
- * ### Writing Data
- * **Example:** Write Items Across Multiple Tables
+ * @binding
+ * @section Writing Data
+ * @example Write Items Across Multiple Tables
  * ```typescript
  * const batchWriteItem = yield* AWS.DynamoDB.BatchWriteItem(sourceTable, archiveTable);
  *
@@ -50,8 +51,6 @@ export interface BatchWriteItemRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface BatchWriteItem extends Binding.Service<
   BatchWriteItem,

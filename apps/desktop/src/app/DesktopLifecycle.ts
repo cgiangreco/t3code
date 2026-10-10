@@ -12,11 +12,10 @@ import { makeComponentLogger } from "./DesktopObservability.ts";
 import * as DesktopShutdown from "./DesktopShutdown.ts";
 import * as ElectronApp from "../electron/ElectronApp.ts";
 import * as ElectronTheme from "../electron/ElectronTheme.ts";
-import * as ElectronWindow from "../electron/ElectronWindow.ts";
 import * as DesktopState from "./DesktopState.ts";
 import * as DesktopWindow from "../window/DesktopWindow.ts";
 
-export class DesktopLifecycleRelaunchError extends Schema.TaggedError<DesktopLifecycleRelaunchError>()(
+export class DesktopLifecycleRelaunchError extends Schema.TaggedErrorClass<DesktopLifecycleRelaunchError>()(
   "DesktopLifecycleRelaunchError",
   {
     reason: Schema.String,
@@ -36,12 +35,8 @@ export type DesktopLifecycleRuntimeServices =
   | ElectronApp.ElectronApp
   | ElectronTheme.ElectronTheme;
 
-type DesktopLifecycleRegistrationServices =
-  | DesktopLifecycleRuntimeServices
-  | ElectronWindow.ElectronWindow;
-
 /**
- * @effect-expect-leaking DesktopEnvironment | DesktopShutdown | DesktopState | DesktopWindow | ElectronApp | ElectronTheme | ElectronWindow
+ * @effect-expect-leaking DesktopEnvironment | DesktopShutdown | DesktopState | DesktopWindow | ElectronApp | ElectronTheme
  */
 export class DesktopLifecycle extends Context.Service<
   DesktopLifecycle,
@@ -49,11 +44,7 @@ export class DesktopLifecycle extends Context.Service<
     readonly relaunch: (
       reason: string,
     ) => Effect.Effect<void, never, DesktopLifecycleRuntimeServices>;
-    readonly register: Effect.Effect<
-      void,
-      never,
-      Scope.Scope | DesktopLifecycleRegistrationServices
-    >;
+    readonly register: Effect.Effect<void, never, Scope.Scope | DesktopLifecycleRuntimeServices>;
   }
 >()("@t3tools/desktop/app/DesktopLifecycle") {}
 
@@ -82,13 +73,14 @@ function addScopedListener<Args extends ReadonlyArray<unknown>>(
 }
 
 const requestDesktopShutdownAndWait = Effect.fn("desktop.lifecycle.requestShutdownAndWait")(
-  function* (
-    afterBoundsFlush: Effect.Effect<void> = Effect.void,
-  ): Effect.fn.Return<void, never, DesktopShutdown.DesktopShutdown | DesktopWindow.DesktopWindow> {
+  function* (): Effect.fn.Return<
+    void,
+    never,
+    DesktopShutdown.DesktopShutdown | DesktopWindow.DesktopWindow
+  > {
     const shutdown = yield* DesktopShutdown.DesktopShutdown;
     const desktopWindow = yield* DesktopWindow.DesktopWindow;
     yield* desktopWindow.flushMainWindowBounds;
-    yield* afterBoundsFlush;
     yield* shutdown.request;
     yield* shutdown.awaitComplete;
   },
@@ -96,9 +88,7 @@ const requestDesktopShutdownAndWait = Effect.fn("desktop.lifecycle.requestShutdo
 
 function handleBeforeQuit(
   event: Electron.Event,
-  runEffect: <A, E>(
-    effect: Effect.Effect<A, E, DesktopLifecycleRegistrationServices>,
-  ) => Promise<A>,
+  runEffect: <A, E>(effect: Effect.Effect<A, E, DesktopLifecycleRuntimeServices>) => Promise<A>,
   allowQuit: () => boolean,
   markQuitAllowed: () => void,
 ): void {
@@ -117,16 +107,9 @@ function handleBeforeQuit(
   void runEffect(
     Effect.gen(function* () {
       const state = yield* DesktopState.DesktopState;
-      const electronWindow = yield* ElectronWindow.ElectronWindow;
       yield* Ref.set(state.quitting, true);
       yield* logLifecycleInfo("before-quit received");
-      yield* requestDesktopShutdownAndWait(
-        electronWindow.destroyAll.pipe(
-          Effect.catchCause((cause) =>
-            logLifecycleError("failed to destroy windows before shutdown", { cause }),
-          ),
-        ),
-      );
+      yield* requestDesktopShutdownAndWait();
     }).pipe(Effect.withSpan("desktop.lifecycle.beforeQuit")),
   ).finally(() => {
     markQuitAllowed();
@@ -141,9 +124,7 @@ function handleBeforeQuit(
 
 function quitFromSignal(
   signal: "SIGINT" | "SIGTERM",
-  runEffect: <A, E>(
-    effect: Effect.Effect<A, E, DesktopLifecycleRegistrationServices>,
-  ) => Promise<A>,
+  runEffect: <A, E>(effect: Effect.Effect<A, E, DesktopLifecycleRuntimeServices>) => Promise<A>,
 ): void {
   void runEffect(
     Effect.gen(function* () {
@@ -159,7 +140,6 @@ function quitFromSignal(
   );
 }
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = DesktopLifecycle.of({
   relaunch: Effect.fn("desktop.lifecycle.relaunch")(function* (reason) {
     const electronApp = yield* ElectronApp.ElectronApp;
@@ -190,11 +170,10 @@ export const make = DesktopLifecycle.of({
   }),
   register: Effect.gen(function* () {
     const desktopWindow = yield* DesktopWindow.DesktopWindow;
-    const electronWindow = yield* ElectronWindow.ElectronWindow;
     const electronApp = yield* ElectronApp.ElectronApp;
     const electronTheme = yield* ElectronTheme.ElectronTheme;
     const environment = yield* DesktopEnvironment.DesktopEnvironment;
-    const context = yield* Effect.context<DesktopLifecycleRegistrationServices>();
+    const context = yield* Effect.context<DesktopLifecycleRuntimeServices>();
     const runEffect = Effect.runPromiseWith(context);
     let quitAllowed = false;
     let updaterQuitAllowed = false;
@@ -208,16 +187,8 @@ export const make = DesktopLifecycle.of({
       // Cancelling the following app "before-quit" event breaks that sequence,
       // most visibly on macOS where the native updater performs the relaunch.
       updaterQuitAllowed = true;
-      // This event is synchronous and the updater's quit proceeds as soon as
-      // the listener returns, so a forked destroyAll would race the quit
-      // and windows could still be open when the process exits (visible on
-      // macOS). Destroy them inline.
-      Effect.runSyncWith(context)(
-        electronWindow.destroyAll.pipe(
-          Effect.andThen(logLifecycleInfo("allowing updater-controlled quit")),
-          Effect.catchCause((cause) =>
-            logLifecycleError("failed to destroy windows before updater quit", { cause }),
-          ),
+      void runEffect(
+        logLifecycleInfo("allowing updater-controlled quit").pipe(
           Effect.withSpan("desktop.lifecycle.beforeQuitForUpdate"),
         ),
       );
@@ -233,13 +204,7 @@ export const make = DesktopLifecycle.of({
       );
     });
     yield* electronApp.on("activate", () => {
-      void runEffect(
-        Effect.gen(function* () {
-          const state = yield* DesktopState.DesktopState;
-          if (yield* Ref.get(state.quitting)) return;
-          yield* desktopWindow.activate;
-        }).pipe(Effect.withSpan("desktop.lifecycle.activate")),
-      );
+      void runEffect(desktopWindow.activate.pipe(Effect.withSpan("desktop.lifecycle.activate")));
     });
     yield* electronApp.on("window-all-closed", () => {
       void runEffect(

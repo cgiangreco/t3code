@@ -120,7 +120,7 @@ const T1_ADDED = `${zoneName}/${routeSuffix}/t1/other/*`;
 const T1_MATCH_URL = `https://${zoneName}/${routeSuffix}/t1/api/ping`;
 const T1_MISS_URL = `https://${zoneName}/${routeSuffix}/t1/unknown`;
 
-test.provider(
+test.provider.skipIf(!zoneName)(
   "creates, keeps, updates, and removes worker zone routes",
   (stack) =>
     Effect.gen(function* () {
@@ -139,7 +139,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("RouteWorker", {
               main,
-              workersDev: false,
+              url: false,
               routes: [{ pattern: T1_V1, zoneName }],
             });
           }),
@@ -168,7 +168,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("RouteWorker", {
               main,
-              workersDev: false,
+              url: false,
               routes: [{ pattern: T1_V1, zoneName }],
             });
           }),
@@ -183,7 +183,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("RouteWorker", {
               main,
-              workersDev: false,
+              url: false,
               routes: [{ pattern: T1_V2, zoneId }, { pattern: T1_ADDED }],
             });
           }),
@@ -207,7 +207,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("RouteWorker", {
               main,
-              workersDev: false,
+              url: false,
             });
           }),
         );
@@ -228,16 +228,7 @@ test.provider(
         ),
       );
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:dns",
-      "provider:cloudflare:worker",
-      "provider:cloudflare:zone",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 // --- observed state is the baseline: drift removal + destroy cleanup ----
@@ -245,7 +236,7 @@ test.provider(
 const T2_KEPT = `${zoneName}/${routeSuffix}/t2/api/*`;
 const T2_DRIFT = `${zoneName}/${routeSuffix}/t2/drift/*`;
 
-test.provider(
+test.provider.skipIf(!zoneName)(
   "removes out-of-band routes on update and detaches routes on destroy",
   (stack) =>
     Effect.gen(function* () {
@@ -262,7 +253,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("DriftRouteWorker", {
               main,
-              workersDev: false,
+              url: false,
               compatibility: { date: "2024-01-01" },
               routes: [{ pattern: T2_KEPT, zoneName }],
             });
@@ -296,7 +287,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("DriftRouteWorker", {
               main,
-              workersDev: false,
+              url: false,
               compatibility: { date: "2024-01-02" },
               routes: [{ pattern: T2_KEPT, zoneName }],
             });
@@ -322,22 +313,14 @@ test.provider(
       // Destroying the worker detaches its routes from the zone.
       expect(yield* findRoute(zoneId, T2_KEPT)).toBeUndefined();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:worker",
-      "provider:cloudflare:zone",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 // --- refusal: a pattern already routed to a different Worker ------------
 
 const T3_PATTERN = `${zoneName}/${routeSuffix}/t3/api/*`;
 
-test.provider(
+test.provider.skipIf(!zoneName)(
   "refuses to steal a route pattern attached to another Worker",
   (stack) =>
     Effect.gen(function* () {
@@ -351,7 +334,7 @@ test.provider(
           Effect.gen(function* () {
             return yield* Cloudflare.Worker("RouteOwnerWorker", {
               main,
-              workersDev: false,
+              url: false,
               routes: [{ pattern: T3_PATTERN, zoneName }],
             });
           }),
@@ -362,12 +345,12 @@ test.provider(
             Effect.gen(function* () {
               const owner = yield* Cloudflare.Worker("RouteOwnerWorker", {
                 main,
-                workersDev: false,
+                url: false,
                 routes: [{ pattern: T3_PATTERN, zoneName }],
               });
               const thief = yield* Cloudflare.Worker("RouteThiefWorker", {
                 main,
-                workersDev: false,
+                url: false,
                 routes: [{ pattern: T3_PATTERN, zoneName }],
               });
               return { owner, thief };
@@ -386,19 +369,9 @@ test.provider(
         // The pattern still routes to its original owner.
         const live = yield* findRoute(zoneId, T3_PATTERN);
         expect(live?.script).toEqual(owner.workerName);
-      }).pipe(
-        Effect.ensuring(stack.destroy().pipe(Effect.orDie).pipe(Effect.ignore)),
-      );
+      }).pipe(Effect.ensuring(stack.destroy().pipe(Effect.ignore)));
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:worker",
-      "provider:cloudflare:zone",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 /**

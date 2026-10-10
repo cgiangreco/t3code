@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.CancelFindingsReportHttp)`.
- * ### Findings Reports & SBOM Exports
- * **Example:** Cancel a Findings Report
+ * @binding
+ * @section Findings Reports & SBOM Exports
+ * @example Cancel a Findings Report
  * ```typescript
  * // init
  * const cancelFindingsReport = yield* AWS.Inspector2.CancelFindingsReport();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* cancelFindingsReport({ reportId });
  * ```
- *
- * @binding
  */
 export interface CancelFindingsReport extends Binding.Service<
   CancelFindingsReport,

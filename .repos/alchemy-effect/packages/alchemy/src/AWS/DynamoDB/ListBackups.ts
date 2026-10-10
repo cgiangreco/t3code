@@ -15,16 +15,15 @@ export interface ListBackupsRequest extends Omit<
  * that lists the bound table's on-demand backups, automatically injecting the
  * table name. Provide the `ListBackupsHttp` layer on the Function to satisfy
  * the binding.
- * ### Backup and Restore
- * **Example:** List the Bound Table's Backups
+ * @binding
+ * @section Backup and Restore
+ * @example List the Bound Table's Backups
  * ```typescript
  * const listBackups = yield* AWS.DynamoDB.ListBackups(table);
  *
  * const response = yield* listBackups();
  * const backups = response.BackupSummaries;
  * ```
- *
- * @binding
  */
 export interface ListBackups extends Binding.Service<
   ListBackups,

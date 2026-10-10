@@ -13,8 +13,9 @@ import type { Flow } from "./Flow.ts";
  * content answers with `Messages` instead of media info. The flow ARN is
  * injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.MediaConnect.DescribeFlowSourceMetadataHttp)`.
- * ### Observing Flows
- * **Example:** Inspect the Incoming Transport Stream
+ * @binding
+ * @section Observing Flows
+ * @example Inspect the Incoming Transport Stream
  * ```typescript
  * // init — bind the operation to the flow
  * const sourceMetadata = yield* AWS.MediaConnect.DescribeFlowSourceMetadata(flow);
@@ -23,8 +24,6 @@ import type { Flow } from "./Flow.ts";
  * const { TransportMediaInfo, Messages } = yield* sourceMetadata();
  * const programs = TransportMediaInfo?.Programs ?? [];
  * ```
- *
- * @binding
  */
 export interface DescribeFlowSourceMetadata extends Binding.Service<
   DescribeFlowSourceMetadata,

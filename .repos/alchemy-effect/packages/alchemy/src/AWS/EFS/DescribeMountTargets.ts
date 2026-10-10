@@ -21,8 +21,9 @@ export interface DescribeMountTargetsRequest extends Omit<
  * checks and for compute that needs to discover a mount target's IP at
  * runtime. Provide the implementation with
  * `Effect.provide(AWS.EFS.DescribeMountTargetsHttp)`.
- * ### Inspecting File Systems
- * **Example:** List the file system's mount targets
+ * @binding
+ * @section Inspecting File Systems
+ * @example List the file system's mount targets
  * ```typescript
  * const describeMountTargets = yield* AWS.EFS.DescribeMountTargets(files);
  *
@@ -31,8 +32,6 @@ export interface DescribeMountTargetsRequest extends Omit<
  *   yield* Effect.log(`${target.AvailabilityZoneName}: ${target.IpAddress}`);
  * }
  * ```
- *
- * @binding
  */
 export interface DescribeMountTargets extends Binding.Service<
   DescribeMountTargets,

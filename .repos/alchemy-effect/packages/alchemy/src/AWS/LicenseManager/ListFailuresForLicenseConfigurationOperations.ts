@@ -20,8 +20,9 @@ export interface ListFailuresForLicenseConfigurationOperationsRequest extends Om
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.ListFailuresForLicenseConfigurationOperationsHttp)`.
- * ### Reading License Configurations
- * **Example:** List Failed License Operations
+ * @binding
+ * @section Reading License Configurations
+ * @example List Failed License Operations
  * ```typescript
  * // init
  * const listFailures =
@@ -32,8 +33,6 @@ export interface ListFailuresForLicenseConfigurationOperationsRequest extends Om
  * // runtime
  * const { LicenseOperationFailureList } = yield* listFailures();
  * ```
- *
- * @binding
  */
 export interface ListFailuresForLicenseConfigurationOperations extends Binding.Service<
   ListFailuresForLicenseConfigurationOperations,

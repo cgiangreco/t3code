@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * (pair with {@link StartReplicationTask} / {@link StopReplicationTask}).
  * Provide the implementation with
  * `Effect.provide(AWS.DMS.DescribeReplicationTasksHttp)`.
- * ### Orchestrating Replication Tasks
- * **Example:** Check a Task's Status Before Starting It
+ * @binding
+ * @section Orchestrating Replication Tasks
+ * @example Check a Task's Status Before Starting It
  * ```typescript
  * // init — account-level, no target resource
  * const describeReplicationTasks = yield* AWS.DMS.DescribeReplicationTasks();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // ReplicationTasks[0].Status: "ready" | "running" | "stopped" | …
  * ```
- *
- * @binding
  */
 export interface DescribeReplicationTasks extends Binding.Service<
   DescribeReplicationTasks,

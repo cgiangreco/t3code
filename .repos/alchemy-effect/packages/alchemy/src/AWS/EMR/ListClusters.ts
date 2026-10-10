@@ -4,8 +4,9 @@ import * as Binding from "../../Binding.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:ListClusters` — lists the account's EMR clusters (optionally filtered by state or creation window) — the building block of cluster-inventory automation.
- * ### Discovering Clusters
- * **Example:** List Active Clusters
+ * @binding
+ * @section Discovering Clusters
+ * @example List Active Clusters
  * ```typescript
  * const listClusters = yield* AWS.EMR.ListClusters();
  *
@@ -13,8 +14,6 @@ import * as Binding from "../../Binding.ts";
  *   ClusterStates: ["RUNNING", "WAITING"],
  * });
  * ```
- *
- * @binding
  */
 export interface ListClusters extends Binding.Service<
   ListClusters,

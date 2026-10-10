@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.ListLaunchPathsHttp)`.
- * ### Browsing the Catalog
- * **Example:** Find the Launch Path for a Product
+ * @binding
+ * @section Browsing the Catalog
+ * @example Find the Launch Path for a Product
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listLaunchPaths = yield* AWS.ServiceCatalog.ListLaunchPaths();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   ProductId: "prod-abc123",
  * });
  * ```
- *
- * @binding
  */
 export interface ListLaunchPaths extends Binding.Service<
   ListLaunchPaths,

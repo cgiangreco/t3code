@@ -24,8 +24,9 @@ export interface RetrieveAndGenerateStreamRequest
  * `bedrock:InvokeModel` scoped to the bound models (or all foundation models
  * and cross-region inference profiles when none are named).
  *
- * ### Streaming a Grounded Answer
- * **Example:** Aggregate Streamed Output Deltas
+ * @binding
+ * @section Streaming a Grounded Answer
+ * @example Aggregate Streamed Output Deltas
  * ```typescript
  * // init
  * const ragStream = yield* Bedrock.RetrieveAndGenerateStream(
@@ -47,8 +48,6 @@ export interface RetrieveAndGenerateStreamRequest
  * const events = yield* Stream.runCollect(result.stream);
  * const answer = events.map((event) => event.output?.text ?? "").join("");
  * ```
- *
- * @binding
  */
 export interface RetrieveAndGenerateStream extends Binding.Service<
   RetrieveAndGenerateStream,

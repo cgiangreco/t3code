@@ -7,15 +7,14 @@ import type { Project } from "./Project.ts";
  * Runtime binding for `codebuild:RetryBuildBatch` — restarts a finished
  * batch build of the bound project, retrying either all builds or only the
  * failed ones (`retryType`).
- * ### Batch Builds
- * **Example:** Retry Failed Builds in a Batch
+ * @binding
+ * @section Batch Builds
+ * @example Retry Failed Builds in a Batch
  * ```typescript
  * const retryBuildBatch = yield* AWS.CodeBuild.RetryBuildBatch(project);
  *
  * yield* retryBuildBatch({ id: batchId, retryType: "RETRY_FAILED_BUILDS" });
  * ```
- *
- * @binding
  */
 export interface RetryBuildBatch extends Binding.Service<
   RetryBuildBatch,

@@ -7,7 +7,6 @@
  * offers layers for installing that logger or creating a scoped SDK
  * `LoggerProvider` from one or more `LogRecordProcessor`s.
  *
- * @stability unstable
  * @since 4.0.0
  */
 import { SeverityNumber } from "@opentelemetry/api-logs"
@@ -31,7 +30,6 @@ import { Resource } from "./Resource.ts"
 /**
  * Context service containing the OpenTelemetry `LoggerProvider` used to emit Effect log records.
  *
- * @stability unstable
  * @category services
  * @since 4.0.0
  */
@@ -51,7 +49,6 @@ export class OtelLoggerProvider extends Context.Service<
  * ordinal `20000`, fall outside the OpenTelemetry logs data model and can be
  * treated as `UNSPECIFIED` by validating backends.
  *
- * @stability unstable
  * @category converting
  * @since 4.0.0
  */
@@ -77,7 +74,6 @@ export const logLevelToSeverityNumber = (level: LogLevel.LogLevel): SeverityNumb
 /**
  * Creates an Effect logger that emits log records through the configured OpenTelemetry logger provider.
  *
- * @stability unstable
  * @category constructors
  * @since 4.0.0
  */
@@ -95,10 +91,6 @@ export const make: Effect.Effect<
       fiberId: options.fiber.id
     }
 
-    for (const [key, value] of Object.entries(options.fiber.getRef(References.CurrentLogAnnotations))) {
-      Rec.assignProperty(attributes, key, unknownToAttributeValue(value))
-    }
-
     const span = Context.getOrUndefined(options.fiber.context, Tracer.ParentSpan)
 
     if (Predicate.isNotUndefined(span)) {
@@ -106,6 +98,9 @@ export const make: Effect.Effect<
       attributes.traceId = span.traceId
     }
 
+    for (const [key, value] of Object.entries(options.fiber.getRef(References.CurrentLogAnnotations))) {
+      Rec.assignProperty(attributes, key, unknownToAttributeValue(value))
+    }
     const now = options.date.getTime()
     for (const [label, startTime] of options.fiber.getRef(References.CurrentLogSpans)) {
       attributes[`logSpan.${label}`] = `${now - startTime}ms`
@@ -141,7 +136,6 @@ export const make: Effect.Effect<
  * @see {@link make} for constructing the logger directly
  * @see {@link layerLoggerProvider} for creating the required logger provider
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -168,7 +162,6 @@ export const layer = (options: {
 /**
  * Creates a scoped OpenTelemetry logger provider from one or more log record processors, using the current `Resource` and flushing and shutting down the provider when the layer is released.
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -191,7 +184,7 @@ export const layerLoggerProvider = (
           })
         ),
         (provider) =>
-          Effect.promise(() => provider.forceFlush().finally(() => provider.shutdown())).pipe(
+          Effect.promise(() => provider.forceFlush().then(() => provider.shutdown())).pipe(
             Effect.ignore,
             Effect.interruptible,
             Effect.timeoutOption(config?.shutdownTimeout ?? 3000)

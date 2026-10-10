@@ -12,8 +12,9 @@ import type { EnabledBaseline } from "./EnabledBaseline.ts";
  * asynchronous operation; poll it with {@link GetBaselineOperation}.
  * Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ResetEnabledBaselineHttp)`.
- * ### Remediating Drift
- * **Example:** Reset a Drifted Enabled Baseline
+ * @binding
+ * @section Remediating Drift
+ * @example Reset a Drifted Enabled Baseline
  * ```typescript
  * // init — bind the operation to the enabled baseline
  * const resetEnabledBaseline = yield* AWS.ControlTower.ResetEnabledBaseline(ouBaseline);
@@ -21,8 +22,6 @@ import type { EnabledBaseline } from "./EnabledBaseline.ts";
  * // runtime
  * const { operationIdentifier } = yield* resetEnabledBaseline();
  * ```
- *
- * @binding
  */
 export interface ResetEnabledBaseline extends Binding.Service<
   ResetEnabledBaseline,

@@ -1,6 +1,3 @@
-// @effect-diagnostics nodeBuiltinImport:off - FileSystem cannot create a FIFO.
-import * as NodeChildProcess from "node:child_process";
-
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import { it, describe, expect } from "@effect/vitest";
 import * as Effect from "effect/Effect";
@@ -14,16 +11,14 @@ import * as VcsProcess from "../vcs/VcsProcess.ts";
 import * as WorkspaceEntries from "./WorkspaceEntries.ts";
 import * as WorkspaceFileSystem from "./WorkspaceFileSystem.ts";
 import * as WorkspacePaths from "./WorkspacePaths.ts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
-import { symlinksSupported } from "@t3tools/shared/testing/symlinks";
 
-const layerProject = WorkspaceFileSystem.layer.pipe(
+const ProjectLayer = WorkspaceFileSystem.layer.pipe(
   Layer.provide(WorkspacePaths.layer),
   Layer.provide(WorkspaceEntries.layer.pipe(Layer.provide(WorkspacePaths.layer))),
 );
 
-const layerTest = Layer.empty.pipe(
-  Layer.provideMerge(layerProject),
+const TestLayer = Layer.empty.pipe(
+  Layer.provideMerge(ProjectLayer),
   Layer.provideMerge(WorkspaceEntries.layer.pipe(Layer.provide(WorkspacePaths.layer))),
   Layer.provideMerge(WorkspacePaths.layer),
   Layer.provideMerge(VcsDriverRegistry.layer.pipe(Layer.provide(VcsProcess.layer))),
@@ -56,7 +51,7 @@ const writeTextFile = Effect.fn("writeTextFile")(function* (
   yield* fileSystem.writeFileString(absolutePath, contents).pipe(Effect.orDie);
 });
 
-it.layer(layerTest, { excludeTestServices: true })("WorkspaceFileSystemLive", (it) => {
+it.layer(TestLayer, { excludeTestServices: true })("WorkspaceFileSystemLive", (it) => {
   describe("readFile", () => {
     it.effect("reads UTF-8 files relative to the workspace root", () =>
       Effect.gen(function* () {
@@ -78,56 +73,6 @@ it.layer(layerTest, { excludeTestServices: true })("WorkspaceFileSystemLive", (i
       }),
     );
 
-    it.effect("reads host files outside the workspace root by absolute path", () =>
-      Effect.gen(function* () {
-        const workspaceFileSystem = yield* WorkspaceFileSystem.WorkspaceFileSystem;
-        const path = yield* Path.Path;
-        const cwd = yield* makeTempDir;
-        const outsideDir = yield* makeTempDir;
-        yield* writeTextFile(outsideDir, "cleanup-report.md", "# Report\n");
-        const absolutePath = path.join(outsideDir, "cleanup-report.md");
-
-        const result = yield* workspaceFileSystem.readFile({
-          cwd,
-          relativePath: absolutePath,
-        });
-
-        expect(result).toEqual({
-          relativePath: absolutePath,
-          contents: "# Report\n",
-          byteLength: 9,
-          truncated: false,
-        });
-      }),
-    );
-
-    // Needs mkfifo; Windows has no FIFOs to reject.
-    it.effect.skipIf(HostProcess.Platform.defaultValue() === "win32")(
-      "rejects a FIFO without blocking on open",
-      () =>
-        Effect.gen(function* () {
-          const workspaceFileSystem = yield* WorkspaceFileSystem.WorkspaceFileSystem;
-          const path = yield* Path.Path;
-          const cwd = yield* makeTempDir;
-          const outsideDir = yield* makeTempDir;
-          const fifoPath = path.join(outsideDir, "pipe");
-          yield* Effect.promise(
-            () =>
-              new Promise<void>((resolve, reject) =>
-                NodeChildProcess.execFile("mkfifo", [fifoPath], (error) =>
-                  error ? reject(error) : resolve(),
-                ),
-              ),
-          );
-
-          const error = yield* workspaceFileSystem
-            .readFile({ cwd, relativePath: fifoPath })
-            .pipe(Effect.flip);
-
-          expect(error).toBeInstanceOf(WorkspaceFileSystem.WorkspacePathNotFileError);
-        }),
-    );
-
     it.effect("rejects reads outside the workspace root", () =>
       Effect.gen(function* () {
         const workspaceFileSystem = yield* WorkspaceFileSystem.WorkspaceFileSystem;
@@ -143,36 +88,34 @@ it.layer(layerTest, { excludeTestServices: true })("WorkspaceFileSystemLive", (i
       }),
     );
 
-    it.effect.skipIf(!symlinksSupported)(
-      "rejects symlinks that resolve outside the workspace root",
-      () =>
-        Effect.gen(function* () {
-          const workspaceFileSystem = yield* WorkspaceFileSystem.WorkspaceFileSystem;
-          const fileSystem = yield* FileSystem.FileSystem;
-          const path = yield* Path.Path;
-          const cwd = yield* makeTempDir;
-          const outsideDir = yield* makeTempDir;
-          yield* writeTextFile(outsideDir, "secret.txt", "outside\n");
-          yield* fileSystem.symlink(
-            path.join(outsideDir, "secret.txt"),
-            path.join(cwd, "linked-secret.txt"),
-          );
+    it.effect("rejects symlinks that resolve outside the workspace root", () =>
+      Effect.gen(function* () {
+        const workspaceFileSystem = yield* WorkspaceFileSystem.WorkspaceFileSystem;
+        const fileSystem = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const cwd = yield* makeTempDir;
+        const outsideDir = yield* makeTempDir;
+        yield* writeTextFile(outsideDir, "secret.txt", "outside\n");
+        yield* fileSystem.symlink(
+          path.join(outsideDir, "secret.txt"),
+          path.join(cwd, "linked-secret.txt"),
+        );
 
-          const error = yield* workspaceFileSystem
-            .readFile({ cwd, relativePath: "linked-secret.txt" })
-            .pipe(Effect.flip);
-          const resolvedWorkspaceRoot = yield* fileSystem.realPath(cwd);
-          const resolvedPath = yield* fileSystem.realPath(path.join(outsideDir, "secret.txt"));
+        const error = yield* workspaceFileSystem
+          .readFile({ cwd, relativePath: "linked-secret.txt" })
+          .pipe(Effect.flip);
+        const resolvedWorkspaceRoot = yield* fileSystem.realPath(cwd);
+        const resolvedPath = yield* fileSystem.realPath(path.join(outsideDir, "secret.txt"));
 
-          expect(error).toBeInstanceOf(WorkspaceFileSystem.WorkspaceFilePathEscapeError);
-          expect(error).toMatchObject({
-            workspaceRoot: cwd,
-            relativePath: "linked-secret.txt",
-            resolvedWorkspaceRoot,
-            resolvedPath,
-          });
-          expect("cause" in error).toBe(false);
-        }),
+        expect(error).toBeInstanceOf(WorkspaceFileSystem.WorkspaceFilePathEscapeError);
+        expect(error).toMatchObject({
+          workspaceRoot: cwd,
+          relativePath: "linked-secret.txt",
+          resolvedWorkspaceRoot,
+          resolvedPath,
+        });
+        expect("cause" in error).toBe(false);
+      }),
     );
 
     it.effect("rejects directories without manufacturing an I/O cause", () =>
@@ -266,22 +209,6 @@ it.layer(layerTest, { excludeTestServices: true })("WorkspaceFileSystemLive", (i
 
         expect(result).toEqual({ relativePath: "plans/effect-rpc.md" });
         expect(saved).toBe("# Plan\n");
-      }),
-    );
-
-    it.effect("rejects writes by absolute path", () =>
-      Effect.gen(function* () {
-        const workspaceFileSystem = yield* WorkspaceFileSystem.WorkspaceFileSystem;
-        const path = yield* Path.Path;
-        const cwd = yield* makeTempDir;
-        const outsideDir = yield* makeTempDir;
-        const absolutePath = path.join(outsideDir, "cleanup-report.md");
-
-        const error = yield* workspaceFileSystem
-          .writeFile({ cwd, relativePath: absolutePath, contents: "# Edited\n" })
-          .pipe(Effect.flip);
-
-        expect(error).toBeInstanceOf(WorkspacePaths.WorkspacePathOutsideRootError);
       }),
     );
 

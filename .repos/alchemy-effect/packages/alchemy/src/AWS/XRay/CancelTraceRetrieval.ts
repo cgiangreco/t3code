@@ -13,8 +13,9 @@ export interface CancelTraceRetrievalRequest
  * provide the implementation with `Effect.provide(XRay.CancelTraceRetrievalHttp)`.
  * The action is account-scoped: X-Ray does not support resource-level
  * permissions for `xray:CancelTraceRetrieval`, so the binding grants it on `*`.
- * ### Transaction Search
- * **Example:** Cancel a retrieval job
+ * @binding
+ * @section Transaction Search
+ * @example Cancel a retrieval job
  * ```typescript
  * import * as XRay from "alchemy/AWS/XRay";
  *
@@ -24,8 +25,6 @@ export interface CancelTraceRetrievalRequest
  * // runtime
  * yield* cancelTraceRetrieval({ RetrievalToken: token });
  * ```
- *
- * @binding
  */
 export interface CancelTraceRetrieval extends Binding.Service<
   CancelTraceRetrieval,

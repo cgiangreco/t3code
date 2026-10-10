@@ -20,15 +20,14 @@ export interface ListVehiclesInFleetRequest extends Omit<
  * the implementation with
  * `Effect.provide(AWS.IoTFleetWise.ListVehiclesInFleetHttp)`.
  *
- * ### Fleet Membership
- * **Example:** List the Vehicles in a Fleet
+ * @binding
+ * @section Fleet Membership
+ * @example List the Vehicles in a Fleet
  * ```typescript
  * const listVehiclesInFleet = yield* IoTFleetWise.ListVehiclesInFleet(fleet);
  *
  * const { vehicles } = yield* listVehiclesInFleet();
  * ```
- *
- * @binding
  */
 export interface ListVehiclesInFleet extends Binding.Service<
   ListVehiclesInFleet,

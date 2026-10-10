@@ -231,8 +231,11 @@ export type CustomHostname = Resource<
  * existing hostname match. Custom hostnames carry no ownership markers,
  * so an existing match is reported as `Unowned` and the engine refuses
  * to take it over unless `--adopt` (or `adopt(true)`) is set.
- * ### Creating a Custom Hostname
- * **Example:** Basic custom hostname with TXT validation
+ * @resource
+ * @product Custom Hostnames
+ * @category Domains & DNS
+ * @section Creating a Custom Hostname
+ * @example Basic custom hostname with TXT validation
  * ```typescript
  * const hostname = yield* Cloudflare.CustomHostname.CustomHostname("CustomerApp", {
  *   zoneId: zone.zoneId,
@@ -242,7 +245,7 @@ export type CustomHostname = Resource<
  * // hostname.ownershipVerification?.name / .value
  * ```
  *
- * **Example:** HTTP validation with a specific certificate authority
+ * @example HTTP validation with a specific certificate authority
  * ```typescript
  * yield* Cloudflare.CustomHostname.CustomHostname("CustomerApp", {
  *   zoneId: zone.zoneId,
@@ -255,8 +258,8 @@ export type CustomHostname = Resource<
  * });
  * ```
  *
- * ### Pairing with a Fallback Origin
- * **Example:** Route custom hostname traffic to your origin
+ * @section Pairing with a Fallback Origin
+ * @example Route custom hostname traffic to your origin
  * ```typescript
  * const record = yield* Cloudflare.DNS.Record("Origin", {
  *   zoneId: zone.zoneId,
@@ -274,10 +277,6 @@ export type CustomHostname = Resource<
  *   hostname: "app.customer.com",
  * });
  * ```
- *
- * @resource
- * @product Custom Hostnames
- * @category Domains & DNS
  */
 export const CustomHostname = Resource<CustomHostname>(
   "Cloudflare.CustomHostname.CustomHostname",
@@ -307,8 +306,9 @@ export const CustomHostnameProvider = () =>
             Stream.runCollect,
             Effect.map((chunk) =>
               Array.from(chunk).flatMap((page) =>
-                (page.result ?? []).map((raw): Attributes =>
-                  toAttributes(narrowHostname(raw), zone.id),
+                (page.result ?? []).map(
+                  (raw): Attributes =>
+                    toAttributes(narrowHostname(raw), zone.id),
                 ),
               ),
             ),

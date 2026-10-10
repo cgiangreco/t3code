@@ -12,8 +12,9 @@ export interface GetMetricStatisticsRequest
  *
  * Provide `CloudWatch.GetMetricStatisticsHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Querying Metrics
- * **Example:** Fetch Hourly Sums for a Metric
+ * @binding
+ * @section Querying Metrics
+ * @example Fetch Hourly Sums for a Metric
  * ```typescript
  * // init — grants cloudwatch:GetMetricStatistics
  * const getMetricStatistics = yield* AWS.CloudWatch.GetMetricStatistics();
@@ -30,8 +31,6 @@ export interface GetMetricStatisticsRequest
  * });
  * const datapoints = result.Datapoints ?? [];
  * ```
- *
- * @binding
  */
 export interface GetMetricStatistics extends Binding.Service<
   GetMetricStatistics,

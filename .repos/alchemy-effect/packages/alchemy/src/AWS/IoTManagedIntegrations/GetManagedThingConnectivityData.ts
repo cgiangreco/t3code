@@ -13,16 +13,15 @@ import type { ManagedThing } from "./ManagedThing.ts";
  * the implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.GetManagedThingConnectivityDataHttp)`.
  *
- * ### Reading Device State
- * **Example:** Check Device Connectivity
+ * @binding
+ * @section Reading Device State
+ * @example Check Device Connectivity
  * ```typescript
  * const getConnectivity =
  *   yield* IoTManagedIntegrations.GetManagedThingConnectivityData(thing);
  *
  * const { Connected, DisconnectReason } = yield* getConnectivity();
  * ```
- *
- * @binding
  */
 export interface GetManagedThingConnectivityData extends Binding.Service<
   GetManagedThingConnectivityData,

@@ -12,16 +12,15 @@ import type { HostedZone } from "./HostedZone.ts";
  * compute that hands out NS records or verifies delegation at runtime.
  * Provide the implementation with
  * `Effect.provide(AWS.Route53.GetHostedZoneHttp)`.
- * ### Inspecting Zones
- * **Example:** Read the zone's name servers
+ * @binding
+ * @section Inspecting Zones
+ * @example Read the zone's name servers
  * ```typescript
  * const getHostedZone = yield* AWS.Route53.GetHostedZone(zone);
  *
  * const { DelegationSet } = yield* getHostedZone();
  * yield* Effect.log(DelegationSet?.NameServers);
  * ```
- *
- * @binding
  */
 export interface GetHostedZone extends Binding.Service<
   GetHostedZone,

@@ -24,44 +24,42 @@ import { type TunnelAuth } from "./TunnelBinding.ts";
  * Read` permission and binds its outputs into the Worker (the token value as a
  * `secret_text` binding) so runtime code can authenticate.
  *
- * @remarks
+ * @binding
+ * @product Tunnels
+ * @category Cloudflare One (Zero Trust)
  *
  * `ReadTunnel` is a single identifier that is simultaneously the binding's
  * Context tag, its type, and the callable — `yield* Cloudflare.Tunnel.ReadTunnel()`.
  *
- * ### Reading tunnels at runtime
- * **Example:** Bind the read client
+ * @section Reading tunnels at runtime
+ * @example Bind the read client
  * Bind once in the Init phase; every method is available on the returned client.
  * ```typescript
  * const tunnels = yield* Cloudflare.Tunnel.ReadTunnel();
  * ```
  *
- * **Example:** List tunnels
+ * @example List tunnels
  * ```typescript
  * const { result } = yield* tunnels.list({ isDeleted: false });
  * ```
  *
- * **Example:** Fetch a tunnel and its connector token
+ * @example Fetch a tunnel and its connector token
  * `getToken` returns the plaintext token used to run `cloudflared`.
  * ```typescript
  * const tunnel = yield* tunnels.get(tunnelId);
  * const token = yield* tunnels.getToken(tunnelId);
  * ```
  *
- * **Example:** Read the ingress configuration
+ * @example Read the ingress configuration
  * ```typescript
  * const { config } = yield* tunnels.getConfiguration(tunnelId);
  * ```
  *
- * ### Runtime Layer
+ * @section Runtime Layer
  * Provide {@link ReadTunnelBinding} in the Worker's runtime layer.
  * ```typescript
  * Effect.provide(Cloudflare.Tunnel.ReadTunnelBinding)
  * ```
- *
- * @binding
- * @product Tunnels
- * @category Cloudflare One (Zero Trust)
  */
 export interface ReadTunnel extends Binding.Service<
   ReadTunnel,

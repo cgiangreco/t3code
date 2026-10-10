@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.DetectModerationLabelsHttp)`.
  *
- * ### Image Analysis
- * **Example:** Moderate an Uploaded Image
+ * @binding
+ * @section Image Analysis
+ * @example Moderate an Uploaded Image
  * ```typescript
  * // init
  * const detectModerationLabels = yield* AWS.Rekognition.DetectModerationLabels();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const flagged = (result.ModerationLabels ?? []).length > 0;
  * ```
- *
- * @binding
  */
 export interface DetectModerationLabels extends Binding.Service<
   DetectModerationLabels,

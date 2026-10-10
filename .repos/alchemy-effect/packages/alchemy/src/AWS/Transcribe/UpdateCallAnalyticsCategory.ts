@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Amazon Transcribe batch actions have no resource-level IAM; the host is
  * granted `transcribe:UpdateCallAnalyticsCategory` on `*`.
  *
- * ### Call Analytics Categories
- * **Example:** Update a Call Analytics Category
+ * @binding
+ * @section Call Analytics Categories
+ * @example Update a Call Analytics Category
  * ```typescript
  * // init
  * const updateCallAnalyticsCategory = yield* AWS.Transcribe.UpdateCallAnalyticsCategory();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   Rules: [{ NonTalkTimeFilter: { Threshold: 60000 } }],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateCallAnalyticsCategory extends Binding.Service<
   UpdateCallAnalyticsCategory,

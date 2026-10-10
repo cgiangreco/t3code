@@ -1,23 +1,24 @@
 import * as Config from "effect/Config";
+import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
-import {
-  deferUntilFirstUse,
-  orDieCredentialsUnavailable,
-  resolveProviderConfig,
-} from "../Auth/Resolve.ts";
+import { getAuthProvider } from "../Auth/AuthProvider.ts";
+import { ALCHEMY_PROFILE, AlchemyProfile } from "../Auth/Profile.ts";
 import {
   CLOUDFLARE_AUTH_PROVIDER_NAME,
   type CloudflareAuthConfig,
   type CloudflareResolvedCredentials,
-} from "./Auth/AuthConfig.ts";
+} from "./Auth/AuthProvider.ts";
 
-import { CloudflareEnvironment } from "./CloudflareEnvironmentService.ts";
+export class CloudflareEnvironment extends Context.Service<
+  CloudflareEnvironment,
+  Effect.Effect<CloudflareResolvedCredentials>
+>()("Cloudflare::CloudflareEnvironment") {
+  readonly kind = "Environment" as const;
+}
 
-export { CloudflareEnvironment } from "./CloudflareEnvironmentService.ts";
-
-const CLOUDFLARE_ACCOUNT_ID = Config.String("CLOUDFLARE_ACCOUNT_ID");
+const CLOUDFLARE_ACCOUNT_ID = Config.string("CLOUDFLARE_ACCOUNT_ID");
 
 export const fromEnv = () =>
   Layer.effect(
@@ -35,18 +36,21 @@ export const fromProfile = () =>
   Layer.effect(
     CloudflareEnvironment,
     Effect.gen(function* () {
-      // Building providers must work before Cloudflare is configured. Capture
-      // the resolver's services now, but read profiles/credentials only when
-      // a cloud operation actually evaluates this environment.
-      const resolve = yield* resolveProviderConfig<
+      const profile = yield* AlchemyProfile;
+      const auth = yield* getAuthProvider<
         CloudflareAuthConfig,
         CloudflareResolvedCredentials
-      >(CLOUDFLARE_AUTH_PROVIDER_NAME).pipe(
-        Effect.flatMap(({ resolve }) => resolve),
-        deferUntilFirstUse,
-      );
-      return yield* resolve.pipe(
-        orDieCredentialsUnavailable(CLOUDFLARE_AUTH_PROVIDER_NAME),
+      >(CLOUDFLARE_AUTH_PROVIDER_NAME);
+      const profileName = yield* ALCHEMY_PROFILE;
+      const ci = yield* Config.boolean("CI").pipe(Config.withDefault(false));
+      // `loadOrConfigure` reads the persisted config under the canonical
+      // provider name (`Cloudflare`); only runs `configure` (and persists the
+      // result) if no stored config exists.
+      return yield* profile.loadOrConfigure(auth, profileName, { ci }).pipe(
+        Effect.flatMap((config) =>
+          auth.read(profileName, config as CloudflareAuthConfig),
+        ),
+        Effect.orDie,
         Effect.cached,
       );
     }),

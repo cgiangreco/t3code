@@ -10,8 +10,9 @@ import type { DataCatalog } from "./DataCatalog.ts";
  * catalog name is injected automatically; `Expression` filters table names.
  * Provide the implementation with
  * `Effect.provide(AWS.Athena.ListTableMetadataHttp)`.
- * ### Browsing Catalog Metadata
- * **Example:** List a Database's Tables
+ * @binding
+ * @section Browsing Catalog Metadata
+ * @example List a Database's Tables
  * ```typescript
  * // init — bind the operation to the data catalog
  * const listTableMetadata = yield* AWS.Athena.ListTableMetadata(catalog);
@@ -20,8 +21,6 @@ import type { DataCatalog } from "./DataCatalog.ts";
  * const res = yield* listTableMetadata({ DatabaseName: "analytics" });
  * console.log(res.TableMetadataList?.map((t) => t.Name));
  * ```
- *
- * @binding
  */
 export interface ListTableMetadata extends Binding.Service<
   ListTableMetadata,

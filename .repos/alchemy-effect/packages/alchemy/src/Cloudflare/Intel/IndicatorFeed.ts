@@ -107,15 +107,18 @@ export type IndicatorFeed = Resource<
  * adopts an existing feed with the same name instead of creating a
  * duplicate.
  * :::
- * ### Creating a Feed
- * **Example:** Basic feed
+ * @resource
+ * @product Intel
+ * @category Observability & Analytics
+ * @section Creating a Feed
+ * @example Basic feed
  * ```typescript
  * const feed = yield* Cloudflare.Intel.IndicatorFeed("threat-feed", {
  *   description: "Indicators observed by our honeypots",
  * });
  * ```
  *
- * **Example:** Public, downloadable feed
+ * @example Public, downloadable feed
  * ```typescript
  * const feed = yield* Cloudflare.Intel.IndicatorFeed("public-feed", {
  *   name: "acme-public-indicators",
@@ -126,8 +129,8 @@ export type IndicatorFeed = Resource<
  * });
  * ```
  *
- * ### Publishing Indicators
- * **Example:** Upload a STIX 2.x snapshot inline
+ * @section Publishing Indicators
+ * @example Upload a STIX 2.x snapshot inline
  * ```typescript
  * const feed = yield* Cloudflare.Intel.IndicatorFeed("threat-feed", {
  *   description: "Indicators observed by our honeypots",
@@ -139,8 +142,8 @@ export type IndicatorFeed = Resource<
  * });
  * ```
  *
- * ### Sharing a Feed
- * **Example:** Grant another account access
+ * @section Sharing a Feed
+ * @example Grant another account access
  * ```typescript
  * yield* Cloudflare.Intel.IndicatorFeedPermission("partner-access", {
  *   feedId: feed.feedId,
@@ -149,10 +152,6 @@ export type IndicatorFeed = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/security-center/indicator-feeds/
- *
- * @resource
- * @product Intel
- * @category Observability & Analytics
  */
 export const IndicatorFeed = Resource<IndicatorFeed>(TypeId);
 

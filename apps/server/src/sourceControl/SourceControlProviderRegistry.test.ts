@@ -4,29 +4,18 @@ import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
-import * as Redacted from "effect/Redacted";
-import { ChildProcessSpawner } from "effect/process";
+import { ChildProcessSpawner } from "effect/unstable/process";
 import { VcsRepositoryDetectionError } from "@t3tools/contracts";
 
-import * as ServerSettings from "../serverSettings.ts";
 import * as ServerConfig from "../config.ts";
 import type * as VcsDriver from "../vcs/VcsDriver.ts";
 import * as VcsDriverRegistry from "../vcs/VcsDriverRegistry.ts";
 import * as VcsProcess from "../vcs/VcsProcess.ts";
-import * as AzureDevOpsCli from "@t3tools/source-control-azure-devops/server/AzureDevOpsCli";
-import * as AzureDevOpsPullRequestCli from "@t3tools/source-control-azure-devops/server/AzureDevOpsPullRequestCli";
-import * as BitbucketApi from "@t3tools/source-control-bitbucket/server/BitbucketApi";
-import * as BitbucketPullRequestApi from "@t3tools/source-control-bitbucket/server/BitbucketPullRequestApi";
-import * as GitVcsDriver from "../vcs/GitVcsDriver.ts";
-import * as GitHubApi from "@t3tools/source-control-github/server/GitHubApi";
-import * as GitHubPullRequestApi from "@t3tools/source-control-github/server/GitHubPullRequestApi";
-import * as GitHubCredentials from "@t3tools/source-control-github/server/GitHubCredentials";
-import * as GitLabCli from "@t3tools/source-control-gitlab/server/GitLabCli";
-import * as GitLabPullRequestCli from "@t3tools/source-control-gitlab/server/GitLabPullRequestCli";
-import * as ForgejoCli from "@t3tools/source-control-forgejo/server/ForgejoCli";
-import * as GitCafeApi from "@t3tools/source-control-gitcafe/server/GitCafeApi";
+import * as AzureDevOpsCli from "./AzureDevOpsCli.ts";
+import * as BitbucketApi from "./BitbucketApi.ts";
+import * as GitHubCli from "./GitHubCli.ts";
+import * as GitLabCli from "./GitLabCli.ts";
 import * as SourceControlProviderRegistry from "./SourceControlProviderRegistry.ts";
-import * as ServerSourceControlHost from "./ServerSourceControlHost.ts";
 
 const TEST_EPOCH = DateTime.makeUnsafe("1970-01-01T00:00:00.000Z");
 
@@ -50,8 +39,6 @@ function makeRegistry(input: {
     readonly url: string;
   }>;
   readonly process?: Partial<VcsProcess.VcsProcess["Service"]>;
-  readonly githubApi?: Partial<GitHubApi.GitHubApi["Service"]>;
-  readonly gitlab?: Partial<GitLabCli.GitLabCli["Service"]>;
   readonly resolve?: VcsDriverRegistry.VcsDriverRegistry["Service"]["resolve"];
 }) {
   const driver = {
@@ -70,7 +57,7 @@ function makeRegistry(input: {
       }),
   } satisfies Partial<VcsDriver.VcsDriver["Service"]>;
 
-  const layerRegistry = Layer.mock(VcsDriverRegistry.VcsDriverRegistry)({
+  const registryLayer = Layer.mock(VcsDriverRegistry.VcsDriverRegistry)({
     get: () => Effect.succeed(driver as unknown as VcsDriver.VcsDriver["Service"]),
     resolve:
       input.resolve ??
@@ -91,7 +78,7 @@ function makeRegistry(input: {
         })),
   });
 
-  const layerProcess = Layer.mock(VcsProcess.VcsProcess)({
+  const processLayer = Layer.mock(VcsProcess.VcsProcess)({
     run: () => Effect.succeed(processOutput("")),
     ...input.process,
   });
@@ -99,35 +86,12 @@ function makeRegistry(input: {
   return SourceControlProviderRegistry.make.pipe(
     Effect.provide(
       Layer.mergeAll(
-        NodeServices.layer,
-        layerRegistry,
-        layerProcess,
-        ServerSourceControlHost.layer.pipe(
-          Layer.provide(
-            Layer.mergeAll(
-              layerProcess,
-              layerRegistry,
-              ServerSettings.ServerSettingsService.layerTest(),
-              Layer.mock(GitVcsDriver.GitVcsDriver)({}),
-            ),
-          ),
-        ),
+        registryLayer,
+        processLayer,
         Layer.mock(AzureDevOpsCli.AzureDevOpsCli)({}),
-        Layer.mock(AzureDevOpsPullRequestCli.AzureDevOpsPullRequestCli)({}),
         Layer.mock(BitbucketApi.BitbucketApi)({}),
-        Layer.mock(BitbucketPullRequestApi.BitbucketPullRequestApi)({}),
-        ServerSettings.ServerSettingsService.layerTest(),
-        Layer.mock(GitHubPullRequestApi.GitHubPullRequestApi)({}),
-        Layer.mock(GitHubApi.GitHubApi)({
-          // No GitHub credential unless a test supplies one, so custom hosts stay unclaimed.
-          credential: (host) => Effect.fail(new GitHubCredentials.GitHubNotSignedInError({ host })),
-          ...input.githubApi,
-        }),
-        Layer.mock(GitVcsDriver.GitVcsDriver)({}),
-        Layer.mock(GitLabCli.GitLabCli)(input.gitlab ?? {}),
-        Layer.mock(GitLabPullRequestCli.GitLabPullRequestCli)({}),
-        Layer.mock(ForgejoCli.ForgejoCli)({ listLogins: () => Effect.succeed([]) }),
-        Layer.mock(GitCafeApi.GitCafeApi)({}),
+        Layer.mock(GitHubCli.GitHubCli)({}),
+        Layer.mock(GitLabCli.GitLabCli)({}),
         ServerConfig.layerTest(process.cwd(), {
           prefix: "t3-source-control-registry-test-",
         }).pipe(Layer.provide(NodeServices.layer)),
@@ -239,38 +203,6 @@ self-hosted.example.test
   }),
 );
 
-it.effect("refines the caller-selected remote instead of choosing another configured remote", () =>
-  Effect.gen(function* () {
-    const registry = yield* makeRegistry({
-      remotes: [{ name: "origin", url: "git@github.com:fork/project.git" }],
-      process: {
-        run: () =>
-          Effect.succeed(
-            processOutput(`self-hosted.example.test
-  ✓ Logged in to self-hosted.example.test as gitlab-user
-`),
-          ),
-      },
-    });
-
-    const handle = yield* registry.resolveHandle({
-      cwd: "/repo",
-      context: {
-        provider: {
-          kind: "unknown",
-          name: "self-hosted.example.test",
-          baseUrl: "https://self-hosted.example.test",
-        },
-        remoteName: "upstream",
-        remoteUrl: "https://self-hosted.example.test/group/project.git",
-      },
-    });
-
-    assert.strictEqual(handle.context?.provider.kind, "gitlab");
-    assert.strictEqual(handle.context?.remoteName, "upstream");
-  }),
-);
-
 it.effect("routes authenticated self-hosted GitLab remotes on non-standard ports", () =>
   Effect.gen(function* () {
     const registry = yield* makeRegistry({
@@ -327,130 +259,5 @@ it.effect("falls back to a non-origin remote when origin is not configured", () 
     const provider = yield* registry.resolve({ cwd: "/repo" });
 
     assert.strictEqual(provider.kind, "azure-devops");
-  }),
-);
-
-it.effect(
-  "routes linked subjects by URL independently of the checkout and skips unsupported links",
-  () =>
-    Effect.gen(function* () {
-      const registry = yield* makeRegistry({
-        remotes: [{ name: "origin", url: "https://github.com/unrelated/checkout.git" }],
-        githubApi: {
-          rest: () =>
-            Effect.succeed({
-              status: 200,
-              headers: {},
-              body: JSON.stringify({ title: "GitHub issue", body: null }),
-              truncated: false,
-              invalidUtf8: false,
-            }),
-        },
-        gitlab: {
-          execute: () =>
-            Effect.succeed(
-              processOutput(JSON.stringify({ title: "GitLab MR", description: "Nested project" })),
-            ),
-        },
-      });
-      for (const [url, expected] of [
-        ["https://github.com/team/project/issues/1", { title: "GitHub issue", body: null }],
-        [
-          "https://gitlab.com/team/sub/project/-/merge_requests/2",
-          { title: "GitLab MR", body: "Nested project" },
-        ],
-      ] as const) {
-        const lookup = registry.resolveLink({ cwd: "/unrelated", url: new URL(url) });
-        assert.ok(lookup);
-        assert.deepStrictEqual(yield* lookup, expected);
-      }
-      for (const url of [
-        "https://example.test/team/project/issues/1",
-        "https://github.attacker.test/team/project/issues/1",
-        "https://gitlab.attacker.test/team/project/-/issues/1",
-        "https://github.com/team/project",
-        "https://codeberg.org/team/project/issues/1",
-        "https://bitbucket.org/team/project/pull-requests/1",
-        "https://dev.azure.com/org/project/_git/repo/pullrequest/1",
-        "http://github.com/team/project/issues/1",
-        "https://user:secret@github.com/team/project/issues/1",
-      ]) {
-        assert.strictEqual(
-          registry.resolveLink({ cwd: "/unrelated", url: new URL(url) }),
-          undefined,
-        );
-      }
-    }).pipe(Effect.scoped),
-);
-
-it.effect.each([
-  { name: "a credential", credential: "found", expected: "github" },
-  // Claimed so the error says the host is turned off, not that it is unsupported.
-  { name: "a host turned off in Settings", credential: "disabled", expected: "github" },
-  { name: "no credential", credential: "missing", expected: "unknown" },
-] as const)("resolves custom-host remotes with $name", (scenario) =>
-  Effect.gen(function* () {
-    const hosts: Array<string> = [];
-    const commands: Array<string> = [];
-    const registry = yield* makeRegistry({
-      remotes: [{ name: "origin", url: "git@code.example.test:team/project.git" }],
-      process: {
-        run: ({ command }) => {
-          commands.push(command);
-          return Effect.succeed(processOutput(""));
-        },
-      },
-      githubApi: {
-        credential: (host) => {
-          hosts.push(host);
-          return scenario.credential === "found"
-            ? Effect.succeed({ token: Redacted.make("token"), fingerprint: `${host}:fingerprint` })
-            : scenario.credential === "disabled"
-              ? Effect.fail(new GitHubCredentials.GitHubHostDisabledError({ host }))
-              : Effect.fail(new GitHubCredentials.GitHubNotSignedInError({ host }));
-        },
-      },
-    });
-    const handle = yield* registry.resolveHandle({ cwd: "/repo" });
-    assert.strictEqual(handle.provider.kind, scenario.expected);
-    assert.strictEqual(handle.context?.provider.baseUrl, "https://code.example.test");
-    assert.deepStrictEqual(hosts, ["code.example.test"]);
-    // Recognition goes through the credential layer; gh is only one of its sources.
-    assert.notInclude(commands, "gh");
-  }),
-);
-
-it.effect("skips GitHub discovery for the identity resolver's empty base URL", () =>
-  Effect.gen(function* () {
-    const hosts: string[] = [];
-    const remoteUrl = "git@githubenterprise.dev.example.com:team/workspace.git";
-    const registry = yield* makeRegistry({
-      remotes: [{ name: "origin", url: remoteUrl }],
-      githubApi: {
-        credential: (host) => {
-          hosts.push(host);
-          return Effect.succeed({
-            token: Redacted.make("token"),
-            fingerprint: `${host}:fingerprint`,
-          });
-        },
-      },
-    });
-    const context = {
-      provider: { kind: "unknown" as const, name: "Unknown", baseUrl: "" },
-      remoteName: "origin",
-      remoteUrl,
-    };
-    const unresolved = yield* registry.resolveHandle({ cwd: "/repo", context });
-    assert.deepStrictEqual(unresolved.context, context);
-    assert.deepStrictEqual(hosts, []);
-
-    const resolved = yield* registry.resolveHandle({ cwd: "/repo" });
-    assert.strictEqual(resolved.provider.kind, "github");
-    assert.strictEqual(
-      resolved.context?.provider.baseUrl,
-      "https://githubenterprise.dev.example.com",
-    );
-    assert.deepStrictEqual(hosts, ["githubenterprise.dev.example.com"]);
   }),
 );

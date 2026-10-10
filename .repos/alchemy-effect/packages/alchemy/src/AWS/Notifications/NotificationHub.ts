@@ -45,8 +45,9 @@ export interface NotificationHub extends Resource<
  * hub therefore fails — keep a baseline hub registered outside the stack,
  * or register a second hub first.
  *
- * ### Registering a Notification Hub
- * **Example:** Enable a region as a notification hub
+ * @resource
+ * @section Registering a Notification Hub
+ * @example Enable a region as a notification hub
  * ```typescript
  * import * as Notifications from "alchemy/AWS/Notifications";
  *
@@ -54,8 +55,6 @@ export interface NotificationHub extends Resource<
  *   region: "us-east-2",
  * });
  * ```
- *
- * @resource
  */
 export const NotificationHub = Resource<NotificationHub>(
   "AWS.Notifications.NotificationHub",

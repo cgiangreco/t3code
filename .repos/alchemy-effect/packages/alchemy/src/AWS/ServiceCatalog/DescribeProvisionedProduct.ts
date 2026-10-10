@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.DescribeProvisionedProductHttp)`.
- * ### Tracking Provisioned Products
- * **Example:** Get a Provisioned Product's Status
+ * @binding
+ * @section Tracking Provisioned Products
+ * @example Get a Provisioned Product's Status
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeProvisionedProduct = yield* AWS.ServiceCatalog.DescribeProvisionedProduct();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const { ProvisionedProductDetail } =
  *   yield* describeProvisionedProduct({ Name: "my-vpc" });
  * ```
- *
- * @binding
  */
 export interface DescribeProvisionedProduct extends Binding.Service<
   DescribeProvisionedProduct,

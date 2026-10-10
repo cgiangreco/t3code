@@ -58,8 +58,9 @@ export interface ACL extends Resource<
  * {@link Cluster} via `aclName`.
  *
  * ACLs are free and provision quickly.
- * ### Creating an ACL
- * **Example:** ACL with a Custom User
+ * @resource
+ * @section Creating an ACL
+ * @example ACL with a Custom User
  * ```typescript
  * const appUser = yield* User("AppUser", {
  *   authenticationMode: { type: "password", passwords: [appPassword] },
@@ -69,8 +70,6 @@ export interface ACL extends Resource<
  *   userNames: [appUser.userName],
  * });
  * ```
- *
- * @resource
  */
 export const ACL = Resource<ACL>("AWS.MemoryDB.ACL");
 

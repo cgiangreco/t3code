@@ -20,8 +20,9 @@ export interface BatchGetDocumentStatusRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.BatchGetDocumentStatusHttp)`.
  *
- * ### Indexing Documents
- * **Example:** Check Document Status
+ * @binding
+ * @section Indexing Documents
+ * @example Check Document Status
  * ```typescript
  * const documentStatus = yield* AWS.Kendra.BatchGetDocumentStatus(index);
  *
@@ -30,8 +31,6 @@ export interface BatchGetDocumentStatusRequest extends Omit<
  * });
  * console.log(status.DocumentStatusList?.[0]?.DocumentStatus);
  * ```
- *
- * @binding
  */
 export interface BatchGetDocumentStatus extends Binding.Service<
   BatchGetDocumentStatus,

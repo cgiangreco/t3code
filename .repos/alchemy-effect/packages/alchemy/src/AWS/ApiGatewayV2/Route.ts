@@ -93,8 +93,9 @@ export interface RouteType extends Resource<
 /**
  * An API Gateway v2 Route — matches incoming requests (or WebSocket
  * messages) and forwards them to an Integration.
- * ### HTTP API routes
- * **Example:** Catch-all $default route
+ * @resource
+ * @section HTTP API routes
+ * @example Catch-all $default route
  * ```typescript
  * yield* ApiGatewayV2.Route("Default", {
  *   api,
@@ -103,7 +104,7 @@ export interface RouteType extends Resource<
  * });
  * ```
  *
- * **Example:** Method + path route
+ * @example Method + path route
  * ```typescript
  * yield* ApiGatewayV2.Route("ListItems", {
  *   api,
@@ -112,8 +113,8 @@ export interface RouteType extends Resource<
  * });
  * ```
  *
- * ### WebSocket routes
- * **Example:** $connect route
+ * @section WebSocket routes
+ * @example $connect route
  * ```typescript
  * yield* ApiGatewayV2.Route("Connect", {
  *   api,
@@ -122,8 +123,8 @@ export interface RouteType extends Resource<
  * });
  * ```
  *
- * ### Securing routes
- * **Example:** JWT-protected route
+ * @section Securing routes
+ * @example JWT-protected route
  * ```typescript
  * yield* ApiGatewayV2.Route("Secure", {
  *   api,
@@ -133,8 +134,6 @@ export interface RouteType extends Resource<
  *   authorizerId: authorizer.authorizerId,
  * });
  * ```
- *
- * @resource
  */
 export const RouteResource = Resource<RouteType>("AWS.ApiGatewayV2.Route");
 

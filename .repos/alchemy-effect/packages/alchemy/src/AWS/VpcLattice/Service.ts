@@ -96,13 +96,14 @@ export interface Service extends Resource<
  * (running on Lambda, ECS, EC2, or elsewhere) that is made discoverable through
  * a service network. Cheap control-plane resource.
  *
- * ### Creating Services
- * **Example:** Basic Service
+ * @resource
+ * @section Creating Services
+ * @example Basic Service
  * ```typescript
  * const service = yield* Service("PaymentsService", {});
  * ```
  *
- * **Example:** Service with Custom Domain
+ * @example Service with Custom Domain
  * ```typescript
  * const service = yield* Service("PaymentsService", {
  *   customDomainName: "payments.internal.example.com",
@@ -111,8 +112,6 @@ export interface Service extends Resource<
  *   idleTimeout: "60 seconds",
  * });
  * ```
- *
- * @resource
  */
 export const Service = Resource<Service>("AWS.VpcLattice.Service");
 

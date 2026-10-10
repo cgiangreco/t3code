@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * arguments and grants `comprehendmedical:InferRxNorm` on `*`. Provide the
  * implementation with `Effect.provide(AWS.ComprehendMedical.InferRxNormHttp)`.
  *
- * ### Linking Medications to RxNorm
- * **Example:** Infer RxNorm Concepts for a Medication List
+ * @binding
+ * @section Linking Medications to RxNorm
+ * @example Infer RxNorm Concepts for a Medication List
  * ```typescript
  * // init
  * const inferRxNorm = yield* AWS.ComprehendMedical.InferRxNorm();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const concepts = (result.Entities ?? []).flatMap((e) => e.RxNormConcepts ?? []);
  * ```
- *
- * @binding
  */
 export interface InferRxNorm extends Binding.Service<
   InferRxNorm,

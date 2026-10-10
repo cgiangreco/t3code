@@ -28,6 +28,70 @@ describe("ElectronDialog", () => {
     showErrorBoxMock.mockReset();
   });
 
+  it.effect("returns false without opening a confirm dialog for empty messages", () =>
+    Effect.gen(function* () {
+      const dialog = yield* ElectronDialog.ElectronDialog;
+
+      const result = yield* dialog.confirm({
+        message: "   ",
+        owner: Option.none(),
+      });
+
+      assert.isFalse(result);
+      assert.equal(showMessageBoxMock.mock.calls.length, 0);
+    }).pipe(Effect.provide(ElectronDialog.layer)),
+  );
+
+  it.effect("opens a confirm dialog for the owner window", () =>
+    Effect.gen(function* () {
+      const owner = { id: 1 } as BrowserWindow;
+      showMessageBoxMock.mockResolvedValue({ response: 1 });
+      const dialog = yield* ElectronDialog.ElectronDialog;
+
+      const result = yield* dialog.confirm({
+        message: "Delete worktree?",
+        owner: Option.some(owner),
+      });
+
+      assert.isTrue(result);
+      assert.deepEqual(showMessageBoxMock.mock.calls[0], [
+        owner,
+        {
+          type: "question",
+          buttons: ["No", "Yes"],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+          message: "Delete worktree?",
+        },
+      ]);
+    }).pipe(Effect.provide(ElectronDialog.layer)),
+  );
+
+  it.effect("opens an app-level confirm dialog when there is no owner window", () =>
+    Effect.gen(function* () {
+      showMessageBoxMock.mockResolvedValue({ response: 0 });
+      const dialog = yield* ElectronDialog.ElectronDialog;
+
+      const result = yield* dialog.confirm({
+        message: "Delete worktree?",
+        owner: Option.none(),
+      });
+
+      assert.isFalse(result);
+      assert.deepEqual(showMessageBoxMock.mock.calls[0], [
+        {
+          type: "question",
+          buttons: ["No", "Yes"],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+          message: "Delete worktree?",
+        },
+      ]);
+    }).pipe(Effect.provide(ElectronDialog.layer)),
+  );
+
   it.effect("preserves folder picker request context and cause", () =>
     Effect.gen(function* () {
       const cause = new Error("folder picker failed");
@@ -43,6 +107,7 @@ describe("ElectronDialog", () => {
       );
 
       assert.instanceOf(error, ElectronDialog.ElectronDialogPickFolderError);
+      assert.isTrue(ElectronDialog.isElectronDialogError(error));
       assert.strictEqual(error.ownerWindowId, 7);
       assert.strictEqual(error.defaultPath, "/workspace");
       assert.strictEqual(error.cause, cause);
@@ -52,31 +117,28 @@ describe("ElectronDialog", () => {
     }).pipe(Effect.provide(ElectronDialog.layer)),
   );
 
-  it.effect("opens a single-file picker when multiple selections are disabled", () =>
+  it.effect("preserves confirmation request context and cause", () =>
     Effect.gen(function* () {
-      showOpenDialogMock.mockResolvedValue({
-        canceled: false,
-        filePaths: ["/pictures/icon.png"],
-      });
+      const cause = new Error("confirmation failed");
+      const owner = { id: 9 } as BrowserWindow;
+      showMessageBoxMock.mockRejectedValue(cause);
       const dialog = yield* ElectronDialog.ElectronDialog;
 
-      const paths = yield* dialog.pickFiles({
-        owner: Option.none(),
-        defaultPath: Option.some("/project"),
-        filters: [{ name: "Images", extensions: ["png"] }],
-        multiple: false,
-      });
+      const error = yield* Effect.flip(
+        dialog.confirm({
+          owner: Option.some(owner),
+          message: "  Confirm removal?  ",
+        }),
+      );
 
-      assert.deepEqual(paths, ["/pictures/icon.png"]);
-      assert.deepEqual(showOpenDialogMock.mock.calls, [
-        [
-          {
-            defaultPath: "/project",
-            filters: [{ name: "Images", extensions: ["png"] }],
-            properties: ["openFile"],
-          },
-        ],
-      ]);
+      assert.instanceOf(error, ElectronDialog.ElectronDialogConfirmError);
+      assert.strictEqual(error.ownerWindowId, 9);
+      assert.strictEqual(error.promptLength, "Confirm removal?".length);
+      assert.notProperty(error, "promptMessage");
+      assert.strictEqual(error.cause, cause);
+      assert.include(error.message, "window 9");
+      assert.notInclude(error.message, "Confirm removal?");
+      assert.notInclude(error.message, cause.message);
     }).pipe(Effect.provide(ElectronDialog.layer)),
   );
 

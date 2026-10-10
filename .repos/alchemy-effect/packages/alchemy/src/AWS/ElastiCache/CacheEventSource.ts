@@ -81,8 +81,8 @@ export interface CacheEventSourceProps extends EventRouteProps {
  * Provide the host-specific implementation layer (e.g.
  * `AWS.Lambda.EventSource`) on the Function effect.
  *
- * ### Consuming Cache Events
- * **Example:** Alert When a Cache Approaches Its Usage Limit
+ * @section Consuming Cache Events
+ * @example Alert When a Cache Approaches Its Usage Limit
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *

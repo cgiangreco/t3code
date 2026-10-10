@@ -10,8 +10,9 @@ import type { LicenseConfiguration } from "./LicenseConfiguration.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.GetLicenseConfigurationHttp)`.
- * ### Reading License Configurations
- * **Example:** Read the Bound Configuration's Consumption
+ * @binding
+ * @section Reading License Configurations
+ * @example Read the Bound Configuration's Consumption
  * ```typescript
  * // init
  * const getConfiguration =
@@ -24,8 +25,6 @@ import type { LicenseConfiguration } from "./LicenseConfiguration.ts";
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.LicenseManager.GetLicenseConfigurationHttp))
  * ```
- *
- * @binding
  */
 export interface GetLicenseConfiguration extends Binding.Service<
   GetLicenseConfiguration,

@@ -59,8 +59,9 @@ export interface Permission extends Resource<
  * A permission on a private CA granted to the Certificate Manager (ACM)
  * service principal, allowing ACM to automatically issue and renew ACM
  * certificates signed by the CA.
- * ### Granting Permissions
- * **Example:** Allow ACM to auto-renew certificates
+ * @resource
+ * @section Granting Permissions
+ * @example Allow ACM to auto-renew certificates
  * ```typescript
  * import * as ACMPCA from "alchemy/AWS/ACMPCA";
  *
@@ -69,15 +70,13 @@ export interface Permission extends Resource<
  * });
  * ```
  *
- * **Example:** Restrict the granted actions
+ * @example Restrict the granted actions
  * ```typescript
  * const permission = yield* ACMPCA.Permission("AcmIssueOnly", {
  *   certificateAuthorityArn: ca.certificateAuthorityArn,
  *   actions: ["IssueCertificate", "GetCertificate"],
  * });
  * ```
- *
- * @resource
  */
 export const Permission = Resource<Permission>("AWS.ACMPCA.Permission");
 

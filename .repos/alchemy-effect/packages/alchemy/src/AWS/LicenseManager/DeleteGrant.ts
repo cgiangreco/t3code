@@ -14,8 +14,9 @@ export interface DeleteGrantRequest extends licensemanager.DeleteGrantRequest {}
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.DeleteGrantHttp)`.
- * ### Managing Grants
- * **Example:** Delete a Grant
+ * @binding
+ * @section Managing Grants
+ * @example Delete a Grant
  * ```typescript
  * // init
  * const deleteGrant = yield* AWS.LicenseManager.DeleteGrant();
@@ -24,8 +25,6 @@ export interface DeleteGrantRequest extends licensemanager.DeleteGrantRequest {}
  * const { Grant } = yield* getGrant({ GrantArn: grantArn });
  * yield* deleteGrant({ GrantArn: grantArn, Version: Grant!.Version! });
  * ```
- *
- * @binding
  */
 export interface DeleteGrant extends Binding.Service<
   DeleteGrant,

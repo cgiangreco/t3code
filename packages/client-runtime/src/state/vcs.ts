@@ -13,17 +13,13 @@ import * as Result from "effect/Result";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
 import * as SubscriptionRef from "effect/SubscriptionRef";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Atom, AtomRegistry } from "effect/unstable/reactivity";
 
-import {
-  createEnvironmentRpcCommand,
-  createEnvironmentRpcSubscriptionAtomFamily,
-  createEnvironmentSubscriptionAtomFamily,
-} from "./runtime.ts";
+import { createEnvironmentRpcCommand, createEnvironmentSubscriptionAtomFamily } from "./runtime.ts";
 import type { EnvironmentRegistry } from "../connection/registry.ts";
-import * as EnvironmentSupervisor from "../connection/supervisor.ts";
+import { EnvironmentSupervisor } from "../connection/supervisor.ts";
 import { safeErrorLogAttributes } from "../errors/safeLog.ts";
-import * as Persistence from "../platform/persistence.ts";
+import { EnvironmentCacheStore } from "../platform/persistence.ts";
 import { request, subscribe, type EnvironmentRpcInput } from "../rpc/client.ts";
 import { followStreamInEnvironment } from "./runtime.ts";
 import { vcsCommandConcurrency, vcsCommandScheduler } from "./vcsCommandScheduler.ts";
@@ -35,9 +31,6 @@ import {
 
 const OFFLINE_BRANCH_LIST_LIMIT = 100;
 const VCS_REFS_IDLE_TTL_MS = 30_000;
-// Rows keep the last status they rendered, so the live stream only needs a
-// short grace period when virtualization or scrolling releases its consumer.
-const VCS_STATUS_IDLE_TTL_MS = 10_000;
 const VCS_REFS_RETRY_SCHEDULE = Schedule.exponential("1 second").pipe(
   Schedule.modifyDelay(({ duration }) =>
     Effect.succeed(Duration.min(duration, Duration.seconds(30))),
@@ -56,7 +49,7 @@ function canUseVcsRefsCache(input: VcsListRefsInput): boolean {
 
 export const commitVcsRefsRefresh = Effect.fn("CachedVcsRefsState.commitRefresh")(function* (
   registry: AtomRegistry.AtomRegistry,
-  cache: Persistence.EnvironmentCacheStore["Service"],
+  cache: EnvironmentCacheStore["Service"],
   input: {
     readonly environmentId: EnvironmentId;
     readonly cwd: string;
@@ -126,8 +119,8 @@ export const makeCachedVcsRefsChanges = Effect.fn("CachedVcsRefsState.makeChange
   registry?: AtomRegistry.AtomRegistry,
   persistedCacheReadable = true,
 ) {
-  const supervisor = yield* EnvironmentSupervisor.EnvironmentSupervisor;
-  const cache = yield* Persistence.EnvironmentCacheStore;
+  const supervisor = yield* EnvironmentSupervisor;
+  const cache = yield* EnvironmentCacheStore;
   const environmentId = supervisor.target.environmentId;
   const useCache = canUseVcsRefsCache(input);
   const cached =
@@ -147,7 +140,7 @@ export const makeCachedVcsRefsChanges = Effect.fn("CachedVcsRefsState.makeChange
       : Option.none<VcsListRefsResult>();
   const refresh = Effect.fn("CachedVcsRefsState.refresh")(function* () {
     const refs = yield* request(WS_METHODS.vcsListRefs, input).pipe(
-      Effect.provideService(EnvironmentSupervisor.EnvironmentSupervisor, supervisor),
+      Effect.provideService(EnvironmentSupervisor, supervisor),
     );
     const persist = cache.saveVcsRefs(environmentId, input.cwd, refs).pipe(
       Effect.catch((error) =>
@@ -218,7 +211,7 @@ export const makeCachedVcsRefsChanges = Effect.fn("CachedVcsRefsState.makeChange
   return Stream.concat(cachedRefs, refreshedRefs);
 });
 
-function cachedVcsRefsChanges(
+export function cachedVcsRefsChanges(
   environmentId: EnvironmentId,
   input: VcsListRefsInput,
   expectedRevision: number,
@@ -241,34 +234,31 @@ function cachedVcsRefsChanges(
 }
 
 export function createVcsEnvironmentAtoms<R, E>(
-  runtime: Atom.AtomRuntime<EnvironmentRegistry | Persistence.EnvironmentCacheStore | R, E>,
+  runtime: Atom.AtomRuntime<EnvironmentRegistry | EnvironmentCacheStore | R, E>,
 ) {
-  /**
-   * One flat family on purpose: families hold entries via WeakRef, so a nested
-   * per-environment family can be collected between lookups, dropping every
-   * cached page atom and collapsing paginated ref lists mid-scroll.
-   */
-  const listRefsFamily = Atom.family((key: string) => {
-    const [environmentId, input] = JSON.parse(key) as [EnvironmentId, VcsListRefsInput];
-    return runtime
-      .atom((get) => {
-        const state = get(vcsRefsCacheStateAtom({ environmentId }));
-        return cachedVcsRefsChanges(
-          environmentId,
-          input,
-          state.revision,
-          state.persistedCacheReadable,
+  const listRefsByEnvironment = Atom.family((environmentId: EnvironmentId) =>
+    Atom.family((inputKey: string) => {
+      const input = JSON.parse(inputKey) as VcsListRefsInput;
+      return runtime
+        .atom((get) => {
+          const state = get(vcsRefsCacheStateAtom({ environmentId }));
+          return cachedVcsRefsChanges(
+            environmentId,
+            input,
+            state.revision,
+            state.persistedCacheReadable,
+          );
+        })
+        .pipe(
+          Atom.setIdleTTL(VCS_REFS_IDLE_TTL_MS),
+          Atom.withLabel(`environment-data:vcs:list-refs:${environmentId}:${inputKey}`),
         );
-      })
-      .pipe(
-        Atom.setIdleTTL(VCS_REFS_IDLE_TTL_MS),
-        Atom.withLabel(`environment-data:vcs:list-refs:${key}`),
-      );
-  });
+    }),
+  );
   const listRefs = (target: {
     readonly environmentId: EnvironmentId;
     readonly input: VcsListRefsInput;
-  }) => listRefsFamily(JSON.stringify([target.environmentId, target.input]));
+  }) => listRefsByEnvironment(target.environmentId)(JSON.stringify(target.input));
   const invalidateRefs = (
     target: { readonly environmentId: EnvironmentId; readonly input: { readonly cwd: string } },
     registry: AtomRegistry.AtomRegistry,
@@ -282,7 +272,6 @@ export function createVcsEnvironmentAtoms<R, E>(
     listRefs,
     status: createEnvironmentSubscriptionAtomFamily(runtime, {
       label: "environment-data:vcs:status",
-      idleTtlMs: VCS_STATUS_IDLE_TTL_MS,
       subscribe: (input: EnvironmentRpcInput<typeof WS_METHODS.subscribeVcsStatus>) =>
         subscribe(WS_METHODS.subscribeVcsStatus, input).pipe(
           Stream.mapAccum(
@@ -314,18 +303,6 @@ export function createVcsEnvironmentAtoms<R, E>(
       scheduler: vcsCommandScheduler,
       concurrency: vcsCommandConcurrency,
       onSettled: invalidateRefs,
-    }),
-    // Live stages of a bootstrap worktree setup. Null until the server begins
-    // tracking, then a snapshot per change, then null again after the setup
-    // is dropped. Short TTL so a closed thread releases its subscription.
-    worktreeSetup: createEnvironmentRpcSubscriptionAtomFamily(runtime, {
-      label: "environment-data:vcs:worktree-setup",
-      tag: WS_METHODS.subscribeWorktreeSetup,
-      idleTtlMs: VCS_STATUS_IDLE_TTL_MS,
-    }),
-    cancelWorktreeSetup: createEnvironmentRpcCommand(runtime, {
-      label: "environment-data:vcs:cancel-worktree-setup",
-      tag: WS_METHODS.worktreeSetupCancel,
     }),
     removeWorktree: createEnvironmentRpcCommand(runtime, {
       label: "environment-data:vcs:remove-worktree",
@@ -361,3 +338,4 @@ export function createVcsEnvironmentAtoms<R, E>(
 export * from "./gitActions.ts";
 export * from "./vcsAction.ts";
 export * from "./vcsRef.ts";
+export * from "./vcsStatus.ts";

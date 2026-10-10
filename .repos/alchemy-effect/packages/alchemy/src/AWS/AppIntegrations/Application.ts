@@ -68,8 +68,9 @@ export interface Application extends Resource<
  * The namespace is immutable; changing it replaces the application. The
  * name, description, access URL, approved origins, and permissions can all
  * be updated in place.
- * ### Creating an Application
- * **Example:** Basic Application
+ * @resource
+ * @section Creating an Application
+ * @example Basic Application
  * ```typescript
  * import * as AppIntegrations from "alchemy/AWS/AppIntegrations";
  *
@@ -79,7 +80,7 @@ export interface Application extends Resource<
  * });
  * ```
  *
- * **Example:** Application with Permissions and Tags
+ * @example Application with Permissions and Tags
  * ```typescript
  * const app = yield* AppIntegrations.Application("AgentApp", {
  *   namespace: "com.example.agentapp",
@@ -89,8 +90,6 @@ export interface Application extends Resource<
  *   tags: { team: "contact-center" },
  * });
  * ```
- *
- * @resource
  */
 export const Application = Resource<Application>(
   "AWS.AppIntegrations.Application",

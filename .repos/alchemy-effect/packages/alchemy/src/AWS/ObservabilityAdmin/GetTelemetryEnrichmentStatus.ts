@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `AWS.ObservabilityAdmin.GetTelemetryEnrichmentStatusHttp` on the
  * hosting Lambda Function to satisfy the requirement.
- * ### Reading Enrichment Status
- * **Example:** Read the enrichment status, tolerating never-onboarded
+ * @binding
+ * @section Reading Enrichment Status
+ * @example Read the enrichment status, tolerating never-onboarded
  * ```typescript
  * // init — grants observabilityadmin:GetTelemetryEnrichmentStatus
  * const getEnrichmentStatus = yield* AWS.ObservabilityAdmin.GetTelemetryEnrichmentStatus();
@@ -25,8 +26,6 @@ import * as Binding from "../../Binding.ts";
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GetTelemetryEnrichmentStatus extends Binding.Service<
   GetTelemetryEnrichmentStatus,

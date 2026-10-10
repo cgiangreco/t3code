@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.SearchResourcesHttp)`.
- * ### S3 Bucket Inventory
- * **Example:** Search Buckets by Sensitivity
+ * @binding
+ * @section S3 Bucket Inventory
+ * @example Search Buckets by Sensitivity
  * ```typescript
  * // init — account-level binding, no resource argument
  * const searchResources = yield* AWS.Macie2.SearchResources();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { matchingResources } = yield* searchResources({});
  * ```
- *
- * @binding
  */
 export interface SearchResources extends Binding.Service<
   SearchResources,

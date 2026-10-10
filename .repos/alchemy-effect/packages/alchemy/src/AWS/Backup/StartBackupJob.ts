@@ -31,8 +31,9 @@ export interface StartBackupJobRequest extends Omit<
  * `backup.amazonaws.com`). Both are injected into every runtime request.
  * Provide the implementation with
  * `Effect.provide(AWS.Backup.StartBackupJobHttp)`.
- * ### Starting Backups
- * **Example:** On-Demand Backup Of A DynamoDB Table
+ * @binding
+ * @section Starting Backups
+ * @example On-Demand Backup Of A DynamoDB Table
  * ```typescript
  * // deploy time — bind the vault and the backup role
  * const startBackupJob = yield* AWS.Backup.StartBackupJob(vault, backupRole);
@@ -45,8 +46,6 @@ export interface StartBackupJobRequest extends Omit<
  * });
  * yield* Effect.log(`backup job ${job.BackupJobId} started`);
  * ```
- *
- * @binding
  */
 export interface StartBackupJob extends Binding.Service<
   StartBackupJob,

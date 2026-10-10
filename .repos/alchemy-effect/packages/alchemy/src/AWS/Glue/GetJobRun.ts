@@ -16,8 +16,9 @@ export interface GetJobRunRequest extends Omit<
  * and error message — so a function can poll a run it started to a terminal
  * state. The job name is injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Glue.GetJobRunHttp)`.
- * ### Running Jobs
- * **Example:** Poll a Run to a Terminal State
+ * @binding
+ * @section Running Jobs
+ * @example Poll a Run to a Terminal State
  * ```typescript
  * // init
  * const getJobRun = yield* AWS.Glue.GetJobRun(job);
@@ -28,8 +29,6 @@ export interface GetJobRunRequest extends Omit<
  *   yield* Effect.logError(JobRun.ErrorMessage ?? "run failed");
  * }
  * ```
- *
- * @binding
  */
 export interface GetJobRun extends Binding.Service<
   GetJobRun,

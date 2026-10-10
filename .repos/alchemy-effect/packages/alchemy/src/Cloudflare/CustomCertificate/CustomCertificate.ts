@@ -191,8 +191,11 @@ export type CustomCertificate = Resource<
  * the PEM contents back, so a SHA-256 content hash of the pair is persisted
  * in the attributes and used as the rotation diff baseline. Only `zoneId`
  * and `type` force a replacement.
- * ### Uploading a certificate
- * **Example:** Basic SNI certificate
+ * @resource
+ * @product Custom Certificates
+ * @category SSL/TLS & Certificates
+ * @section Uploading a certificate
+ * @example Basic SNI certificate
  * ```typescript
  * const cert = yield* Cloudflare.CustomCertificate.CustomCertificate("EdgeCert", {
  *   zoneId: zone.zoneId,
@@ -202,7 +205,7 @@ export type CustomCertificate = Resource<
  * });
  * ```
  *
- * **Example:** Optimal bundle with a Geo Key Manager region
+ * @example Optimal bundle with a Geo Key Manager region
  * ```typescript
  * yield* Cloudflare.CustomCertificate.CustomCertificate("EuCert", {
  *   zoneId: zone.zoneId,
@@ -214,8 +217,8 @@ export type CustomCertificate = Resource<
  * });
  * ```
  *
- * ### Rotating the certificate
- * **Example:** Rotate in place
+ * @section Rotating the certificate
+ * @example Rotate in place
  * ```typescript
  * // Changing `certificate`/`privateKey` PATCHes the same certificate id —
  * // no replacement, no coverage gap.
@@ -227,8 +230,8 @@ export type CustomCertificate = Resource<
  * });
  * ```
  *
- * ### Prioritizing overlapping certificates
- * **Example:** Explicit priority
+ * @section Prioritizing overlapping certificates
+ * @example Explicit priority
  * ```typescript
  * // Higher priority breaks ties across overlapping legacy_custom certs.
  * yield* Cloudflare.CustomCertificate.CustomCertificate("PrimaryCert", {
@@ -240,10 +243,6 @@ export type CustomCertificate = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ssl/edge-certificates/custom-certificates/
- *
- * @resource
- * @product Custom Certificates
- * @category SSL/TLS & Certificates
  */
 export const CustomCertificate = Resource<CustomCertificate>(TypeId, {
   aliases: ["Cloudflare.CustomCertificate"],
@@ -283,11 +282,12 @@ export const CustomCertificateProvider = () =>
               Stream.runCollect,
               Effect.map((chunk) =>
                 Array.from(chunk).flatMap((page) =>
-                  (page.result ?? []).map((cert): Attributes =>
-                    toAttributes(cert, {
-                      type: "legacy_custom",
-                      contentHash: "",
-                    }),
+                  (page.result ?? []).map(
+                    (cert): Attributes =>
+                      toAttributes(cert, {
+                        type: "legacy_custom",
+                        contentHash: "",
+                      }),
                   ),
                 ),
               ),

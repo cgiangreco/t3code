@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * send. Fails with the typed `NotFoundException` tag when the address is
  * not on the list. Account-level operation. Provide the implementation with
  * `Effect.provide(AWS.SES.GetSuppressedDestinationHttp)`.
- * ### Suppression List
- * **Example:** Look Up a Suppressed Address
+ * @binding
+ * @section Suppression List
+ * @example Look Up a Suppressed Address
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getSuppressed = yield* SES.GetSuppressedDestination();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // SuppressedDestination.Reason — "BOUNCE" | "COMPLAINT"
  * ```
- *
- * @binding
  */
 export interface GetSuppressedDestination extends Binding.Service<
   GetSuppressedDestination,

@@ -11,15 +11,14 @@ export interface ListRuleExecutionsRequest extends Omit<
 /**
  * Runtime binding for `codepipeline:ListRuleExecutions` — enumerates the
  * execution history of stage-condition rules (V2 pipelines).
- * ### Observing Pipelines
- * **Example:** List Rule Executions
+ * @binding
+ * @section Observing Pipelines
+ * @example List Rule Executions
  * ```typescript
  * const listRules = yield* AWS.CodePipeline.ListRuleExecutions(pipeline);
  *
  * const { ruleExecutionDetails } = yield* listRules();
  * ```
- *
- * @binding
  */
 export interface ListRuleExecutions extends Binding.Service<
   ListRuleExecutions,

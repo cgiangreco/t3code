@@ -7,15 +7,14 @@ import type { ReportGroup } from "./ReportGroup.ts";
  * Runtime binding for `codebuild:GetReportGroupTrend` — aggregates a trend
  * statistic (pass rate, duration, …) across the bound report group's most
  * recent reports.
- * ### Reading Reports
- * **Example:** Read the Pass-Rate Trend
+ * @binding
+ * @section Reading Reports
+ * @example Read the Pass-Rate Trend
  * ```typescript
  * const getReportGroupTrend = yield* AWS.CodeBuild.GetReportGroupTrend(reportGroup);
  *
  * const { stats } = yield* getReportGroupTrend({ trendField: "PASS_RATE" });
  * ```
- *
- * @binding
  */
 export interface GetReportGroupTrend extends Binding.Service<
   GetReportGroupTrend,

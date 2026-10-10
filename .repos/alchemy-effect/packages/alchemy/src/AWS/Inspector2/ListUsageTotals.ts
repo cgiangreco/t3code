@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.ListUsageTotalsHttp)`.
- * ### Account Settings & Usage
- * **Example:** Monthly Usage Totals
+ * @binding
+ * @section Account Settings & Usage
+ * @example Monthly Usage Totals
  * ```typescript
  * // init
  * const listUsageTotals = yield* AWS.Inspector2.ListUsageTotals();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { totals } = yield* listUsageTotals();
  * ```
- *
- * @binding
  */
 export interface ListUsageTotals extends Binding.Service<
   ListUsageTotals,

@@ -13,7 +13,7 @@
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
     "logs": "alchemy logs",
-    "tail": "alchemy logs --tail",
+    "tail": "alchemy tail",
     "bench": "bun test test/bench.test.ts"
   },
   "dependencies": {

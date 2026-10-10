@@ -61,8 +61,9 @@ export interface AlternateContact extends Resource<
  * These are account-global singletons: setting one overwrites any existing
  * contact of the same type, and deleting removes it entirely.
  *
- * ### Setting an Alternate Contact
- * **Example:** Operations Contact
+ * @resource
+ * @section Setting an Alternate Contact
+ * @example Operations Contact
  * ```typescript
  * const contact = yield* AlternateContact("OpsContact", {
  *   alternateContactType: "OPERATIONS",
@@ -73,7 +74,7 @@ export interface AlternateContact extends Resource<
  * });
  * ```
  *
- * **Example:** Billing Contact for an Organizations Member Account
+ * @example Billing Contact for an Organizations Member Account
  * ```typescript
  * const contact = yield* AlternateContact("BillingContact", {
  *   alternateContactType: "BILLING",
@@ -84,8 +85,6 @@ export interface AlternateContact extends Resource<
  *   accountId: "123456789012",
  * });
  * ```
- *
- * @resource
  */
 export const AlternateContact = Resource<AlternateContact>(
   "AWS.Account.AlternateContact",

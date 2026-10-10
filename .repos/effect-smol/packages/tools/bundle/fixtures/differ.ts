@@ -6,4 +6,4 @@ const schema = Schema.Struct({
   c: Schema.Array(Schema.String)
 })
 
-export const differ = Schema.toDifferJsonPatch(schema)
+Schema.toDifferJsonPatch(schema)

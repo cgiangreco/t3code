@@ -54,8 +54,9 @@ export interface PolicyStoreAlias extends Resource<
  * reference a policy store by a stable name (e.g. in `IsAuthorized`
  * requests) so the underlying store can be swapped without reconfiguring
  * clients.
- * ### Creating an Alias
- * **Example:** Alias with a Generated Name
+ * @resource
+ * @section Creating an Alias
+ * @example Alias with a Generated Name
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -66,7 +67,7 @@ export interface PolicyStoreAlias extends Resource<
  * });
  * ```
  *
- * **Example:** Named Alias with Hard Delete
+ * @example Named Alias with Hard Delete
  * ```typescript
  * yield* AWS.VerifiedPermissions.PolicyStoreAlias("Alias", {
  *   policyStoreId: store.policyStoreId,
@@ -74,8 +75,6 @@ export interface PolicyStoreAlias extends Resource<
  *   deletionMode: "HardDelete",
  * });
  * ```
- *
- * @resource
  */
 export const PolicyStoreAlias = Resource<PolicyStoreAlias>(
   "AWS.VerifiedPermissions.PolicyStoreAlias",

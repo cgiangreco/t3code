@@ -62,8 +62,9 @@ export interface MetricStream extends Resource<
 /**
  * A CloudWatch metric stream — continuously exports CloudWatch metrics to
  * a Kinesis Data Firehose delivery stream (and on to S3, Datadog, etc.).
- * ### Creating Metric Streams
- * **Example:** Firehose Delivery Stream
+ * @resource
+ * @section Creating Metric Streams
+ * @example Firehose Delivery Stream
  * ```typescript
  * const stream = yield* MetricStream("MetricsExport", {
  *   FirehoseArn: "arn:aws:firehose:us-east-1:123456789012:deliverystream/example",
@@ -72,7 +73,7 @@ export interface MetricStream extends Resource<
  * });
  * ```
  *
- * **Example:** Stream Only Selected Namespaces
+ * @example Stream Only Selected Namespaces
  * ```typescript
  * const stream = yield* MetricStream("LambdaMetricsExport", {
  *   FirehoseArn: firehose.deliveryStreamArn,
@@ -82,8 +83,8 @@ export interface MetricStream extends Resource<
  * });
  * ```
  *
- * ### Reading Metric Streams at Runtime
- * **Example:** Read the Stream's State from a Function
+ * @section Reading Metric Streams at Runtime
+ * @example Read the Stream's State from a Function
  * ```typescript
  * // init — bind the stream to the function (see GetMetricStream)
  * const getMetricStream = yield* AWS.CloudWatch.GetMetricStream(stream);
@@ -92,8 +93,6 @@ export interface MetricStream extends Resource<
  * const result = yield* getMetricStream();
  * const state = result.State; // "running" | "stopped"
  * ```
- *
- * @resource
  */
 export const MetricStream = Resource<MetricStream>(
   "AWS.CloudWatch.MetricStream",

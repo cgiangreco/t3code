@@ -14,8 +14,9 @@ export interface PutRecordRequest extends Omit<
  * Grants `firehose:PutRecord` on the bound delivery stream. The data blob
  * can be up to 1,000 KiB; Firehose buffers records before delivering them to
  * the destination, so use a delimiter (e.g. `\n`) to disambiguate records.
- * ### Putting Records
- * **Example:** Put a record from a handler
+ * @binding
+ * @section Putting Records
+ * @example Put a record from a handler
  * ```typescript
  * // init
  * const putRecord = yield* AWS.Firehose.PutRecord(deliveryStream);
@@ -30,8 +31,6 @@ export interface PutRecordRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface PutRecord extends Binding.Service<
   PutRecord,

@@ -70,21 +70,24 @@ export type TurnKey = Resource<
  * short-lived TURN credentials that WebRTC clients use to relay traffic
  * through Cloudflare's network. The only configurable property is the
  * human-readable `name`, which is mutable in place.
- * ### Creating a TURN key
- * **Example:** TURN key with a generated name
+ * @resource
+ * @product Calls
+ * @category Media
+ * @section Creating a TURN key
+ * @example TURN key with a generated name
  * ```typescript
  * const turnKey = yield* Cloudflare.Calls.TurnKey("turn", {});
  * ```
  *
- * **Example:** TURN key with an explicit name
+ * @example TURN key with an explicit name
  * ```typescript
  * const turnKey = yield* Cloudflare.Calls.TurnKey("turn", {
  *   name: "my-turn-key",
  * });
  * ```
  *
- * ### Using the key
- * **Example:** Minting TURN credentials server-side
+ * @section Using the key
+ * @example Minting TURN credentials server-side
  * ```typescript
  * // keyId is public — it appears in the credential-minting URL:
  * const keyId = turnKey.keyId;
@@ -95,10 +98,6 @@ export type TurnKey = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/realtime/turn/
- *
- * @resource
- * @product Calls
- * @category Media
  */
 export const TurnKey = Resource<TurnKey>(TypeId);
 

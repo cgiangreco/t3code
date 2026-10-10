@@ -16,8 +16,9 @@ export interface StopCodeInterpreterSessionRequest extends Omit<
  * Provide `AgentCore.StopCodeInterpreterSessionHttp` on the Function effect
  * to implement the binding.
  *
- * ### Stopping Sessions
- * **Example:** Stop a Session After Use
+ * @binding
+ * @section Stopping Sessions
+ * @example Stop a Session After Use
  * ```typescript
  * // init
  * const stopSession = yield* AgentCore.StopCodeInterpreterSession(interpreter);
@@ -25,8 +26,6 @@ export interface StopCodeInterpreterSessionRequest extends Omit<
  * // runtime (inside the handler)
  * yield* stopSession({ sessionId: session.sessionId });
  * ```
- *
- * @binding
  */
 export interface StopCodeInterpreterSession extends Binding.Service<
   StopCodeInterpreterSession,

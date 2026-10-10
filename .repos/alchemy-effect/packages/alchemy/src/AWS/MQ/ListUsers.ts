@@ -9,16 +9,15 @@ import type { Broker } from "./Broker.ts";
  *
  * Lists all users on the broker, including any with staged pending changes.
  * Provide the implementation with `Effect.provide(AWS.MQ.ListUsersHttp)`.
- * ### Managing Users
- * **Example:** List Broker Users
+ * @binding
+ * @section Managing Users
+ * @example List Broker Users
  * ```typescript
  * const listUsers = yield* MQ.ListUsers(broker);
  *
  * const page = yield* listUsers();
  * // page.Users → [{ Username: "admin" }, { Username: "tenant-42", PendingChange: "CREATE" }]
  * ```
- *
- * @binding
  */
 export interface ListUsers extends Binding.Service<
   ListUsers,

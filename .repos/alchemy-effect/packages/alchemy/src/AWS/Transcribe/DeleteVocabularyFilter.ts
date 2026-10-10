@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Amazon Transcribe batch actions have no resource-level IAM; the host is
  * granted `transcribe:DeleteVocabularyFilter` on `*`.
  *
- * ### Vocabulary Filters
- * **Example:** Delete a Vocabulary Filter
+ * @binding
+ * @section Vocabulary Filters
+ * @example Delete a Vocabulary Filter
  * ```typescript
  * // init
  * const deleteVocabularyFilter = yield* AWS.Transcribe.DeleteVocabularyFilter();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteVocabularyFilter({ VocabularyFilterName: "profanity-filter" });
  * ```
- *
- * @binding
  */
 export interface DeleteVocabularyFilter extends Binding.Service<
   DeleteVocabularyFilter,

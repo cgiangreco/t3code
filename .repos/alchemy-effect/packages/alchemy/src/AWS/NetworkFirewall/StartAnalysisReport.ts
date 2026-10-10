@@ -16,8 +16,9 @@ export interface StartAnalysisReportRequest extends Omit<
  *
  * Provide `NetworkFirewall.StartAnalysisReportHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Analysis Reports
- * **Example:** Start a TLS SNI Analysis Report
+ * @binding
+ * @section Analysis Reports
+ * @example Start a TLS SNI Analysis Report
  * ```typescript
  * // init — grants network-firewall:StartAnalysisReport on the firewall
  * const startAnalysisReport =
@@ -28,8 +29,6 @@ export interface StartAnalysisReportRequest extends Omit<
  *   AnalysisType: "TLS_SNI",
  * });
  * ```
- *
- * @binding
  */
 export interface StartAnalysisReport extends Binding.Service<
   StartAnalysisReport,

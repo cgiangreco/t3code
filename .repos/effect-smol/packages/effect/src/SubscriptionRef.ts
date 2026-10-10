@@ -129,7 +129,7 @@ export const make = <A>(value: A): Effect.Effect<SubscriptionRef<A>> =>
  *
  * **Example** (Streaming changes)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Deferred, Effect, Fiber, Stream, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -148,13 +148,13 @@ export const make = <A>(value: A): Effect.Effect<SubscriptionRef<A>> =>
  *   yield* SubscriptionRef.set(ref, 2)
  *
  *   const values = yield* Fiber.join(fiber)
- *   return Array.from(values)
+ *   console.log(values) // [ 0, 1, 2 ]
  * })
  *
- * await Effect.runPromise(program) // => [0, 1, 2]
+ * Effect.runPromise(program)
  * ```
  *
- * @category subscriptions
+ * @category changes
  * @since 4.0.0
  */
 export const changes = <A>(self: SubscriptionRef<A>): Stream.Stream<A> => Stream.fromPubSub(self.pubsub)
@@ -175,16 +175,15 @@ export const changes = <A>(self: SubscriptionRef<A>): Stream.Stream<A> => Stream
  *
  * **Example** (Reading the current value unsafely)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(42)
  *
- *   return SubscriptionRef.getUnsafe(ref)
+ *   const value = SubscriptionRef.getUnsafe(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
  * @category getters
@@ -197,16 +196,15 @@ export const getUnsafe = <A>(self: SubscriptionRef<A>): A => self.value
  *
  * **Example** (Reading the current value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(42)
  *
- *   return yield* SubscriptionRef.get(ref)
+ *   const value = yield* SubscriptionRef.get(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
  * @category getters
@@ -220,18 +218,18 @@ export const get = <A>(self: SubscriptionRef<A>): Effect.Effect<A> => Effect.syn
  *
  * **Example** (Getting and setting a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(10)
  *
  *   const oldValue = yield* SubscriptionRef.getAndSet(ref, 20)
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [oldValue, newValue]
- * })
+ *   console.log("Old value:", oldValue)
  *
- * await Effect.runPromise(program) // => [10, 20]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
  * @category getters
@@ -258,18 +256,18 @@ const setUnsafe = <A>(self: SubscriptionRef<A>, value: A) => {
  *
  * **Example** (Getting and updating a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(10)
  *
  *   const oldValue = yield* SubscriptionRef.getAndUpdate(ref, (n) => n * 2)
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [oldValue, newValue]
- * })
+ *   console.log("Old value:", oldValue)
  *
- * await Effect.runPromise(program) // => [10, 20]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
  * @category getters
@@ -292,7 +290,7 @@ export const getAndUpdate: {
  *
  * **Example** (Getting and updating with an effect)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -302,11 +300,11 @@ export const getAndUpdate: {
  *     ref,
  *     (n) => Effect.succeed(n + 5)
  *   )
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [oldValue, newValue]
- * })
+ *   console.log("Old value:", oldValue)
  *
- * await Effect.runPromise(program) // => [10, 15]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
  * @category getters
@@ -319,7 +317,7 @@ export const getAndUpdateEffect: {
   self: SubscriptionRef<A>,
   update: (a: A) => Effect.Effect<A, E, R>
 ) =>
-  self.semaphore.withPermit(Effect.suspend(() => {
+  self.semaphore.withPermit(Effect.sync(() => {
     const current = self.value
     return Effect.map(update(current), (newValue) => {
       setUnsafe(self, newValue)
@@ -343,7 +341,7 @@ export const getAndUpdateEffect: {
  *
  * **Example** (Getting and conditionally updating a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -353,11 +351,11 @@ export const getAndUpdateEffect: {
  *     ref,
  *     (n) => n > 5 ? Option.some(n * 2) : Option.none()
  *   )
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [oldValue, newValue]
- * })
+ *   console.log("Old value:", oldValue)
  *
- * await Effect.runPromise(program) // => [10, 20]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
  * @category getters
@@ -374,7 +372,7 @@ export const getAndUpdateSome: {
     const current = self.value
     const option = update(current)
     if (Option.isNone(option)) {
-      return current
+      return Effect.succeed(current)
     }
     setUnsafe(self, option.value)
     return current
@@ -396,7 +394,7 @@ export const getAndUpdateSome: {
  *
  * **Example** (Getting and conditionally updating with an effect)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -406,11 +404,11 @@ export const getAndUpdateSome: {
  *     ref,
  *     (n) => Effect.succeed(n > 5 ? Option.some(n + 3) : Option.none())
  *   )
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [oldValue, newValue]
- * })
+ *   console.log("Old value:", oldValue)
  *
- * await Effect.runPromise(program) // => [10, 13]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
  * @category getters
@@ -443,7 +441,7 @@ export const getAndUpdateSomeEffect: {
  *
  * **Example** (Modifying a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -453,14 +451,14 @@ export const getAndUpdateSomeEffect: {
  *     `Old value was ${n}`,
  *     n * 2
  *   ])
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [result, newValue]
- * })
+ *   console.log(result)
  *
- * await Effect.runPromise(program) // => ["Old value was 10", 20]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
- * @category mutations
+ * @category modifications
  * @since 2.0.0
  */
 export const modify: {
@@ -483,7 +481,7 @@ export const modify: {
  *
  * **Example** (Modifying with an effect)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -493,14 +491,14 @@ export const modify: {
  *     ref,
  *     (n) => Effect.succeed([`Doubled from ${n}`, n * 2] as const)
  *   )
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [result, newValue]
- * })
+ *   console.log(result)
  *
- * await Effect.runPromise(program) // => ["Doubled from 10", 20]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
- * @category mutations
+ * @category modifications
  * @since 2.0.0
  */
 export const modifyEffect: {
@@ -538,7 +536,7 @@ export const modifyEffect: {
  *
  * **Example** (Conditionally modifying a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -549,14 +547,14 @@ export const modifyEffect: {
  *     (n) =>
  *       n > 5 ? ["Updated", Option.some(n * 2)] : ["Not updated", Option.none()]
  *   )
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [result, newValue]
- * })
+ *   console.log(result)
  *
- * await Effect.runPromise(program) // => ["Updated", 20]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
- * @category mutations
+ * @category modifications
  * @since 2.0.0
  */
 export const modifySome: {
@@ -594,7 +592,7 @@ export const modifySome: {
  *
  * **Example** (Conditionally modifying with an effect)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -609,14 +607,14 @@ export const modifySome: {
  *           : (["Not updated", Option.none()] as const)
  *       )
  *   )
- *   const newValue = yield* SubscriptionRef.get(ref)
- *   return [result, newValue]
- * })
+ *   console.log(result)
  *
- * await Effect.runPromise(program) // => ["Updated", 15]
+ *   const newValue = yield* SubscriptionRef.get(ref)
+ *   console.log("New value:", newValue)
+ * })
  * ```
  *
- * @category mutations
+ * @category modifications
  * @since 2.0.0
  */
 export const modifySomeEffect: {
@@ -645,7 +643,7 @@ export const modifySomeEffect: {
  *
  * **Example** (Setting a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -653,13 +651,12 @@ export const modifySomeEffect: {
  *
  *   yield* SubscriptionRef.set(ref, 42)
  *
- *   return yield* SubscriptionRef.get(ref)
+ *   const value = yield* SubscriptionRef.get(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
- * @category mutations
+ * @category setters
  * @since 2.0.0
  */
 export const set: {
@@ -676,19 +673,18 @@ export const set: {
  *
  * **Example** (Setting and reading the new value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(0)
  *
- *   return yield* SubscriptionRef.setAndGet(ref, 42)
+ *   const newValue = yield* SubscriptionRef.setAndGet(ref, 42)
+ *   console.log("New value:", newValue)
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
- * @category mutations
+ * @category setters
  * @since 2.0.0
  */
 export const setAndGet: {
@@ -706,7 +702,7 @@ export const setAndGet: {
  *
  * **Example** (Updating a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -714,13 +710,12 @@ export const setAndGet: {
  *
  *   yield* SubscriptionRef.update(ref, (n) => n * 2)
  *
- *   return yield* SubscriptionRef.get(ref)
+ *   const value = yield* SubscriptionRef.get(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 20
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const update: {
@@ -738,7 +733,7 @@ export const update: {
  *
  * **Example** (Updating with an effect)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -746,13 +741,12 @@ export const update: {
  *
  *   yield* SubscriptionRef.updateEffect(ref, (n) => Effect.succeed(n + 5))
  *
- *   return yield* SubscriptionRef.get(ref)
+ *   const value = yield* SubscriptionRef.get(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 15
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateEffect: {
@@ -772,19 +766,18 @@ export const updateEffect: {
  *
  * **Example** (Updating and reading the new value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(10)
  *
- *   return yield* SubscriptionRef.updateAndGet(ref, (n) => n * 2)
+ *   const newValue = yield* SubscriptionRef.updateAndGet(ref, (n) => n * 2)
+ *   console.log("New value:", newValue)
  * })
- *
- * await Effect.runPromise(program) // => 20
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateAndGet: {
@@ -804,22 +797,21 @@ export const updateAndGet: {
  *
  * **Example** (Updating with an effect and reading the new value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(10)
  *
- *   return yield* SubscriptionRef.updateAndGetEffect(
+ *   const newValue = yield* SubscriptionRef.updateAndGetEffect(
  *     ref,
  *     (n) => Effect.succeed(n + 5)
  *   )
+ *   console.log("New value:", newValue)
  * })
- *
- * await Effect.runPromise(program) // => 15
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateAndGetEffect: {
@@ -843,7 +835,7 @@ export const updateAndGetEffect: {
  *
  * **Example** (Conditionally updating a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -854,13 +846,12 @@ export const updateAndGetEffect: {
  *     (n) => n > 5 ? Option.some(n * 2) : Option.none()
  *   )
  *
- *   return yield* SubscriptionRef.get(ref)
+ *   const value = yield* SubscriptionRef.get(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 20
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateSome: {
@@ -892,7 +883,7 @@ export const updateSome: {
  *
  * **Example** (Conditionally updating with an effect)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -903,13 +894,12 @@ export const updateSome: {
  *     (n) => Effect.succeed(n > 5 ? Option.some(n + 3) : Option.none())
  *   )
  *
- *   return yield* SubscriptionRef.get(ref)
+ *   const value = yield* SubscriptionRef.get(ref)
+ *   console.log(value)
  * })
- *
- * await Effect.runPromise(program) // => 13
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateSomeEffect: {
@@ -947,22 +937,21 @@ export const updateSomeEffect: {
  *
  * **Example** (Conditionally updating and reading the new value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(10)
  *
- *   return yield* SubscriptionRef.updateSomeAndGet(
+ *   const newValue = yield* SubscriptionRef.updateSomeAndGet(
  *     ref,
  *     (n) => n > 5 ? Option.some(n * 2) : Option.none()
  *   )
+ *   console.log("New value:", newValue)
  * })
- *
- * await Effect.runPromise(program) // => 20
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateSomeAndGet: {
@@ -996,22 +985,21 @@ export const updateSomeAndGet: {
  *
  * **Example** (Conditionally updating with an effect and reading the new value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option, SubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* SubscriptionRef.make(10)
  *
- *   return yield* SubscriptionRef.updateSomeAndGetEffect(
+ *   const newValue = yield* SubscriptionRef.updateSomeAndGetEffect(
  *     ref,
  *     (n) => Effect.succeed(n > 5 ? Option.some(n + 3) : Option.none())
  *   )
+ *   console.log("New value:", newValue)
  * })
- *
- * await Effect.runPromise(program) // => 13
  * ```
  *
- * @category mutations
+ * @category updating
  * @since 2.0.0
  */
 export const updateSomeAndGetEffect: {

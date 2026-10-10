@@ -26,8 +26,9 @@ export interface SendBulkEmailRequest extends Omit<
  *
  * Bulk sends always render a template — reference one via
  * `DefaultContent.Template`.
- * ### Sending Email
- * **Example:** Send a Templated Message to Many Recipients
+ * @binding
+ * @section Sending Email
+ * @example Send a Templated Message to Many Recipients
  * ```typescript
  * // init
  * const sendBulkEmail = yield* SES.SendBulkEmail(identity, configSet);
@@ -53,8 +54,6 @@ export interface SendBulkEmailRequest extends Omit<
  * });
  * // result.BulkEmailEntryResults
  * ```
- *
- * @binding
  */
 export interface SendBulkEmail extends Binding.Service<
   SendBulkEmail,

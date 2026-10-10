@@ -1,18 +1,11 @@
 import * as Schema from "effect/Schema";
 import { Linking } from "react-native";
 
-const ExternalUrlTarget = Schema.Literals([
-  "file-preview",
-  "markdown-link",
-  "pull-request",
-  "provider-auth",
-  "html-render",
-  "mcp-app",
-]);
+const ExternalUrlTarget = Schema.Literals(["file-preview", "markdown-link", "pull-request"]);
 
 export type ExternalUrlTarget = typeof ExternalUrlTarget.Type;
 
-export class ExternalUrlOpenError extends Schema.TaggedError<ExternalUrlOpenError>()(
+export class ExternalUrlOpenError extends Schema.TaggedErrorClass<ExternalUrlOpenError>()(
   "ExternalUrlOpenError",
   {
     target: ExternalUrlTarget,

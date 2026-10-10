@@ -1,6 +1,4 @@
 /**
- * Data models shared by the docgen parser, checker, and printer.
- *
  * @since 0.6.0
  */
 
@@ -15,9 +13,7 @@ import * as String from "effect/String"
 import type * as Parser from "./Parser.ts"
 
 /**
- * Base model for a named, documented declaration.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class DocEntry {
@@ -39,9 +35,7 @@ export class DocEntry {
 }
 
 /**
- * Parsed JSDoc content attached to a declaration or module.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Doc {
@@ -88,9 +82,7 @@ export class Doc {
 }
 
 /**
- * Parsed documentation model for one source module.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Module {
@@ -133,9 +125,7 @@ export class Module {
 }
 
 /**
- * Parsed documentation model for a class and its documented members.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Class extends DocEntry {
@@ -160,9 +150,7 @@ export class Class extends DocEntry {
 }
 
 /**
- * Parsed documentation model for an interface.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Interface extends DocEntry {
@@ -170,9 +158,7 @@ export class Interface extends DocEntry {
 }
 
 /**
- * One-based source position used in diagnostics.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export interface Position {
@@ -181,9 +167,7 @@ export interface Position {
 }
 
 /**
- * Parsed documentation model for a function.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Function extends DocEntry {
@@ -191,9 +175,7 @@ export class Function extends DocEntry {
 }
 
 /**
- * Parsed documentation model for a type alias.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class TypeAlias extends DocEntry {
@@ -201,9 +183,7 @@ export class TypeAlias extends DocEntry {
 }
 
 /**
- * Parsed documentation model for a constant.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Constant extends DocEntry {
@@ -211,9 +191,17 @@ export class Constant extends DocEntry {
 }
 
 /**
- * Parsed documentation model for an explicit named or namespace export.
+ * These are manual exports, like:
  *
- * @category models
+ * ```ts skip-type-checking
+ * const _null = ...
+ *
+ * export {
+ *   _null as null
+ * }
+ * ```
+ *
+ * @category model
  * @since 0.6.0
  */
 export class Export extends DocEntry {
@@ -232,9 +220,7 @@ export class Export extends DocEntry {
 }
 
 /**
- * Parsed documentation model for a namespace and its nested declarations.
- *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class Namespace {
@@ -277,7 +263,7 @@ export const ByPath: Order.Order<Module> = Order.mapInput(
 /**
  * Represents a file which can be optionally overwriteable.
  *
- * @category models
+ * @category model
  * @since 0.6.0
  */
 export class File {
@@ -296,25 +282,19 @@ export class File {
 }
 
 /**
- * Type ID for `DocgenError`.
- *
- * @category symbols
+ * @category symbol
  * @since 0.6.0
  */
 export const DocgenErrorTypeId = Symbol.for("@effect/docgen/DocgenError")
 
 /**
- * Type-level representation of `DocgenErrorTypeId`.
- *
- * @category symbols
+ * @category symbol
  * @since 0.6.0
  */
 export type DocgenErrorTypeId = typeof DocgenErrorTypeId
 
 /**
- * Error reported when documentation generation cannot continue.
- *
- * @category errors
+ * @category model
  * @since 0.6.0
  */
 export class DocgenError extends Data.TaggedError("DocgenError")<{
@@ -324,7 +304,7 @@ export class DocgenError extends Data.TaggedError("DocgenError")<{
 /**
  * Represents a handle to the currently executing process.
  *
- * @category services
+ * @category service
  * @since 0.6.0
  */
 export class Process extends Context.Service<Process, {

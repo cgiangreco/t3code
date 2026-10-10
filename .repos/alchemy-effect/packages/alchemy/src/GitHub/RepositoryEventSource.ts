@@ -97,7 +97,8 @@ export interface RepositoryEventSourceProps<
  * host-specific runtime layer — see
  * `Cloudflare.Workers.GitHubRepositoryEventSourceLive` for the Cloudflare Worker
  * implementation.
- * **Example:** Example
+ * @binding
+ * @example
  * ```typescript
  * // `event.name` is narrowed to "push" | "pull_request"
  * yield* GitHub.consumeRepositoryEvents(
@@ -111,15 +112,13 @@ export interface RepositoryEventSourceProps<
  * );
  * ```
  *
- * **Example:** Example
+ * @example
  * ```typescript
  * // When you don't need to pass any options, the handler is the only argument.
  * yield* GitHub.consumeRepositoryEvents((event) =>
  *   Effect.log(`received ${event.name} (${event.id})`),
  * );
  * ```
- *
- * @binding
  */
 export function consumeRepositoryEvents<Req = never>(
   process: (

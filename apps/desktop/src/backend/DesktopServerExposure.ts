@@ -9,7 +9,7 @@ import {
   type DesktopServerExposureMode,
   type DesktopServerExposureState,
 } from "@t3tools/contracts";
-import { isTailscaleIpv4Address, readTailscaleStatus } from "@t3tools/tailscale";
+import { readTailscaleStatus } from "@t3tools/tailscale";
 import * as Context from "effect/Context";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
@@ -17,9 +17,8 @@ import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Ref from "effect/Ref";
 import * as Schema from "effect/Schema";
-import * as Semaphore from "effect/Semaphore";
-import * as HttpClient from "effect/http/HttpClient";
-import * as ChildProcessSpawner from "effect/process/ChildProcessSpawner";
+import * as HttpClient from "effect/unstable/http/HttpClient";
+import * as ChildProcessSpawner from "effect/unstable/process/ChildProcessSpawner";
 
 import * as DesktopAppSettings from "../settings/DesktopAppSettings.ts";
 import * as DesktopConfig from "../app/DesktopConfig.ts";
@@ -28,7 +27,7 @@ import { resolveTailscaleAdvertisedEndpoints } from "./tailscaleEndpointProvider
 
 const TAILSCALE_STATUS_CACHE_TTL = Duration.seconds(60);
 
-const DESKTOP_LOOPBACK_HOST = "127.0.0.1";
+export const DESKTOP_LOOPBACK_HOST = "127.0.0.1";
 const DESKTOP_LAN_BIND_HOST = "0.0.0.0";
 
 interface ResolvedDesktopServerExposure {
@@ -66,9 +65,7 @@ const normalizeOptionalHost = (value: string | undefined): string | undefined =>
 };
 
 const isUsableLanIpv4Address = (address: string): boolean =>
-  !address.startsWith("127.") &&
-  !address.startsWith("169.254.") &&
-  !isTailscaleIpv4Address(address);
+  !address.startsWith("127.") && !address.startsWith("169.254.");
 
 const isHttpsEndpointUrl = (value: string): boolean => {
   try {
@@ -206,7 +203,7 @@ const resolveDesktopCoreAdvertisedEndpoints = (
   return endpoints;
 };
 
-export class DesktopServerExposureNoNetworkAddressError extends Schema.TaggedError<DesktopServerExposureNoNetworkAddressError>()(
+export class DesktopServerExposureNoNetworkAddressError extends Schema.TaggedErrorClass<DesktopServerExposureNoNetworkAddressError>()(
   "DesktopServerExposureNoNetworkAddressError",
   {
     port: Schema.Number,
@@ -217,7 +214,7 @@ export class DesktopServerExposureNoNetworkAddressError extends Schema.TaggedErr
   }
 }
 
-export class DesktopServerExposureModePersistenceError extends Schema.TaggedError<DesktopServerExposureModePersistenceError>()(
+export class DesktopServerExposureModePersistenceError extends Schema.TaggedErrorClass<DesktopServerExposureModePersistenceError>()(
   "DesktopServerExposureModePersistenceError",
   {
     mode: DesktopServerExposureModeSchema,
@@ -229,7 +226,7 @@ export class DesktopServerExposureModePersistenceError extends Schema.TaggedErro
   }
 }
 
-export class DesktopTailscaleServePersistenceError extends Schema.TaggedError<DesktopTailscaleServePersistenceError>()(
+export class DesktopTailscaleServePersistenceError extends Schema.TaggedErrorClass<DesktopTailscaleServePersistenceError>()(
   "DesktopTailscaleServePersistenceError",
   {
     enabled: Schema.Boolean,
@@ -247,6 +244,7 @@ export const DesktopServerExposureSetModeError = Schema.Union([
   DesktopServerExposureModePersistenceError,
 ]);
 export type DesktopServerExposureSetModeError = typeof DesktopServerExposureSetModeError.Type;
+export const isDesktopServerExposureSetModeError = Schema.is(DesktopServerExposureSetModeError);
 
 export const DesktopServerExposureError = Schema.Union([
   DesktopServerExposureNoNetworkAddressError,
@@ -254,6 +252,7 @@ export const DesktopServerExposureError = Schema.Union([
   DesktopTailscaleServePersistenceError,
 ]);
 export type DesktopServerExposureError = typeof DesktopServerExposureError.Type;
+export const isDesktopServerExposureError = Schema.is(DesktopServerExposureError);
 
 export interface DesktopServerExposureBackendConfig {
   readonly port: number;
@@ -379,14 +378,7 @@ function resolveRuntimeState(input: {
     ...(advertisedHostOverride ? { advertisedHostOverride } : {}),
   });
   const unavailable =
-    input.requestedMode === "network-accessible" &&
-    requestedExposure.endpointUrl === null &&
-    !Object.values(input.networkInterfaces).some((addresses) =>
-      addresses?.some(
-        (address) =>
-          !address.internal && address.family === "IPv4" && isTailscaleIpv4Address(address.address),
-      ),
-    );
+    input.requestedMode === "network-accessible" && requestedExposure.endpointUrl === null;
   const exposure = unavailable
     ? resolveDesktopServerExposure({
         mode: "local-only",
@@ -412,7 +404,6 @@ const requiresBackendRelaunch = (previous: RuntimeState, next: RuntimeState): bo
   previous.bindHost !== next.bindHost ||
   previous.localHttpUrl !== next.localHttpUrl;
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
   const config = yield* DesktopConfig.DesktopConfig;
   const networkInterfaces = yield* DesktopNetworkInterfaces.DesktopNetworkInterfaces;
@@ -420,10 +411,6 @@ export const make = Effect.gen(function* () {
   const httpClient = yield* HttpClient.HttpClient;
   const desktopSettings = yield* DesktopAppSettings.DesktopAppSettings;
   const stateRef = yield* Ref.make(initialRuntimeState());
-  // Each change reads the runtime state, persists settings, then writes the
-  // state back. Run them one at a time so a change never writes over another
-  // with values it read before that change persisted.
-  const changePermit = yield* Semaphore.make(1);
 
   // Cache the `tailscale status` spawn for the TTL. On macOS, the Mac App
   // Store Tailscale CLI lives inside Tailscale's sandbox container, so each
@@ -497,7 +484,7 @@ export const make = Effect.gen(function* () {
       state: toContractState(resolved.state),
       requiresRelaunch: change.changed || requiresBackendRelaunch(previous, resolved.state),
     };
-  }, changePermit.withPermit);
+  });
 
   const setTailscaleServeEnabled = Effect.fn("desktop.serverExposure.setTailscaleServeEnabled")(
     function* (input: { readonly enabled: boolean; readonly port?: number }) {
@@ -532,7 +519,6 @@ export const make = Effect.gen(function* () {
         requiresRelaunch: result.changed,
       };
     },
-    changePermit.withPermit,
   );
 
   const getAdvertisedEndpoints = Effect.gen(function* () {

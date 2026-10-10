@@ -9,16 +9,15 @@ import type { Archive } from "./Archive.ts";
  * Lists the recent exports of the bound archive. The archive id is
  * injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.MailManager.ListArchiveExportsHttp)`.
- * ### Exporting from the Archive
- * **Example:** List Recent Exports
+ * @binding
+ * @section Exporting from the Archive
+ * @example List Recent Exports
  * ```typescript
  * const listExports = yield* MailManager.ListArchiveExports(archive);
  *
  * // runtime
  * const { Exports } = yield* listExports({});
  * ```
- *
- * @binding
  */
 export interface ListArchiveExports extends Binding.Service<
   ListArchiveExports,

@@ -10,9 +10,9 @@ import * as Predicate from "effect/Predicate";
 import * as Result from "effect/Result";
 import * as Schema from "effect/Schema";
 import { decodeJsonResult } from "@t3tools/shared/schemaJson";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessPlatform } from "@t3tools/shared/hostProcess";
 
-export class BootstrapFdStatError extends Schema.TaggedError<BootstrapFdStatError>()(
+export class BootstrapFdStatError extends Schema.TaggedErrorClass<BootstrapFdStatError>()(
   "BootstrapFdStatError",
   {
     fd: Schema.Number,
@@ -24,7 +24,7 @@ export class BootstrapFdStatError extends Schema.TaggedError<BootstrapFdStatErro
   }
 }
 
-export class BootstrapInputStreamOpenError extends Schema.TaggedError<BootstrapInputStreamOpenError>()(
+export class BootstrapInputStreamOpenError extends Schema.TaggedErrorClass<BootstrapInputStreamOpenError>()(
   "BootstrapInputStreamOpenError",
   {
     fd: Schema.Number,
@@ -39,7 +39,7 @@ export class BootstrapInputStreamOpenError extends Schema.TaggedError<BootstrapI
   }
 }
 
-export class BootstrapEnvelopeReadError extends Schema.TaggedError<BootstrapEnvelopeReadError>()(
+export class BootstrapEnvelopeReadError extends Schema.TaggedErrorClass<BootstrapEnvelopeReadError>()(
   "BootstrapEnvelopeReadError",
   {
     fd: Schema.Number,
@@ -51,7 +51,7 @@ export class BootstrapEnvelopeReadError extends Schema.TaggedError<BootstrapEnve
   }
 }
 
-export class BootstrapEnvelopeDecodeError extends Schema.TaggedError<BootstrapEnvelopeDecodeError>()(
+export class BootstrapEnvelopeDecodeError extends Schema.TaggedErrorClass<BootstrapEnvelopeDecodeError>()(
   "BootstrapEnvelopeDecodeError",
   {
     fd: Schema.Number,
@@ -168,7 +168,7 @@ const isFdReady = (fd: number) =>
 
 const makeBootstrapInputStream = (fd: number) =>
   Effect.gen(function* () {
-    const platform = yield* HostProcess.Platform;
+    const platform = yield* HostProcessPlatform;
     const fdPath = resolveFdPath(fd, platform);
     return yield* Effect.try<NodeStream.Readable, BootstrapInputStreamOpenError>({
       try: () => {

@@ -136,8 +136,9 @@ export interface FlowLog extends Resource<
  * `deliverLogsPermissionArn` — an IAM role that EC2's `vpc-flow-logs` service
  * principal can assume to write to the group.
  *
- * ### Creating a Flow Log
- * **Example:** VPC Flow Log to CloudWatch Logs
+ * @resource
+ * @section Creating a Flow Log
+ * @example VPC Flow Log to CloudWatch Logs
  * ```typescript
  * const logGroup = yield* AWS.Logs.LogGroup("FlowLogs", {});
  *
@@ -176,7 +177,7 @@ export interface FlowLog extends Resource<
  * Captures all traffic for the VPC and delivers it to the CloudWatch Logs
  * group via the delivery role.
  *
- * **Example:** S3 Flow Log for Rejected Traffic
+ * @example S3 Flow Log for Rejected Traffic
  * ```typescript
  * const flowLog = yield* AWS.EC2.FlowLog("RejectedTraffic", {
  *   resourceType: "Subnet",
@@ -188,8 +189,6 @@ export interface FlowLog extends Resource<
  * ```
  * Delivers only rejected-traffic records for a subnet directly to an S3 bucket
  * (no IAM role required for S3 delivery).
- *
- * @resource
  */
 export const FlowLog = Resource<FlowLog>("AWS.EC2.FlowLog");
 

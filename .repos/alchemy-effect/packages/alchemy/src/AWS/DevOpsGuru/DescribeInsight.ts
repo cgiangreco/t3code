@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Returns the details of a single insight — severity, status, time ranges, and the SSM OpsItem id when OpsCenter integration is enabled. The building block of an incident-response Function reacting to DevOps Guru notifications.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.DescribeInsightHttp)`.
- * ### Inspecting Insights
- * **Example:** Read an Insight's Detail
+ * @binding
+ * @section Inspecting Insights
+ * @example Read an Insight's Detail
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeInsight = yield* AWS.DevOpsGuru.DescribeInsight();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * const { ReactiveInsight } = yield* describeInsight({ Id: insightId });
  * yield* Effect.log(`${ReactiveInsight?.Severity}: ${ReactiveInsight?.Name}`);
  * ```
- *
- * @binding
  */
 export interface DescribeInsight extends Binding.Service<
   DescribeInsight,

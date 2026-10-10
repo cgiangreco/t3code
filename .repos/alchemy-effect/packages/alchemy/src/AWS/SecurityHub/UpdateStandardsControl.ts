@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.UpdateStandardsControlHttp)`.
- * ### Standards & Controls
- * **Example:** Disable a Control
+ * @binding
+ * @section Standards & Controls
+ * @example Disable a Control
  * ```typescript
  * // init — account-level binding, no resource argument
  * const updateStandardsControl = yield* AWS.SecurityHub.UpdateStandardsControl();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   DisabledReason: "not applicable to this workload",
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateStandardsControl extends Binding.Service<
   UpdateStandardsControl,

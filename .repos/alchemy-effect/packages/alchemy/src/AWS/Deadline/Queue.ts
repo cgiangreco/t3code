@@ -121,8 +121,9 @@ export interface Queue extends Resource<
  * An AWS Deadline Cloud queue — accepts render jobs within a farm and
  * schedules them onto associated fleets.
  *
- * ### Creating Queues
- * **Example:** Basic Queue
+ * @resource
+ * @section Creating Queues
+ * @example Basic Queue
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -132,7 +133,7 @@ export interface Queue extends Resource<
  * });
  * ```
  *
- * **Example:** Queue with Job Attachments and Role
+ * @example Queue with Job Attachments and Role
  * ```typescript
  * const queue = yield* AWS.Deadline.Queue("RenderQueue", {
  *   farmId: farm.farmId,
@@ -144,8 +145,6 @@ export interface Queue extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Queue = Resource<Queue>("AWS.Deadline.Queue");
 

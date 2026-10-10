@@ -15,14 +15,13 @@ export interface BatchDisassociateAssessmentReportEvidenceRequest extends Omit<
  * Removes a batch of evidence items from the (in-progress)
  * assessment report of the bound assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.BatchDisassociateAssessmentReportEvidenceHttp)`.
- * ### Assessment Reports
- * **Example:** Exclude a Batch of Evidence from the Report
+ * @binding
+ * @section Assessment Reports
+ * @example Exclude a Batch of Evidence from the Report
  * ```typescript
  * const batchDisassociateAssessmentReportEvidence = yield* AWS.AuditManager.BatchDisassociateAssessmentReportEvidence(assessment);
  * const result = yield* batchDisassociateAssessmentReportEvidence({ evidenceFolderId, evidenceIds });
  * ```
- *
- * @binding
  */
 export interface BatchDisassociateAssessmentReportEvidence extends Binding.Service<
   BatchDisassociateAssessmentReportEvidence,

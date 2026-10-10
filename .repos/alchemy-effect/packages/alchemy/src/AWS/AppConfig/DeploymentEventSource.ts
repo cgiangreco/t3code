@@ -112,8 +112,9 @@ export function consumeDeploymentEvents<Req = never>(
  * layer is `Lambda.AppConfigDeploymentEventSource` (extension + association +
  * invoke role at deploy time, payload dispatch at runtime). Consume it
  * through the {@link consumeDeploymentEvents} helper.
- * ### Consuming Deployment Events
- * **Example:** React to Deployments of an Environment
+ * @binding
+ * @section Consuming Deployment Events
+ * @example React to Deployments of an Environment
  * ```typescript
  * export default MyFunction.make(
  *   { main: import.meta.url },
@@ -133,8 +134,6 @@ export function consumeDeploymentEvents<Req = never>(
  *   }).pipe(Effect.provide(Lambda.AppConfigDeploymentEventSource)),
  * );
  * ```
- *
- * @binding
  */
 export interface DeploymentEventSource extends Binding.Service<
   DeploymentEventSource,

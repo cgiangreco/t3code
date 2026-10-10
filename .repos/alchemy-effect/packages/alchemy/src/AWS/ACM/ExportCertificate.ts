@@ -25,8 +25,9 @@ export interface ExportCertificateRequest extends Omit<
  * is sensitive and comes back wrapped in `Redacted` — unwrap it with
  * `Redacted.value` only at the point of use. Provide the implementation with
  * `Effect.provide(AWS.ACM.ExportCertificateHttp)`.
- * ### Exporting Certificates
- * **Example:** Export a Certificate and Its Private Key
+ * @binding
+ * @section Exporting Certificates
+ * @example Export a Certificate and Its Private Key
  * ```typescript
  * // init — bind the operation to the certificate
  * const exportCertificate = yield* AWS.ACM.ExportCertificate(certificate);
@@ -41,8 +42,6 @@ export interface ExportCertificateRequest extends Omit<
  *     ? result.PrivateKey
  *     : result.PrivateKey && Redacted.value(result.PrivateKey);
  * ```
- *
- * @binding
  */
 export interface ExportCertificate extends Binding.Service<
   ExportCertificate,

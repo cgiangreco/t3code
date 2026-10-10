@@ -14,8 +14,9 @@ export interface ListNotificationsRequest extends Omit<
  * Lists task or event notifications for the calling user in the bound domain. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.ListNotificationsHttp)`.
- * ### Portal, Profiles & Notifications
- * **Example:** Read Pending Tasks
+ * @binding
+ * @section Portal, Profiles & Notifications
+ * @example Read Pending Tasks
  * ```typescript
  * // init — bind the operation to the domain
  * const listNotifications = yield* AWS.DataZone.ListNotifications(domain);
@@ -23,8 +24,6 @@ export interface ListNotificationsRequest extends Omit<
  * // runtime
  * const tasks = yield* listNotifications({ type: "TASK", taskStatus: "ACTIVE" });
  * ```
- *
- * @binding
  */
 export interface ListNotifications extends Binding.Service<
   ListNotifications,

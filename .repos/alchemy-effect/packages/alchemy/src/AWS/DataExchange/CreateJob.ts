@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * attach the matching `AWS.S3` bindings to the same host.
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.CreateJobHttp)`.
- * ### Import & Export Jobs
- * **Example:** Import S3 Objects Into A Revision
+ * @binding
+ * @section Import & Export Jobs
+ * @example Import S3 Objects Into A Revision
  * ```typescript
  * const createJob = yield* AWS.DataExchange.CreateJob();
  * const startJob = yield* AWS.DataExchange.StartJob();
@@ -31,8 +32,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * yield* startJob({ JobId: job.Id! });
  * ```
- *
- * @binding
  */
 export interface CreateJob extends Binding.Service<
   CreateJob,

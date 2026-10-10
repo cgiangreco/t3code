@@ -4,8 +4,9 @@ import * as Binding from "../../Binding.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:ListSupportedInstanceTypes` — lists the EC2 instance types a given EMR release supports in the region.
- * ### Release Catalog
- * **Example:** List Instance Types for a Release
+ * @binding
+ * @section Release Catalog
+ * @example List Instance Types for a Release
  * ```typescript
  * const listInstanceTypes = yield* AWS.EMR.ListSupportedInstanceTypes();
  *
@@ -13,8 +14,6 @@ import * as Binding from "../../Binding.ts";
  *   ReleaseLabel: "emr-7.5.0",
  * });
  * ```
- *
- * @binding
  */
 export interface ListSupportedInstanceTypes extends Binding.Service<
   ListSupportedInstanceTypes,

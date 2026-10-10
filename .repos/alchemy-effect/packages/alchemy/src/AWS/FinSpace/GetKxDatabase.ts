@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:GetKxDatabase` — reads one kdb database of the bound environment — including `lastCompletedChangesetId`, the anchor ingestion pipelines use to advance dataviews.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.GetKxDatabaseHttp)`.
- * ### Reading Databases
- * **Example:** Read the Latest Changeset Id
+ * @binding
+ * @section Reading Databases
+ * @example Read the Latest Changeset Id
  * ```typescript
  * const getDatabase = yield* AWS.FinSpace.GetKxDatabase(kdb);
  *
@@ -16,8 +17,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   databaseName: "ticks",
  * });
  * ```
- *
- * @binding
  */
 export interface GetKxDatabase extends Binding.Service<
   GetKxDatabase,

@@ -13,8 +13,9 @@ export interface ListMemberAccountsRequest
  *
  * Returns the member account ids in the administrator's Amazon Web Services organization — only usable by the organization's management account or a delegated administrator. Provide the
  * implementation with `Effect.provide(AWS.FMS.ListMemberAccountsHttp)`.
- * ### Compliance and Protection Status
- * **Example:** List Member Accounts
+ * @binding
+ * @section Compliance and Protection Status
+ * @example List Member Accounts
  * ```typescript
  * // init — account-level binding takes no resource
  * const listMemberAccounts = yield* AWS.FMS.ListMemberAccounts();
@@ -23,8 +24,6 @@ export interface ListMemberAccountsRequest
  * const result = yield* listMemberAccounts();
  * console.log(result.MemberAccounts?.length);
  * ```
- *
- * @binding
  */
 export interface ListMemberAccounts extends Binding.Service<
   ListMemberAccounts,

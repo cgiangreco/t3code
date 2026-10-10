@@ -20,15 +20,14 @@ export interface DeletePrincipalMappingRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.DeletePrincipalMappingHttp)`.
  *
- * ### Principal Mapping
- * **Example:** Remove a Group Mapping
+ * @binding
+ * @section Principal Mapping
+ * @example Remove a Group Mapping
  * ```typescript
  * const deleteMapping = yield* AWS.Kendra.DeletePrincipalMapping(index);
  *
  * yield* deleteMapping({ GroupId: "engineering" });
  * ```
- *
- * @binding
  */
 export interface DeletePrincipalMapping extends Binding.Service<
   DeletePrincipalMapping,

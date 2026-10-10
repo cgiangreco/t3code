@@ -87,13 +87,14 @@ export interface PublicRepository extends Resource<
  * `us-east-1`; this resource pins every control-plane call there regardless of
  * the stack region.
  *
- * ### Creating Public Repositories
- * **Example:** Basic Public Repository
+ * @resource
+ * @section Creating Public Repositories
+ * @example Basic Public Repository
  * ```typescript
  * const repo = yield* PublicRepository("MyPublicRepo", {});
  * ```
  *
- * **Example:** With Catalog Metadata
+ * @example With Catalog Metadata
  * ```typescript
  * const repo = yield* PublicRepository("MyPublicRepo", {
  *   catalogData: {
@@ -106,8 +107,8 @@ export interface PublicRepository extends Resource<
  * });
  * ```
  *
- * ### Access Policies
- * **Example:** Grant Cross-Account Push
+ * @section Access Policies
+ * @example Grant Cross-Account Push
  * ```typescript
  * const repo = yield* PublicRepository("MyPublicRepo", {
  *   policyText: JSON.stringify({
@@ -123,8 +124,6 @@ export interface PublicRepository extends Resource<
  *   }),
  * });
  * ```
- *
- * @resource
  */
 export const PublicRepository = Resource<PublicRepository>(
   "AWS.ECRPublic.Repository",

@@ -47,15 +47,14 @@ export const connectEnvPrefix = (logicalId: string): string =>
  * 1. be attached to the cache's VPC (`vpc: { subnetIds, securityGroupIds }`), and
  * 2. have a security group allowed ingress on the cache's port by one of the
  *    cache's `securityGroupIds`.
- * ### Connecting to a Cache
- * **Example:** Resolve Connection Info inside a Function
+ * @binding
+ * @section Connecting to a Cache
+ * @example Resolve Connection Info inside a Function
  * ```typescript
  * const connect = yield* ElastiCache.Connect(cache);
  * // inside a handler:
  * const { host, port, tls } = yield* connect;
  * ```
- *
- * @binding
  */
 export interface Connect extends Binding.Service<
   Connect,

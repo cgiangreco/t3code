@@ -142,8 +142,9 @@ export interface Table extends Resource<
  * An AWS Glue Data Catalog table — a schema (columns), storage location, and
  * SerDe over data in S3 (or another store). This is the unit Athena, Redshift
  * Spectrum, and EMR query; it is the analytics foundation of a Glue database.
- * ### Creating Tables
- * **Example:** Parquet Table over S3
+ * @resource
+ * @section Creating Tables
+ * @example Parquet Table over S3
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -174,8 +175,6 @@ export interface Table extends Resource<
  *   parameters: { classification: "parquet" },
  * });
  * ```
- *
- * @resource
  */
 export const Table = Resource<Table>("AWS.Glue.Table");
 

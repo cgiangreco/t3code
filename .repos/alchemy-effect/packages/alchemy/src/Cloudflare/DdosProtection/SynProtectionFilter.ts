@@ -71,8 +71,11 @@ export type SynProtectionFilter = Resource<
  * state, `read` scans for an existing filter with the same expression and
  * reports it as `Unowned`, so the engine refuses to take it over unless
  * `--adopt` (or `adopt(true)`) is set.
- * ### Creating a filter
- * **Example:** Scope SYN mitigation to HTTPS traffic
+ * @resource
+ * @product DDoS Protection
+ * @category Network
+ * @section Creating a filter
+ * @example Scope SYN mitigation to HTTPS traffic
  * ```typescript
  * const filter = yield* Cloudflare.DdosProtection.SynProtectionFilter("HttpsOnly", {
  *   expression: "tcp.dstport in {443}",
@@ -80,7 +83,7 @@ export type SynProtectionFilter = Resource<
  * });
  * ```
  *
- * **Example:** Monitor a port range without mitigating
+ * @example Monitor a port range without mitigating
  * ```typescript
  * yield* Cloudflare.DdosProtection.SynProtectionFilter("WatchHighPorts", {
  *   expression: "tcp.dstport in {8000..8999}",
@@ -89,10 +92,6 @@ export type SynProtectionFilter = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ddos-protection/advanced-ddos-systems/overview/advanced-tcp-protection/
- *
- * @resource
- * @product DDoS Protection
- * @category Network
  */
 export const SynProtectionFilter = Resource<SynProtectionFilter>(TypeId);
 

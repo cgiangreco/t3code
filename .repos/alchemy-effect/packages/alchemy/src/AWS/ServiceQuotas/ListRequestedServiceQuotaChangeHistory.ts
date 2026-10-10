@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * increase requests in the account's 90-day request history from inside a
  * Function, optionally filtered by service or status.
  *
- * ### Quota Increase Requests
- * **Example:** List pending requests
+ * @binding
+ * @section Quota Increase Requests
+ * @example List pending requests
  * ```typescript
  * // init
  * const listRequestedServiceQuotaChangeHistory =
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   Status: "PENDING",
  * });
  * ```
- *
- * @binding
  */
 export interface ListRequestedServiceQuotaChangeHistory extends Binding.Service<
   ListRequestedServiceQuotaChangeHistory,

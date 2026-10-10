@@ -15,8 +15,9 @@ export interface GetDataLakePrincipalRequest
  * useful for logging/auditing which data-lake principal a function acts as.
  * Provide the implementation with
  * `Effect.provide(AWS.LakeFormation.GetDataLakePrincipalHttp)`.
- * ### Identifying the Caller
- * **Example:** Read the Calling Data Lake Principal
+ * @binding
+ * @section Identifying the Caller
+ * @example Read the Calling Data Lake Principal
  * ```typescript
  * // init — account-level binding takes no resource
  * const getDataLakePrincipal = yield* AWS.LakeFormation.GetDataLakePrincipal();
@@ -24,8 +25,6 @@ export interface GetDataLakePrincipalRequest
  * // runtime
  * const { Identity } = yield* getDataLakePrincipal();
  * ```
- *
- * @binding
  */
 export interface GetDataLakePrincipal extends Binding.Service<
   GetDataLakePrincipal,

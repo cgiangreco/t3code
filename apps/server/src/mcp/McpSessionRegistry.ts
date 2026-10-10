@@ -5,23 +5,15 @@ import * as Crypto from "effect/Crypto";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as SynchronizedRef from "effect/SynchronizedRef";
-import { HttpServer } from "effect/http";
-import * as NetAddress from "effect/net/NetAddress";
+import { HttpServer } from "effect/unstable/http";
 
 import * as ServerEnvironment from "../environment/ServerEnvironment.ts";
 import * as McpInvocationContext from "./McpInvocationContext.ts";
-import * as McpProviderSession from "@t3tools/provider-core/server/mcpSession";
+import * as McpProviderSession from "./McpProviderSession.ts";
 
 export interface McpCredentialRequest {
   readonly threadId: ThreadId;
   readonly providerInstanceId: ProviderInstanceId;
-  /**
-   * When false, the credential is minted without the "preview" capability so
-   * the user's choice to withhold agent browser access holds everywhere the
-   * token is honored (#7083). Defaults to full access.
-   */
-  readonly browserToolsAvailable?: boolean;
-  readonly capabilities?: ReadonlySet<McpInvocationContext.McpCapability>;
 }
 
 export interface McpIssuedCredential {
@@ -32,7 +24,7 @@ export interface McpSessionRegistryShape {
   readonly issue: (request: McpCredentialRequest) => Effect.Effect<McpIssuedCredential>;
   readonly resolve: (
     rawToken: string,
-  ) => Effect.Effect<McpInvocationContext.McpThreadInvocationScope | undefined>;
+  ) => Effect.Effect<McpInvocationContext.McpInvocationScope | undefined>;
   /**
    * Records a sign of life for every credential bound to `threadId`. Provider
    * turns call this so that a session which is plainly alive keeps its
@@ -49,10 +41,9 @@ export class McpSessionRegistry extends Context.Service<
   McpSessionRegistryShape
 >()("t3/mcp/McpSessionRegistry") {}
 
-/** Registry credentials always belong to a provider session, so their scope has a thread. */
 interface CredentialRecord {
   readonly tokenHash: string;
-  readonly scope: McpInvocationContext.McpThreadInvocationScope;
+  readonly scope: McpInvocationContext.McpInvocationScope;
   readonly lastAliveAt: number;
 }
 
@@ -77,7 +68,7 @@ export interface McpSessionRegistryOptions {
  *
  * The bound matters because `/mcp` is mounted outside the environment auth
  * stack and is reachable on whatever host the server binds to, so this token is
- * the only thing guarding the `t3-code` toolkits on a remote-reachable server.
+ * the only thing guarding the preview toolkit on a remote-reachable server.
  */
 const DEFAULT_LIVENESS_WINDOW_MS = 24 * 60 * 60 * 1_000;
 
@@ -86,12 +77,16 @@ const bytesToHex = (bytes: Uint8Array): string =>
 
 const tokenFromBytes = (bytes: Uint8Array): string => Buffer.from(bytes).toString("base64url");
 
-// A wildcard bind is reachable on loopback, which is where the provider
-// subprocesses run; anything else is announced as the address it bound.
-const getHttpMcpEndpointHost = (address: NetAddress.IpAddress): string =>
-  NetAddress.isUnspecified(address)
-    ? "127.0.0.1"
-    : NetAddress.formatUrlHostString(NetAddress.formatIp(address));
+const getHttpMcpEndpointHost = (hostname: string): string => {
+  const normalized = hostname.toLowerCase();
+  const endpointHostname =
+    normalized === "0.0.0.0" || normalized === "::" || normalized === "[::]"
+      ? "127.0.0.1"
+      : hostname;
+  return endpointHostname.includes(":") && !endpointHostname.startsWith("[")
+    ? `[${endpointHostname}]`
+    : endpointHostname;
+};
 
 const makeWithOptions = Effect.fn("McpSessionRegistry.make")(function* (
   options: McpSessionRegistryOptions = {},
@@ -103,9 +98,10 @@ const makeWithOptions = Effect.fn("McpSessionRegistry.make")(function* (
   const state = yield* SynchronizedRef.make<RegistryState>({ records: new Map() });
   const currentTimeMillis = options.now ? Effect.sync(options.now) : Clock.currentTimeMillis;
   const livenessWindowMs = options.livenessWindowMs ?? DEFAULT_LIVENESS_WINDOW_MS;
-  const endpoint = NetAddress.isInetAddress(httpServer.address)
-    ? `http://${getHttpMcpEndpointHost(httpServer.address.address)}:${httpServer.address.port}/mcp`
-    : "http://127.0.0.1/mcp";
+  const endpoint =
+    httpServer.address._tag === "TcpAddress"
+      ? `http://${getHttpMcpEndpointHost(httpServer.address.hostname)}:${httpServer.address.port}/mcp`
+      : "http://127.0.0.1/mcp";
 
   const hashToken = (token: string) =>
     crypto
@@ -127,22 +123,12 @@ const makeWithOptions = Effect.fn("McpSessionRegistry.make")(function* (
       const providerSessionId = yield* crypto.randomUUIDv4.pipe(Effect.orDie);
       const rawToken = yield* crypto.randomBytes(32).pipe(Effect.map(tokenFromBytes), Effect.orDie);
       const tokenHash = yield* hashToken(rawToken);
-      const browserToolsAvailable = request.browserToolsAvailable ?? true;
-      const scope: McpInvocationContext.McpThreadInvocationScope = {
+      const scope: McpInvocationContext.McpInvocationScope = {
         environmentId,
-        requestNamespace: providerSessionId,
-        thread: {
-          threadId: ThreadId.make(request.threadId),
-          providerSessionId,
-          providerInstanceId: ProviderInstanceId.make(request.providerInstanceId),
-        },
-        client: undefined,
-        capabilities: new Set<McpInvocationContext.McpCapability>([
-          "orchestration",
-          "worktree",
-          "pull-requests",
-          ...(request.capabilities ?? (browserToolsAvailable ? (["preview"] as const) : [])),
-        ]),
+        threadId: ThreadId.make(request.threadId),
+        providerSessionId,
+        providerInstanceId: ProviderInstanceId.make(request.providerInstanceId),
+        capabilities: new Set(["preview"]),
         issuedAt,
       };
       yield* SynchronizedRef.update(state, ({ records }) => {
@@ -153,13 +139,11 @@ const makeWithOptions = Effect.fn("McpSessionRegistry.make")(function* (
       return {
         config: {
           environmentId,
-          threadId: scope.thread.threadId,
+          threadId: scope.threadId,
           providerSessionId,
-          providerInstanceId: scope.thread.providerInstanceId,
+          providerInstanceId: scope.providerInstanceId,
           endpoint,
           authorizationHeader: `Bearer ${rawToken}`,
-          browserToolsAvailable: scope.capabilities.has("preview"),
-          capabilities: scope.capabilities,
         },
       };
     },
@@ -188,7 +172,7 @@ const makeWithOptions = Effect.fn("McpSessionRegistry.make")(function* (
         const current = pruneDead(records, timestamp);
         const next = new Map(current);
         for (const [tokenHash, record] of current) {
-          if (record.scope.thread.threadId === threadId) {
+          if (record.scope.threadId === threadId) {
             next.set(tokenHash, { ...record, lastAliveAt: timestamp });
           }
         }
@@ -208,11 +192,11 @@ const makeWithOptions = Effect.fn("McpSessionRegistry.make")(function* (
     touch,
     revokeProviderSession: Effect.fn("McpSessionRegistry.revokeProviderSession")(
       function* (providerSessionId) {
-        yield* revokeWhere((record) => record.scope.thread.providerSessionId === providerSessionId);
+        yield* revokeWhere((record) => record.scope.providerSessionId === providerSessionId);
       },
     ),
     revokeThread: Effect.fn("McpSessionRegistry.revokeThread")(function* (threadId) {
-      yield* revokeWhere((record) => record.scope.thread.threadId === threadId);
+      yield* revokeWhere((record) => record.scope.threadId === threadId);
     }),
     revokeAll: SynchronizedRef.set(state, { records: new Map() }),
   });
@@ -245,7 +229,7 @@ export const issueActiveMcpCredential = (
     ? activeMcpSessionRegistry
         .revokeThread(request.threadId)
         .pipe(Effect.andThen(activeMcpSessionRegistry.issue(request)))
-    : Effect.undefined;
+    : Effect.sync((): McpIssuedCredential | undefined => undefined);
 
 /**
  * Refreshes the liveness of a thread's MCP credential. Called on every provider
@@ -254,10 +238,10 @@ export const issueActiveMcpCredential = (
 export const touchActiveMcpThread = (threadId: ThreadId): Effect.Effect<void> =>
   activeMcpSessionRegistry ? activeMcpSessionRegistry.touch(threadId) : Effect.void;
 
-const revokeActiveMcpThread = (threadId: ThreadId): Effect.Effect<void> =>
+export const revokeActiveMcpThread = (threadId: ThreadId): Effect.Effect<void> =>
   activeMcpSessionRegistry ? activeMcpSessionRegistry.revokeThread(threadId) : Effect.void;
 
-const revokeAllActiveMcpCredentials = (): Effect.Effect<void> =>
+export const revokeAllActiveMcpCredentials = (): Effect.Effect<void> =>
   activeMcpSessionRegistry ? activeMcpSessionRegistry.revokeAll : Effect.void;
 
 /** Exposed for tests. */

@@ -63,8 +63,9 @@ export interface LoggingConfiguration extends Resource<
  * has at most one logging configuration; deleting this resource disables
  * logging.
  *
- * ### Configuring Logging
- * **Example:** Log to CloudWatch Logs
+ * @resource
+ * @section Configuring Logging
+ * @example Log to CloudWatch Logs
  * ```typescript
  * const logGroup = yield* AWS.Logs.LogGroup("WafLogs", {
  *   logGroupName: "aws-waf-logs-my-firewall",
@@ -76,7 +77,7 @@ export interface LoggingConfiguration extends Resource<
  * });
  * ```
  *
- * **Example:** Redact Headers and Filter to Blocked Requests
+ * @example Redact Headers and Filter to Blocked Requests
  * ```typescript
  * yield* AWS.WAFv2.LoggingConfiguration("Logging", {
  *   resourceArn: acl.webAclArn,
@@ -94,8 +95,6 @@ export interface LoggingConfiguration extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const LoggingConfiguration = Resource<LoggingConfiguration>(
   "AWS.WAFv2.LoggingConfiguration",

@@ -63,8 +63,9 @@ export interface ProfileResourceAssociation extends Resource<
  * An attachment of a DNS resource to a Route 53 Profile. Attach private
  * hosted zones, Resolver rules, or DNS Firewall rule groups; every VPC the
  * Profile is associated with picks up the resource.
- * ### Attaching Resources
- * **Example:** Attach a DNS Firewall Rule Group
+ * @resource
+ * @section Attaching Resources
+ * @example Attach a DNS Firewall Rule Group
  * ```typescript
  * import * as Route53Profiles from "alchemy/AWS/Route53Profiles";
  *
@@ -78,7 +79,7 @@ export interface ProfileResourceAssociation extends Resource<
  * );
  * ```
  *
- * **Example:** Attach a Resolver Rule
+ * @example Attach a Resolver Rule
  * ```typescript
  * const attachment = yield* Route53Profiles.ProfileResourceAssociation(
  *   "CorpForwarding",
@@ -88,8 +89,6 @@ export interface ProfileResourceAssociation extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const ProfileResourceAssociation = Resource<ProfileResourceAssociation>(
   "AWS.Route53Profiles.ProfileResourceAssociation",

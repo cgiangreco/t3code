@@ -11,16 +11,15 @@ import type { Workspace } from "./Workspace.ts";
  * alias, endpoint). Provide the `DescribeWorkspaceHttp` layer on the Function
  * to satisfy the binding.
  *
- * ### Workspace Metadata
- * **Example:** Describe the Bound Workspace
+ * @binding
+ * @section Workspace Metadata
+ * @example Describe the Bound Workspace
  * ```typescript
  * const describeWorkspace = yield* AMP.DescribeWorkspace(workspace);
  *
  * const response = yield* describeWorkspace();
  * const status = response.workspace.status.statusCode;
  * ```
- *
- * @binding
  */
 export interface DescribeWorkspace extends Binding.Service<
   DescribeWorkspace,

@@ -45,15 +45,14 @@ export interface EntityType extends Resource<
  * event is about (e.g. `customer`, `merchant`). Event types reference entity
  * types; they are cheap metadata objects.
  *
- * ### Creating an Entity Type
- * **Example:** Basic Entity Type
+ * @resource
+ * @section Creating an Entity Type
+ * @example Basic Entity Type
  * ```typescript
  * const customer = yield* FraudDetector.EntityType("customer", {
  *   description: "the buyer placing an order",
  * });
  * ```
- *
- * @resource
  */
 export const EntityType = Resource<EntityType>("AWS.FraudDetector.EntityType");
 

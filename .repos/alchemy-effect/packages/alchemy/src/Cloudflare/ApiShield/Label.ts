@@ -78,8 +78,11 @@ export type Label = Resource<
  * characters), so renaming triggers a replacement; only the `description`
  * is mutable in place. Deleting a label detaches it from any operations
  * server-side.
- * ### Creating a Label
- * **Example:** Label with a generated name
+ * @resource
+ * @product API Shield
+ * @category Application Security
+ * @section Creating a Label
+ * @example Label with a generated name
  * ```typescript
  * const label = yield* Cloudflare.ApiShield.Label("TeamPayments", {
  *   zoneId: zone.zoneId,
@@ -87,7 +90,7 @@ export type Label = Resource<
  * });
  * ```
  *
- * **Example:** Label with an explicit name
+ * @example Label with an explicit name
  * ```typescript
  * yield* Cloudflare.ApiShield.Label("Pii", {
  *   zoneId: zone.zoneId,
@@ -97,10 +100,6 @@ export type Label = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api-shield/management-and-monitoring/endpoint-labels/
- *
- * @resource
- * @product API Shield
- * @category Application Security
  */
 export const Label = Resource<Label>(TypeId);
 

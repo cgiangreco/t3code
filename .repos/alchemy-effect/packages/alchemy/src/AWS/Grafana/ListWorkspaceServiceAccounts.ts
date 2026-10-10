@@ -11,8 +11,9 @@ import type { Workspace } from "./Workspace.ts";
  * Lists the Grafana service accounts in the workspace. Provide the
  * implementation with
  * `Effect.provide(AWS.Grafana.ListWorkspaceServiceAccountsHttp)`.
- * ### Managing Service Accounts
- * **Example:** List the Workspace's Service Accounts
+ * @binding
+ * @section Managing Service Accounts
+ * @example List the Workspace's Service Accounts
  * ```typescript
  * const listServiceAccounts =
  *   yield* Grafana.ListWorkspaceServiceAccounts(workspace);
@@ -22,8 +23,6 @@ import type { Workspace } from "./Workspace.ts";
  *   yield* Effect.logInfo(`${account.name} (${account.grafanaRole})`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListWorkspaceServiceAccounts extends Binding.Service<
   ListWorkspaceServiceAccounts,

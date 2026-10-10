@@ -145,8 +145,11 @@ export type Rule = Resource<
  * error (Cloudflare code 10403) on every call.
  *
  * All fields are patched in place; only `zoneId` forces a replacement.
- * ### Creating a Rule
- * **Example:** Log requests with invalid JWTs
+ * @resource
+ * @product Token Validation
+ * @category Application Security
+ * @section Creating a Rule
+ * @example Log requests with invalid JWTs
  * ```typescript
  * const rule = yield* Cloudflare.TokenValidation.Rule("LogInvalidJwt", {
  *   zoneId: zone.zoneId,
@@ -156,7 +159,7 @@ export type Rule = Resource<
  * });
  * ```
  *
- * **Example:** Block invalid JWTs, excluding a public operation
+ * @example Block invalid JWTs, excluding a public operation
  * ```typescript
  * yield* Cloudflare.TokenValidation.Rule("BlockInvalidJwt", {
  *   zoneId: zone.zoneId,
@@ -169,8 +172,8 @@ export type Rule = Resource<
  * });
  * ```
  *
- * ### Updating a Rule
- * **Example:** Disable a rule in place
+ * @section Updating a Rule
+ * @example Disable a rule in place
  * ```typescript
  * yield* Cloudflare.TokenValidation.Rule("BlockInvalidJwt", {
  *   zoneId: zone.zoneId,
@@ -182,10 +185,6 @@ export type Rule = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api-shield/security/jwt-validation/
- *
- * @resource
- * @product Token Validation
- * @category Application Security
  */
 export const Rule = Resource<Rule>(TypeId);
 
@@ -318,8 +317,8 @@ export const RuleProvider = () =>
             Stream.runCollect,
             Effect.map((chunk) =>
               Array.from(chunk).flatMap((page) =>
-                (page.result ?? []).map((rule): RuleAttributes =>
-                  toAttributes(rule, zone.id),
+                (page.result ?? []).map(
+                  (rule): RuleAttributes => toAttributes(rule, zone.id),
                 ),
               ),
             ),

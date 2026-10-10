@@ -64,7 +64,7 @@ function snapshot(
     }),
   ];
   return {
-    version: 3,
+    version: 2,
     type: "snapshot",
     sequence,
     sampledAtUnixMs,

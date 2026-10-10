@@ -11,8 +11,9 @@ export interface GetApiKeysRequest extends ag.GetApiKeysRequest {}
  * Provide `ApiGateway.GetApiKeysHttp` on the Function effect to implement
  * the binding.
  *
- * ### Managing API keys
- * **Example:** Find keys by name prefix
+ * @binding
+ * @section Managing API keys
+ * @example Find keys by name prefix
  * ```typescript
  * // init
  * const getApiKeys = yield* ApiGateway.GetApiKeys();
@@ -20,8 +21,6 @@ export interface GetApiKeysRequest extends ag.GetApiKeysRequest {}
  * // runtime
  * const page = yield* getApiKeys({ nameQuery: "customer-", limit: 100 });
  * ```
- *
- * @binding
  */
 export interface GetApiKeys extends Binding.Service<
   GetApiKeys,

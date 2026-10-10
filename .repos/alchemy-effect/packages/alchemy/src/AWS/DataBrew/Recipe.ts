@@ -89,8 +89,9 @@ export interface Recipe extends Resource<
  * (rename, filter, case conversion, etc.). Edits modify the `LATEST_WORKING`
  * version; setting `publish: true` snapshots numbered versions that recipe
  * jobs consume.
- * ### Creating Recipes
- * **Example:** Simple Transform Recipe
+ * @resource
+ * @section Creating Recipes
+ * @example Simple Transform Recipe
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -107,7 +108,7 @@ export interface Recipe extends Resource<
  * });
  * ```
  *
- * **Example:** Published Recipe for Jobs
+ * @example Published Recipe for Jobs
  * ```typescript
  * // publish: true snapshots a numbered version (1.0, 2.0, ...) whenever the
  * // steps change — recipe jobs run the latest published version by default.
@@ -126,8 +127,6 @@ export interface Recipe extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const Recipe = Resource<Recipe>("AWS.DataBrew.Recipe");
 

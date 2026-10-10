@@ -13,7 +13,6 @@ import {
   resolveDesktopTheme,
   resolveThemeAppearance,
   resolveThemeHalf,
-  THEME_PREVIEW_ID,
   THEME_APPEARANCE_MODE_STORAGE_KEY,
   THEME_FOLLOW_SYSTEM_STORAGE_KEY,
   THEME_HALVES_STORAGE_KEY,
@@ -26,7 +25,6 @@ import {
 type Theme = ThemePreference;
 type ThemeSnapshot = {
   theme: Theme;
-  resolvedTheme: ThemeAppearance;
   systemDark: boolean;
   followSystem: boolean;
   appearanceMode: ThemePreferenceMode;
@@ -39,7 +37,6 @@ const STORAGE_KEY = "t3code:theme";
 const MEDIA_QUERY = "(prefers-color-scheme: dark)";
 const DEFAULT_THEME_SNAPSHOT: ThemeSnapshot = {
   theme: "system",
-  resolvedTheme: "light",
   systemDark: false,
   followSystem: true,
   appearanceMode: "system",
@@ -52,17 +49,6 @@ export function readThemeHalves(): ThemeHalves | null {
   return readStoredThemeHalves();
 }
 
-/**
- * The stored mix as written, without resolvability pruning. Flows that
- * rebuild the whole mix must capture this before a `setTheme` clears it: a
- * published id resolves only once its set has streamed in, and treating "not
- * resolvable yet" as "absent" silently rewrites that half.
- */
-export function readThemeHalvesRaw(): { light?: string; dark?: string } {
-  if (typeof window === "undefined") return {};
-  return readStoredThemeHalvesRaw();
-}
-
 function readStoredThemeHalves(): ThemeHalves | null {
   if (typeof window === "undefined") return null;
   try {
@@ -72,37 +58,13 @@ function readStoredThemeHalves(): ThemeHalves | null {
   }
 }
 
-/**
- * The stored mix as written, without resolvability pruning. An environment
- * published id resolves only once its set has streamed in, so a write that
- * merged over the pruned parse would silently erase that half whenever the
- * other one changed before the set arrived.
- */
-function readStoredThemeHalvesRaw(): { light?: string; dark?: string } {
-  try {
-    const value: unknown = JSON.parse(
-      window.localStorage.getItem(THEME_HALVES_STORAGE_KEY) ?? "null",
-    );
-    if (value === null || typeof value !== "object") return {};
-    const halves: { light?: string; dark?: string } = {};
-    for (const appearance of ["light", "dark"] as const) {
-      const themeId = (value as Record<string, unknown>)[appearance];
-      if (typeof themeId === "string") halves[appearance] = themeId;
-    }
-    return halves;
-  } catch {
-    return {};
-  }
-}
-
 function themeHalvesSignature(halves: ThemeHalves | null): string {
   return `${halves?.light ?? ""}|${halves?.dark ?? ""}`;
 }
-
 const THEME_COLOR_META_NAME = "theme-color";
 const DYNAMIC_THEME_COLOR_SELECTOR = `meta[name="${THEME_COLOR_META_NAME}"][data-dynamic-theme-color="true"]`;
 
-export class ThemeStorageError extends Schema.TaggedError<ThemeStorageError>()(
+export class ThemeStorageError extends Schema.TaggedErrorClass<ThemeStorageError>()(
   "ThemeStorageError",
   {
     operation: Schema.Literals(["read", "write"]),
@@ -118,7 +80,7 @@ export class ThemeStorageError extends Schema.TaggedError<ThemeStorageError>()(
 
 export const isThemeStorageError = Schema.is(ThemeStorageError);
 
-export class DesktopThemeSyncError extends Schema.TaggedError<DesktopThemeSyncError>()(
+export class DesktopThemeSyncError extends Schema.TaggedErrorClass<DesktopThemeSyncError>()(
   "DesktopThemeSyncError",
   {
     theme: ThemePreference,
@@ -136,7 +98,7 @@ let listeners: Array<() => void> = [];
 let lastSnapshot: ThemeSnapshot | null = null;
 let snapshotStale = true;
 let lastDesktopTheme: "light" | "dark" | "system" | null = null;
-let lastAppliedTheme: Omit<ThemeSnapshot, "resolvedTheme"> | null = null;
+let lastAppliedTheme: ThemeSnapshot | null = null;
 let themeStorageReadFailure: ThemeStorageError | null = null;
 
 function emitChange() {
@@ -320,12 +282,8 @@ export function syncBrowserChromeTheme() {
   }
 }
 
-function applyTheme(theme: Theme, { suppressTransitions = false, preservePreview = true } = {}) {
+function applyTheme(theme: Theme, suppressTransitions = false) {
   if (typeof document === "undefined" || typeof window === "undefined") return;
-  // Keep the editor's draft visible until an explicit refresh restores the selection.
-  if (preservePreview && document.documentElement.dataset?.themeId === THEME_PREVIEW_ID) {
-    return;
-  }
   const appearanceMode = readAppearanceModePreference(theme);
   const followSystem = appearanceMode === "system";
   const systemDark = followSystem ? getSystemDark() : false;
@@ -352,13 +310,15 @@ function applyTheme(theme: Theme, { suppressTransitions = false, preservePreview
     themeHalves,
   );
   applyThemePalette(resolveThemeHalf(theme, themeHalves, resolvedAppearance), resolvedAppearance);
-  document.documentElement.classList.toggle("dark", resolvedAppearance === "dark");
+  const isDark = resolvedAppearance === "dark";
+  document.documentElement.classList.toggle("dark", isDark);
   lastAppliedTheme = { theme, systemDark, followSystem, appearanceMode, themeHalves };
   syncBrowserChromeTheme();
   syncDesktopTheme(theme, followSystem, appearanceMode);
   if (suppressTransitions) {
     // Force a reflow so the no-transitions class takes effect before removal
-    void document.documentElement.offsetHeight;
+    // oxlint-disable-next-line no-unused-expressions
+    document.documentElement.offsetHeight;
     requestAnimationFrame(() => {
       document.documentElement.classList.remove("no-transitions");
     });
@@ -426,17 +386,9 @@ function getSnapshot(): ThemeSnapshot {
   const systemDark = followSystem ? getSystemDark() : false;
   const themeHalves = readStoredThemeHalves();
 
-  const resolvedTheme = resolveThemeAppearance(
-    theme,
-    systemDark,
-    followSystem,
-    appearanceMode,
-    themeHalves,
-  );
   if (
     lastSnapshot &&
     lastSnapshot.theme === theme &&
-    lastSnapshot.resolvedTheme === resolvedTheme &&
     lastSnapshot.systemDark === systemDark &&
     lastSnapshot.followSystem === followSystem &&
     lastSnapshot.appearanceMode === appearanceMode &&
@@ -445,7 +397,7 @@ function getSnapshot(): ThemeSnapshot {
     return lastSnapshot;
   }
 
-  lastSnapshot = { theme, resolvedTheme, systemDark, followSystem, appearanceMode, themeHalves };
+  lastSnapshot = { theme, systemDark, followSystem, appearanceMode, themeHalves };
   return lastSnapshot;
 }
 
@@ -455,28 +407,26 @@ function getServerSnapshot() {
 
 function handleSystemAppearanceChange() {
   const storedTheme = getStored();
-  if (readAppearanceModePreference(storedTheme) === "system") {
-    applyTheme(storedTheme, { suppressTransitions: true });
-  }
+  if (readAppearanceModePreference(storedTheme) === "system") applyTheme(storedTheme, true);
   emitChange();
 }
 
 function handleStorageChange(e: StorageEvent) {
   if (e.key === STORAGE_KEY) {
     themeStorageReadFailure = null;
-    applyTheme(getStored(), { suppressTransitions: true });
+    applyTheme(getStored(), true);
     emitChange();
   } else if (e.key === THEME_FOLLOW_SYSTEM_STORAGE_KEY) {
-    applyTheme(getStored(), { suppressTransitions: true });
+    applyTheme(getStored(), true);
     emitChange();
   } else if (e.key === THEME_APPEARANCE_MODE_STORAGE_KEY || e.key === THEME_HALVES_STORAGE_KEY) {
-    applyTheme(getStored(), { suppressTransitions: true });
+    applyTheme(getStored(), true);
     emitChange();
   } else if (e.key === CUSTOM_THEMES_STORAGE_KEY || e.key === null) {
     if (e.key === null) themeStorageReadFailure = null;
     invalidateCustomThemes();
     lastAppliedTheme = null;
-    applyTheme(getStored(), { suppressTransitions: true });
+    applyTheme(getStored(), true);
     emitChange();
   }
 }
@@ -510,15 +460,19 @@ function subscribe(listener: () => void): () => void {
 
 export function useTheme() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const { theme, resolvedTheme } = snapshot;
+  const theme = snapshot.theme;
+
+  const resolvedTheme: "light" | "dark" = resolveThemeAppearance(
+    theme,
+    snapshot.systemDark,
+    snapshot.followSystem,
+    snapshot.appearanceMode,
+    snapshot.themeHalves,
+  );
 
   const setTheme = useCallback((next: Theme): boolean => {
     if (typeof window === "undefined") return false;
     try {
-      // Preserve the current mode before replacing a legacy or inferred theme
-      // preference. Otherwise a fresh System preference is re-inferred from
-      // the new theme's base appearance, which can switch a dark UI to light.
-      writeAppearanceModePreference(readAppearanceModePreference(getStored()));
       // Choosing a whole theme replaces any automatic-mode mix. The mix is
       // captured first so a failed preference write can put it back instead
       // of erasing it or leaving it attached to the new theme.
@@ -553,7 +507,7 @@ export function useTheme() {
       });
       return false;
     }
-    applyTheme(next, { suppressTransitions: true });
+    applyTheme(next, true);
     emitChange();
     return true;
   }, []);
@@ -578,7 +532,7 @@ export function useTheme() {
       return false;
     }
     themeStorageReadFailure = null;
-    applyTheme(getStored(), { suppressTransitions: true });
+    applyTheme(getStored(), true);
     emitChange();
     return true;
   }, []);
@@ -600,7 +554,7 @@ export function useTheme() {
     (appearance: ThemeAppearance, themeId: string | null): boolean => {
       if (typeof window === "undefined") return false;
       try {
-        const current = readStoredThemeHalvesRaw();
+        const current = readStoredThemeHalves() ?? {};
         const next: { light?: string; dark?: string } = { ...current };
         if (themeId === null) delete next[appearance];
         else next[appearance] = themeId;
@@ -622,7 +576,7 @@ export function useTheme() {
         });
         return false;
       }
-      applyTheme(getStored(), { suppressTransitions: true });
+      applyTheme(getStored(), true);
       emitChange();
       return true;
     },
@@ -646,15 +600,15 @@ export function useTheme() {
       });
       return false;
     }
-    applyTheme(getStored(), { suppressTransitions: true });
+    applyTheme(getStored(), true);
     emitChange();
     return true;
   }, []);
 
-  const refreshTheme = useCallback(({ preservePreview = false } = {}) => {
+  const refreshTheme = useCallback(() => {
     if (typeof window === "undefined") return;
     lastAppliedTheme = null;
-    applyTheme(getStored(), { suppressTransitions: true, preservePreview });
+    applyTheme(getStored(), true);
     emitChange();
   }, []);
 

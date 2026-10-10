@@ -8,7 +8,6 @@
  * configured. `layerTracerProvider` creates a scoped Node tracer provider, and
  * `layerEmpty` provides an empty resource.
  *
- * @stability unstable
  * @since 4.0.0
  */
 import type * as Otel from "@opentelemetry/api"
@@ -30,7 +29,6 @@ import * as Resource from "./Resource.ts"
 /**
  * Configuration for the Node OpenTelemetry layer, including optional tracing, metrics, logging, resource, and shutdown settings.
  *
- * @stability unstable
  * @category models
  * @since 4.0.0
  */
@@ -53,7 +51,6 @@ export interface Configuration {
 /**
  * Creates a scoped Node OpenTelemetry tracer provider from one or more span processors and shuts it down when the layer is released.
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -77,7 +74,7 @@ export const layerTracerProvider = (
           return provider
         }),
         (provider) =>
-          Effect.promise(() => provider.forceFlush().finally(() => provider.shutdown())).pipe(
+          Effect.promise(() => provider.forceFlush().then(() => provider.shutdown())).pipe(
             Effect.ignore,
             Effect.interruptible,
             Effect.timeoutOption(config?.shutdownTimeout ?? 3000)
@@ -106,7 +103,6 @@ export const layerTracerProvider = (
  * Register Node auto-instrumentations before importing modules that should be
  * patched, because many Node instrumentations hook module loading.
  *
- * @stability unstable
  * @category layers
  * @since 4.0.0
  */
@@ -122,9 +118,9 @@ export const layer: {
         ? evaluate as Effect.Effect<Configuration>
         : Effect.sync(evaluate)
 
-      const ResourceLayer = Resource.layerFromEnv(config.resource && Resource.configToAttributes(config.resource))
+      const ResourceLive = Resource.layerFromEnv(config.resource && Resource.configToAttributes(config.resource))
 
-      const TracerLayer = isNonEmpty(config.spanProcessor)
+      const TracerLive = isNonEmpty(config.spanProcessor)
         ? Layer.provide(
           Tracer.layer,
           layerTracerProvider(config.spanProcessor, {
@@ -134,14 +130,14 @@ export const layer: {
         )
         : Layer.empty
 
-      const MetricsLayer = isNonEmpty(config.metricReader)
+      const MetricsLive = isNonEmpty(config.metricReader)
         ? Metrics.layer(constant(config.metricReader), {
           shutdownTimeout: config.shutdownTimeout,
           temporality: config.metricTemporality
         })
         : Layer.empty
 
-      const LoggerLayer = isNonEmpty(config.logRecordProcessor)
+      const LoggerLive = isNonEmpty(config.logRecordProcessor)
         ? Layer.provide(
           Logger.layer({ mergeWithExisting: config.loggerMergeWithExisting }),
           Logger.layerLoggerProvider(config.logRecordProcessor, {
@@ -151,8 +147,8 @@ export const layer: {
         )
         : Layer.empty
 
-      return Layer.mergeAll(TracerLayer, MetricsLayer, LoggerLayer).pipe(
-        Layer.provideMerge(ResourceLayer)
+      return Layer.mergeAll(TracerLive, MetricsLive, LoggerLive).pipe(
+        Layer.provideMerge(ResourceLive)
       )
     })
   )
@@ -160,7 +156,6 @@ export const layer: {
 /**
  * Layer that provides an empty OpenTelemetry `Resource`.
  *
- * @stability unstable
  * @category layers
  * @since 2.0.0
  */

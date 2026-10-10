@@ -104,7 +104,7 @@ export const collectPolicies = (
 export type ResolvedPolicy = {
   effect: "allow" | "deny";
   permissionGroups: { id: string; meta?: { key?: string; value?: string } }[];
-  resources: Record<string, ResourceScope>;
+  resources: Record<string, unknown>;
 };
 
 export const resolvePermissionGroup = (ref: PermissionGroupRef) => {

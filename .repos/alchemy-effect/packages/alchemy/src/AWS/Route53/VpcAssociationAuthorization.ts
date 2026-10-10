@@ -53,8 +53,9 @@ export interface VpcAssociationAuthorization extends Resource<
  * VPC, then the VPC-owning account submits the association (see
  * `ZoneVpcAssociation`). Same-account associations don't need an
  * authorization.
- * ### Authorizing Cross-Account Association
- * **Example:** Authorize a VPC
+ * @resource
+ * @section Authorizing Cross-Account Association
+ * @example Authorize a VPC
  * ```typescript
  * const authorization = yield* VpcAssociationAuthorization("PeerVpcAuth", {
  *   hostedZoneId: zone.id,
@@ -62,8 +63,6 @@ export interface VpcAssociationAuthorization extends Resource<
  *   vpcRegion: "us-west-2",
  * });
  * ```
- *
- * @resource
  */
 export const VpcAssociationAuthorization =
   Resource<VpcAssociationAuthorization>(

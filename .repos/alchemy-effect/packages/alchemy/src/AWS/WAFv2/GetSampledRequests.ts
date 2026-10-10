@@ -15,8 +15,9 @@ export interface GetSampledRequestsRequest extends Omit<
  *
  * Provide `WAFv2.GetSampledRequestsHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Inspecting Traffic
- * **Example:** Read Sampled Requests for a Rule
+ * @binding
+ * @section Inspecting Traffic
+ * @example Read Sampled Requests for a Rule
  * ```typescript
  * // init — grants wafv2:GetSampledRequests on the web ACL
  * const getSampledRequests = yield* AWS.WAFv2.GetSampledRequests(acl);
@@ -32,8 +33,6 @@ export interface GetSampledRequestsRequest extends Omit<
  *   MaxItems: 100,
  * });
  * ```
- *
- * @binding
  */
 export interface GetSampledRequests extends Binding.Service<
   GetSampledRequests,

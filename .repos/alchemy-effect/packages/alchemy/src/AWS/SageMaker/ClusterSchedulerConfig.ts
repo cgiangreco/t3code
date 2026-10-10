@@ -81,8 +81,9 @@ export interface ClusterSchedulerConfig extends Resource<
  * A SageMaker HyperPod cluster policy (task governance) — configures how an
  * EKS-orchestrated HyperPod cluster prioritizes tasks and allocates idle
  * compute across teams via priority classes and fair-share weights.
- * ### Creating Cluster Policies
- * **Example:** Priority Classes with Fair-Share
+ * @resource
+ * @section Creating Cluster Policies
+ * @example Priority Classes with Fair-Share
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -98,8 +99,6 @@ export interface ClusterSchedulerConfig extends Resource<
  *   description: "Prioritize inference over training",
  * });
  * ```
- *
- * @resource
  */
 export const ClusterSchedulerConfig = Resource<ClusterSchedulerConfig>(
   "AWS.SageMaker.ClusterSchedulerConfig",

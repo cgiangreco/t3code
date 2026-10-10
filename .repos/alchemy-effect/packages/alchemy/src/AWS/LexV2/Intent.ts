@@ -78,8 +78,9 @@ export interface Intent extends Resource<
  * An intent on the DRAFT locale of an Amazon Lex V2 bot — an action the user
  * wants to perform, recognized from sample utterances.
  *
- * ### Creating Intents
- * **Example:** Intent with Sample Utterances
+ * @resource
+ * @section Creating Intents
+ * @example Intent with Sample Utterances
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -90,7 +91,7 @@ export interface Intent extends Resource<
  * });
  * ```
  *
- * **Example:** Built-in Parent Intent
+ * @example Built-in Parent Intent
  * ```typescript
  * const help = yield* AWS.LexV2.Intent("Help", {
  *   botId: locale.botId,
@@ -98,8 +99,6 @@ export interface Intent extends Resource<
  *   parentIntentSignature: "AMAZON.HelpIntent",
  * });
  * ```
- *
- * @resource
  */
 export const Intent = Resource<Intent>("AWS.LexV2.Intent");
 

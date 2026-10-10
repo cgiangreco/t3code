@@ -100,8 +100,9 @@ export interface ParallelData extends Resource<
  * translation jobs (Active Custom Translation). The import is asynchronous:
  * the resource waits for the parallel data to become `ACTIVE`.
  *
- * ### Managing Parallel Data
- * **Example:** Import parallel data from S3
+ * @resource
+ * @section Managing Parallel Data
+ * @example Import parallel data from S3
  * ```typescript
  * const examples = yield* AWS.Translate.ParallelData("StyleExamples", {
  *   s3Uri: "s3://my-bucket/style-examples.csv",
@@ -109,7 +110,7 @@ export interface ParallelData extends Resource<
  * });
  * ```
  *
- * **Example:** Use parallel data in a batch translation job
+ * @example Use parallel data in a batch translation job
  * ```typescript
  * const startJob = yield* AWS.Translate.StartTextTranslationJob(dataAccessRole);
  * yield* startJob({
@@ -120,8 +121,6 @@ export interface ParallelData extends Resource<
  *   ParallelDataNames: [examples.parallelDataName],
  * });
  * ```
- *
- * @resource
  */
 export const ParallelData = Resource<ParallelData>(
   "AWS.Translate.ParallelData",

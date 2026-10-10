@@ -182,10 +182,7 @@ test.provider(
       // Destroy again — delete must be idempotent.
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:pipelines", "live"],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 interface EtlOpts {
@@ -206,9 +203,7 @@ const etl = (
   opts: EtlOpts = {},
 ) =>
   Effect.gen(function* () {
-    const bucket = yield* Cloudflare.R2.Bucket("SinkBucket", {
-      forceDestroy: true,
-    });
+    const bucket = yield* Cloudflare.R2.Bucket("SinkBucket", {});
     const stream = yield* Cloudflare.Pipelines.Stream("Stream", {});
     const sink = yield* Cloudflare.Pipelines.Sink("Sink", {
       type: "r2",
@@ -292,13 +287,5 @@ test.provider(
       // Destroy again — deletes must be idempotent.
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:pipelines",
-      "provider:cloudflare:r2",
-      "live",
-    ],
-    timeout: 600_000,
-  },
+  { timeout: 600_000 },
 );

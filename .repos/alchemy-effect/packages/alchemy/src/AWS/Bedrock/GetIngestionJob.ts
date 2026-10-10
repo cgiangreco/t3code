@@ -20,8 +20,9 @@ export interface GetIngestionJobRequest extends Omit<
  * The binding grants the function `bedrock:GetIngestionJob` scoped to the
  * data source's parent knowledge base.
  *
- * ### Syncing a Data Source
- * **Example:** Poll an Ingestion Job to Completion
+ * @binding
+ * @section Syncing a Data Source
+ * @example Poll an Ingestion Job to Completion
  * ```typescript
  * // init
  * const getIngestionJob = yield* Bedrock.GetIngestionJob(dataSource);
@@ -39,8 +40,6 @@ export interface GetIngestionJobRequest extends Omit<
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface GetIngestionJob extends Binding.Service<
   GetIngestionJob,

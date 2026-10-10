@@ -10,8 +10,9 @@ import type { Queue } from "./Queue.ts";
  * `jobId`) with filter and sort expressions. The queue's
  * `farmId`/`queueIds: [queueId]` are injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Deadline.SearchStepsHttp)`.
- * ### Monitoring Steps
- * **Example:** Find A Job's Failed Steps
+ * @binding
+ * @section Monitoring Steps
+ * @example Find A Job's Failed Steps
  * ```typescript
  * // init — bind the operation to the queue
  * const searchSteps = yield* AWS.Deadline.SearchSteps(queue);
@@ -34,8 +35,6 @@ import type { Queue } from "./Queue.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface SearchSteps extends Binding.Service<
   SearchSteps,

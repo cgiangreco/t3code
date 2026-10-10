@@ -12,8 +12,9 @@ export interface CreateAuthTokenRequest
  * Bind it to a {@link MicrovmImage} to get a callable that mints a short-lived
  * token for a running MicroVM. Send it on the MicroVM `endpoint` in the
  * `X-aws-proxy-auth` header.
- * ### Auth Tokens
- * **Example:** Mint an auth token
+ * @binding
+ * @section Auth Tokens
+ * @example Mint an auth token
  * ```typescript
  * const createAuthToken = yield* AWS.Lambda.CreateAuthToken(Sandbox);
  * const { authToken } = yield* createAuthToken({
@@ -22,8 +23,6 @@ export interface CreateAuthTokenRequest
  *   allowedPorts: [{ port: 5000 }],
  * });
  * ```
- *
- * @binding
  */
 export interface CreateAuthToken extends Binding.Service<
   CreateAuthToken,

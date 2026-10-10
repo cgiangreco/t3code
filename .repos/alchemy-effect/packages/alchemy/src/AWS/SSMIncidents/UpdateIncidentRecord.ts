@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * (`Resource: "*"`).
  * Provide the implementation with
  * `Effect.provide(AWS.SSMIncidents.UpdateIncidentRecordHttp)`.
- * ### Updating Incident Records
- * **Example:** Resolve An Incident
+ * @binding
+ * @section Updating Incident Records
+ * @example Resolve An Incident
  * ```typescript
  * // init
  * const updateIncidentRecord = yield* AWS.SSMIncidents.UpdateIncidentRecord();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* updateIncidentRecord({ arn: incidentRecordArn, status: "RESOLVED" });
  * ```
- *
- * @binding
  */
 export interface UpdateIncidentRecord extends Binding.Service<
   UpdateIncidentRecord,

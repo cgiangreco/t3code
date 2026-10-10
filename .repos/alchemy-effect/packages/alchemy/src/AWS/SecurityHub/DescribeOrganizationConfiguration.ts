@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.DescribeOrganizationConfigurationHttp)`.
- * ### Members & Organization
- * **Example:** Read the Organization Configuration
+ * @binding
+ * @section Members & Organization
+ * @example Read the Organization Configuration
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeOrganizationConfiguration = yield* AWS.SecurityHub.DescribeOrganizationConfiguration();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { AutoEnable } = yield* describeOrganizationConfiguration();
  * ```
- *
- * @binding
  */
 export interface DescribeOrganizationConfiguration extends Binding.Service<
   DescribeOrganizationConfiguration,

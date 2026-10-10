@@ -1,14 +1,11 @@
 import { Octokit } from "@octokit/rest";
+import * as Config from "effect/Config";
 import * as Context from "effect/Context";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Redacted from "effect/Redacted";
-import { AuthError } from "../Auth/AuthProvider.ts";
-import {
-  deferUntilFirstUse,
-  orDieCredentialsUnavailable,
-  resolveProviderConfig,
-} from "../Auth/Resolve.ts";
+import { AuthError, getAuthProvider } from "../Auth/AuthProvider.ts";
+import { ALCHEMY_PROFILE, AlchemyProfile } from "../Auth/Profile.ts";
 import {
   GITHUB_AUTH_PROVIDER_NAME,
   type GitHubAuthConfig,
@@ -104,7 +101,7 @@ export const fromEnv = () =>
 /**
  * Build a `GitHubCredentials` layer that resolves a token via the
  * Alchemy AuthProvider for the configured profile (defaults to
- * the current Alchemy profile).
+ * `default`, overridable with `ALCHEMY_PROFILE`).
  *
  * Pass `baseUrl` to hard-code the GitHub host — it takes precedence over
  * whatever host the auth provider resolved from the profile config or
@@ -118,34 +115,31 @@ export const fromAuthProvider = (options?: { readonly baseUrl?: string }) =>
         options?.baseUrl !== undefined
           ? { baseUrl: yield* normalizeGitHubBaseUrl(options.baseUrl) }
           : undefined;
-      // Defer profile lookup and credential resolution until first use, so
-      // building the provider layers never requires a configured profile.
-      const resolve = yield* resolveProviderConfig<
+      const profile = yield* AlchemyProfile;
+      const auth = yield* getAuthProvider<
         GitHubAuthConfig,
         GitHubResolvedCredentials
-      >(GITHUB_AUTH_PROVIDER_NAME).pipe(
-        Effect.flatMap(({ profileName, resolve }) =>
-          resolve.pipe(
-            Effect.map((creds) =>
-              make(
-                creds.token,
-                fixedBaseUrl !== undefined
-                  ? fixedBaseUrl.baseUrl
-                  : creds.baseUrl,
-              ),
-            ),
-            Effect.mapError(
-              (e) =>
-                new AuthError({
-                  message: `Failed to resolve GitHub credentials from ${profileName === undefined ? "the CI environment" : `profile '${profileName}'`}: ${(e as { message?: string }).message ?? String(e)}`,
-                }),
-            ),
+      >(GITHUB_AUTH_PROVIDER_NAME);
+      const profileName = yield* ALCHEMY_PROFILE;
+      const ci = yield* Config.boolean("CI").pipe(Config.withDefault(false));
+
+      return yield* profile.loadOrConfigure(auth, profileName, { ci }).pipe(
+        Effect.flatMap((config) =>
+          auth.read(profileName, config as GitHubAuthConfig),
+        ),
+        Effect.map((creds) =>
+          make(
+            creds.token,
+            fixedBaseUrl !== undefined ? fixedBaseUrl.baseUrl : creds.baseUrl,
           ),
         ),
-        deferUntilFirstUse,
-      );
-      return yield* resolve.pipe(
-        orDieCredentialsUnavailable(GITHUB_AUTH_PROVIDER_NAME),
+        Effect.mapError(
+          (e) =>
+            new AuthError({
+              message: `Failed to resolve GitHub credentials for profile '${profileName}': ${(e as { message?: string }).message ?? String(e)}`,
+            }),
+        ),
+        Effect.orDie,
         Effect.cached,
       );
     }).pipe(Effect.orDie),

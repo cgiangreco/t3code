@@ -6,8 +6,6 @@ import {
   type GitRunStackedActionInput,
   type GitRunStackedActionResult,
   GitStackedAction,
-  type ThreadId,
-  type ProjectId,
   WS_METHODS,
 } from "@t3tools/contracts";
 import * as Cause from "effect/Cause";
@@ -15,18 +13,17 @@ import * as DateTime from "effect/DateTime";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 import * as Stream from "effect/Stream";
-import { AsyncResult, Atom, type AtomRegistry } from "effect/reactivity";
+import { AsyncResult, Atom, type AtomRegistry } from "effect/unstable/reactivity";
 
 import type { EnvironmentRegistry } from "../connection/registry.ts";
-import * as Persistence from "../platform/persistence.ts";
-import { runStreamGuarded, RpcPermissionGuard } from "../rpc/client.ts";
+import { EnvironmentCacheStore } from "../platform/persistence.ts";
+import { runStream } from "../rpc/client.ts";
 import {
   createRuntimeCommand,
   runStreamInEnvironment,
   type AtomCommand,
   type AtomCommandResult,
 } from "./runtime.ts";
-import { createCommandPermissions } from "./commandPermissions.ts";
 import { vcsCommandScheduler } from "./vcsCommandScheduler.ts";
 import { invalidateCachedVcsRefs } from "./vcsRefInvalidation.ts";
 
@@ -79,13 +76,10 @@ export interface RunVcsStackedActionInput {
   readonly commitMessage?: string;
   readonly featureBranch?: boolean;
   readonly filePaths?: ReadonlyArray<string>;
-  /** The thread the action runs beside; the server links a pull request it creates to it. */
-  readonly threadId?: ThreadId;
-  readonly projectId?: ProjectId;
   readonly onProgress?: (event: GitActionProgressEvent) => void;
 }
 
-export class VcsActionUnavailableError extends Schema.TaggedError<VcsActionUnavailableError>()(
+export class VcsActionUnavailableError extends Schema.TaggedErrorClass<VcsActionUnavailableError>()(
   "VcsActionUnavailableError",
   {
     operation: VcsActionOperation,
@@ -98,7 +92,7 @@ export class VcsActionUnavailableError extends Schema.TaggedError<VcsActionUnava
   }
 }
 
-export class VcsActionRemoteFailureError extends Schema.TaggedError<VcsActionRemoteFailureError>()(
+export class VcsActionRemoteFailureError extends Schema.TaggedErrorClass<VcsActionRemoteFailureError>()(
   "VcsActionRemoteFailureError",
   {
     actionId: Schema.String,
@@ -116,7 +110,7 @@ export class VcsActionRemoteFailureError extends Schema.TaggedError<VcsActionRem
   }
 }
 
-export class VcsActionMissingTerminalEventError extends Schema.TaggedError<VcsActionMissingTerminalEventError>()(
+export class VcsActionMissingTerminalEventError extends Schema.TaggedErrorClass<VcsActionMissingTerminalEventError>()(
   "VcsActionMissingTerminalEventError",
   {
     actionId: Schema.String,
@@ -131,7 +125,7 @@ export class VcsActionMissingTerminalEventError extends Schema.TaggedError<VcsAc
   }
 }
 
-export class VcsActionTargetKeyParseError extends Schema.TaggedError<VcsActionTargetKeyParseError>()(
+export class VcsActionTargetKeyParseError extends Schema.TaggedErrorClass<VcsActionTargetKeyParseError>()(
   "VcsActionTargetKeyParseError",
   {
     keyLength: Schema.Number,
@@ -169,14 +163,14 @@ const decodeVcsActionTargetKey = Schema.decodeUnknownSync(
   Schema.Tuple([EnvironmentId, Schema.String]),
 );
 
-const vcsActionStateAtom = Atom.family((key: string) => {
+export const vcsActionStateAtom = Atom.family((key: string) => {
   return Atom.make(EMPTY_VCS_ACTION_STATE).pipe(
     Atom.keepAlive,
     Atom.withLabel(`vcs-action:${key}`),
   );
 });
 
-const EMPTY_VCS_ACTION_ATOM = Atom.make(EMPTY_VCS_ACTION_STATE).pipe(
+export const EMPTY_VCS_ACTION_ATOM = Atom.make(EMPTY_VCS_ACTION_STATE).pipe(
   Atom.keepAlive,
   Atom.withLabel("vcs-action:null"),
 );
@@ -197,7 +191,7 @@ export function parseVcsActionTargetKey(key: string): ResolvedVcsActionTarget {
   }
 }
 
-function getVcsActionStateAtom(target: VcsActionTarget) {
+export function getVcsActionStateAtom(target: VcsActionTarget) {
   const key = getVcsActionTargetKey(target);
   return key === null ? EMPTY_VCS_ACTION_ATOM : vcsActionStateAtom(key);
 }
@@ -223,7 +217,7 @@ export function beginVcsActionState(
   };
 }
 
-function failVcsActionState(
+export function failVcsActionState(
   operation: VcsActionOperation,
   actionId: string,
   error: unknown,
@@ -394,17 +388,14 @@ export function applyVcsActionProgressEvent(
       };
     case "action_finished":
       return {
-        ...current,
-        isRunning: true,
+        ...EMPTY_VCS_ACTION_STATE,
         actionId: event.actionId,
         action: event.action,
         operation: "run_change_request",
-        error: null,
       };
     case "action_failed":
       return {
-        ...current,
-        isRunning: true,
+        ...EMPTY_VCS_ACTION_STATE,
         actionId: event.actionId,
         action: event.action,
         operation: "run_change_request",
@@ -414,7 +405,7 @@ export function applyVcsActionProgressEvent(
 }
 
 export function createVcsActionManager<R, E>(
-  runtime: Atom.AtomRuntime<EnvironmentRegistry | Persistence.EnvironmentCacheStore | R, E>,
+  runtime: Atom.AtomRuntime<EnvironmentRegistry | EnvironmentCacheStore | R, E>,
 ) {
   const runStackedActionCommands = new Map<
     string,
@@ -436,7 +427,7 @@ export function createVcsActionManager<R, E>(
     const target = targetKey === null ? null : parseVcsActionTargetKey(targetKey);
     const stateAtom = targetKey === null ? EMPTY_VCS_ACTION_ATOM : vcsActionStateAtom(targetKey);
     const command = createRuntimeCommand<
-      EnvironmentRegistry | Persistence.EnvironmentCacheStore | R,
+      EnvironmentRegistry | EnvironmentCacheStore | R,
       E,
       RunVcsStackedActionInput,
       GitRunStackedActionResult,
@@ -472,19 +463,11 @@ export function createVcsActionManager<R, E>(
           ...(input.commitMessage ? { commitMessage: input.commitMessage } : {}),
           ...(input.featureBranch ? { featureBranch: true } : {}),
           ...(input.filePaths?.length ? { filePaths: [...input.filePaths] } : {}),
-          ...(input.threadId !== undefined ? { threadId: input.threadId } : {}),
-          ...(input.projectId !== undefined ? { projectId: input.projectId } : {}),
         };
-        const clearOwnedState = Effect.sync(() => {
-          const current = registry.get(stateAtom);
-          if (current.actionId === input.actionId) {
-            registry.set(stateAtom, EMPTY_VCS_ACTION_STATE);
-          }
-        });
         return consumeVcsActionProgress(
           runStreamInEnvironment(
             target.environmentId,
-            runStreamGuarded(WS_METHODS.gitRunStackedAction, rpcInput),
+            runStream(WS_METHODS.gitRunStackedAction, rpcInput),
           ),
           {
             target,
@@ -508,12 +491,7 @@ export function createVcsActionManager<R, E>(
               }),
           },
         ).pipe(
-          Effect.provideService(RpcPermissionGuard, {
-            authorize: (id, method, payload) =>
-              createCommandPermissions(runtime, method).authorize(registry, id, payload),
-          }),
           Effect.ensuring(invalidateCachedVcsRefs(registry, target)),
-          Effect.tap(() => clearOwnedState),
           Effect.tapError((error) =>
             Effect.sync(() => {
               const current = registry.get(stateAtom);
@@ -525,7 +503,6 @@ export function createVcsActionManager<R, E>(
               }
             }),
           ),
-          Effect.onInterrupt(() => clearOwnedState),
         );
       },
     });

@@ -14,14 +14,13 @@ export interface BatchDeleteDelegationByAssessmentRequest extends Omit<
  *
  * Deletes a batch of delegations from the bound assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.BatchDeleteDelegationByAssessmentHttp)`.
- * ### Delegations
- * **Example:** Revoke Delegations
+ * @binding
+ * @section Delegations
+ * @example Revoke Delegations
  * ```typescript
  * const batchDeleteDelegationByAssessment = yield* AWS.AuditManager.BatchDeleteDelegationByAssessment(assessment);
  * const result = yield* batchDeleteDelegationByAssessment({ delegationIds });
  * ```
- *
- * @binding
  */
 export interface BatchDeleteDelegationByAssessment extends Binding.Service<
   BatchDeleteDelegationByAssessment,

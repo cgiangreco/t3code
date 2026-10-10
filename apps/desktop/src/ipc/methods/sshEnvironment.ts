@@ -117,16 +117,6 @@ export const discoverSshHosts = DesktopIpc.makeIpcMethod({
   }),
 });
 
-export const resolveSshHost = DesktopIpc.makeIpcMethod({
-  channel: IpcChannels.RESOLVE_SSH_HOST_CHANNEL,
-  payload: Schema.String,
-  result: DesktopSshEnvironmentTargetSchema,
-  handler: Effect.fn("desktop.ipc.sshEnvironment.resolveHost")(function* (alias) {
-    const sshEnvironment = yield* DesktopSshEnvironment.DesktopSshEnvironment;
-    return yield* sshEnvironment.resolveHost(alias);
-  }),
-});
-
 export const ensureSshEnvironment = DesktopIpc.makeIpcMethod({
   channel: IpcChannels.ENSURE_SSH_ENVIRONMENT_CHANNEL,
   payload: DesktopSshEnvironmentEnsureInputSchema,
@@ -137,11 +127,13 @@ export const ensureSshEnvironment = DesktopIpc.makeIpcMethod({
   }) {
     const sshEnvironment = yield* DesktopSshEnvironment.DesktopSshEnvironment;
     return yield* sshEnvironment.ensureEnvironment(target, options).pipe(
-      Effect.catchIf(DesktopSshEnvironment.isDesktopSshPasswordPromptCancellation, (error) =>
-        Effect.succeed({
-          type: DesktopSshPasswordPromptCancelledType,
-          message: error.message,
-        }),
+      Effect.catch((error) =>
+        DesktopSshEnvironment.isDesktopSshPasswordPromptCancellation(error)
+          ? Effect.succeed({
+              type: DesktopSshPasswordPromptCancelledType,
+              message: error.message,
+            })
+          : Effect.fail(error),
       ),
     );
   }),

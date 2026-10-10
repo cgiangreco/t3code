@@ -15,15 +15,14 @@ export interface ListAccessPreviewFindingsRequest extends Omit<
  * Lists the findings a completed access preview produced. Provide the
  * implementation with
  * `Effect.provide(AWS.AccessAnalyzer.ListAccessPreviewFindingsHttp)`.
- * ### Access Previews
- * **Example:** Read Preview Findings
+ * @binding
+ * @section Access Previews
+ * @example Read Preview Findings
  * ```typescript
  * const listPreviewFindings =
  *   yield* AWS.AccessAnalyzer.ListAccessPreviewFindings(analyzer);
  * const page = yield* listPreviewFindings({ accessPreviewId });
  * ```
- *
- * @binding
  */
 export interface ListAccessPreviewFindings extends Binding.Service<
   ListAccessPreviewFindings,

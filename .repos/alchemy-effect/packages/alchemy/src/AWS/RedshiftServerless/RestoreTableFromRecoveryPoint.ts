@@ -10,8 +10,9 @@ import type { Namespace } from "./Namespace.ts";
  * Restores a single table from an automatic recovery point into the bound
  * {@link Namespace} under a new name. Provide the implementation with
  * `Effect.provide(AWS.RedshiftServerless.RestoreTableFromRecoveryPointHttp)`.
- * ### Restoring Data
- * **Example:** Restore One Table from a Recovery Point
+ * @binding
+ * @section Restoring Data
+ * @example Restore One Table from a Recovery Point
  * ```typescript
  * // init — resolve the runtime client
  * const restoreTable = yield* AWS.RedshiftServerless.RestoreTableFromRecoveryPoint(namespace);
@@ -24,8 +25,6 @@ import type { Namespace } from "./Namespace.ts";
  *   newTableName: "orders_restored",
  * });
  * ```
- *
- * @binding
  */
 export interface RestoreTableFromRecoveryPoint extends Binding.Service<
   RestoreTableFromRecoveryPoint,

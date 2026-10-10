@@ -14,8 +14,9 @@ import type { CertificateAuthority } from "./CertificateAuthority.ts";
  * Provide `ACMPCA.GetCertificateAuthorityCsrHttp` on the Function effect to
  * implement the binding.
  *
- * ### CA Activation
- * **Example:** Fetch the CA's CSR
+ * @binding
+ * @section CA Activation
+ * @example Fetch the CA's CSR
  * ```typescript
  * // init
  * const getCsr = yield* ACMPCA.GetCertificateAuthorityCsr(ca);
@@ -23,8 +24,6 @@ import type { CertificateAuthority } from "./CertificateAuthority.ts";
  * // runtime
  * const { Csr } = yield* getCsr();
  * ```
- *
- * @binding
  */
 export interface GetCertificateAuthorityCsr extends Binding.Service<
   GetCertificateAuthorityCsr,

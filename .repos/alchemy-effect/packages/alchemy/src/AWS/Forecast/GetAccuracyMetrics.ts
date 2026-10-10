@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * and grants `forecast:GetAccuracyMetrics` on `*`. Provide the
  * implementation with `Effect.provide(AWS.Forecast.GetAccuracyMetricsHttp)`.
  *
- * ### Training Predictors
- * **Example:** Gate on Accuracy
+ * @binding
+ * @section Training Predictors
+ * @example Gate on Accuracy
  * ```typescript
  * // init
  * const getAccuracyMetrics = yield* AWS.Forecast.GetAccuracyMetrics();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   PredictorArn: predictorArn,
  * });
  * ```
- *
- * @binding
  */
 export interface GetAccuracyMetrics extends Binding.Service<
   GetAccuracyMetrics,

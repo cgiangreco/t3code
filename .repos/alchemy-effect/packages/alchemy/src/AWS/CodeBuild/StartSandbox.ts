@@ -7,15 +7,14 @@ import type { Project } from "./Project.ts";
  * Runtime binding for `codebuild:StartSandbox` — launches an interactive
  * sandbox environment for the bound project. Run commands in it with
  * {@link StartCommandExecution}; stop it with {@link StopSandbox}.
- * ### Sandboxes
- * **Example:** Start a Sandbox
+ * @binding
+ * @section Sandboxes
+ * @example Start a Sandbox
  * ```typescript
  * const startSandbox = yield* AWS.CodeBuild.StartSandbox(project);
  *
  * const { sandbox } = yield* startSandbox();
  * ```
- *
- * @binding
  */
 export interface StartSandbox extends Binding.Service<
   StartSandbox,

@@ -7,8 +7,9 @@ import * as Binding from "../../Binding.ts";
  * integrate with Service Quotas (and their service codes) from inside a
  * Function.
  *
- * ### Listing Quotas
- * **Example:** Discover service codes
+ * @binding
+ * @section Listing Quotas
+ * @example Discover service codes
  * ```typescript
  * // init
  * const listServices = yield* AWS.ServiceQuotas.ListServices();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * const { Services } = yield* listServices({ MaxResults: 100 });
  * const lambda = Services?.find((s) => s.ServiceCode === "lambda");
  * ```
- *
- * @binding
  */
 export interface ListServices extends Binding.Service<
   ListServices,

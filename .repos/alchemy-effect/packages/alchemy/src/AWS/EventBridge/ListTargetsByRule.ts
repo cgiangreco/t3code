@@ -15,8 +15,9 @@ export interface ListTargetsByRuleRequest extends Omit<
  * Bind this operation to a {@link Rule} inside a function runtime to get a
  * callable that automatically injects the rule and bus names. Provide the
  * `ListTargetsByRuleHttp` layer on the Function to satisfy the binding.
- * ### Listing Targets
- * **Example:** List a Rule's Targets
+ * @binding
+ * @section Listing Targets
+ * @example List a Rule's Targets
  * ```typescript
  * // init — bind the rule (provide AWS.EventBridge.ListTargetsByRuleHttp on the Function)
  * const listTargets = yield* AWS.EventBridge.ListTargetsByRule(rule);
@@ -24,8 +25,6 @@ export interface ListTargetsByRuleRequest extends Omit<
  * // runtime — enumerate the rule's targets
  * const { Targets } = yield* listTargets();
  * ```
- *
- * @binding
  */
 export interface ListTargetsByRule extends Binding.Service<
   ListTargetsByRule,

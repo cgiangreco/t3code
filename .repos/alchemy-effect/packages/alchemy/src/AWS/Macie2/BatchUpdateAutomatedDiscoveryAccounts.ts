@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.BatchUpdateAutomatedDiscoveryAccountsHttp)`.
- * ### Automated Discovery
- * **Example:** Toggle Automated Discovery per Account
+ * @binding
+ * @section Automated Discovery
+ * @example Toggle Automated Discovery per Account
  * ```typescript
  * // init — account-level binding, no resource argument
  * const batchUpdateAutomatedDiscoveryAccounts = yield* AWS.Macie2.BatchUpdateAutomatedDiscoveryAccounts();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   accounts: [{ accountId, status: "ENABLED" }],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchUpdateAutomatedDiscoveryAccounts extends Binding.Service<
   BatchUpdateAutomatedDiscoveryAccounts,

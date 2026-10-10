@@ -13,16 +13,15 @@ export interface ListDeliveryStreamsRequest
  * `ExclusiveStartDeliveryStreamName` + `HasMoreDeliveryStreams`). Provide
  * the `ListDeliveryStreamsHttp` layer on the Function to satisfy the
  * binding.
- * ### Stream Metadata
- * **Example:** List Delivery Streams in the Region
+ * @binding
+ * @section Stream Metadata
+ * @example List Delivery Streams in the Region
  * ```typescript
  * const listDeliveryStreams = yield* AWS.Firehose.ListDeliveryStreams();
  *
  * const response = yield* listDeliveryStreams();
  * const names = response.DeliveryStreamNames;
  * ```
- *
- * @binding
  */
 export interface ListDeliveryStreams extends Binding.Service<
   ListDeliveryStreams,

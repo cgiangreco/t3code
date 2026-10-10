@@ -26,8 +26,9 @@ export interface StartMessageMoveTaskRequest extends Omit<
  *
  * Provide the `StartMessageMoveTaskHttp` layer on the Function to implement
  * the binding.
- * ### Dead-Letter Queue Redrive
- * **Example:** Redrive a DLQ into a Specific Queue
+ * @binding
+ * @section Dead-Letter Queue Redrive
+ * @example Redrive a DLQ into a Specific Queue
  * ```typescript
  * // init (provide SQS.StartMessageMoveTaskHttp on the Function)
  * const startMessageMoveTask = yield* SQS.StartMessageMoveTask(dlq, {
@@ -38,12 +39,10 @@ export interface StartMessageMoveTaskRequest extends Omit<
  * const { TaskHandle } = yield* startMessageMoveTask();
  * ```
  *
- * **Example:** Rate-Limited Redrive
+ * @example Rate-Limited Redrive
  * ```typescript
  * yield* startMessageMoveTask({ MaxNumberOfMessagesPerSecond: 10 });
  * ```
- *
- * @binding
  */
 export interface StartMessageMoveTask extends Binding.Service<
   StartMessageMoveTask,

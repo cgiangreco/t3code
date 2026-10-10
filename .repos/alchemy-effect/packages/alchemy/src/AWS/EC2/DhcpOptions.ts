@@ -100,8 +100,9 @@ export interface DhcpOptions extends Resource<
  * account's default options set, since a set must be disassociated from every
  * VPC before it can be deleted.
  *
- * ### Creating a DHCP Options Set
- * **Example:** Custom DNS and Search Domain
+ * @resource
+ * @section Creating a DHCP Options Set
+ * @example Custom DNS and Search Domain
  * ```typescript
  * const dhcp = yield* AWS.EC2.DhcpOptions("CorpDhcp", {
  *   domainName: "corp.internal",
@@ -113,7 +114,7 @@ export interface DhcpOptions extends Resource<
  * Instances launched into the VPC receive the `corp.internal` search domain and
  * the listed DNS servers.
  *
- * **Example:** NTP and NetBIOS Configuration
+ * @example NTP and NetBIOS Configuration
  * ```typescript
  * const dhcp = yield* AWS.EC2.DhcpOptions("Dhcp", {
  *   ntpServers: ["169.254.169.123"],
@@ -123,8 +124,6 @@ export interface DhcpOptions extends Resource<
  * ```
  * Creates an unassociated options set that you can associate later by setting
  * `vpcId`.
- *
- * @resource
  */
 export const DhcpOptions = Resource<DhcpOptions>("AWS.EC2.DhcpOptions");
 

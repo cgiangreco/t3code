@@ -16,8 +16,9 @@ export interface GetProductsRequest extends pricing.GetProductsRequest {}
  * string describing one product and its terms. Provide the implementation
  * with `Effect.provide(AWS.Pricing.GetProductsHttp)`.
  *
- * ### Querying Products
- * **Example:** Look Up EC2 On-Demand Pricing
+ * @binding
+ * @section Querying Products
+ * @example Look Up EC2 On-Demand Pricing
  * ```typescript
  * // init
  * const getProducts = yield* AWS.Pricing.GetProducts();
@@ -34,8 +35,6 @@ export interface GetProductsRequest extends pricing.GetProductsRequest {}
  * });
  * const products = (result.PriceList ?? []).map((item) => JSON.parse(item));
  * ```
- *
- * @binding
  */
 export interface GetProducts extends Binding.Service<
   GetProducts,

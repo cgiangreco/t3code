@@ -102,8 +102,9 @@ export interface Index extends Resource<
  * An index bills hourly per provisioned capacity unit from the moment it
  * becomes `ACTIVE`. Destroy test indexes promptly.
  * :::
- * ### Creating Indexes
- * **Example:** Starter Index
+ * @resource
+ * @section Creating Indexes
+ * @example Starter Index
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -112,7 +113,7 @@ export interface Index extends Resource<
  * });
  * ```
  *
- * **Example:** Enterprise Index with Extra Capacity
+ * @example Enterprise Index with Extra Capacity
  * ```typescript
  * const index = yield* AWS.QBusiness.Index("Docs", {
  *   applicationId: app.applicationId,
@@ -120,8 +121,6 @@ export interface Index extends Resource<
  *   capacityConfiguration: { units: 2 },
  * });
  * ```
- *
- * @resource
  */
 export const Index = Resource<Index>("AWS.QBusiness.Index");
 

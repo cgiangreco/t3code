@@ -5,28 +5,37 @@ import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
-import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 import {
   type CodexSettings,
   DEFAULT_TEXT_GENERATION_REASONING_EFFORT,
-  type ServerProviderModel,
+  type ModelSelection,
   TextGenerationError,
 } from "@t3tools/contracts";
+import { sanitizeBranchFragment, sanitizeFeatureBranchName } from "@t3tools/shared/git";
 import { resolveSpawnCommand } from "@t3tools/shared/shell";
 
 import { resolveAttachmentPath } from "../attachmentStore.ts";
 import * as ServerConfig from "../config.ts";
-import { expandHomePath } from "@t3tools/provider-core/server/pathExpansion";
-import { codexExecLaunchArgs, resolveCodexLaunchArgs } from "../provider/codexLaunchArgs.ts";
-import * as TextGenerationOperations from "@t3tools/provider-core/server/textGenerationOperations";
+import { expandHomePath } from "../pathExpansion.ts";
+import { codexExecLaunchArgs, resolveCodexLaunchArgs } from "../provider/Layers/codexLaunchArgs.ts";
+import * as TextGeneration from "./TextGeneration.ts";
+import {
+  buildBranchNamePrompt,
+  buildCommitMessagePrompt,
+  buildPrContentPrompt,
+  buildThreadTitlePrompt,
+} from "./TextGenerationPrompts.ts";
 import {
   normalizeCliError,
+  sanitizeCommitSubject,
+  sanitizePrTitle,
+  sanitizeThreadTitle,
   toJsonSchemaObject,
-} from "@t3tools/provider-core/server/textGenerationUtils";
-import { codexModelFamily, getModelSelectionStringOptionValue } from "@t3tools/shared/model";
+} from "./TextGenerationUtils.ts";
+import { getModelSelectionStringOptionValue } from "@t3tools/shared/model";
 import { getCodexServiceTierOptionValue } from "../codexModelOptions.ts";
-import * as HostProcess from "@t3tools/shared/HostProcess";
 
 const CODEX_TIMEOUT_MS = 180_000;
 const encodeJsonString = Schema.encodeEffect(Schema.fromJsonString(Schema.Unknown));
@@ -37,18 +46,16 @@ const encodeJsonString = Schema.encodeEffect(Schema.fromJsonString(Schema.Unknow
 export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(function* (
   codexConfig: CodexSettings,
   environment?: NodeJS.ProcessEnv,
-  getModels: Effect.Effect<ReadonlyArray<ServerProviderModel>> = Effect.succeed([]),
-  resolveRuntime?: Effect.Effect<
-    import("../provider/CodexManagedRuntime.ts").CodexEffectiveRuntime,
-    import("@t3tools/contracts").ProviderSetupError,
-    Scope.Scope
-  >,
 ) {
   const fileSystem = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const commandSpawner = yield* ChildProcessSpawner.ChildProcessSpawner;
   const serverConfig = yield* Effect.service(ServerConfig.ServerConfig);
   const resolvedEnvironment = environment ?? process.env;
+
+  type MaterializedImageAttachments = {
+    readonly imagePaths: ReadonlyArray<string>;
+  };
 
   const readStreamAsString = <E>(
     operation: string,
@@ -65,30 +72,17 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
       ),
     );
 
-  const removeTempFileDir = (filePath: string): Effect.Effect<void, never> =>
-    fileSystem
-      .remove(path.dirname(filePath), { recursive: true })
-      .pipe(Effect.catch(() => Effect.void));
-
-  // Deliberately unscoped: text generation runs from background fibers whose
-  // ambient scope may already be closed (a closed scope reaps the temp
-  // directory the moment it is created). Each allocation removes its own
-  // directory on failure; success-path cleanup is explicit in runCodexJson.
   const writeTempFile = (
     operation: string,
     prefix: string,
     content: string,
-  ): Effect.Effect<string, TextGenerationError> =>
+  ): Effect.Effect<string, TextGenerationError, Scope.Scope> =>
     fileSystem
-      .makeTempFile({
+      .makeTempFileScoped({
         prefix: `t3code-${prefix}-${process.pid}-`,
       })
       .pipe(
-        Effect.tap((filePath) =>
-          fileSystem
-            .writeFileString(filePath, content)
-            .pipe(Effect.onError(() => removeTempFileDir(filePath))),
-        ),
+        Effect.tap((filePath) => fileSystem.writeFileString(filePath, content)),
         Effect.mapError(
           (cause) =>
             new TextGenerationError({
@@ -99,8 +93,15 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
         ),
       );
 
+  const safeUnlink = (filePath: string): Effect.Effect<void, never> =>
+    fileSystem.remove(filePath).pipe(Effect.catch(() => Effect.void));
+
   const encodeJsonForOperation = (
-    operation: TextGenerationOperations.Operation,
+    operation:
+      | "generateCommitMessage"
+      | "generatePrContent"
+      | "generateBranchName"
+      | "generateThreadTitle",
     value: unknown,
   ): Effect.Effect<string, TextGenerationError> =>
     encodeJsonString(value).pipe(
@@ -115,10 +116,15 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
     );
 
   const materializeImageAttachments = Effect.fn("materializeImageAttachments")(function* (
-    attachments: TextGenerationOperations.Request<Schema.Top>["attachments"],
-  ) {
+    _operation:
+      | "generateCommitMessage"
+      | "generatePrContent"
+      | "generateBranchName"
+      | "generateThreadTitle",
+    attachments: TextGeneration.BranchNameGenerationInput["attachments"],
+  ): Effect.fn.Return<MaterializedImageAttachments, TextGenerationError> {
     if (!attachments || attachments.length === 0) {
-      return [];
+      return { imagePaths: [] };
     }
 
     const imagePaths: string[] = [];
@@ -140,56 +146,45 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
       }
       imagePaths.push(resolvedPath);
     }
-    return imagePaths;
+    return { imagePaths };
   });
 
   const runCodexJson = Effect.fn("runCodexJson")(function* <S extends Schema.Top>({
     operation,
     cwd,
     prompt,
-    outputSchema: outputSchemaJson,
+    outputSchemaJson,
+    imagePaths = [],
+    cleanupPaths = [],
     modelSelection,
-    attachments,
-  }: TextGenerationOperations.Request<S>): Effect.fn.Return<
-    S["Type"],
-    TextGenerationError,
-    S["DecodingServices"]
-  > {
-    const imagePaths = yield* materializeImageAttachments(attachments);
+  }: {
+    operation:
+      | "generateCommitMessage"
+      | "generatePrContent"
+      | "generateBranchName"
+      | "generateThreadTitle";
+    cwd: string;
+    prompt: string;
+    outputSchemaJson: S;
+    imagePaths?: ReadonlyArray<string>;
+    cleanupPaths?: ReadonlyArray<string>;
+    modelSelection: ModelSelection;
+  }): Effect.fn.Return<S["Type"], TextGenerationError, S["DecodingServices"]> {
     const schemaJson = yield* encodeJsonForOperation(
       operation,
       toJsonSchemaObject(outputSchemaJson),
     );
     const schemaPath = yield* writeTempFile(operation, "codex-schema", schemaJson);
-    const outputPath = yield* writeTempFile(operation, "codex-output", "").pipe(
-      Effect.onError(() => removeTempFileDir(schemaPath)),
-    );
+    const outputPath = yield* writeTempFile(operation, "codex-output", "");
 
     const runCodexCommand = Effect.fn("runCodexJson.runCodexCommand")(function* () {
-      const resolved = resolveRuntime
-        ? yield* resolveRuntime.pipe(
-            Effect.mapError(
-              (cause) => new TextGenerationError({ operation, detail: cause.detail }),
-            ),
-          )
-        : undefined;
-      const effectiveConfig = resolved?.config ?? codexConfig;
-      const effectiveEnvironment = resolved?.environment ?? resolvedEnvironment;
-      const models = yield* getModels;
-      const requestedModel = modelSelection.model;
-      const model =
-        models.find((candidate) => candidate.slug === requestedModel)?.slug ??
-        models.find(
-          (candidate) => !candidate.isCustom && codexModelFamily(candidate.slug) === requestedModel,
-        )?.slug ??
-        requestedModel;
-      const launchArgs = resolveCodexLaunchArgs(effectiveConfig.launchArgs, effectiveEnvironment);
+      const launchArgs = resolveCodexLaunchArgs(codexConfig.launchArgs, resolvedEnvironment);
       const reasoningEffort =
         getModelSelectionStringOptionValue(modelSelection, "reasoningEffort") ??
         DEFAULT_TEXT_GENERATION_REASONING_EFFORT;
-      const serviceTier = resolved ? undefined : getCodexServiceTierOptionValue(modelSelection);
+      const serviceTier = getCodexServiceTierOptionValue(modelSelection);
       const spawnCommand = yield* resolveSpawnCommand(
-        effectiveConfig.binaryPath || "codex",
+        codexConfig.binaryPath || "codex",
         [
           "exec",
           ...codexExecLaunchArgs(launchArgs),
@@ -198,7 +193,7 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
           "-s",
           "read-only",
           "--model",
-          model,
+          modelSelection.model,
           "--config",
           `model_reasoning_effort="${reasoningEffort}"`,
           ...(serviceTier ? ["--config", `service_tier="${serviceTier}"`] : []),
@@ -209,19 +204,12 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
           ...imagePaths.flatMap((imagePath) => ["--image", imagePath]),
           "-",
         ],
-        { env: effectiveEnvironment },
+        { env: resolvedEnvironment },
       );
       const command = ChildProcess.make(spawnCommand.command, spawnCommand.args, {
         env: {
-          ...effectiveEnvironment,
-          ...(effectiveConfig.homePath
-            ? {
-                CODEX_HOME: expandHomePath(
-                  effectiveConfig.homePath,
-                  yield* HostProcess.HomeDirectory,
-                ),
-              }
-            : {}),
+          ...resolvedEnvironment,
+          ...(codexConfig.homePath ? { CODEX_HOME: expandHomePath(codexConfig.homePath) } : {}),
         },
         cwd,
         shell: spawnCommand.shell,
@@ -265,9 +253,12 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
       }
     });
 
-    const cleanup = Effect.all([removeTempFileDir(schemaPath), removeTempFileDir(outputPath)], {
-      concurrency: "unbounded",
-    }).pipe(Effect.asVoid);
+    const cleanup = Effect.all(
+      [schemaPath, outputPath, ...cleanupPaths].map((filePath) => safeUnlink(filePath)),
+      {
+        concurrency: "unbounded",
+      },
+    ).pipe(Effect.asVoid);
 
     return yield* Effect.gen(function* () {
       yield* runCodexCommand().pipe(
@@ -310,5 +301,114 @@ export const makeCodexTextGeneration = Effect.fn("makeCodexTextGeneration")(func
     }).pipe(Effect.ensuring(cleanup));
   });
 
-  return TextGenerationOperations.fromRunner("CodexTextGeneration", runCodexJson);
+  const generateCommitMessage: TextGeneration.TextGeneration["Service"]["generateCommitMessage"] =
+    Effect.fn("CodexTextGeneration.generateCommitMessage")(function* (input) {
+      const { prompt, outputSchema } = buildCommitMessagePrompt({
+        branch: input.branch,
+        stagedSummary: input.stagedSummary,
+        stagedPatch: input.stagedPatch,
+        includeBranch: input.includeBranch === true,
+        policy: input.policy,
+      });
+
+      const generated = yield* runCodexJson({
+        operation: "generateCommitMessage",
+        cwd: input.cwd,
+        prompt,
+        outputSchemaJson: outputSchema,
+        modelSelection: input.modelSelection,
+      });
+
+      return {
+        subject: sanitizeCommitSubject(generated.subject),
+        body: generated.body.trim(),
+        ...("branch" in generated && typeof generated.branch === "string"
+          ? { branch: sanitizeFeatureBranchName(generated.branch) }
+          : {}),
+      };
+    });
+
+  const generatePrContent: TextGeneration.TextGeneration["Service"]["generatePrContent"] =
+    Effect.fn("CodexTextGeneration.generatePrContent")(function* (input) {
+      const { prompt, outputSchema } = buildPrContentPrompt({
+        baseBranch: input.baseBranch,
+        headBranch: input.headBranch,
+        commitSummary: input.commitSummary,
+        diffSummary: input.diffSummary,
+        diffPatch: input.diffPatch,
+        policy: input.policy,
+        changeRequestTemplate: input.changeRequestTemplate,
+      });
+
+      const generated = yield* runCodexJson({
+        operation: "generatePrContent",
+        cwd: input.cwd,
+        prompt,
+        outputSchemaJson: outputSchema,
+        modelSelection: input.modelSelection,
+      });
+
+      return {
+        title: sanitizePrTitle(generated.title),
+        body: generated.body.trim(),
+      };
+    });
+
+  const generateBranchName: TextGeneration.TextGeneration["Service"]["generateBranchName"] =
+    Effect.fn("CodexTextGeneration.generateBranchName")(function* (input) {
+      const { imagePaths } = yield* materializeImageAttachments(
+        "generateBranchName",
+        input.attachments,
+      );
+      const { prompt, outputSchema } = buildBranchNamePrompt({
+        message: input.message,
+        attachments: input.attachments,
+      });
+
+      const generated = yield* runCodexJson({
+        operation: "generateBranchName",
+        cwd: input.cwd,
+        prompt,
+        outputSchemaJson: outputSchema,
+        imagePaths,
+        modelSelection: input.modelSelection,
+      });
+
+      return {
+        branch: sanitizeBranchFragment(generated.branch),
+      };
+    });
+
+  const generateThreadTitle: TextGeneration.TextGeneration["Service"]["generateThreadTitle"] =
+    Effect.fn("CodexTextGeneration.generateThreadTitle")(function* (input) {
+      const { imagePaths } = yield* materializeImageAttachments(
+        "generateThreadTitle",
+        input.attachments,
+      );
+      const { prompt, outputSchema } = buildThreadTitlePrompt({
+        message: input.message,
+        previousTitle: input.previousTitle,
+        attachments: input.attachments,
+      });
+
+      const generated = yield* runCodexJson({
+        operation: "generateThreadTitle",
+        cwd: input.cwd,
+        prompt,
+        outputSchemaJson: outputSchema,
+        imagePaths,
+        modelSelection: input.modelSelection,
+      });
+
+      return {
+        title: sanitizeThreadTitle(generated.title),
+      } satisfies TextGeneration.ThreadTitleGenerationResult;
+    });
+
+  return {
+    generateCommitMessage,
+    generatePrContent,
+    generateBranchName,
+    generateThreadTitle,
+  } satisfies TextGeneration.TextGeneration["Service"];
 });

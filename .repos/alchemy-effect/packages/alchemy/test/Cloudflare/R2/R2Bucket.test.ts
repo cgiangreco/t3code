@@ -21,7 +21,6 @@ test.provider(
       const bucket = yield* stack.deploy(
         Effect.gen(function* () {
           return yield* Cloudflare.R2.Bucket("ListResource", {
-            forceDestroy: true,
             name: "alchemy-r2bucket-list-test",
           });
         }),
@@ -45,8 +44,5 @@ test.provider(
   // parallel suite is concurrently deleting, but a heavily-populated shared
   // account can still take a while — keep a modest margin over the 120s
   // default for the genuine enumeration cost.
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:r2", "live"],
-    timeout: 180_000,
-  },
+  { timeout: 180_000 },
 );

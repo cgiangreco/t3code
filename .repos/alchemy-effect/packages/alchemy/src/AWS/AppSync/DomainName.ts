@@ -59,8 +59,9 @@ export interface AppSyncDomainName extends Resource<
  * Requires an ACM certificate **in us-east-1** (the domain is
  * CloudFront-backed). Attach an API with {@link ApiAssociation} and point
  * DNS at the `appsyncDomainName` attribute.
- * ### Creating Custom Domains
- * **Example:** Custom domain + API association
+ * @resource
+ * @section Creating Custom Domains
+ * @example Custom domain + API association
  * ```typescript
  * const domain = yield* AppSync.DomainName("Domain", {
  *   domainName: "api.example.com",
@@ -69,8 +70,6 @@ export interface AppSyncDomainName extends Resource<
  * yield* AppSync.ApiAssociation("Assoc", { domain, api });
  * // CNAME api.example.com → domain.appsyncDomainName
  * ```
- *
- * @resource
  */
 export const DomainName = Resource<AppSyncDomainName>("AWS.AppSync.DomainName");
 

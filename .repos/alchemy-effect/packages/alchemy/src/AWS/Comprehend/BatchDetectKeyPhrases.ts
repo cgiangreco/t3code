@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * real-time APIs the action has no resource-level IAM, so the binding takes
  * no arguments and grants the action on `*`.
  *
- * ### Batch Real-Time Analysis
- * **Example:** KeyPhrases for a Batch of Documents
+ * @binding
+ * @section Batch Real-Time Analysis
+ * @example KeyPhrases for a Batch of Documents
  * ```typescript
  * // init
  * const batchDetectKeyPhrases = yield* AWS.Comprehend.BatchDetectKeyPhrases();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // result.ResultList[0].KeyPhrases
  * ```
- *
- * @binding
  */
 export interface BatchDetectKeyPhrases extends Binding.Service<
   BatchDetectKeyPhrases,

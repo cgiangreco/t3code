@@ -27,8 +27,9 @@ export interface CreateAnonymousWebExperienceUrlRequest {
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.CreateAnonymousWebExperienceUrlHttp)`.
  *
- * ### Anonymous Access
- * **Example:** Mint an Anonymous Chat URL
+ * @binding
+ * @section Anonymous Access
+ * @example Mint an Anonymous Chat URL
  * ```typescript
  * const createUrl =
  *   yield* AWS.QBusiness.CreateAnonymousWebExperienceUrl(web);
@@ -37,8 +38,6 @@ export interface CreateAnonymousWebExperienceUrlRequest {
  *   sessionDuration: "30 minutes",
  * });
  * ```
- *
- * @binding
  */
 export interface CreateAnonymousWebExperienceUrl extends Binding.Service<
   CreateAnonymousWebExperienceUrl,

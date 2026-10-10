@@ -15,8 +15,9 @@ export interface UpdateBrowserStreamRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.UpdateBrowserStreamHttp`
  * on the Function effect to implement the binding.
  *
- * ### Browser Automation
- * **Example:** Release the Automation Stream
+ * @binding
+ * @section Browser Automation
+ * @example Release the Automation Stream
  * ```typescript
  * // init
  * const updateBrowserStream = yield* AgentCore.UpdateBrowserStream(browser);
@@ -34,8 +35,6 @@ export interface UpdateBrowserStreamRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface UpdateBrowserStream extends Binding.Service<
   UpdateBrowserStream,

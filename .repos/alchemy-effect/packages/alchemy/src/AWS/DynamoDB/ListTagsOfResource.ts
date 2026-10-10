@@ -14,16 +14,15 @@ export interface ListTagsOfResourceRequest extends Omit<
  * Bind this operation to a `Table` inside a function runtime to get a callable
  * that lists the table's tags, automatically injecting the table ARN. Provide
  * the `ListTagsOfResourceHttp` layer on the Function to satisfy the binding.
- * ### Table Metadata
- * **Example:** List the Bound Table's Tags
+ * @binding
+ * @section Table Metadata
+ * @example List the Bound Table's Tags
  * ```typescript
  * const listTagsOfResource = yield* AWS.DynamoDB.ListTagsOfResource(table);
  *
  * const response = yield* listTagsOfResource();
  * const tags = response.Tags;
  * ```
- *
- * @binding
  */
 export interface ListTagsOfResource extends Binding.Service<
   ListTagsOfResource,

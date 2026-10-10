@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * `mediaconvert:GetJobsQueryResults` on `*`. Provide the implementation with
  * `Effect.provide(AWS.MediaConvert.GetJobsQueryResultsHttp)`.
  *
- * ### Tracking Jobs
- * **Example:** Fetch Query Results
+ * @binding
+ * @section Tracking Jobs
+ * @example Fetch Query Results
  * ```typescript
  * // init
  * const getJobsQueryResults = yield* AWS.MediaConvert.GetJobsQueryResults();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   const jobs = results.Jobs ?? [];
  * }
  * ```
- *
- * @binding
  */
 export interface GetJobsQueryResults extends Binding.Service<
   GetJobsQueryResults,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * (`Resource: "*"`).
  * Provide the implementation with
  * `Effect.provide(AWS.SSMIncidents.DeleteTimelineEventHttp)`.
- * ### Timeline Events
- * **Example:** Delete A Timeline Event
+ * @binding
+ * @section Timeline Events
+ * @example Delete A Timeline Event
  * ```typescript
  * // init
  * const deleteTimelineEvent = yield* AWS.SSMIncidents.DeleteTimelineEvent();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteTimelineEvent({ incidentRecordArn, eventId });
  * ```
- *
- * @binding
  */
 export interface DeleteTimelineEvent extends Binding.Service<
   DeleteTimelineEvent,

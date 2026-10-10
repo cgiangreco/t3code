@@ -17,8 +17,9 @@ export interface GetComplianceDetailsByConfigRuleRequest extends Omit<
  *
  * Provide `Config.GetComplianceDetailsByConfigRuleHttp` on the hosting
  * Lambda Function to satisfy the requirement.
- * ### Reading Compliance
- * **Example:** Read a Rule's Evaluation Results
+ * @binding
+ * @section Reading Compliance
+ * @example Read a Rule's Evaluation Results
  * ```typescript
  * // init — grants config:GetComplianceDetailsByConfigRule
  * const getComplianceDetails =
@@ -30,8 +31,6 @@ export interface GetComplianceDetailsByConfigRuleRequest extends Omit<
  * });
  * console.log(result.EvaluationResults);
  * ```
- *
- * @binding
  */
 export interface GetComplianceDetailsByConfigRule extends Binding.Service<
   GetComplianceDetailsByConfigRule,

@@ -16,8 +16,9 @@ export interface UpdateUsageRequest extends Omit<
  * Provide `ApiGateway.UpdateUsageHttp` on the Function effect to implement
  * the binding.
  *
- * ### Metering usage
- * **Example:** Extend a key's remaining quota
+ * @binding
+ * @section Metering usage
+ * @example Extend a key's remaining quota
  * ```typescript
  * // init
  * const updateUsage = yield* ApiGateway.UpdateUsage(plan);
@@ -30,8 +31,6 @@ export interface UpdateUsageRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateUsage extends Binding.Service<
   UpdateUsage,

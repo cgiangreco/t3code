@@ -91,8 +91,11 @@ export type CustomTrustStore = Resource<
  * no ownership markers, so a cold `read` scans the zone for a certificate
  * with the same PEM body and reports it as `Unowned` — the engine refuses
  * to take it over unless `--adopt` (or `adopt(true)`) is set.
- * ### Uploading a root CA
- * **Example:** Trust a private root CA for origin pulls
+ * @resource
+ * @product ACM
+ * @category SSL/TLS & Certificates
+ * @section Uploading a root CA
+ * @example Trust a private root CA for origin pulls
  * ```typescript
  * const trustStore = yield* Cloudflare.Acm.CustomTrustStore("OriginRootCa", {
  *   zoneId: zone.zoneId,
@@ -100,7 +103,7 @@ export type CustomTrustStore = Resource<
  * });
  * ```
  *
- * **Example:** Load the PEM from a file
+ * @example Load the PEM from a file
  * ```typescript
  * const fs = yield* FileSystem.FileSystem;
  * const pem = yield* fs.readFileString("./certs/root-ca.pem");
@@ -111,10 +114,6 @@ export type CustomTrustStore = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api/resources/acm/
- *
- * @resource
- * @product ACM
- * @category SSL/TLS & Certificates
  */
 export const CustomTrustStore = Resource<CustomTrustStore>(TypeId);
 

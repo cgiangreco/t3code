@@ -130,8 +130,9 @@ export interface Environment extends Resource<
  * Authentication is resolved via the `GitHubCredentials` service supplied
  * by `GitHub.providers()` (env, stored PAT, `gh` CLI, or OAuth). The token
  * needs `repo` scope.
- * ### Creating an Environment
- * **Example:** Basic Environment
+ * @resource
+ * @section Creating an Environment
+ * @example Basic Environment
  * ```typescript
  * const production = yield* GitHub.Environment("production", {
  *   owner: "my-org",
@@ -140,7 +141,7 @@ export interface Environment extends Resource<
  * });
  * ```
  *
- * **Example:** Environment with Protection Rules
+ * @example Environment with Protection Rules
  * ```typescript
  * yield* GitHub.Environment("production", {
  *   owner: "my-org",
@@ -155,8 +156,8 @@ export interface Environment extends Resource<
  * });
  * ```
  *
- * ### Deployment Branch Policies
- * **Example:** Restrict to Protected Branches
+ * @section Deployment Branch Policies
+ * @example Restrict to Protected Branches
  * ```typescript
  * yield* GitHub.Environment("production", {
  *   owner: "my-org",
@@ -166,7 +167,7 @@ export interface Environment extends Resource<
  * });
  * ```
  *
- * **Example:** Restrict to Branch Name Patterns
+ * @example Restrict to Branch Name Patterns
  * ```typescript
  * yield* GitHub.Environment("production", {
  *   owner: "my-org",
@@ -178,8 +179,8 @@ export interface Environment extends Resource<
  * });
  * ```
  *
- * ### Environment Secrets and Variables
- * **Example:** Scope Secrets and Variables to the Environment
+ * @section Environment Secrets and Variables
+ * @example Scope Secrets and Variables to the Environment
  * ```typescript
  * const env = yield* GitHub.Environment("production", {
  *   owner: "my-org",
@@ -203,9 +204,6 @@ export interface Environment extends Resource<
  *   value: "us-east-1",
  * });
  * ```
- *
- * @resource
- * @product Actions
  */
 export const Environment = Resource<Environment>("GitHub.Environment");
 

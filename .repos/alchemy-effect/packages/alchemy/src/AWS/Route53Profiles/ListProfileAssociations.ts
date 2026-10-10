@@ -23,8 +23,9 @@ export interface ListProfileAssociationsRequest extends Omit<
  *
  * Provide `AWS.Route53Profiles.ListProfileAssociationsHttp` on the hosting
  * Lambda Function to satisfy the requirement.
- * ### Listing VPC Associations
- * **Example:** Enumerate the VPCs a Profile applies to
+ * @binding
+ * @section Listing VPC Associations
+ * @example Enumerate the VPCs a Profile applies to
  * ```typescript
  * // init — grants route53profiles:ListProfileAssociations
  * const listProfileAssociations =
@@ -36,8 +37,6 @@ export interface ListProfileAssociationsRequest extends Omit<
  *   yield* Effect.log(`${association.ResourceId}: ${association.Status}`);
  * }
  * ```
- *
- * @binding
  */
 export interface ListProfileAssociations extends Binding.Service<
   ListProfileAssociations,

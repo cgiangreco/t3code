@@ -30,15 +30,7 @@ const isKvsNotReady = (error: unknown) => {
   return tag === "ResourceNotFoundException" || tag === "ConflictException";
 };
 
-/**
- * Bounded KVS retry: exponential backoff with the per-attempt delay capped
- * at 2s and at most 24 recurrences (~45s worst case). NEVER use a bare
- * `Schedule.max([Schedule.exponential(...), Schedule.recurs(n)])` for KVS
- * retries — `recurs` bounds the COUNT, not the TIME, and an uncapped
- * exponential makes the tail attempts wait minutes-to-hours (24 attempts
- * at 100ms doubling total ~19 days), which reads as a silent hang.
- */
-export const cappedKvsRetrySchedule = Schedule.max([
+const cappedKvsRetrySchedule = Schedule.max([
   Schedule.exponential("100 millis"),
   Schedule.recurs(24),
 ]).pipe(
@@ -65,5 +57,6 @@ export const getKvsEtag = Effect.fn(function* (store: string) {
 });
 
 export const isKvsPreconditionFailed = (err: kvs.ValidationException) =>
-  typeof err.message === "string" &&
-  err.message.includes("Pre-Condition failed");
+  "Message" in err &&
+  typeof err.Message === "string" &&
+  err.Message.includes("Pre-Condition failed");

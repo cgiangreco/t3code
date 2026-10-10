@@ -20,16 +20,15 @@ export interface UpdateChatControlsConfigurationRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.UpdateChatControlsConfigurationHttp)`.
  *
- * ### Admin Controls
- * **Example:** Restrict Responses to Enterprise Content
+ * @binding
+ * @section Admin Controls
+ * @example Restrict Responses to Enterprise Content
  * ```typescript
  * const updateControls =
  *   yield* AWS.QBusiness.UpdateChatControlsConfiguration(app);
  *
  * yield* updateControls({ responseScope: "ENTERPRISE_CONTENT_ONLY" });
  * ```
- *
- * @binding
  */
 export interface UpdateChatControlsConfiguration extends Binding.Service<
   UpdateChatControlsConfiguration,

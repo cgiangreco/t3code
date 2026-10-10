@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * the function can hand the service the job's execution role. The account id
  * is resolved once via `sts:GetCallerIdentity`. Provide the implementation
  * with `Effect.provide(AWS.S3Control.CreateJobHttp)`.
- * ### Running Batch Operations Jobs
- * **Example:** Submit a Suspended Tagging Job
+ * @binding
+ * @section Running Batch Operations Jobs
+ * @example Submit a Suspended Tagging Job
  * ```typescript
  * // init — account-level binding, no resource argument
  * const createJob = yield* AWS.S3Control.CreateJob();
@@ -34,8 +35,6 @@ import * as Binding from "../../Binding.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface CreateJob extends Binding.Service<
   CreateJob,

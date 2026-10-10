@@ -18,7 +18,7 @@ const AGENT_AWARENESS_DEVICE_ID_KEY = "t3code.agent-awareness.device-id";
 const AGENT_AWARENESS_REGISTRATION_KEY = "t3code.agent-awareness.registration";
 const RECENT_THREAD_SHORTCUTS_KEY = "t3code.recent-thread-shortcuts";
 
-export class MobileStorageDecodeError extends Schema.TaggedError<MobileStorageDecodeError>()(
+export class MobileStorageDecodeError extends Schema.TaggedErrorClass<MobileStorageDecodeError>()(
   "MobileStorageDecodeError",
   {
     key: Schema.String,
@@ -30,7 +30,7 @@ export class MobileStorageDecodeError extends Schema.TaggedError<MobileStorageDe
   }
 }
 
-export class MobileStorageEncodeError extends Schema.TaggedError<MobileStorageEncodeError>()(
+export class MobileStorageEncodeError extends Schema.TaggedErrorClass<MobileStorageEncodeError>()(
   "MobileStorageEncodeError",
   {
     key: Schema.String,
@@ -42,7 +42,7 @@ export class MobileStorageEncodeError extends Schema.TaggedError<MobileStorageEn
   }
 }
 
-export class MobileDeviceIdGenerationError extends Schema.TaggedError<MobileDeviceIdGenerationError>()(
+export class MobileDeviceIdGenerationError extends Schema.TaggedErrorClass<MobileDeviceIdGenerationError>()(
   "MobileDeviceIdGenerationError",
   { cause: Schema.Defect() },
 ) {

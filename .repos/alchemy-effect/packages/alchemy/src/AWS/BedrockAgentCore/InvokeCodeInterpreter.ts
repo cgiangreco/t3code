@@ -17,8 +17,9 @@ export interface InvokeCodeInterpreterRequest extends Omit<
  * `AgentCore.InvokeCodeInterpreterHttp` on the Function effect to implement
  * the binding.
  *
- * ### Executing Code
- * **Example:** Run Python in a Session
+ * @binding
+ * @section Executing Code
+ * @example Run Python in a Session
  * ```typescript
  * // init
  * const invoke = yield* AgentCore.InvokeCodeInterpreter(interpreter);
@@ -31,8 +32,6 @@ export interface InvokeCodeInterpreterRequest extends Omit<
  * });
  * const chunks = yield* Stream.runCollect(result.stream);
  * ```
- *
- * @binding
  */
 export interface InvokeCodeInterpreter extends Binding.Service<
   InvokeCodeInterpreter,

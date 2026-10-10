@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * the org-governance automation hook.
  * Provide the implementation with
  * `Effect.provide(AWS.Detective.EnableOrganizationAdminAccountHttp)`.
- * ### Organization Administration
- * **Example:** Delegate The Security Account
+ * @binding
+ * @section Organization Administration
+ * @example Delegate The Security Account
  * ```typescript
  * // init — account-level binding, no resource argument
  * const enableOrganizationAdminAccount =
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* enableOrganizationAdminAccount({ AccountId: securityAccountId });
  * ```
- *
- * @binding
  */
 export interface EnableOrganizationAdminAccount extends Binding.Service<
   EnableOrganizationAdminAccount,

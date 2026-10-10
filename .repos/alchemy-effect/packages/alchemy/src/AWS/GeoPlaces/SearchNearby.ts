@@ -12,12 +12,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-places:SearchNearby`. Requests and responses are raw distilled types
  * (no marshalling).
  *
- * ### Searching Nearby Places
+ * @binding
+ * @section Searching Nearby Places
  * Provide the `SearchNearbyHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoPlaces.SearchNearbyHttp))`), bind in the
  * init phase, then call the client at runtime.
  *
- * **Example:** Find places around a position
+ * @example Find places around a position
  * ```typescript
  * // init
  * const searchNearby = yield* AWS.GeoPlaces.SearchNearby();
@@ -30,8 +31,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const titles = result.ResultItems?.map((item) => item.Title);
  * ```
- *
- * @binding
  */
 export interface SearchNearby extends Binding.Service<
   SearchNearby,

@@ -22,8 +22,9 @@ export interface UploadArchiveRequest extends Omit<
  * inventory jobs, so persist it.
  * Provide the implementation with
  * `Effect.provide(AWS.Glacier.UploadArchiveHttp)`.
- * ### Uploading Archives
- * **Example:** Upload a small archive
+ * @binding
+ * @section Uploading Archives
+ * @example Upload a small archive
  * ```typescript
  * const uploadArchive = yield* AWS.Glacier.UploadArchive(vault);
  *
@@ -33,8 +34,6 @@ export interface UploadArchiveRequest extends Omit<
  *   body: payload,
  * });
  * ```
- *
- * @binding
  */
 export interface UploadArchive extends Binding.Service<
   UploadArchive,

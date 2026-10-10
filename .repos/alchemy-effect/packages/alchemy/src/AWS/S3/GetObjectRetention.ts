@@ -17,15 +17,14 @@ export interface GetObjectRetentionRequest extends Omit<
  * and `s3:GetObjectRetention` is granted on the bucket's objects. Requires a
  * bucket created with `objectLockEnabled: true`. Provide the implementation
  * with `Effect.provide(AWS.S3.GetObjectRetentionHttp)`.
- * ### Object Lock
- * **Example:** Read an Object's Retention
+ * @binding
+ * @section Object Lock
+ * @example Read an Object's Retention
  * ```typescript
  * const getObjectRetention = yield* AWS.S3.GetObjectRetention(bucket);
  *
  * const { Retention } = yield* getObjectRetention({ Key: "records/1.json" });
  * ```
- *
- * @binding
  */
 export interface GetObjectRetention extends Binding.Service<
   GetObjectRetention,

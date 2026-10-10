@@ -11,8 +11,9 @@ import type { SyncConfiguration } from "./SyncConfiguration.ts";
  * and the latest successful/attempted syncs — from inside a function
  * runtime. Provide the implementation with
  * `Effect.provide(AWS.CodeConnections.GetResourceSyncStatusHttp)`.
- * ### Monitoring Git Sync
- * **Example:** Read the Resource's Sync Status
+ * @binding
+ * @section Monitoring Git Sync
+ * @example Read the Resource's Sync Status
  * ```typescript
  * // init — bind the operation to the sync configuration
  * const getResourceSyncStatus =
@@ -21,8 +22,6 @@ import type { SyncConfiguration } from "./SyncConfiguration.ts";
  * // runtime
  * const { LatestSync } = yield* getResourceSyncStatus();
  * ```
- *
- * @binding
  */
 export interface GetResourceSyncStatus extends Binding.Service<
   GetResourceSyncStatus,

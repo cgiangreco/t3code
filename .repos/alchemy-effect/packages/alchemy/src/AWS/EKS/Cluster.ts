@@ -9,14 +9,13 @@ import { isResolved } from "../../Diff.ts";
 import {
   deleteObjects,
   reconcileObjects,
-} from "../../Kubernetes/internal/client.ts";
+  type KubernetesClusterConnection,
+} from "./internal/client.ts";
 import {
   type KubernetesObjectBinding,
   type KubernetesObjectDefinition,
   type KubernetesObjectRef,
-} from "../../Kubernetes/internal/objects.ts";
-import type { Connection } from "../../Kubernetes/Connection.ts";
-import { eksConnectionOf, makeEksTransport } from "./KubernetesAdapter.ts";
+} from "./internal/objects.ts";
 import { createPhysicalName } from "../../PhysicalName.ts";
 import * as Provider from "../../Provider.ts";
 import { Resource, type ResourceBinding } from "../../Resource.ts";
@@ -140,13 +139,6 @@ export interface Cluster extends Resource<
     tags: Record<string, string>;
     /** References to Kubernetes objects applied via `kubernetes` props. */
     kubernetesObjects: KubernetesObjectRef[];
-    /**
-     * The cluster-agnostic `Kubernetes.Connection` for this cluster.
-     * Passing the whole cluster resource as a `Kubernetes.*` workload's
-     * `cluster` prop resolves through this — auth uses SigV4 tokens
-     * minted from the ambient AWS credentials.
-     */
-    connection: Connection;
     /** The name of the cluster IAM role created for `compute: "auto"`, if managed by alchemy. */
     managedClusterRoleName: string | undefined;
     /** The name of the node IAM role created for `compute: "auto"`, if managed by alchemy. */
@@ -158,8 +150,9 @@ export interface Cluster extends Resource<
 
 /**
  * An Amazon EKS cluster with support for EKS Auto Mode settings.
- * ### Creating Clusters
- * **Example:** Auto Mode Cluster (managed roles)
+ * @resource
+ * @section Creating Clusters
+ * @example Auto Mode Cluster (managed roles)
  * ```typescript
  * const cluster = yield* Cluster("AppCluster", {
  *   compute: "auto",
@@ -169,7 +162,7 @@ export interface Cluster extends Resource<
  * });
  * ```
  *
- * **Example:** Auto Mode Cluster from Existing Roles and Subnets
+ * @example Auto Mode Cluster from Existing Roles and Subnets
  * ```typescript
  * const cluster = yield* Cluster("AppCluster", {
  *   roleArn: clusterRole.roleArn,
@@ -195,8 +188,8 @@ export interface Cluster extends Resource<
  * });
  * ```
  *
- * ### Running Workloads
- * **Example:** Cluster with a Managed Node Group and an Add-on
+ * @section Running Workloads
+ * @example Cluster with a Managed Node Group and an Add-on
  * ```typescript
  * const cluster = yield* AWS.EKS.Cluster("AppCluster", {
  *   roleArn: clusterRole.roleArn,
@@ -217,8 +210,6 @@ export interface Cluster extends Resource<
  *   addonName: "metrics-server",
  * });
  * ```
- *
- * @resource
  */
 export const Cluster = Resource<Cluster>("AWS.EKS.Cluster");
 
@@ -253,29 +244,24 @@ const updateRetrySchedule = Schedule.max([
   Schedule.recurs(180),
 ]);
 
-const getKubernetesTransport = (
+const getKubernetesConnection = (
   state: Pick<
     Cluster["Attributes"],
-    "clusterArn" | "clusterName" | "endpoint" | "certificateAuthorityData"
+    "clusterName" | "endpoint" | "certificateAuthorityData"
   >,
-) =>
-  Effect.suspend(() => {
-    if (!state.endpoint || !state.certificateAuthorityData) {
-      throw new Error(
-        `EKS cluster '${state.clusterName}' is missing endpoint or certificate authority data`,
-      );
-    }
-    return makeEksTransport({
-      clusterName: state.clusterName,
-      region: regionOfClusterArn(state.clusterArn),
-      endpoint: state.endpoint,
-      certificateAuthorityData: state.certificateAuthorityData,
-    });
-  });
+): KubernetesClusterConnection => {
+  if (!state.endpoint || !state.certificateAuthorityData) {
+    throw new Error(
+      `EKS cluster '${state.clusterName}' is missing endpoint or certificate authority data`,
+    );
+  }
 
-/** The region segment of a cluster ARN (`arn:aws:eks:REGION:...`). */
-const regionOfClusterArn = (arn: string | undefined): string | undefined =>
-  arn?.split(":")[3] || undefined;
+  return {
+    clusterName: state.clusterName,
+    endpoint: state.endpoint,
+    certificateAuthorityData: state.certificateAuthorityData,
+  };
+};
 
 const getDesiredKubernetesObjects = (
   bindings: ReadonlyArray<ResourceBinding<KubernetesObjectBinding>>,
@@ -559,12 +545,6 @@ const mapClusterState = (
   status: cluster.status ?? "CREATING",
   endpoint: cluster.endpoint,
   certificateAuthorityData: cluster.certificateAuthority?.data,
-  connection: eksConnectionOf({
-    clusterName: cluster.name!,
-    region: regionOfClusterArn(cluster.arn) ?? "",
-    endpoint: cluster.endpoint,
-    certificateAuthorityData: cluster.certificateAuthority?.data,
-  }),
   version: cluster.version,
   platformVersion: cluster.platformVersion,
   roleArn: cluster.roleArn!,
@@ -858,7 +838,7 @@ export const ClusterProvider = () =>
           );
 
       return {
-        stables: ["clusterArn", "clusterName", "connection"],
+        stables: ["clusterArn", "clusterName"],
         // Enumerate every cluster in the ambient account/region. `listClusters`
         // returns only names, so we paginate it exhaustively then hydrate each
         // name through `readCluster` (describe + tags) to produce the full
@@ -1125,7 +1105,7 @@ export const ClusterProvider = () =>
           }
 
           const kubernetesObjects = yield* reconcileObjects({
-            transport: yield* getKubernetesTransport(final),
+            connection: getKubernetesConnection(final),
             previousObjects: output?.kubernetesObjects ?? [],
             desiredObjects,
           });
@@ -1138,7 +1118,7 @@ export const ClusterProvider = () =>
         delete: Effect.fn(function* ({ id, output }) {
           if ((output.kubernetesObjects ?? []).length > 0) {
             yield* deleteObjects({
-              transport: yield* getKubernetesTransport(output),
+              connection: getKubernetesConnection(output),
               objects: output.kubernetesObjects ?? [],
             });
           }

@@ -11,8 +11,9 @@ import type { Canary } from "./Canary.ts";
  *
  * Provide `Synthetics.StartCanaryHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Controlling the Canary
- * **Example:** Start the Canary
+ * @binding
+ * @section Controlling the Canary
+ * @example Start the Canary
  * ```typescript
  * // init — grants synthetics:StartCanary on the canary
  * const startCanary = yield* AWS.Synthetics.StartCanary(canary);
@@ -22,8 +23,6 @@ import type { Canary } from "./Canary.ts";
  *   Effect.catchTag("ConflictException", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface StartCanary extends Binding.Service<
   StartCanary,

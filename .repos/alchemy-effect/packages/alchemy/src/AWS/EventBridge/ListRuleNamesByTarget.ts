@@ -13,8 +13,9 @@ export interface ListRuleNamesByTargetRequest
  * feed a target (e.g. the function itself, or one of its queues). Provide
  * the `ListRuleNamesByTargetHttp` layer on the Function to satisfy the
  * binding.
- * ### Listing Rules
- * **Example:** List Rules Feeding a Target
+ * @binding
+ * @section Listing Rules
+ * @example List Rules Feeding a Target
  * ```typescript
  * // init — bind the operation (provide AWS.EventBridge.ListRuleNamesByTargetHttp on the Function)
  * const listRuleNamesByTarget = yield* AWS.EventBridge.ListRuleNamesByTarget();
@@ -24,8 +25,6 @@ export interface ListRuleNamesByTargetRequest
  *   TargetArn: "arn:aws:lambda:us-east-1:123456789012:function:my-fn",
  * });
  * ```
- *
- * @binding
  */
 export interface ListRuleNamesByTarget extends Binding.Service<
   ListRuleNamesByTarget,

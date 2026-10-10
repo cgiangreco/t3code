@@ -11,8 +11,9 @@ import type { Channel } from "./Channel.ts";
  * `ChannelNotBroadcasting` tag when the channel is not live. The channel
  * ARN is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IVS.GetStreamHttp)`.
- * ### Monitoring Live Streams
- * **Example:** Check Whether a Channel Is Live
+ * @binding
+ * @section Monitoring Live Streams
+ * @example Check Whether a Channel Is Live
  * ```typescript
  * // init — bind the operation to the channel
  * const getStream = yield* AWS.IVS.GetStream(channel);
@@ -25,8 +26,6 @@ import type { Channel } from "./Channel.ts";
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface GetStream extends Binding.Service<
   GetStream,

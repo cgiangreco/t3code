@@ -80,8 +80,11 @@ export type OriginPostQuantumEncryption = Resource<
  * observed value differs from the desired one; destroy restores the value
  * the setting had before Alchemy first managed it (captured as
  * `initialValue`).
- * ### Managing the setting
- * **Example:** Prefer post-quantum key agreement to the origin
+ * @resource
+ * @product Origin Post-Quantum Encryption
+ * @category SSL/TLS & Certificates
+ * @section Managing the setting
+ * @example Prefer post-quantum key agreement to the origin
  * ```typescript
  * const zone = yield* Cloudflare.Zone.Zone("Site", { name: "example.com" });
  *
@@ -91,7 +94,7 @@ export type OriginPostQuantumEncryption = Resource<
  * });
  * ```
  *
- * **Example:** Disable post-quantum key agreement to the origin
+ * @example Disable post-quantum key agreement to the origin
  * ```typescript
  * yield* Cloudflare.OriginPostQuantumEncryption.OriginPostQuantumEncryption("OriginPqe", {
  *   zoneId: zone.zoneId,
@@ -99,7 +102,7 @@ export type OriginPostQuantumEncryption = Resource<
  * });
  * ```
  *
- * **Example:** Pin the Cloudflare default explicitly
+ * @example Pin the Cloudflare default explicitly
  * ```typescript
  * yield* Cloudflare.OriginPostQuantumEncryption.OriginPostQuantumEncryption("OriginPqe", {
  *   zoneId: zone.zoneId,
@@ -108,10 +111,6 @@ export type OriginPostQuantumEncryption = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ssl/origin-configuration/pqc-to-origin/
- *
- * @resource
- * @product Origin Post-Quantum Encryption
- * @category SSL/TLS & Certificates
  */
 export const OriginPostQuantumEncryption =
   Resource<OriginPostQuantumEncryption>(TypeId, {

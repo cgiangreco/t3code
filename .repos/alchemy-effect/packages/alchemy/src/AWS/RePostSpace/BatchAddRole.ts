@@ -18,8 +18,9 @@ export interface BatchAddRoleRequest extends Omit<
  * output's `errors` list rather than failing the whole call.
  * Provide the implementation with
  * `Effect.provide(AWS.RePostSpace.BatchAddRoleHttp)`.
- * ### Managing Roles
- * **Example:** Grant the EXPERT role to users
+ * @binding
+ * @section Managing Roles
+ * @example Grant the EXPERT role to users
  * ```typescript
  * const batchAddRole = yield* AWS.RePostSpace.BatchAddRole(space);
  *
@@ -29,8 +30,6 @@ export interface BatchAddRoleRequest extends Omit<
  * });
  * console.log(result.addedAccessorIds, result.errors);
  * ```
- *
- * @binding
  */
 export interface BatchAddRole extends Binding.Service<
   BatchAddRole,

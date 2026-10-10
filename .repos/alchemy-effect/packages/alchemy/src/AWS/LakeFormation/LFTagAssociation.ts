@@ -80,8 +80,9 @@ export interface LFTagAssociation extends Resource<
  * on the LF-tags) — see
  * {@link DataLakeSettings | AWS.LakeFormation.DataLakeSettings}.
  *
- * ### Tagging Resources
- * **Example:** Tag a Database
+ * @resource
+ * @section Tagging Resources
+ * @example Tag a Database
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -91,7 +92,7 @@ export interface LFTagAssociation extends Resource<
  * });
  * ```
  *
- * **Example:** Tag a Table
+ * @example Tag a Table
  * ```typescript
  * const association = yield* AWS.LakeFormation.LFTagAssociation("TableTag", {
  *   resource: {
@@ -100,8 +101,6 @@ export interface LFTagAssociation extends Resource<
  *   lfTags: [{ tagKey: envTag.tagKey, tagValues: ["dev"] }],
  * });
  * ```
- *
- * @resource
  */
 export const LFTagAssociation = Resource<LFTagAssociation>(
   "AWS.LakeFormation.LFTagAssociation",

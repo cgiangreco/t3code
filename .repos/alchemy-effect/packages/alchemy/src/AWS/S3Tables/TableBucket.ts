@@ -66,23 +66,24 @@ export interface TableBucket extends Resource<
  * A table bucket is regional and holds {@link Namespace}s, which in turn hold
  * {@link Table}s. The bucket name is auto-generated from the app, stage, and
  * logical ID unless you provide one explicitly.
- * ### Creating Table Buckets
- * **Example:** Basic Table Bucket
+ * @resource
+ * @section Creating Table Buckets
+ * @example Basic Table Bucket
  * ```typescript
  * import * as S3Tables from "alchemy/AWS/S3Tables";
  *
  * const bucket = yield* S3Tables.TableBucket("Analytics");
  * ```
  *
- * **Example:** Named Table Bucket
+ * @example Named Table Bucket
  * ```typescript
  * const bucket = yield* S3Tables.TableBucket("Analytics", {
  *   name: "my-analytics-tables",
  * });
  * ```
  *
- * ### Encryption
- * **Example:** KMS-encrypted Table Bucket
+ * @section Encryption
+ * @example KMS-encrypted Table Bucket
  * ```typescript
  * const bucket = yield* S3Tables.TableBucket("Secure", {
  *   encryptionConfiguration: {
@@ -91,8 +92,6 @@ export interface TableBucket extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const TableBucket = Resource<TableBucket>("AWS.S3Tables.TableBucket");
 
@@ -101,14 +100,8 @@ const createBucketName = (id: string, props: { name?: string | undefined }) =>
     if (props.name) {
       return props.name;
     }
-    // Table-bucket names follow S3-bucket DNS rules: lowercase, 3-63 chars,
-    // and must not start with the service-reserved prefixes.
-    return yield* createPhysicalName({
-      id,
-      maxLength: 63,
-      lowercase: true,
-      forbiddenPrefixes: ["xn--", "sthree-", "amzn-s3-demo-", "aws"],
-    });
+    // Table-bucket names follow S3-bucket DNS rules: lowercase, 3-63 chars.
+    return yield* createPhysicalName({ id, maxLength: 63, lowercase: true });
   });
 
 export const TableBucketProvider = () =>

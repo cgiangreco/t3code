@@ -1,10 +1,8 @@
 import { scopedProjectKey, scopeProjectRef } from "../environment/scoped.ts";
-import {
-  repositoryGroupingDisplayNameOf,
-  repositoryGroupingKeyOf,
-  type EnvironmentId,
-  type ScopedProjectRef,
-  type SidebarProjectGroupingMode,
+import type {
+  EnvironmentId,
+  ScopedProjectRef,
+  SidebarProjectGroupingMode,
 } from "@t3tools/contracts";
 import type { ClientSettings } from "@t3tools/contracts/settings";
 
@@ -102,9 +100,7 @@ function deriveRepositoryScopedKey(
   project: Pick<EnvironmentProject, "workspaceRoot" | "repositoryIdentity">,
   groupingMode: SidebarProjectGroupingMode,
 ): string | null {
-  const canonicalKey = project.repositoryIdentity
-    ? repositoryGroupingKeyOf(project.repositoryIdentity)
-    : null;
+  const canonicalKey = project.repositoryIdentity?.canonicalKey;
   if (!canonicalKey) {
     return null;
   }
@@ -156,32 +152,33 @@ export function deriveLogicalProjectKeyFromSettings(
   });
 }
 
+export function deriveLogicalProjectKeyFromRef(
+  projectRef: ScopedProjectRef,
+  project:
+    | Pick<EnvironmentProject, "environmentId" | "id" | "workspaceRoot" | "repositoryIdentity">
+    | null
+    | undefined,
+  options?: {
+    readonly groupingMode?: SidebarProjectGroupingMode;
+  },
+): string {
+  return project ? deriveLogicalProjectKey(project, options) : scopedProjectKey(projectRef);
+}
+
 export function deriveProjectGroupLabel(input: {
   readonly representative: Pick<EnvironmentProject, "title" | "repositoryIdentity">;
   readonly members: ReadonlyArray<Pick<EnvironmentProject, "title" | "repositoryIdentity">>;
 }): string {
-  const sharedTitles = uniqueNonEmptyValues(input.members.map((member) => member.title));
   const sharedDisplayNames = uniqueNonEmptyValues(
-    input.members.map((member) =>
-      member.repositoryIdentity ? repositoryGroupingDisplayNameOf(member.repositoryIdentity) : null,
-    ),
+    input.members.map((member) => member.repositoryIdentity?.displayName),
   );
-  const sharedRepositoryNames = uniqueNonEmptyValues(
-    input.members.map((member) => member.repositoryIdentity?.name),
-  );
-  const sharedTitle = sharedTitles[0];
-  if (
-    sharedTitles.length === 1 &&
-    sharedTitle !== undefined &&
-    !sharedDisplayNames.includes(sharedTitle) &&
-    !sharedRepositoryNames.includes(sharedTitle)
-  ) {
-    return sharedTitle;
-  }
   if (sharedDisplayNames.length === 1) {
     return sharedDisplayNames[0]!;
   }
 
+  const sharedRepositoryNames = uniqueNonEmptyValues(
+    input.members.map((member) => member.repositoryIdentity?.name),
+  );
   if (sharedRepositoryNames.length === 1) {
     return sharedRepositoryNames[0]!;
   }

@@ -11,8 +11,9 @@ export interface ListDataIntegrationsRequest
  *
  * An account-level operation — bind it with no resource argument. Provide the
  * `ListDataIntegrationsHttp` layer on the Function to satisfy the binding.
- * ### Listing Data Integrations
- * **Example:** List All Data Integrations
+ * @binding
+ * @section Listing Data Integrations
+ * @example List All Data Integrations
  * ```typescript
  * // init — no resource argument (provide AWS.AppIntegrations.ListDataIntegrationsHttp on the Function)
  * const listDataIntegrations = yield* AWS.AppIntegrations.ListDataIntegrations();
@@ -20,8 +21,6 @@ export interface ListDataIntegrationsRequest
  * // runtime — page through the data integrations in the account
  * const { DataIntegrations } = yield* listDataIntegrations({});
  * ```
- *
- * @binding
  */
 export interface ListDataIntegrations extends Binding.Service<
   ListDataIntegrations,

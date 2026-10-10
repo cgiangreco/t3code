@@ -44,28 +44,27 @@ import * as Semaphore from "../Semaphore.ts"
  *
  * Tests `Effect.timeout` using `TestClock`.
  *
- * ```ts import.meta.vitest
- * import { Effect, Exit, Fiber, pipe } from "effect"
+ * ```ts
+ * import { Effect, Fiber, Option, pipe } from "effect"
  * import { TestClock } from "effect/testing"
+ * import * as assert from "node:assert"
  *
- * const program = Effect.gen(function*() {
+ * Effect.gen(function*() {
  *   const fiber = yield* pipe(
  *     Effect.sleep("5 minutes"),
  *     Effect.timeout("1 minute"),
  *     Effect.forkChild
  *   )
  *   yield* TestClock.adjust("1 minute")
- *   const exit = yield* Fiber.await(fiber)
- *   Exit.isFailure(exit) // => true
+ *   const result = yield* Fiber.join(fiber)
+ *   assert.deepStrictEqual(result, Option.none())
  * })
- *
- * await Effect.runPromise(Effect.provide(program, TestClock.layer()))
  * ```
  *
  * **Example** (Advancing time deterministically)
  *
- * ```ts import.meta.vitest
- * import { Effect, Fiber } from "effect"
+ * ```ts
+ * import { Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
  * const program = Effect.gen(function*() {
@@ -79,13 +78,10 @@ import * as Semaphore from "../Semaphore.ts"
  *
  *   // Advance the test clock by 1 hour
  *   yield* TestClock.adjust("1 hour")
- *   yield* Fiber.join(fiber)
  *
  *   // The effect should now be executed
- *   executed // => true
+ *   console.log(executed) // true
  * })
- *
- * await Effect.runPromise(Effect.provide(program, TestClock.layer()))
  * ```
  *
  * @category models
@@ -115,7 +111,7 @@ export interface TestClock extends Clock.Clock {
  *
  * **Example** (Configuring a test clock)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
@@ -127,10 +123,8 @@ export interface TestClock extends Clock.Clock {
  *
  *   // Access the current state
  *   const currentTime = testClock.currentTimeMillisUnsafe()
- *   currentTime // => 0
+ *   console.log(currentTime) // 0 (starts at epoch)
  * })
- *
- * await Effect.runPromise(Effect.scoped(program))
  * ```
  *
  * @since 2.0.0
@@ -143,7 +137,7 @@ export declare namespace TestClock {
    *
    * **Example** (Configuring the warning delay)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import { Effect } from "effect"
    * import { TestClock } from "effect/testing"
    *
@@ -155,10 +149,7 @@ export declare namespace TestClock {
    *
    *   // Use the TestClock in your test
    *   yield* testClock.adjust("1 hour")
-   *   testClock.currentTimeMillisUnsafe() // => 3_600_000
    * })
-   *
-   * await Effect.runPromise(Effect.scoped(program))
    * ```
    *
    * @category options
@@ -203,20 +194,12 @@ const SleepOrder = Order.flip(Order.Struct({
   sequence: Order.Number
 }))
 
-const nanosPerMilli = BigInt(1_000_000)
-
-const millisToNanos = (millis: number): bigint => {
-  const wholeMillis = Math.floor(millis)
-  const fractionalNanos = Math.floor((millis - wholeMillis) * 1_000_000)
-  return BigInt(wholeMillis) * nanosPerMilli + BigInt(fractionalNanos)
-}
-
 /**
  * Creates a `TestClock` with optional configuration.
  *
  * **Example** (Creating a test clock)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
@@ -232,10 +215,8 @@ const millisToNanos = (millis: number): bigint => {
  *   // Use the TestClock to control time in tests
  *   yield* testClock.adjust("1 hour")
  *   const currentTime = testClock.currentTimeMillisUnsafe()
- *   currentTime // => 3_600_000
+ *   console.log(currentTime) // Time advanced by 1 hour
  * })
- *
- * await Effect.runPromise(Effect.scoped(program))
  * ```
  *
  * @category constructors
@@ -255,8 +236,6 @@ export const make = Effect.fnUntraced(function*(
   const warningSemaphore = yield* Semaphore.make(1)
 
   let currentTimestamp: number = new Date(0).getTime()
-  let currentWallNanos = BigInt(0)
-  let currentMonotonicNanos = BigInt(0)
   let warningState: WarningState = WarningState.Start()
 
   function currentTimeMillisUnsafe(): number {
@@ -264,16 +243,11 @@ export const make = Effect.fnUntraced(function*(
   }
 
   function currentTimeNanosUnsafe(): bigint {
-    return currentWallNanos
-  }
-
-  function monotonicTimeNanosUnsafe(): bigint {
-    return currentMonotonicNanos
+    return BigInt(Math.floor(currentTimestamp * 1000000))
   }
 
   const currentTimeMillis = Effect.sync(currentTimeMillisUnsafe)
   const currentTimeNanos = Effect.sync(currentTimeNanosUnsafe)
-  const monotonicTimeNanos = Effect.sync(monotonicTimeNanosUnsafe)
 
   function withLive<A, E, R>(effect: Effect.Effect<A, E, R>) {
     return Effect.provideService(effect, Clock.Clock, liveClock)
@@ -340,45 +314,22 @@ export const make = Effect.fnUntraced(function*(
   })
 
   const runSemaphore = yield* Semaphore.make(1)
-  const run = Effect.fnUntraced(function*(
-    step: (currentTimestamp: number) => number,
-    adjustmentNanos?: bigint
-  ) {
+  const run = Effect.fnUntraced(function*(step: (currentTimestamp: number) => number) {
     yield* Fiber.await(yield* Effect.forkChild(Effect.yieldNow))
-    const initialWallNanos = currentWallNanos
-    const initialMonotonicNanos = currentMonotonicNanos
     const endTimestamp = step(currentTimestamp)
-    const advanceTo = (timestamp: number) => {
-      const deltaMillis = timestamp - currentTimestamp
-      if (deltaMillis > 0 && Number.isFinite(deltaMillis)) {
-        currentMonotonicNanos += BigInt(Math.round(deltaMillis * 1_000_000))
-      }
-      if (Number.isFinite(timestamp)) {
-        currentWallNanos = millisToNanos(timestamp)
-      }
-      currentTimestamp = timestamp
-    }
     while (Arr.isArrayNonEmpty(sleeps)) {
       if (Arr.lastNonEmpty(sleeps).timestamp > endTimestamp) break
       const entry = sleeps.pop()!
-      advanceTo(entry.timestamp)
+      currentTimestamp = entry.timestamp
       entry.latch.openUnsafe()
       yield* Effect.yieldNow
     }
-    advanceTo(endTimestamp)
-    if (adjustmentNanos !== undefined && Number.isFinite(endTimestamp)) {
-      currentWallNanos = initialWallNanos + adjustmentNanos
-      if (adjustmentNanos > BigInt(0)) {
-        currentMonotonicNanos = initialMonotonicNanos + adjustmentNanos
-      }
-    }
+    currentTimestamp = endTimestamp
   }, runSemaphore.withPermits(1))
 
-  function adjust(input: Duration.Input) {
-    const duration = Duration.fromInputUnsafe(input)
-    const millis = Duration.toMillis(duration)
-    const nanos = Number.isFinite(millis) ? Duration.toNanosUnsafe(duration) : undefined
-    return warningDone.pipe(Effect.andThen(run((timestamp) => timestamp + millis, nanos)))
+  function adjust(duration: Duration.Input) {
+    const millis = Duration.toMillis(Duration.fromInputUnsafe(duration))
+    return warningDone.pipe(Effect.andThen(run((timestamp) => timestamp + millis)))
   }
 
   function setTime(timestamp: number) {
@@ -390,10 +341,8 @@ export const make = Effect.fnUntraced(function*(
   return {
     currentTimeMillisUnsafe,
     currentTimeNanosUnsafe,
-    monotonicTimeNanosUnsafe,
     currentTimeMillis,
     currentTimeNanos,
-    monotonicTimeNanos,
     adjust,
     setTime,
     sleep,
@@ -406,7 +355,7 @@ export const make = Effect.fnUntraced(function*(
  *
  * **Example** (Providing a test clock layer)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
@@ -421,13 +370,7 @@ export const make = Effect.fnUntraced(function*(
  * const program = Effect.gen(function*() {
  *   // Use the layer in your program
  *   yield* TestClock.adjust("1 hour")
- *   return yield* TestClock.testClockWith((testClock) =>
- *     Effect.succeed(testClock.currentTimeMillisUnsafe())
- *   )
- * })
- *
- * await Effect.runPromise(Effect.provide(program, testClockLayer)) // => 3_600_000
- * await Effect.runPromise(Effect.provide(program, customTestClockLayer)) // => 3_600_000
+ * }).pipe(Effect.provide(testClockLayer))
  * ```
  *
  * @category layers
@@ -444,7 +387,7 @@ export const layer: (options?: TestClock.Options) => Layer.Layer<TestClock> = fl
  *
  * **Example** (Accessing the test clock)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
@@ -457,10 +400,8 @@ export const layer: (options?: TestClock.Options) => Layer.Layer<TestClock> = fl
  *   // Adjust time using the TestClock instance
  *   yield* TestClock.testClockWith((testClock) => testClock.adjust("2 hours"))
  *
- *   currentTime // => 0
+ *   console.log(currentTime) // Initial time
  * })
- *
- * await Effect.runPromise(Effect.provide(program, TestClock.layer()))
  * ```
  *
  * @category testing
@@ -477,8 +418,8 @@ export const testClockWith = <A, E, R>(
  *
  * **Example** (Advancing the test clock)
  *
- * ```ts import.meta.vitest
- * import { Effect, Fiber } from "effect"
+ * ```ts
+ * import { Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
  * const program = Effect.gen(function*() {
@@ -492,13 +433,10 @@ export const testClockWith = <A, E, R>(
  *
  *   // Advance the clock by 30 minutes
  *   yield* TestClock.adjust("30 minutes")
- *   yield* Fiber.join(fiber)
  *
  *   // The effect should now be executed
- *   executed // => true
+ *   console.log(executed) // true
  * })
- *
- * await Effect.runPromise(Effect.provide(program, TestClock.layer()))
  * ```
  *
  * @category testing
@@ -513,8 +451,8 @@ export const adjust = (duration: Duration.Input): Effect.Effect<void> =>
  *
  * **Example** (Setting the test clock time)
  *
- * ```ts import.meta.vitest
- * import { Duration, Effect, Fiber } from "effect"
+ * ```ts
+ * import { Duration, Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
  * const program = Effect.gen(function*() {
@@ -529,13 +467,10 @@ export const adjust = (duration: Duration.Input): Effect.Effect<void> =>
  *   // Set the clock to a specific timestamp (2 hours from epoch)
  *   const targetTime = Duration.toMillis(Duration.hours(2))
  *   yield* TestClock.setTime(targetTime)
- *   yield* Fiber.join(fiber)
  *
  *   // The effect should now be executed
- *   executed // => true
+ *   console.log(executed) // true
  * })
- *
- * await Effect.runPromise(Effect.provide(program, TestClock.layer()))
  * ```
  *
  * @category testing
@@ -550,28 +485,26 @@ export const setTime = (timestamp: number): Effect.Effect<void> =>
  *
  * **Example** (Running with the live clock)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Clock, Effect } from "effect"
  * import { TestClock } from "effect/testing"
  *
  * const program = Effect.gen(function*() {
  *   // Get the current test time (starts at epoch)
  *   const testTime = yield* Clock.currentTimeMillis
- *   testTime // => 0
+ *   console.log(testTime) // 0
  *
  *   // Get the actual system time using withLive
  *   const realTime = yield* TestClock.withLive(Clock.currentTimeMillis)
- *   Number.isFinite(realTime) // => true
+ *   console.log(realTime) // Actual system timestamp
  *
  *   // Advance test time
  *   yield* TestClock.adjust("1 hour")
  *
  *   // Test time is now 1 hour ahead
  *   const newTestTime = yield* Clock.currentTimeMillis
- *   newTestTime // => 3_600_000
+ *   console.log(newTestTime) // 3600000 (1 hour in milliseconds)
  * })
- *
- * await Effect.runPromise(Effect.provide(program, TestClock.layer()))
  * ```
  *
  * @category testing

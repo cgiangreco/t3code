@@ -14,8 +14,9 @@ export interface GetTimeSeriesDataPointRequest extends Omit<
  * Reads a single time series data point on an asset or listing in the bound domain. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.GetTimeSeriesDataPointHttp)`.
- * ### Time Series Metadata
- * **Example:** Read One Data Point
+ * @binding
+ * @section Time Series Metadata
+ * @example Read One Data Point
  * ```typescript
  * // init — bind the operation to the domain
  * const getTimeSeriesDataPoint = yield* AWS.DataZone.GetTimeSeriesDataPoint(domain);
@@ -28,8 +29,6 @@ export interface GetTimeSeriesDataPointRequest extends Omit<
  *   identifier: dataPointId,
  * });
  * ```
- *
- * @binding
  */
 export interface GetTimeSeriesDataPoint extends Binding.Service<
   GetTimeSeriesDataPoint,

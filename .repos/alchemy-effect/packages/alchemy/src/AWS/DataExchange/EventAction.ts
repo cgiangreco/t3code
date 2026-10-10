@@ -96,8 +96,9 @@ export interface EventAction extends Resource<
  * Event actions require an entitled data set — creating one against an
  * owned data set fails with a `ValidationException`.
  *
- * ### Auto-Exporting Entitled Data
- * **Example:** Export new revisions to S3
+ * @resource
+ * @section Auto-Exporting Entitled Data
+ * @example Export new revisions to S3
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -109,7 +110,7 @@ export interface EventAction extends Resource<
  * });
  * ```
  *
- * **Example:** Encrypted export with a key pattern
+ * @example Encrypted export with a key pattern
  * ```typescript
  * const autoExport = yield* AWS.DataExchange.EventAction("AutoExport", {
  *   dataSetId: entitledDataSetId,
@@ -120,8 +121,6 @@ export interface EventAction extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const EventAction = Resource<EventAction>(
   "AWS.DataExchange.EventAction",

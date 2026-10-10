@@ -15,8 +15,9 @@ export interface UnlabelParameterVersionRequest extends Omit<
  * callable that removes labels from a specific version of the bound
  * parameter — the counterpart to `LabelParameterVersion` when moving a label
  * during a rollout or rollback.
- * ### Labeling Parameter Versions
- * **Example:** Remove a Label From a Version
+ * @binding
+ * @section Labeling Parameter Versions
+ * @example Remove a Label From a Version
  * ```typescript
  * const unlabel = yield* SSM.UnlabelParameterVersion(config);
  *
@@ -26,8 +27,6 @@ export interface UnlabelParameterVersionRequest extends Omit<
  * });
  * yield* Effect.log(`removed: ${result.RemovedLabels?.join(", ")}`);
  * ```
- *
- * @binding
  */
 export interface UnlabelParameterVersion extends Binding.Service<
   UnlabelParameterVersion,

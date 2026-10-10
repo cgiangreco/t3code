@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * the ElastiCache service access via its bucket policy. Provide the
  * implementation with
  * `Effect.provide(AWS.ElastiCache.ExportServerlessCacheSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Export a Snapshot to S3
+ * @binding
+ * @section Managing Snapshots
+ * @example Export a Snapshot to S3
  * ```typescript
  * const exportSnapshot = yield* ElastiCache.ExportServerlessCacheSnapshot();
  *
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   S3BucketName: "my-backup-bucket",
  * });
  * ```
- *
- * @binding
  */
 export interface ExportServerlessCacheSnapshot extends Binding.Service<
   ExportServerlessCacheSnapshot,

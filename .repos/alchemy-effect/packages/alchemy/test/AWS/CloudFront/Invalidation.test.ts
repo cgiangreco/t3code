@@ -13,7 +13,7 @@ import * as Schedule from "effect/Schedule";
 
 const { test } = Test.make({ providers: AWS.providers() });
 
-test.provider.skipIf(!!process.env.FAST)(
+test.provider.skipIf(process.env.ALCHEMY_RUN_LIVE_AWS_WEBSITE_TESTS !== "true")(
   "create invalidation with explicit paths and wait for completion",
   (stack) =>
     Effect.gen(function* () {
@@ -102,26 +102,15 @@ test.provider.skipIf(!!process.env.FAST)(
         Id: deployed.invalidation.invalidationId,
       });
       expect(current.Invalidation?.Status).toEqual("Completed");
-      // CloudFront returns invalidation paths in arbitrary order.
-      expect(
-        [
-          ...(current.Invalidation?.InvalidationBatch?.Paths?.Items ?? []),
-        ].sort(),
-      ).toEqual(["/docs/*", "/index.html"]);
+      expect(current.Invalidation?.InvalidationBatch?.Paths?.Items).toEqual([
+        "/index.html",
+        "/docs/*",
+      ]);
 
       yield* stack.destroy();
       yield* assertDistributionDeleted(deployed.distribution.distributionId);
     }),
-  {
-    tags: [
-      "provider:aws",
-      "provider:aws:cloudfront",
-      "provider:aws:iam",
-      "provider:aws:s3",
-      "live",
-    ],
-    timeout: 600_000,
-  },
+  { timeout: 600_000 },
 );
 
 test.provider(
@@ -134,7 +123,6 @@ test.provider(
       const all = yield* provider.list();
       expect(all).toEqual([]);
     }),
-  { tags: ["provider:aws", "provider:aws:cloudfront", "live"] },
 );
 
 const assertDistributionDeleted = (distributionId: string) =>

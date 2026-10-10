@@ -14,8 +14,9 @@ export interface DeleteApplicationSnapshotRequest extends Omit<
  * on a retention schedule. The `SnapshotCreationTimestamp` acts as a
  * compare-and-set token; read it fresh with
  * {@link DescribeApplicationSnapshot} or {@link ListApplicationSnapshots}.
- * ### Managing Snapshots
- * **Example:** Prune a snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Prune a snapshot
  * ```typescript
  * const describeSnapshot = yield* AWS.KinesisAnalyticsV2.DescribeApplicationSnapshot(app);
  * const deleteSnapshot = yield* AWS.KinesisAnalyticsV2.DeleteApplicationSnapshot(app);
@@ -26,8 +27,6 @@ export interface DeleteApplicationSnapshotRequest extends Omit<
  *   SnapshotCreationTimestamp: SnapshotDetails.SnapshotCreationTimestamp!,
  * });
  * ```
- *
- * @binding
  */
 export interface DeleteApplicationSnapshot extends Binding.Service<
   DeleteApplicationSnapshot,

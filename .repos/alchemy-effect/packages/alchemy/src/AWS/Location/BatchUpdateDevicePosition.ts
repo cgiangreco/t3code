@@ -19,8 +19,9 @@ export interface BatchUpdateDevicePositionRequest extends Omit<
  * `geo:BatchUpdateDevicePosition`), scoped to one {@link Tracker}. Provide the implementation with
  * `Effect.provide(AWS.Location.BatchUpdateDevicePositionHttp)`.
  *
- * ### Updating Device Positions
- * **Example:** Report Device Positions
+ * @binding
+ * @section Updating Device Positions
+ * @example Report Device Positions
  * ```typescript
  * const updatePositions = yield* Location.BatchUpdateDevicePosition(tracker);
  *
@@ -34,8 +35,6 @@ export interface BatchUpdateDevicePositionRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchUpdateDevicePosition extends Binding.Service<
   BatchUpdateDevicePosition,

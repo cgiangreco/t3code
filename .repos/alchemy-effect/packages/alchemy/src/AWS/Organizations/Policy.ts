@@ -99,8 +99,9 @@ export interface Policy extends Resource<
  * Attach it to a root, OU, or account with {@link PolicyAttachment}. Changing
  * `type` or `name` replaces the policy; document and description changes
  * update in place.
- * ### Creating Policies
- * **Example:** Service Control Policy (Typed Document)
+ * @resource
+ * @section Creating Policies
+ * @example Service Control Policy (Typed Document)
  * ```typescript
  * const denyLeaveOrg = yield* Policy("DenyLeaveOrg", {
  *   type: "SERVICE_CONTROL_POLICY",
@@ -118,7 +119,7 @@ export interface Policy extends Resource<
  * });
  * ```
  *
- * **Example:** Tag Policy (Raw JSON)
+ * @example Tag Policy (Raw JSON)
  * ```typescript
  * const tagPolicy = yield* Policy("RequireEnvTag", {
  *   type: "TAG_POLICY",
@@ -133,8 +134,8 @@ export interface Policy extends Resource<
  * });
  * ```
  *
- * ### Attaching Policies
- * **Example:** Attach an SCP to the Organization Root
+ * @section Attaching Policies
+ * @example Attach an SCP to the Organization Root
  * ```typescript
  * const root = yield* Root("Root", {});
  *
@@ -148,8 +149,6 @@ export interface Policy extends Resource<
  *   targetId: scpEnabled.rootId,
  * });
  * ```
- *
- * @resource
  */
 export const Policy = Resource<Policy>("AWS.Organizations.Policy");
 

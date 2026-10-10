@@ -59,10 +59,7 @@ export const makeRoute53DomainsHttpBinding = <
       return Effect.fn(`AWS.Route53Domains.${options.capability}`)(function* (
         request: I,
       ) {
-        // The region must also be pinned at the call site: the yield-time
-        // snapshot is only a fallback — the calling fiber's ambient Region
-        // (the host Function's own region) wins over it.
-        return yield* withRoute53DomainsRegion(op(request));
+        return yield* op(request);
       });
     });
   });

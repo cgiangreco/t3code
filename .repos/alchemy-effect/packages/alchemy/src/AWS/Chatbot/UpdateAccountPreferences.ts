@@ -9,15 +9,14 @@ import * as Binding from "../../Binding.ts";
  * authorization requirement, training-data collection). Provide the
  * implementation with
  * `Effect.provide(AWS.Chatbot.UpdateAccountPreferencesHttp)`.
- * ### Account Preferences
- * **Example:** Require user authorization account-wide
+ * @binding
+ * @section Account Preferences
+ * @example Require user authorization account-wide
  * ```typescript
  * const updateAccountPreferences =
  *   yield* AWS.Chatbot.UpdateAccountPreferences();
  * yield* updateAccountPreferences({ UserAuthorizationRequired: true });
  * ```
- *
- * @binding
  */
 export interface UpdateAccountPreferences extends Binding.Service<
   UpdateAccountPreferences,

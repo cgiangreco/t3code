@@ -17,15 +17,14 @@ export interface GetObjectLegalHoldRequest extends Omit<
  * `s3:GetObjectLegalHold` is granted on the bucket's objects. Requires a
  * bucket created with `objectLockEnabled: true`. Provide the implementation
  * with `Effect.provide(AWS.S3.GetObjectLegalHoldHttp)`.
- * ### Object Lock
- * **Example:** Read an Object's Legal-Hold Status
+ * @binding
+ * @section Object Lock
+ * @example Read an Object's Legal-Hold Status
  * ```typescript
  * const getObjectLegalHold = yield* AWS.S3.GetObjectLegalHold(bucket);
  *
  * const { LegalHold } = yield* getObjectLegalHold({ Key: "records/1.json" });
  * ```
- *
- * @binding
  */
 export interface GetObjectLegalHold extends Binding.Service<
   GetObjectLegalHold,

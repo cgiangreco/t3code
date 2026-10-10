@@ -31,7 +31,7 @@ import * as Layer from "../Layer.ts"
  *
  * **Example** (Capturing console output in tests)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Console, Effect } from "effect"
  * import { TestConsole } from "effect/testing"
  *
@@ -42,11 +42,9 @@ import * as Layer from "../Layer.ts"
  *   const logs = yield* TestConsole.logLines
  *   const errors = yield* TestConsole.errorLines
  *
- *   logs // => ["Hello, World!"]
- *   errors // => ["An error occurred"]
+ *   console.log(logs) // [["Hello, World!"]]
+ *   console.log(errors) // [["An error occurred"]]
  * }).pipe(Effect.provide(TestConsole.layer))
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @see {@link layer} for providing `TestConsole` to an effect
@@ -101,10 +99,12 @@ export declare namespace TestConsole {
    *
    * **Example** (Typing captured console methods)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import type { TestConsole } from "effect/testing"
    *
    * const method: TestConsole.TestConsole.Method = "log"
+   *
+   * console.log(method) // "log"
    * ```
    *
    * @category models
@@ -122,7 +122,7 @@ export declare namespace TestConsole {
    *
    * **Example** (Typing captured console entries)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import type { TestConsole } from "effect/testing"
    *
    * const entry: TestConsole.TestConsole.Entry = {
@@ -130,7 +130,8 @@ export declare namespace TestConsole {
    *   parameters: ["not found"]
    * }
    *
-   * entry // => { method: "error", parameters: ["not found"] }
+   * console.log(entry.method) // "error"
+   * console.log(entry.parameters) // ["not found"]
    * ```
    *
    * @category models
@@ -153,7 +154,7 @@ export declare namespace TestConsole {
  *
  * **Example** (Creating a test console)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Console, Effect } from "effect"
  * import { TestConsole } from "effect/testing"
  *
@@ -164,11 +165,9 @@ export declare namespace TestConsole {
  *   const logs = yield* TestConsole.logLines
  *   const errors = yield* TestConsole.errorLines
  *
- *   logs // => ["Debug message"]
- *   errors // => ["Error occurred"]
+ *   console.log("Captured logs:", logs)
+ *   console.log("Captured errors:", errors)
  * }).pipe(Effect.provide(TestConsole.layer))
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @see {@link layer} for providing a `TestConsole` as a `Layer`
@@ -226,7 +225,7 @@ export const make = Effect.gen(function*() {
  *
  * **Example** (Accessing the test console service)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { TestConsole } from "effect/testing"
  *
@@ -238,12 +237,10 @@ export const make = Effect.gen(function*() {
  *     const logs = yield* testConsole.logLines
  *     const errors = yield* testConsole.errorLines
  *
- *     logs // => ["Test message"]
- *     errors // => ["Test error"]
+ *     console.log("Logs:", logs) // [["Test message"]]
+ *     console.log("Errors:", errors) // [["Test error"]]
  *   })
  * ).pipe(Effect.provide(TestConsole.layer))
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @see {@link layer} for providing the test console service
@@ -267,7 +264,7 @@ export const testConsoleWith = <A, E, R>(f: (console: TestConsole) => Effect.Eff
  *
  * **Example** (Providing a test console layer)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Console, Effect } from "effect"
  * import { TestConsole } from "effect/testing"
  *
@@ -278,11 +275,9 @@ export const testConsoleWith = <A, E, R>(f: (console: TestConsole) => Effect.Eff
  *   const logs = yield* TestConsole.logLines
  *   const errors = yield* TestConsole.errorLines
  *
- *   logs // => ["This will be captured"]
- *   errors // => ["This error will be captured"]
+ *   console.log("Captured logs:", logs)
+ *   console.log("Captured errors:", errors)
  * }).pipe(Effect.provide(TestConsole.layer))
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @see {@link make} for constructing the service value directly
@@ -304,7 +299,7 @@ export const layer: Layer.Layer<TestConsole> = Layer.effect(Console.Console)(mak
  *
  * **Example** (Reading captured log lines)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Console, Effect } from "effect"
  * import { TestConsole } from "effect/testing"
  *
@@ -315,10 +310,13 @@ export const layer: Layer.Layer<TestConsole> = Layer.effect(Console.Console)(mak
  *
  *   const logs = yield* TestConsole.logLines
  *
- *   logs // => ["First message", "Second message", { key: "value" }, "Third message", 42, true]
+ *   console.log(logs)
+ *   // [
+ *   //   ["First message"],
+ *   //   ["Second message", { key: "value" }],
+ *   //   ["Third message", 42, true]
+ *   // ]
  * }).pipe(Effect.provide(TestConsole.layer))
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @see {@link errorLines} for reading captured `Console.error` output
@@ -342,7 +340,7 @@ export const logLines: Effect.Effect<ReadonlyArray<unknown>, never, never> = tes
  *
  * **Example** (Reading captured error lines)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Console, Effect } from "effect"
  * import { TestConsole } from "effect/testing"
  *
@@ -352,11 +350,12 @@ export const logLines: Effect.Effect<ReadonlyArray<unknown>, never, never> = tes
  *
  *   const errors = yield* TestConsole.errorLines
  *
- *   const messages = [errors[0], errors[1], errors[2] instanceof Error ? errors[2].message : undefined]
- *   messages // => ["Error message", "Another error", "Something went wrong"]
+ *   console.log(errors)
+ *   // [
+ *   //   ["Error message"],
+ *   //   ["Another error", Error: Something went wrong]
+ *   // ]
  * }).pipe(Effect.provide(TestConsole.layer))
- *
- * await Effect.runPromise(program)
  * ```
  *
  * @see {@link logLines} for reading captured `Console.log` output

@@ -16,8 +16,9 @@ export interface ExportQAppSessionDataRequest extends Omit<
  *
  * Exports a shared Q App session's collected data as a downloadable CSV file link. Provide the implementation with
  * `Effect.provide(AWS.QApps.ExportQAppSessionDataHttp)`.
- * ### Sessions
- * **Example:** Export Session Data
+ * @binding
+ * @section Sessions
+ * @example Export Session Data
  * ```typescript
  * // init — bind the operation to the Q App
  * const exportQAppSessionData = yield* AWS.QApps.ExportQAppSessionData(app);
@@ -26,8 +27,6 @@ export interface ExportQAppSessionDataRequest extends Omit<
  * const exported = yield* exportQAppSessionData({ sessionId });
  * console.log(exported.csvFileLink);
  * ```
- *
- * @binding
  */
 export interface ExportQAppSessionData extends Binding.Service<
   ExportQAppSessionData,

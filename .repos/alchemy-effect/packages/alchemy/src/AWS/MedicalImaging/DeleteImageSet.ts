@@ -21,16 +21,15 @@ export interface DeleteImageSetRequest extends Omit<
  * sets before it can be deleted. Provide the implementation with
  * `Effect.provide(AWS.MedicalImaging.DeleteImageSetHttp)`.
  *
- * ### Updating Image Sets
- * **Example:** Delete an Image Set
+ * @binding
+ * @section Updating Image Sets
+ * @example Delete an Image Set
  * ```typescript
  * const deleteImageSet = yield* MedicalImaging.DeleteImageSet(datastore);
  *
  * const deleted = yield* deleteImageSet({ imageSetId });
  * // deleted.imageSetWorkflowStatus === "DELETING"
  * ```
- *
- * @binding
  */
 export interface DeleteImageSet extends Binding.Service<
   DeleteImageSet,

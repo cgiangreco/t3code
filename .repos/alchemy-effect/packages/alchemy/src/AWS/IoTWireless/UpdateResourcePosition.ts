@@ -18,12 +18,13 @@ export interface UpdateResourcePositionRequest extends Omit<
  * wireless device's static position (WGS84, as a GeoJSON payload) from a
  * deployed Lambda or Task.
  *
- * ### Updating Device Position
+ * @binding
+ * @section Updating Device Position
  * Provide the `UpdateResourcePositionHttp` implementation layer on the
  * Function effect, bind the device in the init phase, then call the
  * returned client at runtime.
  *
- * **Example:** Set a Static GeoJSON Position
+ * @example Set a Static GeoJSON Position
  * ```typescript
  * // init
  * const updatePosition = yield* AWS.IoTWireless.UpdateResourcePosition(device);
@@ -38,8 +39,6 @@ export interface UpdateResourcePositionRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTWireless.UpdateResourcePositionHttp))
  * ```
- *
- * @binding
  */
 export interface UpdateResourcePosition extends Binding.Service<
   UpdateResourcePosition,

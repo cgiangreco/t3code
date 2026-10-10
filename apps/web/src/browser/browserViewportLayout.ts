@@ -19,10 +19,7 @@ export interface BrowserViewportLayout {
   readonly fillsPanel: boolean;
 }
 
-// Room for a compact size input (30px with its border) plus its 3px focus ring
-// on both sides, inside the toolbar's 1px bottom border. The bar scrolls
-// horizontally, which also clips anything that overflows vertically.
-export const BROWSER_DEVICE_TOOLBAR_HEIGHT = 38;
+export const BROWSER_DEVICE_TOOLBAR_HEIGHT = 32;
 export const BROWSER_VIEWPORT_RESIZE_RAIL_SIZE = 10;
 
 export type BrowserViewportResizeDirection =

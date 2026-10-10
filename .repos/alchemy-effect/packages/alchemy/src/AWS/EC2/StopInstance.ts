@@ -20,8 +20,9 @@ export interface StopInstanceRequest extends Omit<
  * start/stop-Lambda pattern that powers dev fleets off overnight. Pass
  * `Hibernate: true` for hibernation-enabled instances. Provide the
  * implementation with `Effect.provide(AWS.EC2.StopInstanceHttp)`.
- * ### Instance Lifecycle Control
- * **Example:** Stop the bound instance
+ * @binding
+ * @section Instance Lifecycle Control
+ * @example Stop the bound instance
  * ```typescript
  * // init — bind the operation to the instance
  * const stopInstance = yield* AWS.EC2.StopInstance(instance);
@@ -30,8 +31,6 @@ export interface StopInstanceRequest extends Omit<
  * const result = yield* stopInstance();
  * console.log(result.StoppingInstances?.[0]?.CurrentState?.Name);
  * ```
- *
- * @binding
  */
 export interface StopInstance extends Binding.Service<
   StopInstance,

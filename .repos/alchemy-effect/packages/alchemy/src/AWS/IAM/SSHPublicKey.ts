@@ -48,8 +48,9 @@ export interface SSHPublicKey extends Resource<
  *
  * `SSHPublicKey` uploads and manages a user's public key for services such as
  * AWS CodeCommit that authenticate through IAM-backed SSH credentials.
- * ### Managing SSH Keys
- * **Example:** Upload an SSH Public Key
+ * @resource
+ * @section Managing SSH Keys
+ * @example Upload an SSH Public Key
  * ```typescript
  * const user = yield* User("GitUser", {
  *   userName: "codecommit-user",
@@ -60,8 +61,6 @@ export interface SSHPublicKey extends Resource<
  *   sshPublicKeyBody: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExample codecommit-user",
  * });
  * ```
- *
- * @resource
  */
 export const SSHPublicKey = Resource<SSHPublicKey>("AWS.IAM.SSHPublicKey");
 

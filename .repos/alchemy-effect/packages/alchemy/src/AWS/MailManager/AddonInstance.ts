@@ -49,8 +49,9 @@ export interface AddonInstance extends Resource<
  * an analyzer.
  *
  * Instances are immutable after creation (only tags update in place).
- * ### Creating Add On Instances
- * **Example:** Instance from a Subscription
+ * @resource
+ * @section Creating Add On Instances
+ * @example Instance from a Subscription
  * ```typescript
  * import * as MailManager from "alchemy/AWS/MailManager";
  *
@@ -62,8 +63,8 @@ export interface AddonInstance extends Resource<
  * });
  * ```
  *
- * ### Referencing from a Traffic Policy
- * **Example:** Analyzer Condition
+ * @section Referencing from a Traffic Policy
+ * @example Analyzer Condition
  * ```typescript
  * const policy = yield* MailManager.TrafficPolicy("Edge", {
  *   defaultAction: "ALLOW",
@@ -87,8 +88,6 @@ export interface AddonInstance extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const AddonInstance = Resource<AddonInstance>(
   "AWS.MailManager.AddonInstance",

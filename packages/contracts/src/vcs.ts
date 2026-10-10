@@ -76,7 +76,6 @@ export interface VcsProcessTimeoutFailure {
 export const VcsProcessExitFailureKind = Schema.Literals([
   "authentication",
   "not-found",
-  "rate-limited",
   "command-failed",
 ]);
 export type VcsProcessExitFailureKind = typeof VcsProcessExitFailureKind.Type;
@@ -87,7 +86,7 @@ export interface VcsProcessExitFailure {
   readonly stderrTruncated: boolean;
 }
 
-export class VcsProcessSpawnError extends Schema.TaggedError<VcsProcessSpawnError>()(
+export class VcsProcessSpawnError extends Schema.TaggedErrorClass<VcsProcessSpawnError>()(
   "VcsProcessSpawnError",
   {
     operation: Schema.String,
@@ -109,7 +108,7 @@ export class VcsProcessSpawnError extends Schema.TaggedError<VcsProcessSpawnErro
   }
 }
 
-export class VcsProcessExitError extends Schema.TaggedError<VcsProcessExitError>()(
+export class VcsProcessExitError extends Schema.TaggedErrorClass<VcsProcessExitError>()(
   "VcsProcessExitError",
   {
     operation: Schema.String,
@@ -119,8 +118,6 @@ export class VcsProcessExitError extends Schema.TaggedError<VcsProcessExitError>
     exitCode: Schema.Number,
     detail: Schema.String,
     failureKind: Schema.optional(VcsProcessExitFailureKind),
-    /** Process-boundary hint for a recognized transient failure; absence is not retryable. */
-    retryable: Schema.optional(Schema.Boolean),
     stderrLength: Schema.optional(NonNegativeInt),
     stderrTruncated: Schema.optional(Schema.Boolean),
   },
@@ -133,34 +130,30 @@ export class VcsProcessExitError extends Schema.TaggedError<VcsProcessExitError>
     context: VcsProcessErrorContext,
     error: VcsProcessExitFailure,
     failureKind: VcsProcessExitFailureKind,
-    retryable?: boolean,
   ) {
     const detail =
       failureKind === "authentication"
         ? "Authentication failed."
-        : failureKind === "rate-limited"
-          ? "API rate limit exceeded."
-          : failureKind === "not-found"
-            ? context.command === "glab"
-              ? "Merge request not found."
-              : context.command === "gh" || context.command === "az"
-                ? "Pull request not found."
-                : "VCS resource not found."
-            : "Process exited with a non-zero status.";
+        : failureKind === "not-found"
+          ? context.command === "glab"
+            ? "Merge request not found."
+            : context.command === "gh" || context.command === "az"
+              ? "Pull request not found."
+              : "VCS resource not found."
+          : "Process exited with a non-zero status.";
 
     return new VcsProcessExitError({
       ...context,
       exitCode: error.exitCode,
       detail,
       failureKind,
-      ...(retryable === true ? { retryable: true } : {}),
       stderrLength: error.stderr.length,
       stderrTruncated: error.stderrTruncated,
     });
   }
 }
 
-export class VcsProcessTimeoutError extends Schema.TaggedError<VcsProcessTimeoutError>()(
+export class VcsProcessTimeoutError extends Schema.TaggedErrorClass<VcsProcessTimeoutError>()(
   "VcsProcessTimeoutError",
   {
     operation: Schema.String,
@@ -189,7 +182,7 @@ const VcsProcessBoundaryErrorFields = {
   argumentCount: Schema.optional(NonNegativeInt),
 };
 
-export class VcsProcessStdinWriteError extends Schema.TaggedError<VcsProcessStdinWriteError>()(
+export class VcsProcessStdinWriteError extends Schema.TaggedErrorClass<VcsProcessStdinWriteError>()(
   "VcsProcessStdinWriteError",
   {
     ...VcsProcessBoundaryErrorFields,
@@ -202,7 +195,7 @@ export class VcsProcessStdinWriteError extends Schema.TaggedError<VcsProcessStdi
   }
 }
 
-export class VcsProcessOutputReadError extends Schema.TaggedError<VcsProcessOutputReadError>()(
+export class VcsProcessOutputReadError extends Schema.TaggedErrorClass<VcsProcessOutputReadError>()(
   "VcsProcessOutputReadError",
   {
     ...VcsProcessBoundaryErrorFields,
@@ -215,7 +208,7 @@ export class VcsProcessOutputReadError extends Schema.TaggedError<VcsProcessOutp
   }
 }
 
-export class VcsProcessOutputLimitError extends Schema.TaggedError<VcsProcessOutputLimitError>()(
+export class VcsProcessOutputLimitError extends Schema.TaggedErrorClass<VcsProcessOutputLimitError>()(
   "VcsProcessOutputLimitError",
   {
     ...VcsProcessBoundaryErrorFields,
@@ -229,7 +222,7 @@ export class VcsProcessOutputLimitError extends Schema.TaggedError<VcsProcessOut
   }
 }
 
-export class VcsProcessMissingExitCodeError extends Schema.TaggedError<VcsProcessMissingExitCodeError>()(
+export class VcsProcessMissingExitCodeError extends Schema.TaggedErrorClass<VcsProcessMissingExitCodeError>()(
   "VcsProcessMissingExitCodeError",
   VcsProcessBoundaryErrorFields,
 ) {
@@ -246,7 +239,7 @@ export const VcsOutputDecodeError = Schema.Union([
 ]);
 export type VcsOutputDecodeError = typeof VcsOutputDecodeError.Type;
 
-export class VcsRepositoryDetectionError extends Schema.TaggedError<VcsRepositoryDetectionError>()(
+export class VcsRepositoryDetectionError extends Schema.TaggedErrorClass<VcsRepositoryDetectionError>()(
   "VcsRepositoryDetectionError",
   {
     operation: Schema.String,
@@ -260,7 +253,7 @@ export class VcsRepositoryDetectionError extends Schema.TaggedError<VcsRepositor
   }
 }
 
-export class VcsUnsupportedOperationError extends Schema.TaggedError<VcsUnsupportedOperationError>()(
+export class VcsUnsupportedOperationError extends Schema.TaggedErrorClass<VcsUnsupportedOperationError>()(
   "VcsUnsupportedOperationError",
   {
     operation: Schema.String,

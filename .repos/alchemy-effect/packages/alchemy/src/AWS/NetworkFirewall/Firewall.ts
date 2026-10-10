@@ -93,8 +93,9 @@ export interface Firewall extends Resource<
  *
  * Endpoint provisioning takes several minutes (typically 5-10), and deleting
  * a firewall waits for the endpoints to deprovision.
- * ### Creating Firewalls
- * **Example:** Firewall in a VPC
+ * @resource
+ * @section Creating Firewalls
+ * @example Firewall in a VPC
  * ```typescript
  * import * as EC2 from "alchemy/AWS/EC2";
  * import * as NetworkFirewall from "alchemy/AWS/NetworkFirewall";
@@ -118,8 +119,6 @@ export interface Firewall extends Resource<
  *   subnetMappings: [{ SubnetId: subnet.subnetId }],
  * });
  * ```
- *
- * @resource
  */
 export const Firewall = Resource<Firewall>("AWS.NetworkFirewall.Firewall");
 

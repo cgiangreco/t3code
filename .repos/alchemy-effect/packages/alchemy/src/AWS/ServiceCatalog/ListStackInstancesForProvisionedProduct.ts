@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * is governed by portfolio principal associations, so the binding takes no
  * resource argument. Provide the implementation with
  * `Effect.provide(AWS.ServiceCatalog.ListStackInstancesForProvisionedProductHttp)`.
- * ### Tracking Provisioned Products
- * **Example:** List a StackSet Product's Stack Instances
+ * @binding
+ * @section Tracking Provisioned Products
+ * @example List a StackSet Product's Stack Instances
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listStackInstancesForProvisionedProduct = yield* AWS.ServiceCatalog.ListStackInstancesForProvisionedProduct();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *     ProvisionedProductId: "pp-abc123",
  *   });
  * ```
- *
- * @binding
  */
 export interface ListStackInstancesForProvisionedProduct extends Binding.Service<
   ListStackInstancesForProvisionedProduct,

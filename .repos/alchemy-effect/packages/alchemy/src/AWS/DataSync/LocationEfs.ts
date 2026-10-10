@@ -80,8 +80,9 @@ export interface LocationEfs extends Resource<
  * system, subnet, security groups, subdirectory, access point, or encryption
  * replaces the location.
  *
- * ### Creating EFS Locations
- * **Example:** File system + subnet + security group
+ * @resource
+ * @section Creating EFS Locations
+ * @example File system + subnet + security group
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -94,8 +95,8 @@ export interface LocationEfs extends Resource<
  * });
  * ```
  *
- * ### Transferring Data
- * **Example:** Back up EFS to S3
+ * @section Transferring Data
+ * @example Back up EFS to S3
  * ```typescript
  * const dest = yield* AWS.DataSync.LocationS3("Backups", {
  *   s3BucketArn: bucket.bucketArn,
@@ -108,8 +109,6 @@ export interface LocationEfs extends Resource<
  *   schedule: { ScheduleExpression: "cron(0 2 * * ? *)" },
  * });
  * ```
- *
- * @resource
  */
 export const LocationEfs = Resource<LocationEfs>("AWS.DataSync.LocationEfs");
 

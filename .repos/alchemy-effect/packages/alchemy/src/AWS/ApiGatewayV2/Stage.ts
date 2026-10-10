@@ -105,12 +105,13 @@ export interface ApiGatewayV2Stage extends Resource<
 /**
  * An API Gateway v2 Stage — the deployed, callable endpoint of an HTTP or
  * WebSocket API.
- * ### The $default auto-deploy stage
+ * @resource
+ * @section The $default auto-deploy stage
  * The canonical modern setup is a single `$default` stage with
  * `autoDeploy: true` — every route/integration change goes live
  * automatically at the API root endpoint, with no `Deployment` juggling.
  *
- * **Example:** $default stage with auto-deploy
+ * @example $default stage with auto-deploy
  * ```typescript
  * const stage = yield* ApiGatewayV2.Stage("Stage", {
  *   api,
@@ -119,8 +120,8 @@ export interface ApiGatewayV2Stage extends Resource<
  * // stage.invokeUrl === api.apiEndpoint
  * ```
  *
- * ### Named stages
- * **Example:** A named dev stage
+ * @section Named stages
+ * @example A named dev stage
  * ```typescript
  * const dev = yield* ApiGatewayV2.Stage("Dev", {
  *   api,
@@ -130,8 +131,8 @@ export interface ApiGatewayV2Stage extends Resource<
  * });
  * ```
  *
- * ### Throttling
- * **Example:** Default route throttling
+ * @section Throttling
+ * @example Default route throttling
  * ```typescript
  * const stage = yield* ApiGatewayV2.Stage("Stage", {
  *   api,
@@ -142,8 +143,6 @@ export interface ApiGatewayV2Stage extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const StageResource = Resource<ApiGatewayV2Stage>(
   "AWS.ApiGatewayV2.Stage",

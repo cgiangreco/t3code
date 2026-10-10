@@ -22,7 +22,7 @@ import * as EnvironmentLinks from "./EnvironmentLinks.ts";
 import * as ManagedEndpointProvider from "./ManagedEndpointProvider.ts";
 import * as RelayConfiguration from "../Config.ts";
 
-export class EnvironmentLinkProofExpired extends Schema.TaggedError<EnvironmentLinkProofExpired>()(
+export class EnvironmentLinkProofExpired extends Schema.TaggedErrorClass<EnvironmentLinkProofExpired>()(
   "EnvironmentLinkProofExpired",
   {
     userId: Schema.String,
@@ -35,7 +35,7 @@ export class EnvironmentLinkProofExpired extends Schema.TaggedError<EnvironmentL
   }
 }
 
-export class EnvironmentLinkProofInvalid extends Schema.TaggedError<EnvironmentLinkProofInvalid>()(
+export class EnvironmentLinkProofInvalid extends Schema.TaggedErrorClass<EnvironmentLinkProofInvalid>()(
   "EnvironmentLinkProofInvalid",
   {
     userId: Schema.String,

@@ -18,8 +18,9 @@ export interface PutImageRequest extends Omit<
  * {@link UploadLayerPart} → {@link CompleteLayerUpload}). Provide the
  * implementation with `Effect.provide(AWS.ECRPublic.PutImageHttp)`.
  *
- * ### Pushing Images
- * **Example:** Put An Image Manifest
+ * @binding
+ * @section Pushing Images
+ * @example Put An Image Manifest
  * ```typescript
  * // init
  * const putImage = yield* AWS.ECRPublic.PutImage(repository);
@@ -31,8 +32,6 @@ export interface PutImageRequest extends Omit<
  *   imageTag: "latest",
  * });
  * ```
- *
- * @binding
  */
 export interface PutImage extends Binding.Service<
   PutImage,

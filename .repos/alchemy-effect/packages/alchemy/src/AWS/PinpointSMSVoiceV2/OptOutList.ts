@@ -54,23 +54,22 @@ export interface OptOutList extends Resource<
  * When an end user replies with a supported opt-out keyword (STOP,
  * CANCEL, OPTOUT, ...), their number is added to the list automatically
  * and further messages to it are suppressed.
- * ### Creating Opt-Out Lists
- * **Example:** Basic Opt-Out List
+ * @resource
+ * @section Creating Opt-Out Lists
+ * @example Basic Opt-Out List
  * ```typescript
  * import * as PinpointSMSVoiceV2 from "alchemy/AWS/PinpointSMSVoiceV2";
  *
  * const optOuts = yield* PinpointSMSVoiceV2.OptOutList("OptOuts");
  * ```
  *
- * **Example:** Named Opt-Out List with Tags
+ * @example Named Opt-Out List with Tags
  * ```typescript
  * const optOuts = yield* PinpointSMSVoiceV2.OptOutList("OptOuts", {
  *   optOutListName: "marketing-opt-outs",
  *   tags: { team: "growth" },
  * });
  * ```
- *
- * @resource
  */
 export const OptOutList = Resource<OptOutList>(
   "AWS.PinpointSMSVoiceV2.OptOutList",

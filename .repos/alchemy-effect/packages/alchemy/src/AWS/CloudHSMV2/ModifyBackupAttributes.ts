@@ -10,16 +10,15 @@ import * as Binding from "../../Binding.ts";
  * cluster's retention policy never deletes it, or unpin it again. Provide
  * the implementation with
  * `Effect.provide(AWS.CloudHSMV2.ModifyBackupAttributesHttp)`.
- * ### Managing Backups
- * **Example:** Pin A Backup Forever
+ * @binding
+ * @section Managing Backups
+ * @example Pin A Backup Forever
  * ```typescript
  * const modifyBackupAttributes =
  *   yield* AWS.CloudHSMV2.ModifyBackupAttributes();
  *
  * yield* modifyBackupAttributes({ BackupId: backupId, NeverExpires: true });
  * ```
- *
- * @binding
  */
 export interface ModifyBackupAttributes extends Binding.Service<
   ModifyBackupAttributes,

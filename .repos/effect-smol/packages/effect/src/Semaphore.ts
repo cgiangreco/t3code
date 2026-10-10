@@ -33,7 +33,7 @@ import type * as Option from "./Option.ts"
  *
  * **Example** (Controlling concurrent access)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Semaphore } from "effect"
  *
  * // Create and use a semaphore for controlling concurrent access
@@ -44,8 +44,6 @@ import type * as Option from "./Option.ts"
  *     Effect.succeed("Resource accessed")
  *   )
  * })
- *
- * await Effect.runPromise(program) // => "Resource accessed"
  * ```
  *
  * @see {@link make} for creating a semaphore inside Effect code
@@ -133,16 +131,6 @@ export interface Semaphore {
   take(this: Semaphore, permits: number): Effect.Effect<number>
 
   /**
-   * Acquires the specified number of permits only if they are immediately
-   * available.
-   *
-   * **When to use**
-   *
-   * Use to manually acquire permits without waiting, paired with `release`.
-   */
-  takeIfAvailable(this: Semaphore, permits: number): Effect.Effect<boolean>
-
-  /**
    * Releases the specified number of permits and returns the resulting
    * available permits.
    *
@@ -159,13 +147,6 @@ export interface Semaphore {
    * **When to use**
    *
    * Use to return every currently taken permit to the semaphore at once.
-   *
-   * **Gotchas**
-   *
-   * This does not stop effects already running with `withPermit` or `withPermits`.
-   * Their permits become available immediately, but those effects still release
-   * their permits when they finish. The resulting available count can then
-   * exceed the semaphore's configured number of permits.
    */
   readonly releaseAll: Effect.Effect<number>
 }
@@ -181,7 +162,7 @@ export interface Semaphore {
  *
  * **Example** (Creating an unsafe semaphore)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Semaphore } from "effect"
  *
  * const semaphore = Semaphore.makeUnsafe(3)
@@ -189,8 +170,9 @@ export interface Semaphore {
  * const task = (id: number) =>
  *   semaphore.withPermits(1)(
  *     Effect.gen(function*() {
- *       yield* Effect.yieldNow
- *       return id
+ *       yield* Effect.log(`Task ${id} started`)
+ *       yield* Effect.sleep("1 second")
+ *       yield* Effect.log(`Task ${id} completed`)
  *     })
  *   )
  *
@@ -202,32 +184,12 @@ export interface Semaphore {
  *   task(4),
  *   task(5)
  * ], { concurrency: "unbounded" })
- *
- * await Effect.runPromise(program) // => [1, 2, 3, 4, 5]
  * ```
  *
  * @category constructors
  * @since 4.0.0
  */
 export const makeUnsafe = (permits: number): Semaphore => new SemaphoreImpl(permits)
-
-const waitForPermits = <A, E, R>(
-  self: SemaphoreImpl,
-  n: number,
-  effect: Effect.Effect<A, E, R>
-): Effect.Effect<A, E, R> =>
-  internal.callback((resume) => {
-    if (self.free >= n) return resume(effect)
-    const observer = () => {
-      if (self.free < n) return
-      self.waiters.delete(observer)
-      resume(effect)
-    }
-    self.waiters.add(observer)
-    return internal.sync(() => {
-      self.waiters.delete(observer)
-    })
-  })
 
 class SemaphoreImpl implements Semaphore {
   public waiters = new Set<() => void>()
@@ -245,7 +207,18 @@ class SemaphoreImpl implements Semaphore {
   take(n: number): Effect.Effect<number> {
     const take: Effect.Effect<number> = internal.suspend(() => {
       if (this.free < n) {
-        return waitForPermits(this, n, take)
+        return internal.callback((resume) => {
+          if (this.free >= n) return resume(take)
+          const observer = () => {
+            if (this.free < n) return
+            this.waiters.delete(observer)
+            resume(take)
+          }
+          this.waiters.add(observer)
+          return internal.sync(() => {
+            this.waiters.delete(observer)
+          })
+        })
       }
       this.taken += n
       return internal.succeed(n)
@@ -253,64 +226,58 @@ class SemaphoreImpl implements Semaphore {
     return take
   }
 
-  takeIfAvailable(n: number): Effect.Effect<boolean> {
-    return internal.suspend(() => {
-      if (this.free < n) return internal.succeed(false)
-      this.taken += n
-      return internal.succeed(true)
-    })
-  }
-
-  releaseUnsafe(fiber: Fiber<any, any>, n: number): number {
-    this.taken -= n
+  updateTakenUnsafe(fiber: Fiber<any, any>, f: (n: number) => number): number {
+    this.taken = f(this.taken)
     if (this.waiters.size > 0) {
       fiber.currentDispatcher.scheduleTask(() => {
-        for (const observer of this.waiters) {
-          if (this.free <= 0) break
-          observer()
+        const iter = this.waiters.values()
+        let item = iter.next()
+        while (item.done === false && this.free > 0) {
+          item.value()
+          item = iter.next()
         }
       }, 0)
     }
     return this.free
   }
 
+  updateTaken(f: (n: number) => number): Effect.Effect<number> {
+    return core.withFiber((fiber) => internal.succeed(this.updateTakenUnsafe(fiber, f)))
+  }
+
   resize(permits: number) {
     return core.withFiber((fiber) => {
       this.permits = permits
       if (this.free < 0) return internal.void
-      this.releaseUnsafe(fiber, 0)
+      this.updateTakenUnsafe(fiber, (taken) => taken)
       return internal.void
     })
   }
 
   release(n: number): Effect.Effect<number> {
-    return core.withFiber((fiber) => internal.succeed(this.releaseUnsafe(fiber, n)))
+    return this.updateTaken((taken) => taken - n)
   }
 
   get releaseAll(): Effect.Effect<number> {
-    return core.withFiber((fiber) => internal.succeed(this.releaseUnsafe(fiber, this.taken)))
+    return this.updateTaken((_) => 0)
   }
 
   withPermits(n: number) {
     return <A, E, R>(self: Effect.Effect<A, E, R>) =>
-      internal.uninterruptibleMask((restore) => {
-        const acquire: Effect.Effect<A, E, R> = internal.suspend(() => {
-          if (this.free < n) {
-            const wait = waitForPermits(this, n, internal.void)
-            return internal.flatMap(restore(wait), () => acquire)
-          }
-          this.taken += n
-          return internal.onExitPrimitive(
-            restore(self),
-            () => {
-              this.releaseUnsafe(internal.getCurrentFiber()!, n)
-              return undefined
-            },
-            true
-          )
-        })
-        return acquire
-      })
+      internal.uninterruptibleMask((restore) =>
+        internal.flatMap(
+          restore(this.take(n)),
+          (permits) =>
+            internal.onExitPrimitive(
+              restore(self),
+              () => {
+                this.updateTakenUnsafe(internal.getCurrentFiber()!, (taken) => taken - permits)
+                return undefined
+              },
+              true
+            )
+        )
+      )
   }
 
   readonly withPermit = this.withPermits(1)
@@ -321,7 +288,7 @@ class SemaphoreImpl implements Semaphore {
         if (this.free < n) return internal.succeedNone
         this.taken += n
         return internal.onExitPrimitive(restore(internal.asSome(self)), () => {
-          this.releaseUnsafe(internal.getCurrentFiber()!, n)
+          this.updateTakenUnsafe(internal.getCurrentFiber()!, (taken) => taken - n)
           return undefined
         }, true)
       })
@@ -338,7 +305,7 @@ class SemaphoreImpl implements Semaphore {
  *
  * **Example** (Creating a semaphore)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Semaphore } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -347,16 +314,15 @@ class SemaphoreImpl implements Semaphore {
  *   const task = (id: number) =>
  *     semaphore.withPermits(1)(
  *       Effect.gen(function*() {
- *         yield* Effect.yieldNow
- *         return id
+ *         yield* Effect.log(`Task ${id} acquired permit`)
+ *         yield* Effect.sleep("1 second")
+ *         yield* Effect.log(`Task ${id} releasing permit`)
  *       })
  *     )
  *
  *   // Run 4 tasks, but only 2 can run concurrently
- *   return yield* Effect.all([task(1), task(2), task(3), task(4)])
+ *   yield* Effect.all([task(1), task(2), task(3), task(4)])
  * })
- *
- * await Effect.runPromise(program) // => [1, 2, 3, 4]
  * ```
  *
  * @category constructors
@@ -492,7 +458,6 @@ export const withPermitsIfAvailable: {
  *
  * @see {@link withPermit} for automatically acquiring and releasing one permit around an effect
  * @see {@link withPermits} for automatically acquiring and releasing multiple permits around an effect
- * @see {@link takeIfAvailable} for manually acquiring permits without waiting
  * @see {@link release} for returning manually acquired permits
  *
  * @category combinators
@@ -502,33 +467,6 @@ export const take: {
   (permits: number): (self: Semaphore) => Effect.Effect<number>
   (self: Semaphore, permits: number): Effect.Effect<number>
 } = dual(2, (self: Semaphore, permits: number) => self.take(permits))
-
-/**
- * Acquires the specified number of permits only if they are immediately
- * available.
- *
- * **When to use**
- *
- * Use when you need fail-fast manual permit acquisition for a lower-level
- * protocol with explicit acquisition and release control.
- *
- * **Details**
- *
- * If enough permits are available, they are acquired and the effect returns
- * `true`. Otherwise, the effect returns `false` immediately without acquiring
- * any permits.
- *
- * @see {@link take} for the variant that waits until permits are available
- * @see {@link release} for returning manually acquired permits
- * @see {@link withPermitsIfAvailable} for automatic acquisition and release around an effect
- *
- * @category combinators
- * @since 4.0.0
- */
-export const takeIfAvailable: {
-  (permits: number): (self: Semaphore) => Effect.Effect<boolean>
-  (self: Semaphore, permits: number): Effect.Effect<boolean>
-} = dual(2, (self: Semaphore, permits: number) => self.takeIfAvailable(permits))
 
 /**
  * Releases the specified number of permits and returns the resulting available
@@ -571,13 +509,6 @@ export const release: {
  *
  * Use to return every currently taken permit to a semaphore at once, typically
  * during cleanup of manual `take` / `release` protocols.
- *
- * **Gotchas**
- *
- * This does not stop effects already running with `withPermit` or `withPermits`.
- * Their permits become available immediately, but those effects still release
- * their permits when they finish. The resulting available count can then
- * exceed the semaphore's configured number of permits.
  *
  * @see {@link release} for releasing a known permit count
  * @see {@link withPermits} for automatic acquire and release around an effect

@@ -16,8 +16,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StartCelebrityRecognitionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Start Celebrity Recognition
+ * @binding
+ * @section Video Analysis
+ * @example Start Celebrity Recognition
  * ```typescript
  * // init
  * const startCelebrityRecognition = yield* AWS.Rekognition.StartCelebrityRecognition();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // started.JobId
  * ```
- *
- * @binding
  */
 export interface StartCelebrityRecognition extends Binding.Service<
   StartCelebrityRecognition,

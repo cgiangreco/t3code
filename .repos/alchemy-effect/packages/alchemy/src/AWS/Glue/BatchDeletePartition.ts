@@ -16,8 +16,9 @@ export interface BatchDeletePartitionRequest extends Omit<
  * failures come back in the response's `Errors` list. The database/table
  * names and catalog id are injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Glue.BatchDeletePartitionHttp)`.
- * ### Managing Partitions
- * **Example:** Expire Old Partitions
+ * @binding
+ * @section Managing Partitions
+ * @example Expire Old Partitions
  * ```typescript
  * // init
  * const batchDeletePartition = yield* AWS.Glue.BatchDeletePartition(table);
@@ -27,8 +28,6 @@ export interface BatchDeletePartitionRequest extends Omit<
  *   PartitionsToDelete: expired.map((dt) => ({ Values: [dt] })),
  * });
  * ```
- *
- * @binding
  */
 export interface BatchDeletePartition extends Binding.Service<
   BatchDeletePartition,

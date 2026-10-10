@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * graph — the decline path of the member-account invitation flow.
  * Provide the implementation with
  * `Effect.provide(AWS.Detective.RejectInvitationHttp)`.
- * ### Responding to Invitations
- * **Example:** Decline An Invitation
+ * @binding
+ * @section Responding to Invitations
+ * @example Decline An Invitation
  * ```typescript
  * // init — account-level binding, no resource argument
  * const rejectInvitation = yield* AWS.Detective.RejectInvitation();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* rejectInvitation({ GraphArn: invitation.GraphArn! });
  * ```
- *
- * @binding
  */
 export interface RejectInvitation extends Binding.Service<
   RejectInvitation,

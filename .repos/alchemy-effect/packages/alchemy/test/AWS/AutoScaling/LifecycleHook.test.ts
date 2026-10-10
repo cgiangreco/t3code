@@ -50,7 +50,7 @@ test.provider(
 
       // Launch templates do not validate the AMI at creation time; fall back to
       // a syntactically valid id if the lookup returns nothing.
-      const imageId = amazonLinux2023();
+      const imageId = (yield* amazonLinux2023()) ?? "ami-00000000000000000";
 
       // Place the fleet into a subnet of the account's default VPC (resolved
       // out-of-band) rather than a throwaway Vpc resource — a failed run loses
@@ -131,13 +131,5 @@ test.provider(
         );
       expect(groupsLeft).toBe(0);
     }).pipe(Effect.ensuring(cleanupAsg)),
-  {
-    tags: [
-      "provider:aws",
-      "provider:aws:autoscaling",
-      "provider:aws:ec2",
-      "live",
-    ],
-    timeout: 240_000,
-  },
+  { timeout: 240_000 },
 );

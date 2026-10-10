@@ -68,8 +68,9 @@ export interface Type extends Resource<
  * UDTs are immutable: any change to the field definitions replaces the type.
  * A type used by a table (or nested in another type) cannot be deleted until
  * its consumers are gone.
- * ### Creating a Type
- * **Example:** Address Type
+ * @resource
+ * @section Creating a Type
+ * @example Address Type
  * ```typescript
  * const address = yield* Type("Address", {
  *   keyspaceName: keyspace.keyspaceName,
@@ -81,7 +82,7 @@ export interface Type extends Resource<
  * });
  * ```
  *
- * **Example:** Use the Type in a Table Column
+ * @example Use the Type in a Table Column
  * ```typescript
  * const table = yield* Table("Customers", {
  *   keyspaceName: keyspace.keyspaceName,
@@ -92,8 +93,6 @@ export interface Type extends Resource<
  *   partitionKeys: ["id"],
  * });
  * ```
- *
- * @resource
  */
 export const Type = Resource<Type>("AWS.Keyspaces.Type");
 

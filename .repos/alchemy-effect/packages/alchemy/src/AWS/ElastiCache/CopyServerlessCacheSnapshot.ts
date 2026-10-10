@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * risky migration. Available for valkey, redis, and serverless memcached.
  * Provide the implementation with
  * `Effect.provide(AWS.ElastiCache.CopyServerlessCacheSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Copy a Snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Copy a Snapshot
  * ```typescript
  * const copySnapshot = yield* ElastiCache.CopyServerlessCacheSnapshot();
  *
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   TargetServerlessCacheSnapshotName: "pre-migration",
  * });
  * ```
- *
- * @binding
  */
 export interface CopyServerlessCacheSnapshot extends Binding.Service<
   CopyServerlessCacheSnapshot,

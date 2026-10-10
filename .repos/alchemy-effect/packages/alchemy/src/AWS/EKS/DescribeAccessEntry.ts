@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `clusterName` is injected from the bound {@link Cluster} and `eks:DescribeAccessEntry` is granted on the cluster's sub-resource ARNs.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.DescribeAccessEntryHttp)`.
- * ### Inspecting Identity and Access
- * **Example:** Read an Access Entry
+ * @binding
+ * @section Inspecting Identity and Access
+ * @example Read an Access Entry
  * ```typescript
  * // init
  * const describeAccessEntry = yield* AWS.EKS.DescribeAccessEntry(cluster);
@@ -19,8 +20,6 @@ import type { Cluster } from "./Cluster.ts";
  * // runtime
  * const { accessEntry } = yield* describeAccessEntry({ principalArn });
  * ```
- *
- * @binding
  */
 export interface DescribeAccessEntry extends Binding.Service<
   DescribeAccessEntry,

@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.UpdateConfigurationHttp)`.
- * ### Account Settings & Usage
- * **Example:** Tune ECR Rescan Duration
+ * @binding
+ * @section Account Settings & Usage
+ * @example Tune ECR Rescan Duration
  * ```typescript
  * // init
  * const updateConfiguration = yield* AWS.Inspector2.UpdateConfiguration();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   ecrConfiguration: { rescanDuration: "DAYS_30" },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateConfiguration extends Binding.Service<
   UpdateConfiguration,

@@ -60,8 +60,9 @@ export interface Alarm extends Resource<
  * A CloudWatch metric alarm — watches a single metric (or metric-math
  * expression) and transitions between `OK`, `ALARM`, and
  * `INSUFFICIENT_DATA`, optionally firing actions on state change.
- * ### Creating Alarms
- * **Example:** Threshold Alarm
+ * @resource
+ * @section Creating Alarms
+ * @example Threshold Alarm
  * ```typescript
  * const alarm = yield* Alarm("HighErrors", {
  *   MetricName: "Errors",
@@ -74,7 +75,7 @@ export interface Alarm extends Resource<
  * });
  * ```
  *
- * **Example:** Alarm on a Lambda Function's Errors
+ * @example Alarm on a Lambda Function's Errors
  * ```typescript
  * const fn = yield* MyFunction;
  *
@@ -91,8 +92,8 @@ export interface Alarm extends Resource<
  * });
  * ```
  *
- * ### Reading Alarm State at Runtime
- * **Example:** Read the Alarm's State from a Function
+ * @section Reading Alarm State at Runtime
+ * @example Read the Alarm's State from a Function
  * ```typescript
  * // init — bind the alarm to the function (see DescribeAlarms)
  * const describeAlarms = yield* AWS.CloudWatch.DescribeAlarms(alarm);
@@ -101,8 +102,6 @@ export interface Alarm extends Resource<
  * const result = yield* describeAlarms();
  * const state = result.MetricAlarms?.[0]?.StateValue;
  * ```
- *
- * @resource
  */
 export const Alarm = Resource<Alarm>("AWS.CloudWatch.Alarm");
 

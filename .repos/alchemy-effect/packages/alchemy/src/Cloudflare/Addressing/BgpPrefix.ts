@@ -92,8 +92,11 @@ export type BgpPrefix = Resource<
  * reconcile adopts an existing BGP prefix matching the CIDR before creating
  * a new one. There is **no delete API** — destroying this resource only
  * withdraws the advertisement (`advertised: false`) and drops the state.
- * ### Advertising a Prefix
- * **Example:** Advertise the whole BYOIP prefix
+ * @resource
+ * @product Addressing
+ * @category Network
+ * @section Advertising a Prefix
+ * @example Advertise the whole BYOIP prefix
  * ```typescript
  * const bgp = yield* Cloudflare.Addressing.BgpPrefix("advertise", {
  *   prefixId: prefix.prefixId,
@@ -102,7 +105,7 @@ export type BgpPrefix = Resource<
  * });
  * ```
  *
- * **Example:** Withdraw with AS-Path prepending configured
+ * @example Withdraw with AS-Path prepending configured
  * ```typescript
  * const bgp = yield* Cloudflare.Addressing.BgpPrefix("advertise", {
  *   prefixId: prefix.prefixId,
@@ -113,10 +116,6 @@ export type BgpPrefix = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/byoip/concepts/bgp-prefixes/
- *
- * @resource
- * @product Addressing
- * @category Network
  */
 export const BgpPrefix = Resource<BgpPrefix>(TypeId);
 

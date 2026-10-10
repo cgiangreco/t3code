@@ -19,7 +19,7 @@ import * as Provider from "../../Provider.ts";
 import { Resource, type ResourceBinding } from "../../Resource.ts";
 import type { RuntimeContext } from "../../RuntimeContext.ts";
 import {
-  createContainerRuntimeContext,
+  createHostRuntimeContext,
   type HostRuntimeContext,
   type ServerHost,
 } from "../../Server/Process.ts";
@@ -104,17 +104,6 @@ export interface TaskDefinitionConfig {
    * Additional environment variables for the container.
    */
   env?: Record<string, any>;
-  /**
-   * Environment files to load into the primary container, e.g. `.env`
-   * objects stored in S3:
-   * `[{ value: "arn:aws:s3:::my-bucket/app.env", type: "s3" }]`.
-   *
-   * Variables from `env` (and the container's own `environment`) take
-   * precedence over values loaded from environment files. The execution
-   * role is automatically granted `s3:GetObject` on the referenced objects
-   * and `s3:GetBucketLocation` on their buckets.
-   */
-  environmentFiles?: ecs.EnvironmentFile[];
   /**
    * Command override for the primary container (Docker `CMD`).
    */
@@ -309,8 +298,37 @@ export interface TaskRuntimeContext extends HostRuntimeContext {
   readonly Type: "AWS.ECS.Task";
 }
 
-// Shared with `Docker.Service`; lives beside the host runtime context.
-export { createContainerRuntimeContext } from "../../Server/Process.ts";
+/**
+ * Host runtime context for ECS container platforms: extends the shared
+ * process host context so an impl shape's `run` effect is registered as a
+ * one-shot runner (the container exits when it completes) and the HTTP
+ * server only boots when the impl actually declares a `fetch` handler.
+ */
+export const createContainerRuntimeContext =
+  (type: string) =>
+  (id: string): HostRuntimeContext => {
+    const base = createHostRuntimeContext(type)(id);
+    // Capture the host serve BEFORE Object.assign overwrites `base.serve`
+    // with the wrapper below — calling `base.serve` inside the wrapper would
+    // resolve to the wrapper itself (property lookup happens at call time)
+    // and recurse without bound the moment an impl declares `fetch`.
+    const serveBase = base.serve;
+    const serve: HostRuntimeContext["serve"] = (handler, options) =>
+      Effect.gen(function* () {
+        const shape = options?.shape;
+        const run = shape?.run;
+        if (Effect.isEffect(run)) {
+          yield* base.run(run as Effect.Effect<void, never, any>);
+        }
+        // Boot the HTTP server only for an impl that declared `fetch` — a
+        // pure one-shot `{ run }` program must exit when `run` completes
+        // rather than parking behind the 404 fallback server forever.
+        if (shape === undefined || shape.fetch !== undefined) {
+          yield* serveBase(handler, options);
+        }
+      }) as Effect.Effect<void, never, never>;
+    return Object.assign(base, { serve });
+  };
 
 /**
  * A Fargate task definition with a container image from one of three
@@ -334,8 +352,9 @@ export { createContainerRuntimeContext } from "../../Server/Process.ts";
  * Beyond the primary container you can declare task-level configuration
  * (volumes, runtime platform, ephemeral storage, IPC/PID mode, placement
  * constraints) and append additional `sidecars` for multi-container tasks.
- * ### Creating a Task
- * **Example:** Remote Image
+ * @resource
+ * @section Creating a Task
+ * @example Remote Image
  * ```typescript
  * const migrate = yield* Task("DbMigrate", {
  *   image: "public.ecr.aws/docker/library/busybox:stable",
@@ -345,7 +364,7 @@ export { createContainerRuntimeContext } from "../../Server/Process.ts";
  * });
  * ```
  *
- * **Example:** Build Your Own Dockerfile
+ * @example Build Your Own Dockerfile
  * ```typescript
  * const render = yield* Task("RenderJob", {
  *   context: "./render",                    // dockerfile defaults to ./render/Dockerfile
@@ -355,7 +374,7 @@ export { createContainerRuntimeContext } from "../../Server/Process.ts";
  * });
  * ```
  *
- * **Example:** Inline Effect Program
+ * @example Inline Effect Program
  * ```typescript
  * const drainer = yield* Task(
  *   "QueueDrainer",
@@ -372,8 +391,8 @@ export { createContainerRuntimeContext } from "../../Server/Process.ts";
  * );
  * ```
  *
- * ### Multi-Container Tasks
- * **Example:** Task with a Sidecar
+ * @section Multi-Container Tasks
+ * @example Task with a Sidecar
  * ```typescript
  * const task = yield* Task("ApiTask", {
  *   main: import.meta.url,
@@ -389,33 +408,8 @@ export { createContainerRuntimeContext } from "../../Server/Process.ts";
  * });
  * ```
  *
- * ### Bundling & Tree-shaking
- * `main` is bundled with rolldown at deploy time. Unused code is
- * tree-shaken. `effect`, alchemy, and `@distilled.cloud` are marked
- * pure so unused parts prune more aggressively. Your app is not
- * marked pure.
- *
- * **Example:** Mark additional packages as pure
- * Only list packages with no top-level side effects.
- * ```typescript
- * {
- *   main: import.meta.url,
- *   build: {
- *     pure: { packages: ["my-lib", "@my-scope/*"] },
- *   },
- * }
- * ```
- *
- * **Example:** Turn it off
- * ```typescript
- * {
- *   main: import.meta.url,
- *   build: { pure: false },
- * }
- * ```
- *
- * ### Task-Level Configuration
- * **Example:** ARM64 with EFS Volume and Ephemeral Storage
+ * @section Task-Level Configuration
+ * @example ARM64 with EFS Volume and Ephemeral Storage
  * ```typescript
  * const task = yield* Task("WorkerTask", {
  *   main: import.meta.url,
@@ -432,18 +426,6 @@ export { createContainerRuntimeContext } from "../../Server/Process.ts";
  *   },
  * });
  * ```
- *
- * **Example:** Environment Files from S3
- * ```typescript
- * const task = yield* Task("ApiTask", {
- *   main: import.meta.url,
- *   environmentFiles: [
- *     { value: "arn:aws:s3:::my-config-bucket/app.env", type: "s3" },
- *   ],
- * });
- * ```
- *
- * @resource
  */
 export const Task: Platform<Task, TaskServices, TaskShape, TaskRuntimeContext> =
   Platform("AWS.ECS.Task", {
@@ -460,18 +442,6 @@ export const taskImagePlatform = (runtimePlatform?: ecs.RuntimePlatform) =>
   // start with `image Manifest does not contain descriptor matching
   // platform 'linux/amd64'`.
   runtimePlatform?.cpuArchitecture === "ARM64" ? "linux/arm64" : "linux/amd64";
-
-/** Keep image resolution, drift detection and dev watching on the same inputs. */
-export const taskImageInput = (props: TaskProps) => {
-  const source = props as ImageSourceLike;
-  return {
-    source,
-    platform: taskImagePlatform(props.runtimePlatform),
-    port: props.port,
-    isExternal: props.isExternal,
-    bootstrap: makeBunBootstrap(source.handler ?? "default"),
-  };
-};
 
 /**
  * Create the IAM role assumed by ECS tasks if it doesn't already exist.
@@ -546,56 +516,6 @@ export const ensureTaskExecutionRole = Effect.fn(function* ({
       .pipe(Effect.catchTag("LimitExceededException", () => Effect.void));
   }
   return roleArn;
-});
-
-/** Inline policy granting the execution role read access to `environmentFiles`. */
-const ENVIRONMENT_FILES_POLICY_NAME = "alchemy-environment-files";
-
-/**
- * Sync the execution role's read access to the S3 `environmentFiles`: put
- * an inline policy granting `s3:GetObject` on the referenced objects (and
- * `s3:GetBucketLocation` on their buckets), or delete the policy when no
- * environment files are configured.
- */
-export const syncEnvironmentFilesPolicy = Effect.fn(function* ({
-  roleName,
-  environmentFiles,
-}: {
-  roleName: string;
-  environmentFiles: ecs.EnvironmentFile[] | undefined;
-}) {
-  const objectArns = (environmentFiles ?? [])
-    .filter((file) => file.type === "s3")
-    .map((file) => file.value);
-  if (objectArns.length === 0) {
-    yield* iam
-      .deleteRolePolicy({
-        RoleName: roleName,
-        PolicyName: ENVIRONMENT_FILES_POLICY_NAME,
-      })
-      .pipe(Effect.catchTag("NoSuchEntityException", () => Effect.void));
-    return;
-  }
-  const bucketArns = [...new Set(objectArns.map((arn) => arn.split("/")[0]))];
-  yield* iam.putRolePolicy({
-    RoleName: roleName,
-    PolicyName: ENVIRONMENT_FILES_POLICY_NAME,
-    PolicyDocument: JSON.stringify({
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Action: ["s3:GetObject"],
-          Resource: objectArns,
-        },
-        {
-          Effect: "Allow",
-          Action: ["s3:GetBucketLocation"],
-          Resource: bucketArns,
-        },
-      ],
-    }),
-  });
 });
 
 /** Ensure the CloudWatch log group the task writes to exists. */
@@ -735,7 +655,6 @@ export const registerTaskDefinitionRevision = Effect.fn(function* ({
       name,
       value: typeof value === "string" ? value : JSON.stringify(value),
     })),
-    environmentFiles: props.environmentFiles,
     logConfiguration: {
       logDriver: "awslogs",
       options: {
@@ -1122,7 +1041,14 @@ export const TaskProvider = () =>
           // and surface drift as an update; without this a bootstrap or
           // code-only change would silently no-op until `--force`.
           if (output) {
-            const hash = yield* imageSource.hash(taskImageInput(news));
+            const source = news as ImageSourceLike;
+            const hash = yield* imageSource.hash({
+              source,
+              platform: taskImagePlatform(news.runtimePlatform),
+              port: news.port,
+              isExternal: news.isExternal,
+              bootstrap: makeBunBootstrap(source.handler ?? "default"),
+            });
             if (hash !== undefined && hash !== output.code.hash) {
               return { action: "update" } as const;
             }
@@ -1211,13 +1137,6 @@ export const TaskProvider = () =>
               );
           }
 
-          // Environment files: the execution role reads the referenced S3
-          // objects at task start.
-          yield* syncEnvironmentFilesPolicy({
-            roleName: executionRoleName,
-            environmentFiles: news.environmentFiles,
-          });
-
           const {
             env: bindingEnv,
             volumes: bindingVolumes,
@@ -1241,15 +1160,20 @@ export const TaskProvider = () =>
           // task definition revision. Task definitions are versioned in
           // AWS, so registering a new revision is the unit of "update" —
           // the superseded revision is reaped after registration below.
+          const source = news as ImageSourceLike;
           const resolved = yield* imageSource.resolve({
-            ...taskImageInput(news),
             id,
+            source,
             repositoryName,
             repositoryUri:
               output?.repositoryUri && output.repositoryName === repositoryName
                 ? output.repositoryUri
                 : undefined,
             tags,
+            platform: taskImagePlatform(news.runtimePlatform),
+            port: news.port,
+            isExternal: news.isExternal,
+            bootstrap: makeBunBootstrap(source.handler ?? "default"),
             session,
           });
 

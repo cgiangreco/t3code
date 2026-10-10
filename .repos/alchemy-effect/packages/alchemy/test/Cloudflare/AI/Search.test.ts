@@ -6,7 +6,7 @@ import { expect } from "alchemy-test";
 import * as Effect from "effect/Effect";
 import { MinimumLogLevel } from "effect/References";
 import * as Schedule from "effect/Schedule";
-import * as HttpClient from "effect/http/HttpClient";
+import * as HttpClient from "effect/unstable/http/HttpClient";
 import AiSearchCrawlTargetWorker from "./fixtures/crawl-target-worker.ts";
 
 const { test } = Test.make({ providers: Cloudflare.providers() });
@@ -74,9 +74,7 @@ const expectGone = (accountId: string, id: string, namespace = "default") =>
 // `yield*` wires the whole pipeline together.
 const program = () =>
   Effect.gen(function* () {
-    const bucket = yield* Cloudflare.R2.Bucket("AiSearchSource", {
-      forceDestroy: true,
-    });
+    const bucket = yield* Cloudflare.R2.Bucket("AiSearchSource", {});
     const search = yield* Cloudflare.AI.Search("Search", {
       source: bucket,
     });
@@ -109,35 +107,28 @@ test.provider(
 
       yield* expectGone(accountId, search.instanceId);
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:ai",
-      "provider:cloudflare:r2",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 // A web-crawler source crawls a seed URL and needs no service token, so the
 // construct must NOT mint an AccountApiToken / AiSearchToken — `token` comes
 // back undefined. Cloudflare only crawls a domain the account owns, so the
-// crawl is seeded at a Worker we deploy (its `workers.dev` URL is owned by
-// the account); the fixture serves a sitemap so `parseType: "discover"`
-// always finds content.
+// crawl is seeded at a Worker we deploy (its `workers.dev` URL is owned by the
+// account); `parseType: "crawl"` walks pages instead of requiring a sitemap.
 const crawlerProgram = () =>
   Effect.gen(function* () {
     const target = yield* AiSearchCrawlTargetWorker;
-    // Exercise the flattened source group end-to-end: `parse` (parseType +
-    // parse options) must translate into the distilled
-    // `sourceParams.webCrawler.{parseType,parseOptions}`.
+    // Exercise the flattened source groups end-to-end: `parse` (parseType +
+    // parse options) and `crawl` (link-discovery options) must translate into
+    // the distilled `sourceParams.webCrawler.{parseType,parseOptions,crawlOptions}`.
     const search = yield* Cloudflare.AI.Search("Search", {
       source: target.url.as<string>(),
-      // Cloudflare renamed the `crawl` parse type to `discover` and removed
-      // crawl options from the API. The fixture serves a sitemap, so
-      // discovery always finds content.
-      parse: { type: "discover", useBrowserRendering: false },
+      parse: { type: "crawl", useBrowserRendering: false },
+      // Discover URLs by following links only. Without `source: "links"`,
+      // crawl link-discovery also reads the seed's sitemap, and a
+      // freshly-deployed `workers.dev` URL serves none — Cloudflare rejects
+      // the create with `missing_sitemap`.
+      crawl: { depth: 2, includeSubdomains: false, source: "links" },
     });
     return { target, search, serviceToken: search.serviceToken };
   });
@@ -185,13 +176,5 @@ test.provider(
 
       yield* expectGone(accountId, search.instanceId);
     }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:ai",
-      "provider:cloudflare:worker",
-      "live",
-    ],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );

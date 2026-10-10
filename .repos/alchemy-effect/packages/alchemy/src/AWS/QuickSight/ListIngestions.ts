@@ -11,8 +11,9 @@ import type { DataSet } from "./DataSet.ts";
  * for surfacing the last refresh outcome. `AwsAccountId` and `DataSetId`
  * are injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.QuickSight.ListIngestionsHttp)`.
- * ### Refreshing SPICE Data
- * **Example:** Read The Latest Refresh Outcome
+ * @binding
+ * @section Refreshing SPICE Data
+ * @example Read The Latest Refresh Outcome
  * ```typescript
  * // init — bind the operation to the dataset
  * const listIngestions = yield* AWS.QuickSight.ListIngestions(dataSet);
@@ -21,8 +22,6 @@ import type { DataSet } from "./DataSet.ts";
  * const { Ingestions } = yield* listIngestions({ MaxResults: 1 });
  * const latest = Ingestions?.[0];
  * ```
- *
- * @binding
  */
 export interface ListIngestions extends Binding.Service<
   ListIngestions,

@@ -70,8 +70,11 @@ export type BlockSender = Resource<
  * All fields are mutable in place. Requires the Email Security enterprise
  * add-on; accounts without the entitlement receive the typed
  * `EmailSecurityNotEntitled` error.
- * ### Blocking Senders
- * **Example:** Block a single email address
+ * @resource
+ * @product Email Security
+ * @category Email
+ * @section Blocking Senders
+ * @example Block a single email address
  * ```typescript
  * yield* Cloudflare.Email.BlockSender("KnownPhisher", {
  *   pattern: "phisher@malicious.example.com",
@@ -80,7 +83,7 @@ export type BlockSender = Resource<
  * });
  * ```
  *
- * **Example:** Block a whole sending domain
+ * @example Block a whole sending domain
  * ```typescript
  * yield* Cloudflare.Email.BlockSender("SpamDomain", {
  *   pattern: "spam-source.example.net",
@@ -88,7 +91,7 @@ export type BlockSender = Resource<
  * });
  * ```
  *
- * **Example:** Block by regular expression
+ * @example Block by regular expression
  * ```typescript
  * yield* Cloudflare.Email.BlockSender("LookalikeSenders", {
  *   pattern: ".*@examp1e\\.com$",
@@ -98,10 +101,6 @@ export type BlockSender = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/email-security/
- *
- * @resource
- * @product Email Security
- * @category Email
  */
 export const BlockSender = Resource<BlockSender>(
   EmailSecurityBlockSenderTypeId,

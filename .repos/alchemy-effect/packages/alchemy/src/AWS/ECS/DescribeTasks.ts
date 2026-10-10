@@ -15,8 +15,9 @@ export interface DescribeTasksRequest extends Omit<
  * callable that describes tasks in the bound cluster. The cluster ARN is
  * injected automatically and the host is granted `ecs:DescribeTasks` on the
  * cluster's tasks.
- * ### Describing Tasks
- * **Example:** Poll a Task Until It Stops
+ * @binding
+ * @section Describing Tasks
+ * @example Poll a Task Until It Stops
  * ```typescript
  * const describeTasks = yield* AWS.ECS.DescribeTasks(cluster);
  *
@@ -24,8 +25,6 @@ export interface DescribeTasksRequest extends Omit<
  * const status = response.tasks?.[0]?.lastStatus;
  * const exitCode = response.tasks?.[0]?.containers?.[0]?.exitCode;
  * ```
- *
- * @binding
  */
 export interface DescribeTasks extends Binding.Service<
   DescribeTasks,

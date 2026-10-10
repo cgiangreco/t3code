@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.ListResourceProfileDetectionsHttp)`.
- * ### Automated Discovery
- * **Example:** List a Profile's Detections
+ * @binding
+ * @section Automated Discovery
+ * @example List a Profile's Detections
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listResourceProfileDetections = yield* AWS.Macie2.ListResourceProfileDetections();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { detections } = yield* listResourceProfileDetections({ resourceArn: bucketArn });
  * ```
- *
- * @binding
  */
 export interface ListResourceProfileDetections extends Binding.Service<
   ListResourceProfileDetections,

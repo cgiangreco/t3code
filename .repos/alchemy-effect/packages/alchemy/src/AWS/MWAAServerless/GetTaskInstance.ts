@@ -19,8 +19,9 @@ export type GetTaskInstanceInput = Omit<
  * {@link Workflow} — its status, attempt number, timings, error message,
  * log stream, and XCom values. Provide the implementation with
  * `Effect.provide(AWS.MWAAServerless.GetTaskInstanceHttp)`.
- * ### Observing Tasks
- * **Example:** Read A Task Instance
+ * @binding
+ * @section Observing Tasks
+ * @example Read A Task Instance
  * ```typescript
  * // init — bind the operation to the workflow
  * const getTaskInstance = yield* AWS.MWAAServerless.GetTaskInstance(workflow);
@@ -32,8 +33,6 @@ export type GetTaskInstanceInput = Omit<
  * });
  * yield* Effect.log(`task ${task.TaskId}: ${task.Status}`);
  * ```
- *
- * @binding
  */
 export interface GetTaskInstance extends Binding.Service<
   GetTaskInstance,

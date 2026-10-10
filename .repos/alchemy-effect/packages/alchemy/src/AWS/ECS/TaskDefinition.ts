@@ -235,8 +235,9 @@ export interface TaskDefinition extends Resource<
  * `AWS.ECS.Task`; the bring-your-own-container path is `TaskDefinition`.
  * Both surface `taskDefinitionArn` / `containerName` / `port`, so either
  * plugs into `AWS.ECS.Service`'s `task` prop unchanged.
- * ### Creating a Task Definition
- * **Example:** Public Image on Fargate
+ * @resource
+ * @section Creating a Task Definition
+ * @example Public Image on Fargate
  * ```typescript
  * const taskDef = yield* TaskDefinition("Nginx", {
  *   containerDefinitions: [
@@ -250,7 +251,7 @@ export interface TaskDefinition extends Resource<
  * });
  * ```
  *
- * **Example:** With IAM Roles and CloudWatch Logs
+ * @example With IAM Roles and CloudWatch Logs
  * ```typescript
  * const taskDef = yield* TaskDefinition("Api", {
  *   cpu: 512,
@@ -270,8 +271,8 @@ export interface TaskDefinition extends Resource<
  * });
  * ```
  *
- * ### Running with a Service
- * **Example:** Wire into AWS.ECS.Service
+ * @section Running with a Service
+ * @example Wire into AWS.ECS.Service
  * ```typescript
  * const service = yield* Service("ApiService", {
  *   cluster,
@@ -282,8 +283,8 @@ export interface TaskDefinition extends Resource<
  * });
  * ```
  *
- * ### EC2 Launch Type
- * **Example:** EC2 Task with a Host Volume
+ * @section EC2 Launch Type
+ * @example EC2 Task with a Host Volume
  * ```typescript
  * const taskDef = yield* TaskDefinition("Agent", {
  *   requiresCompatibilities: ["EC2"],
@@ -300,8 +301,6 @@ export interface TaskDefinition extends Resource<
  *   ],
  * });
  * ```
- *
- * @resource
  */
 export const TaskDefinition = Resource<TaskDefinition>(
   "AWS.ECS.TaskDefinition",

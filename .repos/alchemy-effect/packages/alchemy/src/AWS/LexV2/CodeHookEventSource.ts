@@ -127,8 +127,9 @@ export type CodeHookEventSourceService = <Req = never>(
  *
  * Use the {@link onCodeHook} helper rather than the service directly, and
  * provide `LexV2.LambdaCodeHookEventSource` on the hosting function.
- * ### Handling Code Hooks
- * **Example:** Fulfill an Intent from a Lambda Function
+ * @binding
+ * @section Handling Code Hooks
+ * @example Fulfill an Intent from a Lambda Function
  * ```typescript
  * export default BotFunction.make(
  *   { main: import.meta.url },
@@ -150,8 +151,6 @@ export type CodeHookEventSourceService = <Req = never>(
  *   }).pipe(Effect.provide(AWS.LexV2.LambdaCodeHookEventSource)),
  * );
  * ```
- *
- * @binding
  */
 export interface CodeHookEventSource extends Binding.Service<
   CodeHookEventSource,

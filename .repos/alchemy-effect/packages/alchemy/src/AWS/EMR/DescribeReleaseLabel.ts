@@ -4,8 +4,9 @@ import * as Binding from "../../Binding.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:DescribeReleaseLabel` — reads one EMR release label — the applications (with versions) it ships and the OS releases it supports.
- * ### Release Catalog
- * **Example:** Inspect a Release's Applications
+ * @binding
+ * @section Release Catalog
+ * @example Inspect a Release's Applications
  * ```typescript
  * const describeReleaseLabel = yield* AWS.EMR.DescribeReleaseLabel();
  *
@@ -13,8 +14,6 @@ import * as Binding from "../../Binding.ts";
  *   ReleaseLabel: "emr-7.5.0",
  * });
  * ```
- *
- * @binding
  */
 export interface DescribeReleaseLabel extends Binding.Service<
   DescribeReleaseLabel,

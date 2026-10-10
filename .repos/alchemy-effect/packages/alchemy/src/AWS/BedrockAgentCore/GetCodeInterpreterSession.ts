@@ -15,8 +15,9 @@ export interface GetCodeInterpreterSessionRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.GetCodeInterpreterSessionHttp`
  * on the Function effect to implement the binding.
  *
- * ### Inspecting Sessions
- * **Example:** Read a Session
+ * @binding
+ * @section Inspecting Sessions
+ * @example Read a Session
  * ```typescript
  * // init
  * const getCodeInterpreterSession = yield* AgentCore.GetCodeInterpreterSession(codeInterpreter);
@@ -29,8 +30,6 @@ export interface GetCodeInterpreterSessionRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface GetCodeInterpreterSession extends Binding.Service<
   GetCodeInterpreterSession,

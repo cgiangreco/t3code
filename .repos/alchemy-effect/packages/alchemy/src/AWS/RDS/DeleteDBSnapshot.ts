@@ -9,15 +9,14 @@ import * as Binding from "../../Binding.ts";
  * Deletes a manual DB instance snapshot — the pruning half of a
  * snapshot-rotation function. Provide the implementation with
  * `Effect.provide(AWS.RDS.DeleteDBSnapshotHttp)`.
- * ### Managing Instance Snapshots
- * **Example:** Prune an Old Instance Snapshot
+ * @binding
+ * @section Managing Instance Snapshots
+ * @example Prune an Old Instance Snapshot
  * ```typescript
  * const deleteDBSnapshot = yield* AWS.RDS.DeleteDBSnapshot();
  *
  * yield* deleteDBSnapshot({ DBSnapshotIdentifier: oldSnapshotId });
  * ```
- *
- * @binding
  */
 export interface DeleteDBSnapshot extends Binding.Service<
   DeleteDBSnapshot,

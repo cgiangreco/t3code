@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * which groups are kept in sync with a tag and alerts on tasks in `ERROR`.
  * Account-level: tasks span groups, so the grant is on `*`. Provide the
  * implementation with `Effect.provide(AWS.ResourceGroups.ListTagSyncTasksHttp)`.
- * ### Tag-Sync Tasks
- * **Example:** List A Group's Tag-Sync Tasks
+ * @binding
+ * @section Tag-Sync Tasks
+ * @example List A Group's Tag-Sync Tasks
  * ```typescript
  * // init
  * const listTagSyncTasks = yield* AWS.ResourceGroups.ListTagSyncTasks();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   Filters: [{ GroupName: "my-application" }],
  * });
  * ```
- *
- * @binding
  */
 export interface ListTagSyncTasks extends Binding.Service<
   ListTagSyncTasks,

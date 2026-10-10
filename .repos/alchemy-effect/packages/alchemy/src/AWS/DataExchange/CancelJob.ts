@@ -8,16 +8,15 @@ import * as Binding from "../../Binding.ts";
  * Cancels a job that has not yet been started (`WAITING` state).
  * Provide the implementation with
  * `Effect.provide(AWS.DataExchange.CancelJobHttp)`.
- * ### Import & Export Jobs
- * **Example:** Cancel A Waiting Job
+ * @binding
+ * @section Import & Export Jobs
+ * @example Cancel A Waiting Job
  * ```typescript
  * const cancelJob = yield* AWS.DataExchange.CancelJob();
  *
  * // runtime
  * yield* cancelJob({ JobId: job.Id! });
  * ```
- *
- * @binding
  */
 export interface CancelJob extends Binding.Service<
   CancelJob,

@@ -23,7 +23,7 @@ export class GlobError extends Data.TaggedError("GlobError")<{
 /**
  * Service for glob pattern matching.
  *
- * @category services
+ * @category models
  * @since 4.0.0
  */
 export interface Glob {

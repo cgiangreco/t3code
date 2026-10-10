@@ -54,13 +54,14 @@ export interface Domain extends Resource<
  * package repositories and provides a single point for encryption, ownership
  * and cross-account access control.
  *
- * ### Creating a Domain
- * **Example:** Basic Domain
+ * @resource
+ * @section Creating a Domain
+ * @example Basic Domain
  * ```typescript
  * const domain = yield* CodeArtifact.Domain("packages", {});
  * ```
  *
- * **Example:** Domain with a customer-managed KMS key
+ * @example Domain with a customer-managed KMS key
  * ```typescript
  * const domain = yield* CodeArtifact.Domain("packages", {
  *   domainName: "my-org",
@@ -68,8 +69,6 @@ export interface Domain extends Resource<
  *   tags: { team: "platform" },
  * });
  * ```
- *
- * @resource
  */
 export const Domain = Resource<Domain>("AWS.CodeArtifact.Domain");
 

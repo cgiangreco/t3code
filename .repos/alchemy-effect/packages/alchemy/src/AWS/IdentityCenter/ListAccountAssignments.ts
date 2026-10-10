@@ -10,8 +10,9 @@ import type { Instance } from "./Instance.ts";
  * Lists who (users/groups) holds a permission set in an AWS account — the core query of an access-review Lambda. The instance's
  * `InstanceArn` is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IdentityCenter.ListAccountAssignmentsHttp)`.
- * ### Auditing Access
- * **Example:** List a Permission Set's Assignees
+ * @binding
+ * @section Auditing Access
+ * @example List a Permission Set's Assignees
  * ```typescript
  * // init — bind the operation to the Identity Center instance
  * const listAccountAssignments = yield* AWS.IdentityCenter.ListAccountAssignments(instance);
@@ -22,8 +23,6 @@ import type { Instance } from "./Instance.ts";
  *   PermissionSetArn: permissionSetArn,
  * });
  * ```
- *
- * @binding
  */
 export interface ListAccountAssignments extends Binding.Service<
   ListAccountAssignments,

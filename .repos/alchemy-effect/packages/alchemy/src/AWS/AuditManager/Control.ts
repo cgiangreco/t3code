@@ -141,8 +141,9 @@ export interface Control extends Resource<
  * Audit Manager must be registered in the account (`RegisterAccount`)
  * before controls can be created.
  * :::
- * ### Creating Controls
- * **Example:** Manual-Evidence Control
+ * @resource
+ * @section Creating Controls
+ * @example Manual-Evidence Control
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -156,7 +157,7 @@ export interface Control extends Resource<
  * });
  * ```
  *
- * **Example:** CloudTrail-Backed Control
+ * @example CloudTrail-Backed Control
  * ```typescript
  * const control = yield* AWS.AuditManager.Control("RootLoginMonitor", {
  *   description: "Detects console logins by the root user",
@@ -172,8 +173,6 @@ export interface Control extends Resource<
  *   }],
  * });
  * ```
- *
- * @resource
  */
 export const Control = Resource<Control>("AWS.AuditManager.Control");
 

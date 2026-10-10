@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * completion, validation state. The data behind migration progress
  * dashboards and cut-over gates. Provide the implementation with
  * `Effect.provide(AWS.DMS.DescribeTableStatisticsHttp)`.
- * ### Monitoring Migration Progress
- * **Example:** Gate a Cut-Over on Full-Load Completion
+ * @binding
+ * @section Monitoring Migration Progress
+ * @example Gate a Cut-Over on Full-Load Completion
  * ```typescript
  * // init — account-level, no target resource
  * const describeTableStatistics = yield* AWS.DMS.DescribeTableStatistics();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  *   (table) => table.FullLoadEndTime === undefined,
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeTableStatistics extends Binding.Service<
   DescribeTableStatistics,

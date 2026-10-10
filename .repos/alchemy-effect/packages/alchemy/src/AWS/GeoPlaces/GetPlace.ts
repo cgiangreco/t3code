@@ -13,12 +13,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-places:GetPlace`. Requests and responses are raw distilled types (no
  * marshalling).
  *
- * ### Fetching Place Details
+ * @binding
+ * @section Fetching Place Details
  * Provide the `GetPlaceHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoPlaces.GetPlaceHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Look up a place by its PlaceId
+ * @example Look up a place by its PlaceId
  * ```typescript
  * // init
  * const geocode = yield* AWS.GeoPlaces.Geocode();
@@ -30,8 +31,6 @@ import * as Binding from "../../Binding.ts";
  * const place = yield* getPlace({ PlaceId: placeId! });
  * const label = place.Address?.Label;
  * ```
- *
- * @binding
  */
 export interface GetPlace extends Binding.Service<
   GetPlace,

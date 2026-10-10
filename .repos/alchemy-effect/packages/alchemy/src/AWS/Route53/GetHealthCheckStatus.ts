@@ -12,8 +12,9 @@ import type { HealthCheck } from "./HealthCheck.ts";
  * signal Route 53 routes on. Endpoint checks only (not `CALCULATED` /
  * `RECOVERY_CONTROL`). Provide the implementation with
  * `Effect.provide(AWS.Route53.GetHealthCheckStatusHttp)`.
- * ### Observing Health Checks
- * **Example:** Read checker observations
+ * @binding
+ * @section Observing Health Checks
+ * @example Read checker observations
  * ```typescript
  * const getHealthCheckStatus = yield* AWS.Route53.GetHealthCheckStatus(check);
  *
@@ -24,8 +25,6 @@ import type { HealthCheck } from "./HealthCheck.ts";
  *   );
  * }
  * ```
- *
- * @binding
  */
 export interface GetHealthCheckStatus extends Binding.Service<
   GetHealthCheckStatus,

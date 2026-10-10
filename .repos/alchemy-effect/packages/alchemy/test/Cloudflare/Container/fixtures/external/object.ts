@@ -1,9 +1,9 @@
 import * as Cloudflare from "@/Cloudflare";
 import { Layer } from "effect";
 import * as Effect from "effect/Effect";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
 
-export class ExternalContainer extends Cloudflare.Container<ExternalContainer>()(
+class ExternalContainer extends Cloudflare.Container<ExternalContainer>()(
   "ExternalContainer",
   {
     // Use a template string rather than `path.join(import.meta.dirname, …)`:

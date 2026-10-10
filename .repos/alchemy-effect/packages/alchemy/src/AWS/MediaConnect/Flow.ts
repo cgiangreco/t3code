@@ -99,8 +99,9 @@ export interface Flow extends Resource<
  * Creating a flow leaves it in `STANDBY`; a flow only ingests/egresses media
  * (and bills for transport) once started with the StartFlow API. Flows bill
  * hourly while ACTIVE, so alchemy never starts a flow implicitly.
- * ### Creating a Flow
- * **Example:** RTP Flow with a CIDR-Whitelisted Source
+ * @resource
+ * @section Creating a Flow
+ * @example RTP Flow with a CIDR-Whitelisted Source
  * ```typescript
  * const flow = yield* Flow("Broadcast", {
  *   source: {
@@ -112,8 +113,8 @@ export interface Flow extends Resource<
  * });
  * ```
  *
- * ### Outputs
- * **Example:** Flow with an RTP Output
+ * @section Outputs
+ * @example Flow with an RTP Output
  * ```typescript
  * const flow = yield* Flow("Distribution", {
  *   source: {
@@ -133,16 +134,14 @@ export interface Flow extends Resource<
  * });
  * ```
  *
- * ### Tags
- * **Example:** Tagged Flow
+ * @section Tags
+ * @example Tagged Flow
  * ```typescript
  * const flow = yield* Flow("Broadcast", {
  *   source: { Protocol: "rtp", WhitelistCidr: "10.0.0.0/8", IngestPort: 5000 },
  *   tags: { team: "live-video" },
  * });
  * ```
- *
- * @resource
  */
 export const Flow = Resource<Flow>("AWS.MediaConnect.Flow");
 

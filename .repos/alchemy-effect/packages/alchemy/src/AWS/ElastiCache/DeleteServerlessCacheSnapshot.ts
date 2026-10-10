@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * backups from a maintenance Lambda. Available for valkey, redis, and
  * serverless memcached. Provide the implementation with
  * `Effect.provide(AWS.ElastiCache.DeleteServerlessCacheSnapshotHttp)`.
- * ### Managing Snapshots
- * **Example:** Delete an Old Snapshot
+ * @binding
+ * @section Managing Snapshots
+ * @example Delete an Old Snapshot
  * ```typescript
  * const deleteSnapshot = yield* ElastiCache.DeleteServerlessCacheSnapshot();
  *
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   Effect.catchTag("ServerlessCacheSnapshotNotFoundFault", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteServerlessCacheSnapshot extends Binding.Service<
   DeleteServerlessCacheSnapshot,

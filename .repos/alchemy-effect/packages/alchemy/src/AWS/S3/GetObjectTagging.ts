@@ -17,15 +17,14 @@ export interface GetObjectTaggingRequest extends Omit<
  * `s3:GetObjectTagging`/`s3:GetObjectVersionTagging` are granted on the
  * bucket's objects. Provide the implementation with
  * `Effect.provide(AWS.S3.GetObjectTaggingHttp)`.
- * ### Object Tagging
- * **Example:** Read an Object's Tags
+ * @binding
+ * @section Object Tagging
+ * @example Read an Object's Tags
  * ```typescript
  * const getObjectTagging = yield* AWS.S3.GetObjectTagging(bucket);
  *
  * const { TagSet } = yield* getObjectTagging({ Key: "reports/q3.csv" });
  * ```
- *
- * @binding
  */
 export interface GetObjectTagging extends Binding.Service<
   GetObjectTagging,

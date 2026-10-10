@@ -16,8 +16,9 @@ export interface StopQAppSessionRequest extends Omit<
  *
  * Stops an active Q App session, halting any in-progress card executions. Provide the implementation with
  * `Effect.provide(AWS.QApps.StopQAppSessionHttp)`.
- * ### Sessions
- * **Example:** Stop a Session
+ * @binding
+ * @section Sessions
+ * @example Stop a Session
  * ```typescript
  * // init — bind the operation to the Q App
  * const stopQAppSession = yield* AWS.QApps.StopQAppSession(app);
@@ -25,8 +26,6 @@ export interface StopQAppSessionRequest extends Omit<
  * // runtime
  * yield* stopQAppSession({ sessionId });
  * ```
- *
- * @binding
  */
 export interface StopQAppSession extends Binding.Service<
   StopQAppSession,

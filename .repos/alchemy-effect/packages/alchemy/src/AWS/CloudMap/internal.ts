@@ -242,7 +242,7 @@ export const ensureNamespace = <R>(
       if (namespace?.Id === undefined) {
         return yield* Effect.fail(
           new sd.NamespaceNotFound({
-            message: `namespace ${name} not visible after create`,
+            Message: `namespace ${name} not visible after create`,
           }),
         );
       }

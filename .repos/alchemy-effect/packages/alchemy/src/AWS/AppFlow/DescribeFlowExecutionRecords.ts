@@ -17,8 +17,9 @@ export interface DescribeFlowExecutionRecordsRequest extends Omit<
  * name is injected automatically and `appflow:DescribeFlowExecutionRecords`
  * is granted on the flow. Provide the implementation with
  * `Effect.provide(AWS.AppFlow.DescribeFlowExecutionRecordsHttp)`.
- * ### Monitoring Flow Runs
- * **Example:** Check the Status of the Latest Run
+ * @binding
+ * @section Monitoring Flow Runs
+ * @example Check the Status of the Latest Run
  * ```typescript
  * // init — bind the operation to the flow
  * const describeFlowExecutionRecords =
@@ -29,8 +30,6 @@ export interface DescribeFlowExecutionRecordsRequest extends Omit<
  * const latest = records.flowExecutions?.[0];
  * // latest?.executionStatus === "Successful"
  * ```
- *
- * @binding
  */
 export interface DescribeFlowExecutionRecords extends Binding.Service<
   DescribeFlowExecutionRecords,

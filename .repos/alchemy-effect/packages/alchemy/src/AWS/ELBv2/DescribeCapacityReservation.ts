@@ -22,8 +22,9 @@ export interface DescribeCapacityReservationRequest extends Omit<
  * with {@link ModifyCapacityReservation} to confirm a reservation is
  * `provisioned` before a known traffic spike. Provide the implementation
  * with `Effect.provide(AWS.ELBv2.DescribeCapacityReservationHttp)`.
- * ### Capacity Reservation
- * **Example:** Read the current reservation
+ * @binding
+ * @section Capacity Reservation
+ * @example Read the current reservation
  * ```typescript
  * // init — bind the operation to the load balancer
  * const describeCapacityReservation =
@@ -33,8 +34,6 @@ export interface DescribeCapacityReservationRequest extends Omit<
  * const reservation = yield* describeCapacityReservation();
  * const states = reservation.CapacityReservationState?.map((s) => s.State);
  * ```
- *
- * @binding
  */
 export interface DescribeCapacityReservation extends Binding.Service<
   DescribeCapacityReservation,

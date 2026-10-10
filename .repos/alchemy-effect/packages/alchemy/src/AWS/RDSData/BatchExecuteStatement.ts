@@ -24,8 +24,9 @@ export interface BatchExecuteStatementRequest extends Omit<
  * Bind it to a Data-API-enabled `DBCluster` and its credentials secret,
  * exactly like `AWS.RDSData.ExecuteStatement`; provide the implementation
  * with `Effect.provide(AWS.RDSData.BatchExecuteStatementHttp)`.
- * ### Batch Writes
- * **Example:** Bulk Insert Rows
+ * @binding
+ * @section Batch Writes
+ * @example Bulk Insert Rows
  * ```typescript
  * // init — bind alongside your other Data API operations
  * const batchExecuteStatement = yield* AWS.RDSData.BatchExecuteStatement(
@@ -42,8 +43,6 @@ export interface BatchExecuteStatementRequest extends Omit<
  *   ]),
  * });
  * ```
- *
- * @binding
  */
 export interface BatchExecuteStatement extends Binding.Service<
   BatchExecuteStatement,

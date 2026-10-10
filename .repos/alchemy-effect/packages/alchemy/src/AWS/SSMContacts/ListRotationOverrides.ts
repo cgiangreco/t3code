@@ -10,8 +10,9 @@ import type { Rotation } from "./Rotation.ts";
  * The rotation's ARN is injected as `RotationId`.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMContacts.ListRotationOverridesHttp)`.
- * ### Managing On-Call Rotations
- * **Example:** List Overrides This Week
+ * @binding
+ * @section Managing On-Call Rotations
+ * @example List Overrides This Week
  * ```typescript
  * const listRotationOverrides =
  *   yield* AWS.SSMContacts.ListRotationOverrides(rotation);
@@ -21,8 +22,6 @@ import type { Rotation } from "./Rotation.ts";
  *   EndTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
  * });
  * ```
- *
- * @binding
  */
 export interface ListRotationOverrides extends Binding.Service<
   ListRotationOverrides,

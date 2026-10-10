@@ -15,8 +15,9 @@ export interface StartBuildRequest extends Omit<
  *
  * The response carries the created `build` including its `id`, which can be
  * polled with the {@link BatchGetBuilds} binding.
- * ### Starting Builds
- * **Example:** Start a Build
+ * @binding
+ * @section Starting Builds
+ * @example Start a Build
  * ```typescript
  * const startBuild = yield* AWS.CodeBuild.StartBuild(project);
  *
@@ -26,8 +27,6 @@ export interface StartBuildRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface StartBuild extends Binding.Service<
   StartBuild,

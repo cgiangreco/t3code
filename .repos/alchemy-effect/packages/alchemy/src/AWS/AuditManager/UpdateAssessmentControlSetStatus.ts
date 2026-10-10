@@ -15,14 +15,13 @@ export interface UpdateAssessmentControlSetStatusRequest extends Omit<
  * Updates the review status of a control set in the bound
  * assessment. Provide the
  * implementation with `Effect.provide(AWS.AuditManager.UpdateAssessmentControlSetStatusHttp)`.
- * ### Assessment Workflow
- * **Example:** Sign Off a Control Set
+ * @binding
+ * @section Assessment Workflow
+ * @example Sign Off a Control Set
  * ```typescript
  * const updateAssessmentControlSetStatus = yield* AWS.AuditManager.UpdateAssessmentControlSetStatus(assessment);
  * const result = yield* updateAssessmentControlSetStatus({ controlSetId, status: "REVIEWED", comment: "Signed off" });
  * ```
- *
- * @binding
  */
 export interface UpdateAssessmentControlSetStatus extends Binding.Service<
   UpdateAssessmentControlSetStatus,

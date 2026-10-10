@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.DeleteInvitationsHttp)`.
- * ### Administrator & Invitations
- * **Example:** Delete Invitations
+ * @binding
+ * @section Administrator & Invitations
+ * @example Delete Invitations
  * ```typescript
  * // init
  * // init — account-level binding, no resource argument
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteInvitations({ AccountIds: ["111122223333"] });
  * ```
- *
- * @binding
  */
 export interface DeleteInvitations extends Binding.Service<
   DeleteInvitations,

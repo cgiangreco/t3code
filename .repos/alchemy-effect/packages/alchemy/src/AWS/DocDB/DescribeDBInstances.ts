@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * building block of instance-health monitoring and reboot automation.
  * Provide the implementation with
  * `Effect.provide(AWS.DocDB.DescribeDBInstancesHttp)`.
- * ### Monitoring Instances
- * **Example:** Check the Cluster's Instance Health
+ * @binding
+ * @section Monitoring Instances
+ * @example Check the Cluster's Instance Health
  * ```typescript
  * const describeDBInstances = yield* DocDB.DescribeDBInstances();
  *
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   (instance) => instance.DBInstanceStatus === "available",
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeDBInstances extends Binding.Service<
   DescribeDBInstances,

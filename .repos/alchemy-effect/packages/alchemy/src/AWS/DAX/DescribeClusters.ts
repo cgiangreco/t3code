@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * status, endpoints and configuration embedded — the building block of
  * cluster-health monitoring and node-reboot automation. Provide the
  * implementation with `Effect.provide(AWS.DAX.DescribeClustersHttp)`.
- * ### Monitoring Clusters
- * **Example:** Check a Cluster's Node Health
+ * @binding
+ * @section Monitoring Clusters
+ * @example Check a Cluster's Node Health
  * ```typescript
  * const describeClusters = yield* DAX.DescribeClusters();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   (node) => node.NodeStatus === "available",
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeClusters extends Binding.Service<
   DescribeClusters,

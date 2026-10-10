@@ -20,8 +20,9 @@ export interface CopyBlueprintStageRequest extends Omit<
  *
  * Provide the implementation with
  * `Effect.provide(AWS.BedrockDataAutomation.CopyBlueprintStageHttp)`.
- * ### Blueprint Management
- * **Example:** Promote Development To Live
+ * @binding
+ * @section Blueprint Management
+ * @example Promote Development To Live
  * ```typescript
  * // deploy time — bind the blueprint
  * const copyStage =
@@ -30,8 +31,6 @@ export interface CopyBlueprintStageRequest extends Omit<
  * // runtime — promote the development copy
  * yield* copyStage({ sourceStage: "DEVELOPMENT", targetStage: "LIVE" });
  * ```
- *
- * @binding
  */
 export interface CopyBlueprintStage extends Binding.Service<
   CopyBlueprintStage,

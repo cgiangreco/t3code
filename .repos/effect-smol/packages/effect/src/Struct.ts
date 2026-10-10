@@ -32,7 +32,7 @@ import * as Reducer from "./Reducer.ts"
  *
  * **Example** (Flattening an intersection)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Struct } from "effect"
  *
  * type Original = { a: string } & { b: number }
@@ -40,8 +40,6 @@ import * as Reducer from "./Reducer.ts"
  * // Without Simplify, the type displays as `{ a: string } & { b: number }`
  * type Simplified = Struct.Simplify<Original>
  * // { a: string; b: number }
- *
- * const witness: Simplified = { a: "value", b: 1 }
  * ```
  *
  * @see {@link Mutable} – also flattens but removes `readonly`
@@ -65,16 +63,12 @@ export type Simplify<T> = { [K in keyof T]: T[K] } & {}
  *
  * **Example** (Making a readonly type mutable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Struct } from "effect"
  *
  * type ReadOnly = { readonly a: string; readonly b: number }
  * type Writable = Struct.Mutable<ReadOnly>
  * // { a: string; b: number }
- *
- * const witness: Writable = { a: "value", b: 1 }
- * witness.b = 2
- * witness // => { a: "value", b: 2 }
  * ```
  *
  * @see {@link Simplify} – flattens intersections without removing `readonly`
@@ -98,15 +92,13 @@ export type Mutable<T> = { -readonly [K in keyof T]: T[K] } & {}
  *
  * **Example** (Merging two types with overlapping keys)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Struct } from "effect"
  *
  * type A = { a: string; b: number }
  * type B = { b: boolean; c: string }
  * type Merged = Struct.Assign<A, B>
  * // { a: string; b: boolean; c: string }
- *
- * const witness: Merged = { a: "value", b: true, c: "other" }
  * ```
  *
  * @see {@link assign} – the runtime equivalent
@@ -129,10 +121,11 @@ export type Assign<T, U> = Simplify<keyof T & keyof U extends never ? T & U : Om
  *
  * **Example** (Extracting a property in a pipeline)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
- * pipe({ name: "Alice", age: 30 }, Struct.get("name")) // => "Alice"
+ * const name = pipe({ name: "Alice", age: 30 }, Struct.get("name"))
+ * console.log(name) // "Alice"
  * ```
  *
  * @see {@link keys} – list all string keys of a struct
@@ -159,18 +152,18 @@ export const get: {
  *
  * **Example** (Reading typed keys)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Struct } from "effect"
  *
  * const user = { name: "Alice", age: 30, [Symbol.for("id")]: 1 }
  *
  * const k: Array<"name" | "age"> = Struct.keys(user)
- * k // => ["name", "age"]
+ * console.log(k) // ["name", "age"]
  * ```
  *
  * @see {@link get} – access a single key's value
  * @see {@link pick} – select a subset of keys into a new struct
- * @category getters
+ * @category Key utilities
  * @since 3.6.0
  */
 export const keys = <S extends object>(self: S): Array<(keyof S) & string> =>
@@ -189,11 +182,12 @@ export const keys = <S extends object>(self: S): Array<(keyof S) & string> =>
  *
  * **Example** (Selecting specific properties)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const user = { name: "Alice", age: 30, admin: true }
- * pipe(user, Struct.pick(["name", "age"])) // => { name: "Alice", age: 30 }
+ * const nameAndAge = pipe(user, Struct.pick(["name", "age"]))
+ * console.log(nameAndAge) // { name: "Alice", age: 30 }
  * ```
  *
  * @see {@link omit} – the inverse (exclude keys instead)
@@ -209,7 +203,7 @@ export const pick: {
 } = dual(
   2,
   <S extends object, const Keys extends ReadonlyArray<keyof S>>(self: S, keys: Keys) => {
-    return buildStruct(self, (k, v) => (hasPropertyKey(keys, k) ? [k, v] : undefined))
+    return buildStruct(self, (k, v) => (keys.includes(k) ? [k, v] : undefined))
   }
 )
 
@@ -226,11 +220,12 @@ export const pick: {
  *
  * **Example** (Removing a property)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const user = { name: "Alice", age: 30, password: "secret" }
- * pipe(user, Struct.omit(["password"])) // => { name: "Alice", age: 30 }
+ * const safe = pipe(user, Struct.omit(["password"]))
+ * console.log(safe) // { name: "Alice", age: 30 }
  * ```
  *
  * @see {@link pick} – the inverse (keep only specified keys)
@@ -245,7 +240,7 @@ export const omit: {
 } = dual(
   2,
   <S extends object, Keys extends ReadonlyArray<keyof S>>(self: S, keys: Keys) => {
-    return buildStruct(self, (k, v) => (!hasPropertyKey(keys, k) ? [k, v] : undefined))
+    return buildStruct(self, (k, v) => (!keys.includes(k) ? [k, v] : undefined))
   }
 )
 
@@ -263,12 +258,13 @@ export const omit: {
  *
  * **Example** (Merging structs with overlapping keys)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const defaults = { theme: "light", lang: "en" }
  * const overrides = { theme: "dark", fontSize: 14 }
- * pipe(defaults, Struct.assign(overrides)) // => { theme: "dark", lang: "en", fontSize: 14 }
+ * const config = pipe(defaults, Struct.assign(overrides))
+ * console.log(config) // { theme: "dark", lang: "en", fontSize: 14 }
  * ```
  *
  * @see {@link Assign} – the type-level equivalent
@@ -307,7 +303,7 @@ type Evolved<S, E> = Simplify<
  *
  * **Example** (Transforming selected values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const result = pipe(
@@ -317,7 +313,7 @@ type Evolved<S, E> = Simplify<
  *     age: (n) => n + 1
  *   })
  * )
- * result // => { name: "ALICE", age: 31, active: true }
+ * console.log(result) // { name: "ALICE", age: 31, active: true }
  * ```
  *
  * @see {@link evolveKeys} – transform keys instead of values
@@ -357,7 +353,7 @@ type KeyEvolved<S, E> = Simplify<
  *
  * **Example** (Renaming keys with functions)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const result = pipe(
@@ -366,13 +362,13 @@ type KeyEvolved<S, E> = Simplify<
  *     name: (k) => k.toUpperCase()
  *   })
  * )
- * result // => { NAME: "Alice", age: 30 }
+ * console.log(result) // { NAME: "Alice", age: 30 }
  * ```
  *
  * @see {@link renameKeys} – rename keys with a static mapping
  * @see {@link evolve} – transform values instead of keys
  * @see {@link evolveEntries} – transform both keys and values
- * @category transforming
+ * @category Key utilities
  * @since 4.0.0
  */
 export const evolveKeys: {
@@ -412,7 +408,7 @@ type EntryEvolved<S, E> = {
  *
  * **Example** (Transforming keys and values together)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const result = pipe(
@@ -422,7 +418,7 @@ type EntryEvolved<S, E> = {
  *     label: (k, v) => [k, v.toUpperCase()]
  *   })
  * )
- * result // => { amountCents: 10000, label: "TOTAL" }
+ * console.log(result) // { amountCents: 10000, label: "TOTAL" }
  * ```
  *
  * @see {@link evolve} – transform values only
@@ -454,19 +450,19 @@ export const evolveEntries: {
  *
  * **Example** (Renaming keys)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * const result = pipe(
  *   { firstName: "Alice", lastName: "Smith", age: 30 },
  *   Struct.renameKeys({ firstName: "first", lastName: "last" })
  * )
- * result // => { first: "Alice", last: "Smith", age: 30 }
+ * console.log(result) // { first: "Alice", last: "Smith", age: 30 }
  * ```
  *
  * @see {@link evolveKeys} – rename keys using functions
  * @see {@link evolveEntries} – rename keys and transform values
- * @category transforming
+ * @category Key utilities
  * @since 4.0.0
  */
 export const renameKeys: {
@@ -499,7 +495,7 @@ export const renameKeys: {
  *
  * **Example** (Comparing structs for equivalence)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Equivalence, Struct } from "effect"
  *
  * const PersonEquivalence = Struct.makeEquivalence({
@@ -507,8 +503,10 @@ export const renameKeys: {
  *   age: Equivalence.strictEqual<number>()
  * })
  *
- * PersonEquivalence({ name: "Alice", age: 30 }, { name: "Alice", age: 30 }) // => true
- * PersonEquivalence({ name: "Alice", age: 30 }, { name: "Bob", age: 30 }) // => false
+ * console.log(PersonEquivalence({ name: "Alice", age: 30 }, { name: "Alice", age: 30 }))
+ * // true
+ * console.log(PersonEquivalence({ name: "Alice", age: 30 }, { name: "Bob", age: 30 }))
+ * // false
  * ```
  *
  * @see {@link makeOrder} – create an `Order` for structs
@@ -534,7 +532,7 @@ export const makeEquivalence = Equivalence.Struct
  *
  * **Example** (Ordering structs by name then age)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number, String, Struct } from "effect"
  *
  * const PersonOrder = Struct.makeOrder({
@@ -542,7 +540,8 @@ export const makeEquivalence = Equivalence.Struct
  *   age: Number.Order
  * })
  *
- * PersonOrder({ name: "Alice", age: 30 }, { name: "Bob", age: 25 }) // => -1
+ * console.log(PersonOrder({ name: "Alice", age: 30 }, { name: "Bob", age: 25 }))
+ * // -1 (Alice comes before Bob)
  * ```
  *
  * @see {@link makeEquivalence} – create an `Equivalence` for structs
@@ -568,20 +567,18 @@ export const makeOrder = order.Struct
  *
  * **Example** (Defining a lambda type)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Struct } from "effect"
  *
  * interface ToString extends Struct.Lambda {
  *   readonly "~lambda.out": string
  * }
- *
- * const witness: ToString = { "~lambda.in": 1, "~lambda.out": "1" }
  * ```
  *
  * @see {@link Apply} – apply a Lambda to a concrete type
  * @see {@link lambda} – create a runtime lambda value
  * @see {@link map} – use a lambda to transform all struct values
- * @category utility types
+ * @category Lambda
  * @since 4.0.0
  */
 export interface Lambda {
@@ -605,21 +602,19 @@ export interface Lambda {
  *
  * **Example** (Computing the output type of a lambda)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import type { Struct } from "effect"
  *
  * interface ToString extends Struct.Lambda {
  *   readonly "~lambda.out": string
  * }
  *
- * // string
+ * // Result is `string`
  * type Result = Struct.Apply<ToString, number>
- *
- * const witness: Result = "value"
  * ```
  *
  * @see {@link Lambda} – the base interface
- * @category utility types
+ * @category Lambda
  * @since 4.0.0
  */
 export type Apply<L extends Lambda, V> = (L & { readonly "~lambda.in": V })["~lambda.out"]
@@ -642,7 +637,7 @@ export type Apply<L extends Lambda, V> = (L & { readonly "~lambda.in": V })["~la
  *
  * **Example** (Wrapping values in arrays)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * interface AsArray extends Struct.Lambda {
@@ -652,12 +647,12 @@ export type Apply<L extends Lambda, V> = (L & { readonly "~lambda.in": V })["~la
  *
  * const asArray = Struct.lambda<AsArray>((a) => [a])
  * const result = pipe({ x: 1, y: "hello" }, Struct.map(asArray))
- * result // => { x: [1], y: ["hello"] }
+ * console.log(result) // { x: [1], y: ["hello"] }
  * ```
  *
  * @see {@link Lambda} – the type-level interface
  * @see {@link map} – apply a lambda to all struct values
- * @category constructors
+ * @category Lambda
  * @since 4.0.0
  */
 export const lambda = <L extends (a: any) => any>(
@@ -678,7 +673,7 @@ export const lambda = <L extends (a: any) => any>(
  *
  * **Example** (Wrapping every value in an array)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * interface AsArray extends Struct.Lambda {
@@ -688,7 +683,7 @@ export const lambda = <L extends (a: any) => any>(
  *
  * const asArray = Struct.lambda<AsArray>((a) => [a])
  * const result = pipe({ width: 10, height: 20 }, Struct.map(asArray))
- * result // => { width: [10], height: [20] }
+ * console.log(result) // { width: [10], height: [20] }
  * ```
  *
  * @see {@link mapPick} – apply a lambda only to selected keys
@@ -722,7 +717,7 @@ export const map: {
  *
  * **Example** (Wrapping only selected values in arrays)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * interface AsArray extends Struct.Lambda {
@@ -735,7 +730,7 @@ export const map: {
  *   { x: 1, y: 2, z: 3 },
  *   Struct.mapPick(["x", "z"], asArray)
  * )
- * result // => { x: [1], y: 2, z: [3] }
+ * console.log(result) // { x: [1], y: 2, z: [3] }
  * ```
  *
  * @see {@link map} – apply a lambda to all keys
@@ -762,7 +757,7 @@ export const mapPick: {
     keys: Keys,
     lambda: L
   ) => {
-    return buildStruct(self, (k, v) => [k, hasPropertyKey(keys, k) ? lambda(v) : v])
+    return buildStruct(self, (k, v) => [k, keys.includes(k) ? lambda(v) : v])
   }
 )
 
@@ -776,7 +771,7 @@ export const mapPick: {
  *
  * **Example** (Wrapping all values except one in arrays)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { pipe, Struct } from "effect"
  *
  * interface AsArray extends Struct.Lambda {
@@ -789,7 +784,7 @@ export const mapPick: {
  *   { x: 1, y: 2, z: 3 },
  *   Struct.mapOmit(["y"], asArray)
  * )
- * result // => { x: [1], y: 2, z: [3] }
+ * console.log(result) // { x: [1], y: 2, z: [3] }
  * ```
  *
  * @see {@link map} – apply a lambda to all keys
@@ -816,13 +811,9 @@ export const mapOmit: {
     keys: Keys,
     lambda: L
   ) => {
-    return buildStruct(self, (k, v) => [k, !hasPropertyKey(keys, k) ? lambda(v) : v])
+    return buildStruct(self, (k, v) => [k, !keys.includes(k) ? lambda(v) : v])
   }
 )
-
-function hasPropertyKey(keys: ReadonlyArray<PropertyKey>, key: PropertyKey): boolean {
-  return keys.some((candidate) => candidate === key || typeof candidate === "number" && String(candidate) === key)
-}
 
 /**
  * Walk `source`; for each key decide what to emit via the small callback.
@@ -869,7 +860,7 @@ function buildStruct<
  *
  * **Example** (Combining struct properties)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number, String, Struct } from "effect"
  *
  * const C = Struct.makeCombiner<{ readonly n: number; readonly s: string }>({
@@ -877,7 +868,8 @@ function buildStruct<
  *   s: String.ReducerConcat
  * })
  *
- * C.combine({ n: 1, s: "hello" }, { n: 2, s: " world" }) // => { n: 3, s: "hello world" }
+ * const result = C.combine({ n: 1, s: "hello" }, { n: 2, s: " world" })
+ * console.log(result) // { n: 3, s: "hello world" }
  * ```
  *
  * @see {@link makeReducer} – like `makeCombiner` but with an initial value
@@ -921,7 +913,7 @@ export function makeCombiner<A>(
  *
  * **Example** (Reducing a collection of structs)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Number, String, Struct } from "effect"
  *
  * const R = Struct.makeReducer<{ readonly n: number; readonly s: string }>({
@@ -934,7 +926,7 @@ export function makeCombiner<A>(
  *   { n: 2, s: "b" },
  *   { n: 3, s: "c" }
  * ])
- * result // => { n: 6, s: "abc" }
+ * console.log(result) // { n: 6, s: "abc" }
  * ```
  *
  * @see {@link makeCombiner} – like `makeReducer` but without an initial value
@@ -966,10 +958,11 @@ export function makeReducer<A>(
  *
  * **Example** (Creating a record)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Struct } from "effect"
  *
- * Struct.Record(["a", "b"], "value") // => { a: "value", b: "value" }
+ * const record = Struct.Record(["a", "b"], "value")
+ * console.log(record) // { a: "value", b: "value" }
  * ```
  *
  * @category constructors

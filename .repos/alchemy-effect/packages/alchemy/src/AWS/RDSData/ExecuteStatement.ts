@@ -28,11 +28,12 @@ export interface ExecuteStatementRequest extends Omit<
  * `rds-data:ExecuteStatement` plus `secretsmanager:GetSecretValue` on the
  * secret. Provide the implementation with
  * `Effect.provide(AWS.RDSData.ExecuteStatementHttp)`.
- * ### Executing Statements
- * **Example:** Query with Named Parameters
+ * @binding
+ * @section Executing Statements
+ * @example Query with Named Parameters
  * ```typescript
  * export default MyFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     const db = yield* AWS.RDS.Aurora("AppDb", {
  *       subnetIds: [subnetA.subnetId, subnetB.subnetId],
@@ -58,7 +59,7 @@ export interface ExecuteStatementRequest extends Omit<
  * );
  * ```
  *
- * **Example:** Write Inside a Transaction
+ * @example Write Inside a Transaction
  * ```typescript
  * // pass a transactionId from AWS.RDSData.BeginTransaction to make the
  * // statement part of that transaction
@@ -71,8 +72,6 @@ export interface ExecuteStatementRequest extends Omit<
  *   transactionId: tx.transactionId,
  * });
  * ```
- *
- * @binding
  */
 export interface ExecuteStatement extends Binding.Service<
   ExecuteStatement,

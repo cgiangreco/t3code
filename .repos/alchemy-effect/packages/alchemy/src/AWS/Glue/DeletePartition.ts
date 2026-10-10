@@ -17,8 +17,9 @@ export interface DeletePartitionRequest extends Omit<
  * database/table names and catalog id are injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.Glue.DeletePartitionHttp)`.
- * ### Managing Partitions
- * **Example:** Deregister a Partition
+ * @binding
+ * @section Managing Partitions
+ * @example Deregister a Partition
  * ```typescript
  * // init
  * const deletePartition = yield* AWS.Glue.DeletePartition(table);
@@ -28,8 +29,6 @@ export interface DeletePartitionRequest extends Omit<
  *   Effect.catchTag("EntityNotFoundException", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeletePartition extends Binding.Service<
   DeletePartition,

@@ -38,8 +38,10 @@ test.provider.skipIf(entitled)(
         .createAccessBookmark({
           accountId,
           bookmarkId: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeffff0001",
-          name: "alchemy-access-bookmark-probe",
-          domain: "wiki.alchemy-test-2.us",
+          body: {
+            name: "alchemy-access-bookmark-probe",
+            domain: "wiki.alchemy-test-2.us",
+          },
         })
         .pipe(Effect.flip);
       expect(error._tag).toEqual("AccessBookmarkNotFound");
@@ -49,10 +51,7 @@ test.provider.skipIf(entitled)(
       const bookmarks = yield* zeroTrust.listAccessBookmarks({ accountId });
       expect(Array.isArray(bookmarks.result)).toBe(true);
     }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:access", "live"],
-    timeout: 120_000,
-  },
+  { timeout: 120_000 },
 );
 
 test.provider.skipIf(!entitled)(
@@ -109,10 +108,7 @@ test.provider.skipIf(!entitled)(
         );
       expect(afterDestroy?.id ?? undefined).toBeUndefined();
     }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:access", "live"],
-    timeout: 120_000,
-  },
+  { timeout: 120_000 },
 );
 
 // The legacy bookmarks list endpoint is read-only but available on every
@@ -150,8 +146,5 @@ test.provider(
 
       yield* stack.destroy();
     }).pipe(logLevel),
-  {
-    tags: ["provider:cloudflare", "provider:cloudflare:access", "live"],
-    timeout: 120_000,
-  },
+  { timeout: 120_000 },
 );

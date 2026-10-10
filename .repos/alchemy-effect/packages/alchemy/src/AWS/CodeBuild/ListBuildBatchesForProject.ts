@@ -6,15 +6,14 @@ import type { Project } from "./Project.ts";
 /**
  * Runtime binding for `codebuild:ListBuildBatchesForProject` — lists the
  * bound project's batch build ids, optionally filtered by status.
- * ### Batch Builds
- * **Example:** List Batch Builds
+ * @binding
+ * @section Batch Builds
+ * @example List Batch Builds
  * ```typescript
  * const listBuildBatches = yield* AWS.CodeBuild.ListBuildBatchesForProject(project);
  *
  * const { ids } = yield* listBuildBatches();
  * ```
- *
- * @binding
  */
 export interface ListBuildBatchesForProject extends Binding.Service<
   ListBuildBatchesForProject,

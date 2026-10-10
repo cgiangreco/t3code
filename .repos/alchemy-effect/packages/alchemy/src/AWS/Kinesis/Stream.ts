@@ -184,15 +184,16 @@ export interface Stream extends Resource<
  * including retention, encryption, monitoring, warm throughput, record size, tags,
  * and stream resource policy. A stream name is auto-generated from the app,
  * stage, and logical ID unless you provide one explicitly.
- * ### Creating Streams
- * **Example:** On-Demand Stream
+ * @resource
+ * @section Creating Streams
+ * @example On-Demand Stream
  * ```typescript
  * import * as Kinesis from "alchemy/AWS/Kinesis";
  *
  * const stream = yield* Kinesis.Stream("OrdersStream");
  * ```
  *
- * **Example:** Provisioned Stream
+ * @example Provisioned Stream
  * ```typescript
  * const stream = yield* Kinesis.Stream("AnalyticsStream", {
  *   streamMode: "PROVISIONED",
@@ -201,7 +202,7 @@ export interface Stream extends Resource<
  * });
  * ```
  *
- * **Example:** Encrypted Stream
+ * @example Encrypted Stream
  * ```typescript
  * const stream = yield* Kinesis.Stream("SecureStream", {
  *   encryption: true,
@@ -209,11 +210,11 @@ export interface Stream extends Resource<
  * });
  * ```
  *
- * ### Runtime Producers
+ * @section Runtime Producers
  * Bind producer operations in the init phase and use them in runtime
  * handlers.
  *
- * **Example:** Put a record from a handler
+ * @example Put a record from a handler
  * ```typescript
  * // init
  * const putRecord = yield* AWS.Kinesis.PutRecord(stream);
@@ -230,11 +231,11 @@ export interface Stream extends Resource<
  * };
  * ```
  *
- * ### Event Sources
+ * @section Event Sources
  * Process records from a Kinesis stream using a Lambda event source
  * mapping.
  *
- * **Example:** Process stream records
+ * @example Process stream records
  * ```typescript
  * // init
  * yield* Kinesis.consumeStreamRecords(
@@ -246,8 +247,6 @@ export interface Stream extends Resource<
  *   }),
  * );
  * ```
- *
- * @resource
  */
 export const Stream = Resource<Stream>("AWS.Kinesis.Stream");
 

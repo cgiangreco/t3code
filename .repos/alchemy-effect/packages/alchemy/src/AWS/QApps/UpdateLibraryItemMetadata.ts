@@ -16,8 +16,9 @@ export interface UpdateLibraryItemMetadataRequest extends Omit<
  *
  * Updates a library item's verification badge (`isVerified`). Provide the implementation with
  * `Effect.provide(AWS.QApps.UpdateLibraryItemMetadataHttp)`.
- * ### Library Items
- * **Example:** Mark a Library Item Verified
+ * @binding
+ * @section Library Items
+ * @example Mark a Library Item Verified
  * ```typescript
  * // init — bind the operation to the Q App
  * const updateLibraryItemMetadata = yield* AWS.QApps.UpdateLibraryItemMetadata(app);
@@ -25,8 +26,6 @@ export interface UpdateLibraryItemMetadataRequest extends Omit<
  * // runtime
  * yield* updateLibraryItemMetadata({ libraryItemId, isVerified: true });
  * ```
- *
- * @binding
  */
 export interface UpdateLibraryItemMetadata extends Binding.Service<
   UpdateLibraryItemMetadata,

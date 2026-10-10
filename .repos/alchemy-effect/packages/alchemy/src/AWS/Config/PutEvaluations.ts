@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.PutEvaluationsHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Reporting Evaluations (Custom Rules)
- * **Example:** Report Evaluations from a Custom Rule
+ * @binding
+ * @section Reporting Evaluations (Custom Rules)
+ * @example Report Evaluations from a Custom Rule
  * ```typescript
  * // init — grants config:PutEvaluations
  * const putEvaluations = yield* AWS.Config.PutEvaluations();
@@ -29,8 +30,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * console.log(result.FailedEvaluations);
  * ```
- *
- * @binding
  */
 export interface PutEvaluations extends Binding.Service<
   PutEvaluations,

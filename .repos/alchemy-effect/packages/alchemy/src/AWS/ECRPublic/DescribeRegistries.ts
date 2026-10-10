@@ -14,8 +14,9 @@ export interface DescribeRegistriesRequest
  * Provide the implementation with
  * `Effect.provide(AWS.ECRPublic.DescribeRegistriesHttp)`.
  *
- * ### Registry Access
- * **Example:** Look Up The Registry Alias
+ * @binding
+ * @section Registry Access
+ * @example Look Up The Registry Alias
  * ```typescript
  * // init — registry-level binding takes no resource
  * const describeRegistries = yield* AWS.ECRPublic.DescribeRegistries();
@@ -24,8 +25,6 @@ export interface DescribeRegistriesRequest
  * const result = yield* describeRegistries();
  * const alias = result.registries?.[0]?.aliases?.[0]?.name;
  * ```
- *
- * @binding
  */
 export interface DescribeRegistries extends Binding.Service<
   DescribeRegistries,

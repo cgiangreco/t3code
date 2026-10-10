@@ -10,8 +10,9 @@ import type { Instance } from "./Instance.ts";
  * Adds a user to a group in the bound instance's identity store, returning the new `MembershipId`. The instance's
  * `IdentityStoreId` is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IdentityCenter.CreateGroupMembershipHttp)`.
- * ### Managing Group Memberships
- * **Example:** Add a User to a Group
+ * @binding
+ * @section Managing Group Memberships
+ * @example Add a User to a Group
  * ```typescript
  * // init — bind the operation to the Identity Center instance
  * const createGroupMembership = yield* AWS.IdentityCenter.CreateGroupMembership(instance);
@@ -22,8 +23,6 @@ import type { Instance } from "./Instance.ts";
  *   MemberId: { UserId: userId },
  * });
  * ```
- *
- * @binding
  */
 export interface CreateGroupMembership extends Binding.Service<
   CreateGroupMembership,

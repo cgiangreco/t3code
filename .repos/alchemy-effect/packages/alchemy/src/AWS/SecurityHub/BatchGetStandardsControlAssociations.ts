@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.BatchGetStandardsControlAssociationsHttp)`.
- * ### Standards & Controls
- * **Example:** Read Control Associations
+ * @binding
+ * @section Standards & Controls
+ * @example Read Control Associations
  * ```typescript
  * // init — account-level binding, no resource argument
  * const batchGetStandardsControlAssociations = yield* AWS.SecurityHub.BatchGetStandardsControlAssociations();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *     ],
  *   });
  * ```
- *
- * @binding
  */
 export interface BatchGetStandardsControlAssociations extends Binding.Service<
   BatchGetStandardsControlAssociations,

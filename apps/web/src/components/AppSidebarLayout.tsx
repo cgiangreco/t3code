@@ -7,44 +7,22 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { useLocation, useNavigate, useParams } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
 import { isElectron } from "../env";
-import { getLocalStorageItem, removeLocalStorageItem } from "../hooks/useLocalStorage";
-import {
-  isRichTextBoldShortcut,
-  resolveShortcutCommand,
-  shortcutLabelForCommand,
-} from "../keybindings";
-import { isEditableFocused } from "../lib/editableFocus";
-import { isPreviewFocused } from "../lib/previewFocus";
-import { isTerminalFocused } from "../lib/terminalFocus";
-import { isModelPickerOpen } from "../modelPickerVisibility";
-import { selectActiveRightPanel, useRightPanelStore } from "../rightPanelStore";
-import { selectThreadTerminalUiState, useTerminalUiStateStore } from "../terminalUiStateStore";
-import { resolveThreadRouteRef } from "../threadRoutes";
+import { getLocalStorageItem } from "../hooks/useLocalStorage";
+import { resolveShortcutCommand, shortcutLabelForCommand } from "../keybindings";
 import { cn, isMacPlatform } from "../lib/utils";
 import { primaryServerKeybindingsAtom } from "../state/server";
-import { useEnvironmentIdentificationMode, useLegacySidebarEnabled } from "../hooks/useSettings";
-import {
-  PanelAnimationSuppressionProvider,
-  usePanelAnimationSettings,
-  usePanelNavigationSuppression,
-} from "../panelAnimations";
-import LegacyThreadSidebar from "./LegacySidebar";
-import { useThreadVisitedMigration } from "../hooks/useThreadVisitedMigration";
+import { useEnvironmentIdentificationMode, useSidebarV2Enabled } from "../hooks/useSettings";
 import ThreadSidebar from "./Sidebar";
-import { SettingsSidebarNav } from "./settings/SettingsSidebarNav";
-import { SidebarBrandWidthProbe, SidebarChromeHeader } from "./sidebar/SidebarChrome";
-import { MainAppLocationTracker } from "./sidebar/mainAppLocation";
+import ThreadSidebarV2 from "./SidebarV2";
 import { useSidebarStageBackdropVariant } from "./SidebarStageBackdrop";
-import { useProjects } from "../state/entities";
 import {
-  clampThreadSidebarWidth,
   resolveInitialThreadSidebarWidth,
   resolveThreadSidebarMaximumWidth,
-  resolveThreadSidebarMinimumWidth,
   THREAD_MAIN_CONTENT_MIN_WIDTH,
+  THREAD_SIDEBAR_MIN_WIDTH,
   THREAD_SIDEBAR_WIDTH_STORAGE_KEY,
 } from "./threadSidebarWidth";
 import {
@@ -57,7 +35,7 @@ import {
 } from "./ui/sidebar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "./ui/tooltip";
 
-const MACOS_TRAFFIC_LIGHTS_LEFT_INSET = "var(--desktop-window-controls-inset, 90px)";
+const MACOS_TRAFFIC_LIGHTS_LEFT_INSET = "90px";
 
 function subscribeToViewportWidth(onChange: () => void): () => void {
   window.addEventListener("resize", onChange);
@@ -81,7 +59,6 @@ function readInitialThreadSidebarWidth(): number {
 }
 
 function SidebarControl() {
-  const usagePageOpen = useLocation({ select: (location) => location.pathname === "/usage" });
   const keybindings = useAtomValue(primaryServerKeybindingsAtom);
   const { toggleSidebar } = useSidebar();
   const isSidebarVisible = useSidebarVisibility();
@@ -89,9 +66,7 @@ function SidebarControl() {
   const stageBackdropVariant = useSidebarStageBackdropVariant(
     environmentIdentificationMode === "artwork",
   );
-  const shortcutLabel = shortcutLabelForCommand(keybindings, "sidebar.toggle", {
-    context: { usagePageOpen },
-  });
+  const shortcutLabel = shortcutLabelForCommand(keybindings, "sidebar.toggle");
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -102,20 +77,7 @@ function SidebarControl() {
       ) {
         return;
       }
-      if (
-        isRichTextBoldShortcut(event) &&
-        event.target instanceof HTMLElement &&
-        event.target.closest('[data-composer-rich-text="true"]')
-      ) {
-        // The rich-text composer claims Mod+B for bold; the toggle stays
-        // available everywhere else, including the plain-text composer.
-        return;
-      }
-      if (
-        resolveShortcutCommand(event, keybindings, { context: { usagePageOpen } }) !==
-        "sidebar.toggle"
-      )
-        return;
+      if (resolveShortcutCommand(event, keybindings) !== "sidebar.toggle") return;
 
       event.preventDefault();
       event.stopPropagation();
@@ -124,34 +86,23 @@ function SidebarControl() {
 
     // Capture before focused editors consume commands such as Mod+B for rich-text formatting.
     window.addEventListener("keydown", onKeyDown, true);
-    // A focused desktop browser page forwards the chord as a menu action.
-    const unsubscribe = window.desktopBridge?.onMenuAction((action) => {
-      if (action === "sidebar.toggle") toggleSidebar();
-    });
-    return () => {
-      window.removeEventListener("keydown", onKeyDown, true);
-      unsubscribe?.();
-    };
-  }, [keybindings, toggleSidebar, usagePageOpen]);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [keybindings, toggleSidebar]);
 
   return (
-    // The right-side layout controls carry mr-px (border compensation inside
-    // the panel), so the trigger mirrors it: both clusters sit one extra pixel
-    // off their edge and the titlebar reads symmetric.
     <div
-      className="pointer-events-none fixed left-[var(--workspace-controls-left)] top-[var(--workspace-controls-top)] z-50 ml-px flex h-[var(--workspace-topbar-height)] items-center"
+      className="pointer-events-none fixed left-[var(--workspace-controls-left)] top-[var(--workspace-controls-top)] z-50 flex h-[var(--workspace-topbar-height)] items-center"
       data-sidebar-control=""
     >
       <Tooltip>
         <TooltipTrigger
           render={
             <SidebarTrigger
-              // Over the stage artwork the trigger is a control on imagery, like the media
-              // viewer's arrows; that variant positions itself, so the layout is reset here.
-              variant={isSidebarVisible && stageBackdropVariant ? "media-navigation" : "ghost"}
               className={cn(
                 "pointer-events-auto",
-                isSidebarVisible && stageBackdropVariant && "relative top-auto translate-y-0",
+                isSidebarVisible &&
+                  stageBackdropVariant &&
+                  "[:hover,[data-pressed]]:bg-white/15 focus-visible:ring-white/90 focus-visible:ring-offset-blue-700 [&_svg]:stroke-white/90! [&_svg]:opacity-100! [&_svg]:hover:stroke-white!",
               )}
               aria-label="Toggle main sidebar"
             />
@@ -165,94 +116,22 @@ function SidebarControl() {
   );
 }
 
-// Moves through the app's route history like a browser's back/forward buttons.
-function NavigationHistoryShortcuts() {
-  const keybindings = useAtomValue(primaryServerKeybindingsAtom);
-  const routeThreadRef = useParams({
-    strict: false,
-    select: (params) => resolveThreadRouteRef(params),
-  });
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
-      if (
-        event.target instanceof HTMLElement &&
-        event.target.closest("[data-keybinding-capture]")
-      ) {
-        return;
-      }
-      const command = resolveShortcutCommand(event, keybindings, {
-        context: {
-          terminalFocus: isTerminalFocused(),
-          terminalOpen: routeThreadRef
-            ? selectThreadTerminalUiState(
-                useTerminalUiStateStore.getState().terminalUiStateByThreadKey,
-                routeThreadRef,
-              ).terminalOpen
-            : false,
-          previewFocus: isPreviewFocused(),
-          previewOpen: routeThreadRef
-            ? selectActiveRightPanel(useRightPanelStore.getState().byThreadKey, routeThreadRef) ===
-              "preview"
-            : false,
-          editableFocus: isEditableFocused(event.target),
-          modelPickerOpen: isModelPickerOpen(),
-        },
-      });
-      if (command !== "navigation.back" && command !== "navigation.forward") return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      if (command === "navigation.back") window.history.back();
-      else window.history.forward();
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [keybindings, routeThreadRef]);
-
-  return null;
-}
-
-// Settings swaps the thread sidebar out of the tree. Keep the lightweight
-// project projection subscribed so returning to a draft never renders the
-// zero-project state while the environment snapshot reconnects.
-function ProjectProjectionRetention() {
-  useProjects();
-  return null;
-}
-
 export function AppSidebarLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const legacySidebarEnabled = useLegacySidebarEnabled();
-  const { active: panelAnimationsActive, durationMs: panelAnimationDurationMs } =
-    usePanelAnimationSettings();
-  // Settings routes show the settings nav in place of whichever thread
-  // sidebar is active.
-  // Seeds server-side visited tracking from this browser's localStorage the
-  useThreadVisitedMigration();
+  const sidebarV2Enabled = useSidebarV2Enabled();
+  // Settings routes render the settings nav, which lives in the v1 component
+  // and is identical for both sidebars — so v1 stays mounted there.
   const pathname = useLocation({ select: (location) => location.pathname });
-  const panelAnimationsSuppressed = usePanelNavigationSuppression(pathname);
-  const routePanelAnimationsActive = panelAnimationsActive && !panelAnimationsSuppressed;
   const isOnSettings = pathname === "/settings" || pathname.startsWith("/settings/");
+  const useSidebarV2 = sidebarV2Enabled && !isOnSettings;
+  const useSidebarV2Theme = useSidebarV2 || isOnSettings;
   const isMacosDesktop = isElectron && isMacPlatform(navigator.platform);
   const [sidebarWidth, setSidebarWidth] = useState(readInitialThreadSidebarWidth);
   // Subscribed rather than read once: the clamp must track live window size,
   // and a clamped drag ends with an unchanged width, which skips the re-render
   // that would otherwise refresh a render-time snapshot.
   const viewportWidth = useSyncExternalStore(subscribeToViewportWidth, readViewportWidth);
-  const [brandWidth, setBrandWidth] = useState(0);
-  const sidebarMinimumWidth = resolveThreadSidebarMinimumWidth(brandWidth);
-  const sidebarMaximumWidth = resolveThreadSidebarMaximumWidth(viewportWidth, sidebarMinimumWidth);
-  const resetSidebarWidth = () => {
-    try {
-      removeLocalStorageItem(THREAD_SIDEBAR_WIDTH_STORAGE_KEY);
-    } catch (error) {
-      console.error("Could not clear persisted thread sidebar width.", error);
-    }
-    setSidebarWidth(resolveInitialThreadSidebarWidth(null, viewportWidth));
-  };
+  const sidebarMaximumWidth = resolveThreadSidebarMaximumWidth(viewportWidth);
   const [isWindowFullscreen, setIsWindowFullscreen] = useState(() => {
     const getWindowFullscreenState = window.desktopBridge?.getWindowFullscreenState;
     return isMacosDesktop && typeof getWindowFullscreenState === "function"
@@ -260,8 +139,7 @@ export function AppSidebarLayout({ children }: { children: ReactNode }) {
       : false;
   });
   const sidebarProviderStyle = {
-    "--sidebar-width": `${clampThreadSidebarWidth(sidebarWidth, sidebarMinimumWidth, sidebarMaximumWidth)}px`,
-    "--panel-animation-duration": `${panelAnimationDurationMs}ms`,
+    "--sidebar-width": `${sidebarWidth}px`,
     ...(isMacosDesktop && !isWindowFullscreen
       ? { "--workspace-controls-left": MACOS_TRAFFIC_LIGHTS_LEFT_INSET }
       : {}),
@@ -305,48 +183,28 @@ export function AppSidebarLayout({ children }: { children: ReactNode }) {
   }, [navigate, pathname]);
 
   return (
-    <PanelAnimationSuppressionProvider value={panelAnimationsSuppressed}>
-      <SidebarProvider
-        className="h-dvh! min-h-0!"
-        data-panel-animations={routePanelAnimationsActive ? "true" : "false"}
-        defaultOpen
-        style={sidebarProviderStyle}
+    <SidebarProvider className="h-dvh! min-h-0!" defaultOpen style={sidebarProviderStyle}>
+      <Sidebar
+        side="left"
+        collapsible="offcanvas"
+        data-app-sidebar=""
+        data-sidebar-version={useSidebarV2Theme ? "v2" : "v1"}
+        className="border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
+        resizable={{
+          maxWidth: sidebarMaximumWidth,
+          minWidth: THREAD_SIDEBAR_MIN_WIDTH,
+          shouldAcceptWidth: ({ currentWidth, nextWidth, wrapper }) =>
+            nextWidth <= currentWidth ||
+            wrapper.clientWidth - nextWidth >= THREAD_MAIN_CONTENT_MIN_WIDTH,
+          storageKey: THREAD_SIDEBAR_WIDTH_STORAGE_KEY,
+          onResize: setSidebarWidth,
+        }}
       >
-        <SidebarBrandWidthProbe onWidthChange={setBrandWidth} />
-        <ProjectProjectionRetention />
-        <Sidebar
-          side="left"
-          collapsible="offcanvas"
-          data-app-sidebar=""
-          role="navigation"
-          aria-label={isOnSettings ? "Settings" : "Threads"}
-          resizable={{
-            maxWidth: sidebarMaximumWidth,
-            minWidth: sidebarMinimumWidth,
-            shouldAcceptWidth: ({ currentWidth, nextWidth, wrapper }) =>
-              nextWidth <= currentWidth ||
-              wrapper.clientWidth - nextWidth >= THREAD_MAIN_CONTENT_MIN_WIDTH,
-            storageKey: THREAD_SIDEBAR_WIDTH_STORAGE_KEY,
-            onResize: setSidebarWidth,
-          }}
-        >
-          {isOnSettings ? (
-            <>
-              <SidebarChromeHeader isElectron={isElectron} />
-              <SettingsSidebarNav pathname={pathname} />
-            </>
-          ) : legacySidebarEnabled ? (
-            <LegacyThreadSidebar />
-          ) : (
-            <ThreadSidebar />
-          )}
-          <SidebarRail onDoubleClick={resetSidebarWidth} />
-        </Sidebar>
-        {children}
-        <SidebarControl />
-        <NavigationHistoryShortcuts />
-        <MainAppLocationTracker />
-      </SidebarProvider>
-    </PanelAnimationSuppressionProvider>
+        {useSidebarV2 ? <ThreadSidebarV2 /> : <ThreadSidebar />}
+        <SidebarRail />
+      </Sidebar>
+      {children}
+      <SidebarControl />
+    </SidebarProvider>
   );
 }

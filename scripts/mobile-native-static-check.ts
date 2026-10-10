@@ -9,8 +9,8 @@ import * as FileSystem from "effect/FileSystem";
 import * as Logger from "effect/Logger";
 import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
-import { Command } from "effect/cli";
-import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { Command } from "effect/unstable/cli";
+import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process";
 
 interface NativeStaticTool {
   readonly command: string;
@@ -19,7 +19,7 @@ interface NativeStaticTool {
 
 const NonNegativeInt = Schema.Int.check(Schema.isGreaterThanOrEqualTo(0));
 
-export class NativeStaticCheckSourceDiscoveryError extends Schema.TaggedError<NativeStaticCheckSourceDiscoveryError>()(
+export class NativeStaticCheckSourceDiscoveryError extends Schema.TaggedErrorClass<NativeStaticCheckSourceDiscoveryError>()(
   "NativeStaticCheckSourceDiscoveryError",
   {
     operation: Schema.Literals(["resolve-root", "read-directory", "stat-entry"]),
@@ -32,7 +32,7 @@ export class NativeStaticCheckSourceDiscoveryError extends Schema.TaggedError<Na
   }
 }
 
-export class NativeStaticCheckProcessError extends Schema.TaggedError<NativeStaticCheckProcessError>()(
+export class NativeStaticCheckProcessError extends Schema.TaggedErrorClass<NativeStaticCheckProcessError>()(
   "NativeStaticCheckProcessError",
   {
     operation: Schema.Literals(["spawn", "wait-for-exit"]),
@@ -48,7 +48,7 @@ export class NativeStaticCheckProcessError extends Schema.TaggedError<NativeStat
   }
 }
 
-export class NativeStaticCheckCommandError extends Schema.TaggedError<NativeStaticCheckCommandError>()(
+export class NativeStaticCheckCommandError extends Schema.TaggedErrorClass<NativeStaticCheckCommandError>()(
   "NativeStaticCheckCommandError",
   {
     command: Schema.String,

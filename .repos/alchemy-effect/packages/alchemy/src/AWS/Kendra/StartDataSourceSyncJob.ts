@@ -13,15 +13,14 @@ import type { DataSource } from "./DataSource.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Kendra.StartDataSourceSyncJobHttp)`.
  *
- * ### Syncing Data Sources
- * **Example:** Trigger a Sync
+ * @binding
+ * @section Syncing Data Sources
+ * @example Trigger a Sync
  * ```typescript
  * const startSync = yield* AWS.Kendra.StartDataSourceSyncJob(source);
  *
  * const { ExecutionId } = yield* startSync();
  * ```
- *
- * @binding
  */
 export interface StartDataSourceSyncJob extends Binding.Service<
   StartDataSourceSyncJob,

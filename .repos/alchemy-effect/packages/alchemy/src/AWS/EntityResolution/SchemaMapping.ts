@@ -64,8 +64,9 @@ export interface SchemaMapping extends Resource<
  * (name, email, phone, unique id, …) and which columns rule-based matching
  * compares via `matchKey`.
  *
- * ### Creating Schema Mappings
- * **Example:** Customer records schema
+ * @resource
+ * @section Creating Schema Mappings
+ * @example Customer records schema
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -78,8 +79,8 @@ export interface SchemaMapping extends Resource<
  * });
  * ```
  *
- * ### Matching Workflows
- * **Example:** Use the schema in a matching workflow input source
+ * @section Matching Workflows
+ * @example Use the schema in a matching workflow input source
  * ```typescript
  * const workflow = yield* AWS.EntityResolution.MatchingWorkflow("Dedupe", {
  *   inputSourceConfig: [
@@ -88,8 +89,6 @@ export interface SchemaMapping extends Resource<
  *   // ...
  * });
  * ```
- *
- * @resource
  */
 export const SchemaMapping = Resource<SchemaMapping>(
   "AWS.EntityResolution.SchemaMapping",

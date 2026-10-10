@@ -102,8 +102,9 @@ export interface EnvironmentBlueprintConfiguration extends Resource<
  * its per-domain configuration (a `PUT`-style singleton keyed by domain +
  * blueprint).
  *
- * ### Configuring Blueprints
- * **Example:** Enable the DefaultDataLake Blueprint
+ * @resource
+ * @section Configuring Blueprints
+ * @example Enable the DefaultDataLake Blueprint
  * ```typescript
  * import * as DataZone from "alchemy/AWS/DataZone";
  *
@@ -122,7 +123,7 @@ export interface EnvironmentBlueprintConfiguration extends Resource<
  * );
  * ```
  *
- * **Example:** Blueprint with Lake Formation Provisioning
+ * @example Blueprint with Lake Formation Provisioning
  * ```typescript
  * const config = yield* DataZone.EnvironmentBlueprintConfiguration(
  *   "datalake",
@@ -141,8 +142,6 @@ export interface EnvironmentBlueprintConfiguration extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const EnvironmentBlueprintConfiguration =
   Resource<EnvironmentBlueprintConfiguration>(

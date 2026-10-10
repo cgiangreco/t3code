@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.UpdateOrganizationConfigurationHttp)`.
- * ### Organization & Members
- * **Example:** Auto-Enable Scanning for New Members
+ * @binding
+ * @section Organization & Members
+ * @example Auto-Enable Scanning for New Members
  * ```typescript
  * // init
  * const updateOrganizationConfiguration = yield* AWS.Inspector2.UpdateOrganizationConfiguration();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   autoEnable: { ec2: true, ecr: true, lambda: true },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateOrganizationConfiguration extends Binding.Service<
   UpdateOrganizationConfiguration,

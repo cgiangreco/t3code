@@ -8,16 +8,15 @@ import * as Binding from "../../Binding.ts";
  *
  * Reads one automatic recovery point by id. Provide the implementation with
  * `Effect.provide(AWS.RedshiftServerless.GetRecoveryPointHttp)`.
- * ### Working with Recovery Points
- * **Example:** Inspect a Recovery Point
+ * @binding
+ * @section Working with Recovery Points
+ * @example Inspect a Recovery Point
  * ```typescript
  * // init — resolve the runtime client
  * const getRecoveryPoint = yield* AWS.RedshiftServerless.GetRecoveryPoint();
  *
  * const { recoveryPoint } = yield* getRecoveryPoint({ recoveryPointId });
  * ```
- *
- * @binding
  */
 export interface GetRecoveryPoint extends Binding.Service<
   GetRecoveryPoint,

@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Deletes a closed insight — housekeeping automation for insights that have been triaged and resolved. Only closed insights can be deleted.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.DeleteInsightHttp)`.
- * ### Inspecting Insights
- * **Example:** Delete a Closed Insight
+ * @binding
+ * @section Inspecting Insights
+ * @example Delete a Closed Insight
  * ```typescript
  * // init — account-level binding, no resource argument
  * const deleteInsight = yield* AWS.DevOpsGuru.DeleteInsight();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* deleteInsight({ Id: insightId });
  * ```
- *
- * @binding
  */
 export interface DeleteInsight extends Binding.Service<
   DeleteInsight,

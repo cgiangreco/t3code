@@ -24,8 +24,9 @@ export interface BatchExecuteStatementRequest
  *
  * The request is passed through unchanged, but IAM is scoped to the explicitly
  * bound tables and their indexes.
- * ### PartiQL
- * **Example:** Execute a Batch of Statements
+ * @binding
+ * @section PartiQL
+ * @example Execute a Batch of Statements
  * ```typescript
  * const batchExecuteStatement = yield* AWS.DynamoDB.BatchExecuteStatement(
  *   sourceTable,
@@ -41,8 +42,6 @@ export interface BatchExecuteStatementRequest
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchExecuteStatement extends Binding.Service<
   BatchExecuteStatement,

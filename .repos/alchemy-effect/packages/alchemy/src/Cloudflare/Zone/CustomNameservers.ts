@@ -79,8 +79,11 @@ export type CustomNameservers = Resource<
  * Enabling requires an account custom nameserver set to be configured first
  * (Business/Enterprise feature). Without one, Cloudflare rejects the update
  * with the typed `CustomNameserverSetNotFound` error.
- * ### Enabling account custom nameservers
- * **Example:** Use the account's default nameserver set
+ * @resource
+ * @product Zones
+ * @category Domains & DNS
+ * @section Enabling account custom nameservers
+ * @example Use the account's default nameserver set
  * ```typescript
  * yield* Cloudflare.Zone.CustomNameservers("CustomNs", {
  *   zoneId: zone.zoneId,
@@ -88,7 +91,7 @@ export type CustomNameservers = Resource<
  * });
  * ```
  *
- * **Example:** Pin a specific nameserver set
+ * @example Pin a specific nameserver set
  * ```typescript
  * yield* Cloudflare.Zone.CustomNameservers("CustomNs", {
  *   zoneId: zone.zoneId,
@@ -97,8 +100,8 @@ export type CustomNameservers = Resource<
  * });
  * ```
  *
- * ### Disabling
- * **Example:** Explicitly pin the zone to Cloudflare-assigned nameservers
+ * @section Disabling
+ * @example Explicitly pin the zone to Cloudflare-assigned nameservers
  * ```typescript
  * yield* Cloudflare.Zone.CustomNameservers("CustomNs", {
  *   zoneId: zone.zoneId,
@@ -107,10 +110,6 @@ export type CustomNameservers = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api/resources/zones/subresources/custom_nameservers/
- *
- * @resource
- * @product Zones
- * @category Domains & DNS
  */
 export const CustomNameservers = Resource<CustomNameservers>(TypeId);
 

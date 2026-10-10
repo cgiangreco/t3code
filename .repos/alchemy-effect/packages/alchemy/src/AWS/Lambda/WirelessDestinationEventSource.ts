@@ -35,8 +35,9 @@ export const isWirelessUplinkMessage = (
  * `expressionType: "RuleName"`) with a Lambda action targeting this
  * function, and grants `iot.amazonaws.com` permission to invoke it; at
  * runtime it dispatches uplink invocations to the registered handler.
- * ### Consuming wireless uplinks
- * **Example:** Consume LoRaWAN uplinks
+ * @binding
+ * @section Consuming wireless uplinks
+ * @example Consume LoRaWAN uplinks
  * ```typescript
  * yield* IoTWireless.consumeUplinks(destination, (uplinks) =>
  *   uplinks.pipe(
@@ -45,8 +46,6 @@ export const isWirelessUplinkMessage = (
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export const WirelessDestinationEventSource = Layer.effect(
   IoTWirelessDestinationEventSource,

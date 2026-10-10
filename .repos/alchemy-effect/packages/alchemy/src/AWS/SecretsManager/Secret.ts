@@ -109,8 +109,9 @@ export interface Secret extends Resource<
  * `Secret` owns the lifecycle of the secret metadata and current value. It can
  * store a caller-provided value or generate a password-backed JSON payload for
  * downstream resources such as Aurora clusters and RDS proxies.
- * ### Creating Secrets
- * **Example:** Static Secret String
+ * @resource
+ * @section Creating Secrets
+ * @example Static Secret String
  * ```typescript
  * const secret = yield* Secret("DbSecret", {
  *   secretString: Redacted.make(JSON.stringify({
@@ -120,7 +121,7 @@ export interface Secret extends Resource<
  * });
  * ```
  *
- * **Example:** Generated Password Secret
+ * @example Generated Password Secret
  * ```typescript
  * const secret = yield* Secret("DbSecret", {
  *   generateSecretString: {
@@ -131,8 +132,8 @@ export interface Secret extends Resource<
  * });
  * ```
  *
- * ### Resource Policies
- * **Example:** Typed Resource Policy
+ * @section Resource Policies
+ * @example Typed Resource Policy
  * ```typescript
  * const secret = yield* Secret("SharedSecret", {
  *   secretString: Redacted.make("shared-value"),
@@ -149,8 +150,6 @@ export interface Secret extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Secret = Resource<Secret>("AWS.SecretsManager.Secret");
 
@@ -183,7 +182,7 @@ const retryThroughDeletionWindow = <A, E extends { _tag: string }, R>(
   Effect.retry(self, {
     while: (e) =>
       e._tag === "InvalidRequestException" &&
-      isDeletionInProgress((e as { message?: string }).message),
+      isDeletionInProgress((e as { Message?: string }).Message),
     schedule: Schedule.max([Schedule.fixed("2 seconds"), Schedule.recurs(10)]),
   });
 
@@ -480,7 +479,7 @@ export const SecretProvider = () =>
             .pipe(
               Effect.catchTag("ResourceNotFoundException", () => Effect.void),
               Effect.catchTag("InvalidRequestException", (error) =>
-                isDeletionInProgress(error.message)
+                isDeletionInProgress(error.Message)
                   ? Effect.void
                   : Effect.fail(error),
               ),

@@ -23,7 +23,7 @@ const { test } = Test.make({ providers: AWS.providers() });
 // Workspace-onboarding gate: creating a configuration against a workspace
 // that has not been authorized via the console OAuth flow is rejected with
 // the synthetic SlackWorkspaceNotAuthorized tag (patched in
-// submodules/distilled/packages/aws/patches/chatbot.json). A failed create still
+// distilled/packages/aws/patches/chatbot.json). A failed create still
 // reserves the configuration name server-side (undeletable tombstone), so
 // repeated runs of this probe surface the typed ConflictException instead —
 // both tags prove the create is rejected without onboarding.
@@ -44,7 +44,7 @@ test.provider(
         error._tag,
       );
     }),
-  { tags: ["provider:aws", "provider:aws:chatbot", "live"], timeout: 30_000 },
+  { timeout: 30_000 },
 );
 
 // Team-onboarding gate: the Teams create fails at team validation (before
@@ -65,7 +65,7 @@ test.provider(
       );
       expect(error._tag).toBe("MicrosoftTeamsTeamNotConfigured");
     }),
-  { tags: ["provider:aws", "provider:aws:chatbot", "live"], timeout: 30_000 },
+  { timeout: 30_000 },
 );
 
 // Validates the distilled chatbot patch: the wire ResourceNotFoundException
@@ -85,7 +85,7 @@ test.provider(
       );
       expect(error._tag).toBe("ResourceNotFoundException");
     }),
-  { tags: ["provider:aws", "provider:aws:chatbot", "live"], timeout: 60_000 },
+  { timeout: 60_000 },
 );
 
 // The Slack read path is a filter — an unknown ARN yields an empty list, not
@@ -100,7 +100,7 @@ test.provider(
       });
       expect(result.SlackChannelConfigurations).toEqual([]);
     }),
-  { tags: ["provider:aws", "provider:aws:chatbot", "live"], timeout: 30_000 },
+  { timeout: 30_000 },
 );
 
 // ---------------------------------------------------------------------------
@@ -199,10 +199,7 @@ test.provider.skipIf(
       yield* stack.destroy();
       yield* assertSlackConfigurationDeleted(config.chatConfigurationArn);
     }),
-  {
-    tags: ["provider:aws", "provider:aws:chatbot", "provider:aws:iam", "live"],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 const findTeamsConfiguration = (arn: string) =>
@@ -287,8 +284,5 @@ test.provider.skipIf(
       yield* stack.destroy();
       yield* assertTeamsConfigurationDeleted(config.chatConfigurationArn);
     }),
-  {
-    tags: ["provider:aws", "provider:aws:chatbot", "provider:aws:iam", "live"],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );

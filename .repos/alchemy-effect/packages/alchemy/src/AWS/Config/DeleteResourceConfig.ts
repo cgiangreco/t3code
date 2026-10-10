@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide `Config.DeleteResourceConfigHttp` on the hosting Lambda Function to
  * satisfy the requirement.
- * ### Recording Custom Resources
- * **Example:** Delete a Custom Resource's Configuration
+ * @binding
+ * @section Recording Custom Resources
+ * @example Delete a Custom Resource's Configuration
  * ```typescript
  * // init — grants config:DeleteResourceConfig
  * const deleteResourceConfig = yield* AWS.Config.DeleteResourceConfig();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   ResourceId: "widget-1",
  * });
  * ```
- *
- * @binding
  */
 export interface DeleteResourceConfig extends Binding.Service<
   DeleteResourceConfig,

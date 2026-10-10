@@ -12,8 +12,9 @@ import type { Graph } from "./Graph.ts";
  * {@link Graph}.
  * Provide the implementation with
  * `Effect.provide(AWS.Detective.GetMembersHttp)`.
- * ### Administering Member Accounts
- * **Example:** Check A Member's Status
+ * @binding
+ * @section Administering Member Accounts
+ * @example Check A Member's Status
  * ```typescript
  * // init
  * const getMembers = yield* AWS.Detective.GetMembers(graph);
@@ -23,8 +24,6 @@ import type { Graph } from "./Graph.ts";
  *   AccountIds: ["111122223333"],
  * });
  * ```
- *
- * @binding
  */
 export interface GetMembers extends Binding.Service<
   GetMembers,

@@ -46,8 +46,9 @@ export interface CreateScheduleRequest extends Omit<
  * time it contributes BOTH `scheduler:CreateSchedule` on the group's schedule
  * ARN pattern AND `iam:PassRole` on the execution role — without the PassRole
  * statement schedule creation fails only at runtime.
- * ### Creating Schedules At Runtime
- * **Example:** Mint A One-Shot Schedule From A Lambda
+ * @binding
+ * @section Creating Schedules At Runtime
+ * @example Mint A One-Shot Schedule From A Lambda
  * ```typescript
  * // deploy time: pre-create the execution role Scheduler will assume
  * const role = yield* AWS.IAM.Role("ReminderRole", {
@@ -89,14 +90,12 @@ export interface CreateScheduleRequest extends Omit<
  * });
  * ```
  *
- * **Example:** Scope Creation To A Schedule Group
+ * @example Scope Creation To A Schedule Group
  * ```typescript
  * const group = yield* AWS.Scheduler.ScheduleGroup("Reminders", {});
  * const createSchedule = yield* AWS.Scheduler.CreateSchedule(role, group);
  * // runtime calls create schedules inside the group only
  * ```
- *
- * @binding
  */
 export interface CreateSchedule extends Binding.Service<
   CreateSchedule,

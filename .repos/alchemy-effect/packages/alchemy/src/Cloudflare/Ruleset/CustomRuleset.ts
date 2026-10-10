@@ -102,8 +102,11 @@ export type CustomRuleset = Resource<
  *
  * For zone-level rules, use `Cloudflare.Ruleset.Ruleset` (the zone phase
  * entrypoint) instead.
- * ### Custom Rulesets
- * **Example:** Define an account custom WAF ruleset
+ * @resource
+ * @product Rulesets
+ * @category Rules & Configuration
+ * @section Custom Rulesets
+ * @example Define an account custom WAF ruleset
  * ```typescript
  * const ruleset = yield* Cloudflare.Ruleset.CustomRuleset("SharedWafRules", {
  *   phase: "http_request_firewall_custom",
@@ -118,7 +121,7 @@ export type CustomRuleset = Resource<
  * });
  * ```
  *
- * **Example:** Deploy the custom ruleset via the account entrypoint
+ * @example Deploy the custom ruleset via the account entrypoint
  * ```typescript
  * yield* Cloudflare.Ruleset.AccountEntrypoint("WafDeployment", {
  *   phase: "http_request_firewall_custom",
@@ -134,10 +137,6 @@ export type CustomRuleset = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/waf/account/custom-rulesets/
- *
- * @resource
- * @product Rulesets
- * @category Rules & Configuration
  */
 export const CustomRuleset = Resource<CustomRuleset>(TypeId);
 

@@ -10,14 +10,13 @@ export interface OptInPhoneNumberRequest extends sns.OptInPhoneNumberInput {}
  * An account-scoped operation — opts a previously opted-out phone number
  * back in to SMS delivery (allowed once every 30 days per number).
  * Provide the `OptInPhoneNumberHttp` layer on the Function to implement the binding.
- * ### SMS Opt-Out Management
- * **Example:** Opt a Number Back In
+ * @binding
+ * @section SMS Opt-Out Management
+ * @example Opt a Number Back In
  * ```typescript
  * const optIn = yield* SNS.OptInPhoneNumber();
  * yield* optIn({ phoneNumber: "+15555550123" });
  * ```
- *
- * @binding
  */
 export interface OptInPhoneNumber extends Binding.Service<
   OptInPhoneNumber,

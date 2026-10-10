@@ -14,8 +14,9 @@ export interface SignRequest extends Omit<kms.SignRequest, "KeyId"> {}
  * automatically injects the `KeyId`. The private key never leaves KMS — the
  * signature is produced inside the HSM.
  *
- * ### Signing
- * **Example:** Sign a Message
+ * @binding
+ * @section Signing
+ * @example Sign a Message
  * ```typescript
  * const sign = yield* AWS.KMS.Sign(signingKey);
  *
@@ -25,7 +26,7 @@ export interface SignRequest extends Omit<kms.SignRequest, "KeyId"> {}
  * });
  * ```
  *
- * **Example:** Sign a Pre-Computed Digest
+ * @example Sign a Pre-Computed Digest
  * ```typescript
  * // For payloads larger than 4096 bytes, hash locally and sign the digest.
  * const { Signature } = yield* sign({
@@ -34,8 +35,6 @@ export interface SignRequest extends Omit<kms.SignRequest, "KeyId"> {}
  *   SigningAlgorithm: "ECDSA_SHA_256",
  * });
  * ```
- *
- * @binding
  */
 export interface Sign extends Binding.Service<
   Sign,

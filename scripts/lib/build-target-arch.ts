@@ -1,4 +1,4 @@
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessArchitecture, HostProcessPlatform } from "@t3tools/shared/hostProcess";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Option from "effect/Option";
@@ -11,8 +11,8 @@ interface PlatformConfig {
 }
 
 const WindowsProcessorArchitectureConfig = Config.all({
-  processorArchitecture: Config.String("PROCESSOR_ARCHITECTURE").pipe(Config.option),
-  processorArchitectureW6432: Config.String("PROCESSOR_ARCHITEW6432").pipe(Config.option),
+  processorArchitecture: Config.string("PROCESSOR_ARCHITECTURE").pipe(Config.option),
+  processorArchitectureW6432: Config.string("PROCESSOR_ARCHITEW6432").pipe(Config.option),
 });
 
 function normalizeWindowsArch(value: string | undefined): BuildArch | undefined {
@@ -27,8 +27,8 @@ const optionToUndefined = <A>(value: Option.Option<A>): A | undefined =>
   Option.getOrUndefined(value);
 
 const resolveHostProcessArch = Effect.fn("resolveHostProcessArch")(function* () {
-  const platform = yield* HostProcess.Platform;
-  const processArch = yield* HostProcess.Architecture;
+  const platform = yield* HostProcessPlatform;
+  const processArch = yield* HostProcessArchitecture;
   if (processArch === "arm64") return "arm64";
   if (processArch === "x64") {
     if (platform !== "win32") return "x64";

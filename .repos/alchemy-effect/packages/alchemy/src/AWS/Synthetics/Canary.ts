@@ -19,7 +19,6 @@ import {
   hasAlchemyTags,
 } from "../../Tags.ts";
 import { toWireDays, toWireSeconds } from "../../Util/Duration.ts";
-import { zipFiles } from "../../Util/zip.ts";
 import { sha256Object } from "../../Util/sha256.ts";
 import { AWSEnvironment } from "../Environment.ts";
 import type { Providers } from "../Providers.ts";
@@ -196,8 +195,9 @@ export interface Canary extends Resource<
  * chosen runtime. Unless you pass `executionRoleArn`, an IAM execution role
  * is created with least-privilege access to the artifact bucket, CloudWatch
  * Logs, and Synthetics metrics.
- * ### Creating Canaries
- * **Example:** Heartbeat Canary (created stopped)
+ * @resource
+ * @section Creating Canaries
+ * @example Heartbeat Canary (created stopped)
  * ```typescript
  * import * as Synthetics from "alchemy/AWS/Synthetics";
  *
@@ -212,7 +212,7 @@ export interface Canary extends Resource<
  * });
  * ```
  *
- * **Example:** Started Canary on a Schedule
+ * @example Started Canary on a Schedule
  * ```typescript
  * const canary = yield* Synthetics.Canary("ApiMonitor", {
  *   script: myCanaryScript,
@@ -222,8 +222,8 @@ export interface Canary extends Resource<
  * });
  * ```
  *
- * ### Configuration
- * **Example:** Custom Runtime, Timeout and Environment
+ * @section Configuration
+ * @example Custom Runtime, Timeout and Environment
  * ```typescript
  * const canary = yield* Synthetics.Canary("Checkout", {
  *   script: checkoutScript,
@@ -238,7 +238,7 @@ export interface Canary extends Resource<
  * });
  * ```
  *
- * **Example:** Bring Your Own Execution Role
+ * @example Bring Your Own Execution Role
  * ```typescript
  * const canary = yield* Synthetics.Canary("Probe", {
  *   script: probeScript,
@@ -246,8 +246,6 @@ export interface Canary extends Resource<
  *   executionRoleArn: role.roleArn,
  * });
  * ```
- *
- * @resource
  */
 export const Canary = Resource<Canary>("AWS.Synthetics.Canary");
 
@@ -336,9 +334,17 @@ const buildCode = Effect.fn(function* (
   handler: string,
   runtimeVersion: string,
 ) {
-  const buffer = yield* zipFiles([
-    { path: scriptFilePath(runtimeVersion, handler), content: script },
-  ]);
+  const zip = new (yield* Effect.promise(() => import("jszip"))).default();
+  // constant date for a deterministic archive
+  const date = new Date("1980-01-01T00:00:00.000Z");
+  zip.file(scriptFilePath(runtimeVersion, handler), script, { date });
+  const buffer = yield* Effect.promise(() =>
+    zip.generateAsync({
+      type: "nodebuffer",
+      compression: "DEFLATE",
+      platform: "UNIX",
+    }),
+  );
   return {
     ZipFile: new Uint8Array(buffer),
     Handler: handler,
@@ -556,14 +562,11 @@ export const CanaryProvider = () =>
             ),
           );
 
-      const waitForBackingResourceGone = <
-        E extends { readonly _tag: string },
-        R,
-      >(
+      const waitForBackingResourceGone = (
         canaryName: string,
         resource: "LambdaFunction" | "LogGroup",
         identifier: string,
-        exists: Effect.Effect<boolean, E, R>,
+        exists: Effect.Effect<boolean, any, any>,
       ) =>
         exists.pipe(
           Effect.flatMap((visible) =>

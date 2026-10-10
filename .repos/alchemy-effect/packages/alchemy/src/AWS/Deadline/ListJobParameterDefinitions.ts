@@ -12,8 +12,9 @@ import type { Queue } from "./Queue.ts";
  * The queue's `farmId`/`queueId` are injected from the binding. Provide the
  * implementation with
  * `Effect.provide(AWS.Deadline.ListJobParameterDefinitionsHttp)`.
- * ### Monitoring Jobs
- * **Example:** Introspect A Job's Parameters
+ * @binding
+ * @section Monitoring Jobs
+ * @example Introspect A Job's Parameters
  * ```typescript
  * // init — bind the operation to the queue
  * const listJobParameterDefinitions =
@@ -23,8 +24,6 @@ import type { Queue } from "./Queue.ts";
  * const { jobParameterDefinitions } =
  *   yield* listJobParameterDefinitions({ jobId });
  * ```
- *
- * @binding
  */
 export interface ListJobParameterDefinitions extends Binding.Service<
   ListJobParameterDefinitions,

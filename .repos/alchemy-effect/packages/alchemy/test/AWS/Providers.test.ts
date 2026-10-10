@@ -1,37 +1,22 @@
 import { AlchemyContext } from "@/AlchemyContext.ts";
 import { ArtifactStore, createArtifactStore } from "@/Artifacts.ts";
 import { AuthProviders } from "@/Auth/AuthProvider.ts";
-import { ProfileStoreLive } from "@/Auth/Profile.ts";
+import { ProfileLive } from "@/Auth/Profile.ts";
 import * as AWS from "@/AWS";
-import { AWSEnvironment } from "@/AWS/Environment.ts";
 import { Stack } from "@/Stack.ts";
 import { Stage } from "@/Stage.ts";
-import * as NodeServices from "@effect/platform-node/NodeServices";
-import { expect, it } from "alchemy-test";
+import { NodeServices } from "@effect/platform-node";
+import { it } from "alchemy-test";
 import * as ConfigProvider from "effect/ConfigProvider";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
-import * as Result from "effect/Result";
-import * as FetchHttpClient from "effect/http/FetchHttpClient";
+import * as FetchHttpClient from "effect/unstable/http/FetchHttpClient";
 import { v4 as uuidv4 } from "uuid";
-
 it.live(
-  "building the AWS provider layers rejects an unknown explicit profile",
+  "building the AWS provider layers should not fail for unknown profile",
   () =>
     Effect.gen(function* () {
-      // AWSEnvironment is constructed lazily so `alchemy dev` can build
-      // provider layers without credentials. The unknown-profile rejection
-      // surfaces on first use, not at `Layer.build`.
-      const result = yield* Effect.result(
-        Effect.sandbox(
-          AWSEnvironment.current.pipe(Effect.provide(AWS.providers())),
-        ),
-      );
-      expect(Result.isFailure(result)).toBe(true);
-      if (Result.isFailure(result)) {
-        expect(String(result.failure)).toContain("does not exist");
-        expect(String(result.failure)).toContain("alchemy profile create");
-      }
+      yield* Layer.build(AWS.providers());
     }).pipe(
       Effect.provide(
         Layer.mergeAll(
@@ -50,12 +35,13 @@ it.live(
             adopt: false,
             dotAlchemy: ".alchemy",
           }),
-          ConfigProvider.layer(
+          Layer.succeed(
+            ConfigProvider.ConfigProvider,
             ConfigProvider.fromUnknown({
               ALCHEMY_PROFILE: `non-existent-${uuidv4()}`,
             }),
           ),
-          ProfileStoreLive,
+          ProfileLive,
         ).pipe(
           Layer.provideMerge(
             Layer.mergeAll(NodeServices.layer, FetchHttpClient.layer),
@@ -63,5 +49,4 @@ it.live(
         ),
       ),
     ),
-  { tags: ["unit", "provider:aws", "local"] },
 );

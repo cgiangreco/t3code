@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * to resolve "which zone owns `example.com`?" at runtime. Provide the
  * implementation with
  * `Effect.provide(AWS.Route53.ListHostedZonesByNameHttp)`.
- * ### Discovering Zones
- * **Example:** Find a zone by name
+ * @binding
+ * @section Discovering Zones
+ * @example Find a zone by name
  * ```typescript
  * const listByName = yield* AWS.Route53.ListHostedZonesByName();
  *
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   MaxItems: 1,
  * });
  * ```
- *
- * @binding
  */
 export interface ListHostedZonesByName extends Binding.Service<
   ListHostedZonesByName,

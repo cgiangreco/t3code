@@ -138,23 +138,24 @@ export interface FileSystem extends Resource<
  * {@link MountTarget} (per-subnet network endpoints) and
  * {@link AccessPoint} (application-specific POSIX entry points — required
  * for Lambda mounts).
- * ### Creating File Systems
- * **Example:** Default file system (encrypted, general purpose)
+ * @resource
+ * @section Creating File Systems
+ * @example Default file system (encrypted, general purpose)
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
  * const files = yield* AWS.EFS.FileSystem("Files");
  * ```
  *
- * **Example:** Elastic throughput
+ * @example Elastic throughput
  * ```typescript
  * const files = yield* AWS.EFS.FileSystem("Files", {
  *   throughputMode: "elastic",
  * });
  * ```
  *
- * ### Lifecycle Management
- * **Example:** Tier cold files to Infrequent Access
+ * @section Lifecycle Management
+ * @example Tier cold files to Infrequent Access
  * ```typescript
  * const files = yield* AWS.EFS.FileSystem("Files", {
  *   lifecyclePolicies: [
@@ -164,23 +165,23 @@ export interface FileSystem extends Resource<
  * });
  * ```
  *
- * ### Backup and Protection
- * **Example:** Enable AWS Backup automatic backups
+ * @section Backup and Protection
+ * @example Enable AWS Backup automatic backups
  * ```typescript
  * const files = yield* AWS.EFS.FileSystem("Files", {
  *   backup: true,
  * });
  * ```
  *
- * **Example:** Allow the file system to be a replication destination
+ * @example Allow the file system to be a replication destination
  * ```typescript
  * const files = yield* AWS.EFS.FileSystem("Files", {
  *   replicationOverwriteProtection: "DISABLED",
  * });
  * ```
  *
- * ### File System Policy
- * **Example:** Enforce in-transit encryption with a typed PolicyDocument
+ * @section File System Policy
+ * @example Enforce in-transit encryption with a typed PolicyDocument
  * ```typescript
  * const files = yield* AWS.EFS.FileSystem("Files", {
  *   policy: {
@@ -198,11 +199,11 @@ export interface FileSystem extends Resource<
  * });
  * ```
  *
- * ### Mounting into Lambda
+ * @section Mounting into Lambda
  * Lambda mounts EFS through an access point; the function must be attached
  * to a VPC that can reach a mount target.
  *
- * **Example:** File system + mount target + access point + Lambda
+ * @example File system + mount target + access point + Lambda
  * ```typescript
  * const files = yield* AWS.EFS.FileSystem("Files");
  * const target = yield* AWS.EFS.MountTarget("FilesTarget", {
@@ -230,7 +231,7 @@ export interface FileSystem extends Resource<
  * });
  * ```
  *
- * **Example:** Host-agnostic mount binding (Lambda or ECS)
+ * @example Host-agnostic mount binding (Lambda or ECS)
  * `EFS.mount` wires the mount config + least-privilege IAM through the
  * host's binding channel — the same code works inside a Lambda Function or
  * an ECS Task body (provide `AWS.EFS.MountLive` on the host Effect).
@@ -247,8 +248,6 @@ export interface FileSystem extends Resource<
  *   }).pipe(Effect.provide(AWS.EFS.MountLive)),
  * ) {}
  * ```
- *
- * @resource
  */
 export const FileSystem = Resource<FileSystem>("AWS.EFS.FileSystem");
 

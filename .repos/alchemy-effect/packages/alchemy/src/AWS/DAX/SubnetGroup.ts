@@ -51,8 +51,9 @@ export interface SubnetGroup extends Resource<
  * Subnet groups are free and provision instantly. A {@link Cluster}
  * references one by name via `subnetGroupName`. DAX does not support tags on
  * subnet groups.
- * ### Creating a Subnet Group
- * **Example:** Subnet Group Spanning Two Subnets
+ * @resource
+ * @section Creating a Subnet Group
+ * @example Subnet Group Spanning Two Subnets
  * ```typescript
  * const subnetGroup = yield* SubnetGroup("DaxSubnets", {
  *   description: "DAX cluster subnets",
@@ -60,8 +61,8 @@ export interface SubnetGroup extends Resource<
  * });
  * ```
  *
- * ### Placing a Cluster
- * **Example:** Cluster in the Subnet Group
+ * @section Placing a Cluster
+ * @example Cluster in the Subnet Group
  * ```typescript
  * const cluster = yield* Cluster("Cache", {
  *   nodeType: "dax.t3.small",
@@ -70,8 +71,6 @@ export interface SubnetGroup extends Resource<
  *   subnetGroupName: subnetGroup.subnetGroupName,
  * });
  * ```
- *
- * @resource
  */
 export const SubnetGroup = Resource<SubnetGroup>("AWS.DAX.SubnetGroup");
 

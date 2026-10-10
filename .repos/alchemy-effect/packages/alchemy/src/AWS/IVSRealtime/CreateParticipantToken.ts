@@ -28,13 +28,14 @@ export interface CreateParticipantTokenRequest extends Omit<
  * is visible to other participants. The returned `token` is sensitive and
  * surfaces as a `Redacted` value.
  *
- * ### Minting Participant Tokens
+ * @binding
+ * @section Minting Participant Tokens
  * Provide the `CreateParticipantTokenHttp` implementation layer on the
  * Function effect, bind the stage in the init phase, then call the returned
  * client at runtime. The binding grants `ivs:CreateParticipantToken` on the
  * stage and injects its ARN automatically.
  *
- * **Example:** Mint a token from a Lambda
+ * @example Mint a token from a Lambda
  * ```typescript
  * // init
  * const stage = yield* IVSRealtime.Stage("VideoRoom");
@@ -61,8 +62,6 @@ export interface CreateParticipantTokenRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(IVSRealtime.CreateParticipantTokenHttp))
  * ```
- *
- * @binding
  */
 export interface CreateParticipantToken extends Binding.Service<
   CreateParticipantToken,

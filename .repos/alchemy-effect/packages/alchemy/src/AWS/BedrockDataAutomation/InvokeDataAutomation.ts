@@ -26,8 +26,9 @@ export interface InvokeDataAutomationRequest extends Omit<
  * (e.g. `…:data-automation-profile/us.data-automation-v1`). Provide the
  * implementation with
  * `Effect.provide(AWS.BedrockDataAutomation.InvokeDataAutomationHttp)`.
- * ### Invoking Data Automation
- * **Example:** Extract Fields From An Inline Document
+ * @binding
+ * @section Invoking Data Automation
+ * @example Extract Fields From An Inline Document
  * ```typescript
  * // deploy time — bind the SYNC project
  * const invoke = yield* AWS.BedrockDataAutomation.InvokeDataAutomation(syncProject);
@@ -39,8 +40,6 @@ export interface InvokeDataAutomationRequest extends Omit<
  * });
  * const fields = result.outputSegments?.[0]?.customOutput;
  * ```
- *
- * @binding
  */
 export interface InvokeDataAutomation extends Binding.Service<
   InvokeDataAutomation,

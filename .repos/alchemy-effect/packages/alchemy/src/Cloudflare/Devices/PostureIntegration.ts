@@ -128,8 +128,11 @@ export type DevicePostureIntegration = Resource<
  * Cloudflare validates the configured credentials against the live
  * provider API at create/update time, so a reachable third-party tenant
  * is required.
- * ### Creating a posture integration
- * **Example:** CrowdStrike Falcon
+ * @resource
+ * @product Devices
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a posture integration
+ * @example CrowdStrike Falcon
  * ```typescript
  * const falcon = yield* Cloudflare.Devices.DevicePostureIntegration("Falcon", {
  *   type: "crowdstrike_s2s",
@@ -143,7 +146,7 @@ export type DevicePostureIntegration = Resource<
  * });
  * ```
  *
- * **Example:** Custom service-to-service provider behind Access
+ * @example Custom service-to-service provider behind Access
  * ```typescript
  * const custom = yield* Cloudflare.Devices.DevicePostureIntegration("Custom", {
  *   type: "custom_s2s",
@@ -157,7 +160,7 @@ export type DevicePostureIntegration = Resource<
  * });
  * ```
  *
- * **Example:** Reference the integration from a posture rule
+ * @example Reference the integration from a posture rule
  * ```typescript
  * yield* Cloudflare.Devices.DevicePostureRule("FalconScore", {
  *   type: "crowdstrike_s2s",
@@ -166,10 +169,6 @@ export type DevicePostureIntegration = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/identity/devices/service-providers/
- *
- * @resource
- * @product Devices
- * @category Cloudflare One (Zero Trust)
  */
 export const DevicePostureIntegration =
   Resource<DevicePostureIntegration>(TypeId);

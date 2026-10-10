@@ -5,13 +5,13 @@
  */
 import { Effect, Schema } from "effect"
 
-// Define custom errors using Schema.TaggedError
-export class ParseError extends Schema.TaggedError<ParseError>()("ParseError", {
+// Define custom errors using Schema.TaggedErrorClass
+export class ParseError extends Schema.TaggedErrorClass<ParseError>()("ParseError", {
   input: Schema.String,
   message: Schema.String
 }) {}
 
-export class ReservedPortError extends Schema.TaggedError<ReservedPortError>()("ReservedPortError", {
+export class ReservedPortError extends Schema.TaggedErrorClass<ReservedPortError>()("ReservedPortError", {
   port: Schema.Int
 }) {}
 

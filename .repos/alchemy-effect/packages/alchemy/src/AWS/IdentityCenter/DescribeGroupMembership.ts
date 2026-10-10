@@ -10,8 +10,9 @@ import type { Instance } from "./Instance.ts";
  * Reads a group membership (group id + member id) from the bound instance's identity store by `MembershipId`. The instance's
  * `IdentityStoreId` is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IdentityCenter.DescribeGroupMembershipHttp)`.
- * ### Querying Group Memberships
- * **Example:** Read a Membership
+ * @binding
+ * @section Querying Group Memberships
+ * @example Read a Membership
  * ```typescript
  * // init — bind the operation to the Identity Center instance
  * const describeGroupMembership = yield* AWS.IdentityCenter.DescribeGroupMembership(instance);
@@ -22,8 +23,6 @@ import type { Instance } from "./Instance.ts";
  * });
  * console.log(membership.GroupId, membership.MemberId);
  * ```
- *
- * @binding
  */
 export interface DescribeGroupMembership extends Binding.Service<
   DescribeGroupMembership,

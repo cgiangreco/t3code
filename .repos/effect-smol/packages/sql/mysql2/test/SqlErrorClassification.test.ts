@@ -1,7 +1,7 @@
 import { assert, describe, it } from "@effect/vitest"
 import { Effect } from "effect"
-import * as Reactivity from "effect/reactivity/Reactivity"
-import type * as SqlError from "effect/sql/SqlError"
+import * as Reactivity from "effect/unstable/reactivity/Reactivity"
+import type * as SqlError from "effect/unstable/sql/SqlError"
 import { vi } from "vitest"
 
 const state: {
@@ -38,7 +38,7 @@ const assertUniqueViolation = (reason: SqlError.SqlErrorReason, constraint: stri
   }
 }
 
-describe("MysqlClient SqlError classification", { concurrent: false }, () => {
+describe("MysqlClient SqlError classification", () => {
   it.effect("maps representative errno codes to reasons", () =>
     Effect.gen(function*() {
       const cases = [

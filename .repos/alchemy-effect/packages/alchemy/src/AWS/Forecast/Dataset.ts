@@ -98,8 +98,9 @@ export interface Dataset extends Resource<
  * dataset is a cheap metadata operation; bulk imports and training happen
  * through separate import jobs and predictors.
  *
- * ### Creating a Dataset
- * **Example:** Target Time-Series Dataset
+ * @resource
+ * @section Creating a Dataset
+ * @example Target Time-Series Dataset
  * ```typescript
  * const dataset = yield* Forecast.Dataset("Demand", {
  *   domain: "CUSTOM",
@@ -114,8 +115,6 @@ export interface Dataset extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Dataset = Resource<Dataset>("AWS.Forecast.Dataset");
 

@@ -7,8 +7,9 @@ import type { Project } from "./Project.ts";
  * Runtime binding for `codebuild:BatchDeleteBuilds` — deletes builds of
  * the bound project by id. Builds that cannot be deleted are returned in
  * `buildsNotDeleted` with a reason rather than failing the call.
- * ### Deleting Builds
- * **Example:** Delete Old Builds
+ * @binding
+ * @section Deleting Builds
+ * @example Delete Old Builds
  * ```typescript
  * const batchDeleteBuilds = yield* AWS.CodeBuild.BatchDeleteBuilds(project);
  *
@@ -16,8 +17,6 @@ import type { Project } from "./Project.ts";
  *   ids: oldBuildIds,
  * });
  * ```
- *
- * @binding
  */
 export interface BatchDeleteBuilds extends Binding.Service<
   BatchDeleteBuilds,

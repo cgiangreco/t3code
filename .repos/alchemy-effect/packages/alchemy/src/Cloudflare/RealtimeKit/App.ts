@@ -59,15 +59,18 @@ export type App = Resource<TypeId, AppProps, AppAttributes, never, Providers>;
  * (with a warning) — the app itself remains on the account until Cloudflare
  * ships a delete API. Because of this, an existing app with the same name is
  * adopted rather than duplicated.
- * ### Creating an App
- * **Example:** Basic app
+ * @resource
+ * @product Realtime Kit
+ * @category Media
+ * @section Creating an App
+ * @example Basic app
  * ```typescript
  * const app = yield* Cloudflare.RealtimeKit.App("Meetings", {
  *   name: "my-meetings-app",
  * });
  * ```
  *
- * **Example:** Child resources
+ * @example Child resources
  * ```typescript
  * const app = yield* Cloudflare.RealtimeKit.App("Meetings", {});
  *
@@ -79,10 +82,6 @@ export type App = Resource<TypeId, AppProps, AppAttributes, never, Providers>;
  * ```
  *
  * @see https://developers.cloudflare.com/realtime/realtimekit/
- *
- * @resource
- * @product Realtime Kit
- * @category Media
  */
 export const App = Resource<App>(TypeId);
 

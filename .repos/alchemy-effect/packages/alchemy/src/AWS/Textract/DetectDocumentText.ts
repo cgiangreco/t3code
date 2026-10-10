@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * Pass the document as raw bytes (`Document.Bytes`) or as an S3 object
  * reference (`Document.S3Object`) — raw distilled types, no marshalling.
  *
- * ### Detecting Document Text
- * **Example:** Detect Text in Document Bytes
+ * @binding
+ * @section Detecting Document Text
+ * @example Detect Text in Document Bytes
  * ```typescript
  * // init
  * const detectDocumentText = yield* AWS.Textract.DetectDocumentText();
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  *   .filter((block) => block.BlockType === "LINE")
  *   .map((block) => block.Text);
  * ```
- *
- * @binding
  */
 export interface DetectDocumentText extends Binding.Service<
   DetectDocumentText,

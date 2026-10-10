@@ -9,16 +9,15 @@ import * as Binding from "../../Binding.ts";
  * incident it belongs to.
  * Provide the implementation with
  * `Effect.provide(AWS.SSMContacts.DescribeEngagementHttp)`.
- * ### Managing Engagements
- * **Example:** Inspect an Engagement
+ * @binding
+ * @section Managing Engagements
+ * @example Inspect an Engagement
  * ```typescript
  * const describeEngagement = yield* AWS.SSMContacts.DescribeEngagement();
  *
  * const engagement = yield* describeEngagement({ EngagementId: engagementArn });
  * // engagement.Subject, engagement.ContactArn, ...
  * ```
- *
- * @binding
  */
 export interface DescribeEngagement extends Binding.Service<
   DescribeEngagement,

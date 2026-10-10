@@ -123,8 +123,9 @@ export interface Branch extends Resource<
  * manual-deploy pipeline: stage a zip with `CreateDeployment`, upload it to
  * the pre-signed URL, and release it with `StartDeployment`.
  *
- * ### Creating Branches
- * **Example:** Manual-Deploy Branch
+ * @resource
+ * @section Creating Branches
+ * @example Manual-Deploy Branch
  * ```typescript
  * const app = yield* App("MySite", { platform: "WEB" });
  * const branch = yield* Branch("Main", {
@@ -135,7 +136,7 @@ export interface Branch extends Resource<
  * });
  * ```
  *
- * **Example:** Password-Protected Branch with Content TTL
+ * @example Password-Protected Branch with Content TTL
  * ```typescript
  * const branch = yield* Branch("Preview", {
  *   appId: app.appId,
@@ -147,8 +148,6 @@ export interface Branch extends Resource<
  *   basicAuthCredentials: Redacted.make(credentials),
  * });
  * ```
- *
- * @resource
  */
 export const Branch = Resource<Branch>("AWS.Amplify.Branch");
 

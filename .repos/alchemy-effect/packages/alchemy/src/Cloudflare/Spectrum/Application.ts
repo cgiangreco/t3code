@@ -220,8 +220,11 @@ export type Application = Resource<
  * no prior state, `read` scans the zone for an application with the same
  * `dns.name` + `protocol` and reports it as `Unowned`, so the engine
  * refuses to take it over unless `--adopt` (or `adopt(true)`) is set.
- * ### Proxying SSH
- * **Example:** SSH on a fixed origin address
+ * @resource
+ * @product Spectrum
+ * @category Network
+ * @section Proxying SSH
+ * @example SSH on a fixed origin address
  * ```typescript
  * const ssh = yield* Cloudflare.Spectrum.Application("Ssh", {
  *   zoneId: zone.zoneId,
@@ -231,8 +234,8 @@ export type Application = Resource<
  * });
  * ```
  *
- * ### Origin via DNS
- * **Example:** Resolve the origin by hostname
+ * @section Origin via DNS
+ * @example Resolve the origin by hostname
  * ```typescript
  * yield* Cloudflare.Spectrum.Application("Minecraft", {
  *   zoneId: zone.zoneId,
@@ -243,8 +246,8 @@ export type Application = Resource<
  * });
  * ```
  *
- * ### Enterprise features
- * **Example:** UDP with IP firewall and PROXY protocol
+ * @section Enterprise features
+ * @example UDP with IP firewall and PROXY protocol
  * ```typescript
  * // Arbitrary ports/protocols, UDP, and proxyProtocol require an
  * // Enterprise plan with Spectrum.
@@ -259,10 +262,6 @@ export type Application = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/spectrum/
- *
- * @resource
- * @product Spectrum
- * @category Network
  */
 export const Application = Resource<Application>(TypeId);
 
@@ -403,18 +402,6 @@ export const ApplicationProvider = () =>
 type ObservedApp = spectrum.GetAppResponse;
 
 /**
- * Distilled types `getApp`/`listApps` results as a union whose second
- * variant omits the optional configuration fields — normalize to a single
- * partial shape.
- */
-type FullApp = Extract<ObservedApp, { trafficType: unknown }>;
-type AnyApp =
-  | ObservedApp
-  | spectrum.CreateAppResponse
-  | spectrum.UpdateAppResponse;
-const asFull = (app: AnyApp): Partial<FullApp> & AnyApp => app;
-
-/**
  * Read an application by id, mapping "gone" (`SpectrumAppNotFound`,
  * Cloudflare error code 10006) to `undefined`.
  */
@@ -457,6 +444,14 @@ const toRequestBody = (news: ApplicationProps) => ({
   edgeIps: news.edgeIps,
   virtualNetworkId: news.virtualNetworkId as string | undefined,
 });
+
+/**
+ * Distilled types `getApp`/`listApps` results as a union whose second
+ * variant omits the optional configuration fields — normalize to a single
+ * partial shape.
+ */
+type FullApp = Extract<ObservedApp, { trafficType: unknown }>;
+const asFull = (app: ObservedApp): Partial<FullApp> & ObservedApp => app;
 
 /**
  * Compare observed cloud state against the desired props. Fields the user
@@ -507,7 +502,7 @@ const toAttributes = (
   app: ObservedApp | spectrum.CreateAppResponse | spectrum.UpdateAppResponse,
   zoneId: string,
 ): ApplicationAttributes => {
-  const a = asFull(app);
+  const a = asFull(app as ObservedApp);
   return {
     appId: a.id,
     zoneId,

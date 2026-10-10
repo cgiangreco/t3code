@@ -28,8 +28,9 @@ export interface GenerateEmbedUrlForRegisteredUserRequest extends Omit<
  * 15 minutes to 10 hours (`SessionLifetimeInMinutes`). Provide the
  * implementation with
  * `Effect.provide(AWS.QuickSight.GenerateEmbedUrlForRegisteredUserHttp)`.
- * ### Embedding Dashboards
- * **Example:** Embed The Bound Dashboard For A Registered User
+ * @binding
+ * @section Embedding Dashboards
+ * @example Embed The Bound Dashboard For A Registered User
  * ```typescript
  * // init — bind the operation to the dashboard
  * const generateEmbedUrl =
@@ -41,8 +42,6 @@ export interface GenerateEmbedUrlForRegisteredUserRequest extends Omit<
  *   SessionLifetimeInMinutes: 60,
  * });
  * ```
- *
- * @binding
  */
 export interface GenerateEmbedUrlForRegisteredUser extends Binding.Service<
   GenerateEmbedUrlForRegisteredUser,

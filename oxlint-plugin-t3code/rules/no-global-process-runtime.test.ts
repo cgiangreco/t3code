@@ -8,10 +8,10 @@ describe("t3code/no-global-process-runtime", () => {
   rule.valid(
     "allows injected host process references",
     `
-      import * as HostProcess from "@t3tools/shared/HostProcess";
+      import { HostProcessPlatform } from "@t3tools/shared/hostProcess";
       import * as Effect from "effect/Effect";
 
-      export const isWindows = Effect.map(HostProcess.Platform, (platform) => platform === "win32");
+      export const isWindows = Effect.map(HostProcessPlatform, (platform) => platform === "win32");
     `,
   );
 
@@ -38,7 +38,7 @@ describe("t3code/no-global-process-runtime", () => {
       export const isWindows = process.platform === "win32";
     `,
     (output) => {
-      assert.match(output, /Use HostProcess\.Platform/);
+      assert.match(output, /Use HostProcessPlatform/);
     },
   );
 
@@ -48,7 +48,7 @@ describe("t3code/no-global-process-runtime", () => {
       export const isArm = process.arch === "arm64";
     `,
     (output) => {
-      assert.match(output, /Use HostProcess\.Architecture/);
+      assert.match(output, /Use HostProcessArchitecture/);
     },
   );
 
@@ -67,7 +67,7 @@ describe("t3code/no-global-process-runtime", () => {
       export const isWindows = NodeOS.platform() === "win32";
     `,
     (output) => {
-      assert.match(output, /Use HostProcess\.Platform/);
+      assert.match(output, /Use HostProcessPlatform/);
     },
   );
 
@@ -79,7 +79,7 @@ describe("t3code/no-global-process-runtime", () => {
       export const isArm = hostArch() === "arm64";
     `,
     (output) => {
-      assert.match(output, /Use HostProcess\.Architecture/);
+      assert.match(output, /Use HostProcessArchitecture/);
     },
   );
 

@@ -12,8 +12,9 @@ import type { LandingZone } from "./LandingZone.ts";
  * (landing zone operations routinely take an hour); poll it with
  * {@link GetLandingZoneOperation}. Provide the implementation with
  * `Effect.provide(AWS.ControlTower.ResetLandingZoneHttp)`.
- * ### Remediating Drift
- * **Example:** Reset a Drifted Landing Zone
+ * @binding
+ * @section Remediating Drift
+ * @example Reset a Drifted Landing Zone
  * ```typescript
  * // init — bind the operation to the landing zone
  * const resetLandingZone = yield* AWS.ControlTower.ResetLandingZone(landingZone);
@@ -21,8 +22,6 @@ import type { LandingZone } from "./LandingZone.ts";
  * // runtime
  * const { operationIdentifier } = yield* resetLandingZone();
  * ```
- *
- * @binding
  */
 export interface ResetLandingZone extends Binding.Service<
   ResetLandingZone,

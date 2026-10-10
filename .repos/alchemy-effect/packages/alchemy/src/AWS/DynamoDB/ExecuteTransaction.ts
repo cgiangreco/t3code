@@ -17,8 +17,9 @@ export type ExecuteTransactionTables = [Table, ...Table[]];
  * host is granted the transactional read/write actions on every bound table.
  * Provide the `ExecuteTransactionHttp` layer on the Function to satisfy the
  * binding.
- * ### PartiQL
- * **Example:** Run a PartiQL Transaction
+ * @binding
+ * @section PartiQL
+ * @example Run a PartiQL Transaction
  * ```typescript
  * const executeTransaction = yield* AWS.DynamoDB.ExecuteTransaction(table);
  * const tableName = yield* table.tableName;
@@ -36,8 +37,6 @@ export type ExecuteTransactionTables = [Table, ...Table[]];
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface ExecuteTransaction extends Binding.Service<
   ExecuteTransaction,

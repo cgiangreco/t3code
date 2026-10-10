@@ -66,7 +66,7 @@ describe("EnvironmentLinks", () => {
 
       expect(error).toMatchObject({
         _tag: "EnvironmentLinkUserListPersistenceError",
-        message: "Environment link user query 'list-delivery-users' failed for environment 'env-1'",
+        operation: "list-delivery-users",
         environmentId: "env-1",
       });
       expect(error.cause).toBe(cause);
@@ -78,7 +78,7 @@ describe("EnvironmentLinks", () => {
     );
   });
 
-  it.effect("selects notification or Live Activity users by environment key", () => {
+  it.effect("selects users when either notifications or Live Activities are enabled", () => {
     const whereConditions: Array<unknown> = [];
     const fakeDb = {
       select: (selection: unknown) => {
@@ -99,12 +99,7 @@ describe("EnvironmentLinks", () => {
 
     return Effect.gen(function* () {
       const links = yield* EnvironmentLinks.EnvironmentLinks;
-      expect(
-        yield* links.listDeliveryUsersForEnvironment({
-          environmentId: "env-1",
-          environmentPublicKey: "public-key-1",
-        }),
-      ).toEqual([]);
+      expect(yield* links.listUsersForEnvironment({ environmentId: "env-1" })).toEqual([]);
       expect(whereConditions).toHaveLength(1);
 
       const query = new PgDialect().sqlToQuery(whereConditions[0] as never);
@@ -112,48 +107,8 @@ describe("EnvironmentLinks", () => {
       expect(query.sql).toContain('"relay_environment_links"."revoked_at" is null');
       expect(query.sql).toContain('"relay_environment_links"."notifications_enabled" = $2');
       expect(query.sql).toContain('"relay_environment_links"."live_activities_enabled" = $3');
-      expect(query.sql).toContain('"relay_environment_links"."environment_public_key" = $4');
       expect(query.sql).toContain(" or ");
-      expect(query.params).toEqual(["env-1", true, true, "public-key-1"]);
-    }).pipe(
-      Effect.provide(
-        EnvironmentLinks.layer.pipe(Layer.provide(Layer.succeed(RelayDb.RelayDb, fakeDb))),
-      ),
-    );
-  });
-
-  it.effect("carries the webhook-hold opt-in over only from links with the same key", () => {
-    const inserted: Array<Record<string, unknown>> = [];
-    const fakeDb = {
-      insert: () => ({
-        values: (values: Record<string, unknown>) => {
-          inserted.push(values);
-          return { onConflictDoUpdate: () => Effect.void };
-        },
-      }),
-    } as unknown as RelayDb.RelayDb["Service"];
-
-    return Effect.gen(function* () {
-      const links = yield* EnvironmentLinks.EnvironmentLinks;
-      yield* links.upsert({
-        userId: "user-1",
-        request: {
-          notificationsEnabled: false,
-          liveActivitiesEnabled: false,
-          managedTunnelsEnabled: true,
-        } as never,
-        proof: {
-          environmentId: "env-1",
-          environmentPublicKey: "public-key-1",
-          descriptor: { label: "Laptop" },
-        } as never,
-        endpoint: { httpBaseUrl: "https://a.example", wsBaseUrl: "wss://a.example" } as never,
-      });
-      const query = new PgDialect().sqlToQuery(inserted[0]?.holdWebhooksWhileOffline as never);
-      // An environment id is public: another account linking it with its own
-      // key must not switch the opt-in on for this one.
-      expect(query.sql).toContain("environment_public_key");
-      expect(query.params).toEqual(["env-1", "public-key-1"]);
+      expect(query.params).toEqual(["env-1", true, true]);
     }).pipe(
       Effect.provide(
         EnvironmentLinks.layer.pipe(Layer.provide(Layer.succeed(RelayDb.RelayDb, fakeDb))),

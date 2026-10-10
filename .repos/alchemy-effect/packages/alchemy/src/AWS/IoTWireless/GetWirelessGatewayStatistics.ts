@@ -17,12 +17,13 @@ export interface GetWirelessGatewayStatisticsRequest extends Omit<
  * bound wireless gateway's operating information (connection status, last
  * uplink time) from a deployed Lambda or Task.
  *
- * ### Reading Gateway Statistics
+ * @binding
+ * @section Reading Gateway Statistics
  * Provide the `GetWirelessGatewayStatisticsHttp` implementation layer on
  * the Function effect, bind the gateway in the init phase, then call the
  * returned client at runtime.
  *
- * **Example:** Check the Gateway's Connection Status
+ * @example Check the Gateway's Connection Status
  * ```typescript
  * // init
  * const getStats = yield* AWS.IoTWireless.GetWirelessGatewayStatistics(gateway);
@@ -33,8 +34,6 @@ export interface GetWirelessGatewayStatisticsRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTWireless.GetWirelessGatewayStatisticsHttp))
  * ```
- *
- * @binding
  */
 export interface GetWirelessGatewayStatistics extends Binding.Service<
   GetWirelessGatewayStatistics,

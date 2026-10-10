@@ -12,8 +12,9 @@ import type { Pipe } from "./Pipe.ts";
  * `STOPPED` states; use {@link DescribePipe} to observe when the pipe
  * settles. The pipe name is injected from the binding. Provide the
  * implementation with `Effect.provide(AWS.Pipes.StopPipeHttp)`.
- * ### Controlling a Pipe
- * **Example:** Pause a Running Pipe
+ * @binding
+ * @section Controlling a Pipe
+ * @example Pause a Running Pipe
  * ```typescript
  * // init — bind the operation to the pipe
  * const stopPipe = yield* AWS.Pipes.StopPipe(pipe);
@@ -22,8 +23,6 @@ import type { Pipe } from "./Pipe.ts";
  * const response = yield* stopPipe();
  * // response.DesiredState === "STOPPED"
  * ```
- *
- * @binding
  */
 export interface StopPipe extends Binding.Service<
   StopPipe,

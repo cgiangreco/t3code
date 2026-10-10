@@ -18,8 +18,9 @@ export interface CreateDeploymentRequest extends Omit<
  * upload the content there, then release it with {@link StartDeployment}.
  * Provide the implementation with
  * `Effect.provide(AWS.Amplify.CreateDeploymentHttp)`.
- * ### Manual Deployments
- * **Example:** Stage a Zip Deployment
+ * @binding
+ * @section Manual Deployments
+ * @example Stage a Zip Deployment
  * ```typescript
  * // init — bind the operation to the app
  * const createDeployment = yield* AWS.Amplify.CreateDeployment(app);
@@ -30,8 +31,6 @@ export interface CreateDeploymentRequest extends Omit<
  * });
  * // PUT the site zip to `zipUploadUrl`, then start the deployment with jobId
  * ```
- *
- * @binding
  */
 export interface CreateDeployment extends Binding.Service<
   CreateDeployment,

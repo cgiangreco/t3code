@@ -9,16 +9,15 @@ import * as Binding from "../../Binding.ts";
  * Lists all cross-stack exported output values in the account and region —
  * runtime service discovery of values shared via `Fn::ImportValue`. Provide
  * the implementation with `Effect.provide(AWS.CloudFormation.ListExportsHttp)`.
- * ### Cross-Stack Exports
- * **Example:** Resolve an Exported Value
+ * @binding
+ * @section Cross-Stack Exports
+ * @example Resolve an Exported Value
  * ```typescript
  * const listExports = yield* AWS.CloudFormation.ListExports();
  *
  * const { Exports } = yield* listExports();
  * const apiUrl = Exports?.find((e) => e.Name === "ApiUrl")?.Value;
  * ```
- *
- * @binding
  */
 export interface ListExports extends Binding.Service<
   ListExports,

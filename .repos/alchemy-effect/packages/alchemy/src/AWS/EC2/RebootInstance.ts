@@ -19,8 +19,9 @@ export interface RebootInstanceRequest extends Omit<
  * Requests an asynchronous reboot of the instance — e.g. a remediation Lambda
  * that bounces a wedged host after a failed health check. Provide the
  * implementation with `Effect.provide(AWS.EC2.RebootInstanceHttp)`.
- * ### Instance Lifecycle Control
- * **Example:** Reboot the bound instance
+ * @binding
+ * @section Instance Lifecycle Control
+ * @example Reboot the bound instance
  * ```typescript
  * // init — bind the operation to the instance
  * const rebootInstance = yield* AWS.EC2.RebootInstance(instance);
@@ -28,8 +29,6 @@ export interface RebootInstanceRequest extends Omit<
  * // runtime — request the reboot (asynchronous)
  * yield* rebootInstance();
  * ```
- *
- * @binding
  */
 export interface RebootInstance extends Binding.Service<
   RebootInstance,

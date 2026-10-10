@@ -5,12 +5,12 @@ import * as Provider from "../Provider.ts";
 import { Resource } from "../Resource.ts";
 import type { Providers } from "./Providers.ts";
 
-export type ViewProps = Axiom.CreateViewRequest;
+export type ViewProps = Axiom.CreateViewInput;
 
 export type View = Resource<
   "Axiom.View",
   ViewProps,
-  Axiom.View & {
+  Axiom.CreateViewOutput & {
     /**
      * Path identifier used by `updateView` / `getView` / `deleteView`.
      * Currently derived from `name` because Axiom's view list/get responses
@@ -29,10 +29,11 @@ export type View = Resource<
  *
  * The path identifier is `name`. Renaming a view triggers a replacement
  * (the old one is deleted, a new one is created).
+ * @resource
  * @see https://axiom.co/docs/query-data/datasets — APL query reference
  *
- * ### Creating a View
- * **Example:** Recent errors across one dataset
+ * @section Creating a View
+ * @example Recent errors across one dataset
  * ```typescript
  * yield* Axiom.View("recent-errors", {
  *   name: "recent-errors",
@@ -47,7 +48,7 @@ export type View = Resource<
  * });
  * ```
  *
- * **Example:** Cross-dataset join (logs + traces by trace_id)
+ * @example Cross-dataset join (logs + traces by trace_id)
  * ```typescript
  * yield* Axiom.View("trace-with-logs", {
  *   name: "trace-with-logs",
@@ -59,9 +60,6 @@ export type View = Resource<
  *   `,
  * });
  * ```
- *
- * @resource
- * @product Dashboard
  */
 export const View = Resource<View>("Axiom.View");
 

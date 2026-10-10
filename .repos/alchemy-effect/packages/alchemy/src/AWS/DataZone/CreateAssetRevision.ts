@@ -14,8 +14,9 @@ export interface CreateAssetRevisionRequest extends Omit<
  * Creates a new revision of an existing asset in the bound domain, e.g. after a schema change. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.CreateAssetRevisionHttp)`.
- * ### Publishing Assets
- * **Example:** Revise an Asset
+ * @binding
+ * @section Publishing Assets
+ * @example Revise an Asset
  * ```typescript
  * // init — bind the operation to the domain
  * const createAssetRevision = yield* AWS.DataZone.CreateAssetRevision(domain);
@@ -23,8 +24,6 @@ export interface CreateAssetRevisionRequest extends Omit<
  * // runtime
  * yield* createAssetRevision({ identifier: assetId, name: "daily-orders" });
  * ```
- *
- * @binding
  */
 export interface CreateAssetRevision extends Binding.Service<
   CreateAssetRevision,

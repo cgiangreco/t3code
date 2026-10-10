@@ -11,8 +11,9 @@ import type { Cluster } from "./Cluster.ts";
  * scale-out automation (e.g. a Lambda reacting to a CloudWatch alarm on
  * cluster CPU or cache-miss rate). Provide the implementation with
  * `Effect.provide(AWS.DAX.IncreaseReplicationFactorHttp)`.
- * ### Scaling a Cluster
- * **Example:** Scale Out to Three Nodes
+ * @binding
+ * @section Scaling a Cluster
+ * @example Scale Out to Three Nodes
  * ```typescript
  * const increaseReplicationFactor =
  *   yield* DAX.IncreaseReplicationFactor(cluster);
@@ -22,8 +23,6 @@ import type { Cluster } from "./Cluster.ts";
  * });
  * // result.Cluster?.TotalNodes → 3 (new nodes provision asynchronously)
  * ```
- *
- * @binding
  */
 export interface IncreaseReplicationFactor extends Binding.Service<
   IncreaseReplicationFactor,

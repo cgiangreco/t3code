@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * grant is account-level (`Resource: "*"`).
  * Provide the implementation with
  * `Effect.provide(AWS.SSMIncidents.BatchGetIncidentFindingsHttp)`.
- * ### Findings
- * **Example:** Read Finding Details
+ * @binding
+ * @section Findings
+ * @example Read Finding Details
  * ```typescript
  * // init
  * const batchGetIncidentFindings = yield* AWS.SSMIncidents.BatchGetIncidentFindings();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   findingIds,
  * });
  * ```
- *
- * @binding
  */
 export interface BatchGetIncidentFindings extends Binding.Service<
   BatchGetIncidentFindings,

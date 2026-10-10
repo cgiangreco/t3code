@@ -16,8 +16,9 @@ export interface DeleteMessageBatchRequest extends Omit<
  * The binding grants the host function `sqs:DeleteMessage` on the queue.
  * Provide the `DeleteMessageBatchHttp` layer on the Function to implement the
  * binding.
- * ### Deleting Message Batches
- * **Example:** Delete a Batch of Processed Messages
+ * @binding
+ * @section Deleting Message Batches
+ * @example Delete a Batch of Processed Messages
  * ```typescript
  * // init (provide SQS.DeleteMessageBatchHttp on the Function)
  * const deleteMessageBatch = yield* SQS.DeleteMessageBatch(queue);
@@ -31,8 +32,6 @@ export interface DeleteMessageBatchRequest extends Omit<
  * });
  * // result.Successful / result.Failed
  * ```
- *
- * @binding
  */
 export interface DeleteMessageBatch extends Binding.Service<
   DeleteMessageBatch,

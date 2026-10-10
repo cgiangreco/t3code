@@ -19,8 +19,9 @@ import * as Binding from "../../Binding.ts";
  * `SynthesizeSpeech` (request-response) until distilled core ships
  * event-stream request support.
  *
- * ### Streaming Synthesis
- * **Example:** Stream text in, collect audio out
+ * @binding
+ * @section Streaming Synthesis
+ * @example Stream text in, collect audio out
  * ```typescript
  * // init
  * const startSpeechSynthesisStream =
@@ -41,8 +42,6 @@ import * as Binding from "../../Binding.ts";
  *   .flatMap((event) => (event.AudioEvent?.AudioChunk ? [event.AudioEvent.AudioChunk] : []))
  *   .reduce((total, chunk) => total + chunk.length, 0);
  * ```
- *
- * @binding
  */
 export interface StartSpeechSynthesisStream extends Binding.Service<
   StartSpeechSynthesisStream,

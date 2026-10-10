@@ -153,8 +153,9 @@ export interface Workflow extends Resource<
  * Each update to the definition or configuration creates a new workflow
  * version; MWAA Serverless keeps only the latest version actively
  * scheduled.
- * ### Creating a Workflow
- * **Example:** Basic Workflow
+ * @resource
+ * @section Creating a Workflow
+ * @example Basic Workflow
  * ```typescript
  * import * as MWAAServerless from "alchemy/AWS/MWAAServerless";
  * import * as IAM from "alchemy/AWS/IAM";
@@ -179,7 +180,7 @@ export interface Workflow extends Resource<
  * });
  * ```
  *
- * **Example:** Workflow with Logging and Tags
+ * @example Workflow with Logging and Tags
  * ```typescript
  * const workflow = yield* MWAAServerless.Workflow("Etl", {
  *   definitionS3Location: {
@@ -192,8 +193,6 @@ export interface Workflow extends Resource<
  *   tags: { team: "data" },
  * });
  * ```
- *
- * @resource
  */
 export const Workflow = Resource<Workflow>("AWS.MWAAServerless.Workflow");
 

@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.GetUsageStatisticsHttp)`.
- * ### Usage & Coverage
- * **Example:** Usage by Data Source
+ * @binding
+ * @section Usage & Coverage
+ * @example Usage by Data Source
  * ```typescript
  * // init
  * const getUsageStatistics = yield* AWS.GuardDuty.GetUsageStatistics(detector);
@@ -22,8 +23,6 @@ import type { Detector } from "./Detector.ts";
  *   UsageCriteria: { DataSources: ["FLOW_LOGS"] },
  * });
  * ```
- *
- * @binding
  */
 export interface GetUsageStatistics extends Binding.Service<
   GetUsageStatistics,

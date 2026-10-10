@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:GetSessionEndpoint` — resolves the Spark Connect endpoint URL and a time-limited auth token for an interactive session on the bound cluster. The returned `AuthToken` is `Redacted` — unwrap with `Redacted.value`.
- * ### Interactive Sessions
- * **Example:** Connect a Spark Client
+ * @binding
+ * @section Interactive Sessions
+ * @example Connect a Spark Client
  * ```typescript
  * const getEndpoint = yield* AWS.EMR.GetSessionEndpoint(cluster);
  *
@@ -14,8 +15,6 @@ import type { Cluster } from "./Cluster.ts";
  *   SessionId: sessionId,
  * });
  * ```
- *
- * @binding
  */
 export interface GetSessionEndpoint extends Binding.Service<
   GetSessionEndpoint,

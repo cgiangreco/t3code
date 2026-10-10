@@ -207,8 +207,11 @@ export type DeviceCustomProfile = Resource<
  * are replaced via their dedicated endpoints. Deleting the resource
  * deletes the profile; matched devices fall back to the account's default
  * profile.
- * ### Creating a profile
- * **Example:** Profile for a user group
+ * @resource
+ * @product Devices
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a profile
+ * @example Profile for a user group
  * ```typescript
  * const profile = yield* Cloudflare.Devices.DeviceCustomProfile("Contractors", {
  *   match: 'identity.groups.name == "contractors"',
@@ -218,8 +221,8 @@ export type DeviceCustomProfile = Resource<
  * });
  * ```
  *
- * ### Split tunneling
- * **Example:** Exclude internal ranges from the tunnel
+ * @section Split tunneling
+ * @example Exclude internal ranges from the tunnel
  * ```typescript
  * yield* Cloudflare.Devices.DeviceCustomProfile("Engineering", {
  *   match: 'identity.groups.name == "engineering"',
@@ -230,8 +233,8 @@ export type DeviceCustomProfile = Resource<
  * });
  * ```
  *
- * ### Fallback domains
- * **Example:** Resolve a private suffix via an on-prem DNS server
+ * @section Fallback domains
+ * @example Resolve a private suffix via an on-prem DNS server
  * ```typescript
  * yield* Cloudflare.Devices.DeviceCustomProfile("CorpDns", {
  *   match: 'identity.email matches ".*@corp.example.com"',
@@ -243,10 +246,6 @@ export type DeviceCustomProfile = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/configure-warp/device-profiles/
- *
- * @resource
- * @product Devices
- * @category Cloudflare One (Zero Trust)
  */
 export const DeviceCustomProfile = Resource<DeviceCustomProfile>(TypeId);
 

@@ -3,8 +3,8 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
-import * as SqlClient from "effect/sql/SqlClient";
-import * as SqlSchema from "effect/sql/SqlSchema";
+import * as SqlClient from "effect/unstable/sql/SqlClient";
+import * as SqlSchema from "effect/unstable/sql/SqlSchema";
 
 import { AuthEnvironmentScopes } from "@t3tools/contracts";
 
@@ -46,7 +46,6 @@ export type CreateAuthPairingLinkInput = typeof CreateAuthPairingLinkInput.Type;
 export const ConsumeAuthPairingLinkInput = Schema.Struct({
   credential: Schema.String,
   proofKeyThumbprint: Schema.NullOr(Schema.String),
-  requestedScopes: Schema.optionalKey(AuthEnvironmentScopes),
   consumedAt: Schema.DateTimeUtcFromString,
   now: Schema.DateTimeUtcFromString,
 });
@@ -120,7 +119,6 @@ function toPersistenceSqlOrDecodeError(
         });
 }
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
 
@@ -160,7 +158,7 @@ export const make = Effect.gen(function* () {
   const consumeAvailablePairingLinkRow = SqlSchema.findOneOption({
     Request: ConsumeAuthPairingLinkInput,
     Result: AuthPairingLinkRawDbRow,
-    execute: ({ credential, proofKeyThumbprint, requestedScopes, consumedAt, now }) =>
+    execute: ({ credential, proofKeyThumbprint, consumedAt, now }) =>
       sql`
         UPDATE auth_pairing_links
         SET consumed_at = ${consumedAt}
@@ -172,13 +170,6 @@ export const make = Effect.gen(function* () {
             proof_key_thumbprint IS NULL
             OR proof_key_thumbprint = ${proofKeyThumbprint}
           )
-          AND (${requestedScopes === undefined ? 1 : 0} OR EXISTS (
-            SELECT 1
-            FROM json_each(${JSON.stringify(requestedScopes ?? [])}) AS requested
-            WHERE requested.value IN (
-              SELECT value FROM json_each(auth_pairing_links.scopes)
-            )
-          ))
         RETURNING
           id AS "id",
           credential AS "credential",
@@ -276,7 +267,7 @@ export const make = Effect.gen(function* () {
       ),
       Effect.flatMap((rowOption) =>
         Option.match(rowOption, {
-          onNone: () => Effect.succeedNone,
+          onNone: () => Effect.succeed(Option.none()),
           onSome: (row) =>
             decodeAuthPairingLinkDbRow(row).pipe(
               Effect.mapError((cause) =>
@@ -286,7 +277,7 @@ export const make = Effect.gen(function* () {
                   { pairingLinkId: row.id },
                 ),
               ),
-              Effect.asSome,
+              Effect.map(Option.some),
             ),
         }),
       ),
@@ -337,7 +328,7 @@ export const make = Effect.gen(function* () {
       ),
       Effect.flatMap((rowOption) =>
         Option.match(rowOption, {
-          onNone: () => Effect.succeedNone,
+          onNone: () => Effect.succeed(Option.none()),
           onSome: (row) =>
             decodeAuthPairingLinkDbRow(row).pipe(
               Effect.mapError((cause) =>
@@ -347,7 +338,7 @@ export const make = Effect.gen(function* () {
                   { pairingLinkId: row.id },
                 ),
               ),
-              Effect.asSome,
+              Effect.map(Option.some),
             ),
         }),
       ),

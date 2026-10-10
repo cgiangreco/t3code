@@ -15,8 +15,9 @@ export interface GetUsagePlanKeyRequest extends Omit<
  * Provide `ApiGateway.GetUsagePlanKeyHttp` on the Function effect to
  * implement the binding.
  *
- * ### Managing plan keys
- * **Example:** Check a key's enrollment
+ * @binding
+ * @section Managing plan keys
+ * @example Check a key's enrollment
  * ```typescript
  * // init
  * const getUsagePlanKey = yield* ApiGateway.GetUsagePlanKey(plan);
@@ -27,8 +28,6 @@ export interface GetUsagePlanKeyRequest extends Omit<
  *   Effect.catchTag("NotFoundException", () => Effect.succeed(false)),
  * );
  * ```
- *
- * @binding
  */
 export interface GetUsagePlanKey extends Binding.Service<
   GetUsagePlanKey,

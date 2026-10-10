@@ -102,11 +102,12 @@ export interface ConnectOptions {
  * `secretsmanager:GetSecretValue` on the secret and publishes the endpoint
  * as environment variables. Provide the implementation with
  * `Effect.provide(AWS.DocDB.ConnectHttp)`.
- * ### Connecting to a Cluster
- * **Example:** Query DocumentDB from a Function
+ * @binding
+ * @section Connecting to a Cluster
+ * @example Query DocumentDB from a Function
  * ```typescript
  * export default MyFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     // init — bind the cluster's managed master secret; grants
  *     // secretsmanager:GetSecretValue and attaches the function to the
@@ -132,7 +133,7 @@ export interface ConnectOptions {
  * );
  * ```
  *
- * **Example:** Resolve Raw Connection Info
+ * @example Resolve Raw Connection Info
  * ```typescript
  * // init
  * const connect = yield* AWS.DocDB.Connect(cluster, { database: "app" });
@@ -140,8 +141,6 @@ export interface ConnectOptions {
  * // runtime — host/port/credentials plus a ready-to-use mongodb:// URL
  * const info = yield* connect;
  * ```
- *
- * @binding
  */
 export interface Connect extends Binding.Service<
   Connect,

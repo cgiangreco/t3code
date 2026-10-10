@@ -21,8 +21,9 @@ export interface DescribeFHIRExportJobRequest extends Omit<
  * `COMPLETED` (or a failure status). Provide the implementation with
  * `Effect.provide(AWS.HealthLake.DescribeFHIRExportJobHttp)`.
  *
- * ### Exporting FHIR Data
- * **Example:** Poll an Export Job Until It Completes
+ * @binding
+ * @section Exporting FHIR Data
+ * @example Poll an Export Job Until It Completes
  * ```typescript
  * const describeExport = yield* HealthLake.DescribeFHIRExportJob(datastore);
  *
@@ -35,8 +36,6 @@ export interface DescribeFHIRExportJobRequest extends Omit<
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface DescribeFHIRExportJob extends Binding.Service<
   DescribeFHIRExportJob,

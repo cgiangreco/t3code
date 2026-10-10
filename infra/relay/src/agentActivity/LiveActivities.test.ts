@@ -276,7 +276,7 @@ describe("LiveActivities", () => {
         liveActivities.register({ userId: "user-1", registration }),
       );
       const targetListError = yield* Effect.flip(liveActivities.listTargets({ userId: "user-1" }));
-      const deliveryErrors = yield* Effect.forEach(
+      const deliveryErrors = yield* Effect.all(
         [
           liveActivities.markDelivery({
             userId: "user-1",
@@ -297,8 +297,7 @@ describe("LiveActivities", () => {
             kind: "push_notification",
             invalidatedAt: "2026-05-25T00:00:10.000Z",
           }),
-        ],
-        (effect) => Effect.flip(effect),
+        ].map(Effect.flip),
         { concurrency: 1 },
       );
 

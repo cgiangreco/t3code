@@ -12,8 +12,9 @@ import type { AccessPoint } from "./AccessPoint.ts";
  * still wired to the expected bucket. The access point name and owning
  * account are injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.S3Control.GetAccessPointHttp)`.
- * ### Observing an Access Point
- * **Example:** Read the Access Point's Configuration
+ * @binding
+ * @section Observing an Access Point
+ * @example Read the Access Point's Configuration
  * ```typescript
  * // init — bind the operation to the access point
  * const getAccessPoint = yield* AWS.S3Control.GetAccessPoint(accessPoint);
@@ -22,8 +23,6 @@ import type { AccessPoint } from "./AccessPoint.ts";
  * const live = yield* getAccessPoint();
  * // live.Bucket, live.NetworkOrigin, live.Endpoints
  * ```
- *
- * @binding
  */
 export interface GetAccessPoint extends Binding.Service<
   GetAccessPoint,

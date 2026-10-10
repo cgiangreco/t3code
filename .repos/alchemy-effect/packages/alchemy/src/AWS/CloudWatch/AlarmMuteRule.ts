@@ -52,8 +52,9 @@ export interface AlarmMuteRule extends Resource<
  * A CloudWatch alarm mute rule — suppresses alarm actions on a recurring
  * schedule (e.g. maintenance windows) instead of manually disabling and
  * re-enabling alarm actions.
- * ### Creating Mute Rules
- * **Example:** Scheduled Mute
+ * @resource
+ * @section Creating Mute Rules
+ * @example Scheduled Mute
  * ```typescript
  * const rule = yield* AlarmMuteRule("NightlyMute", {
  *   Rule: {
@@ -65,8 +66,8 @@ export interface AlarmMuteRule extends Resource<
  * });
  * ```
  *
- * ### Reading Mute Rules at Runtime
- * **Example:** Read the Mute Rule from a Function
+ * @section Reading Mute Rules at Runtime
+ * @example Read the Mute Rule from a Function
  * ```typescript
  * // init — bind the rule to the function (see GetAlarmMuteRule)
  * const getAlarmMuteRule = yield* AWS.CloudWatch.GetAlarmMuteRule(rule);
@@ -75,8 +76,6 @@ export interface AlarmMuteRule extends Resource<
  * const result = yield* getAlarmMuteRule();
  * const schedule = result.Rule?.Schedule;
  * ```
- *
- * @resource
  */
 export const AlarmMuteRule = Resource<AlarmMuteRule>(
   "AWS.CloudWatch.AlarmMuteRule",

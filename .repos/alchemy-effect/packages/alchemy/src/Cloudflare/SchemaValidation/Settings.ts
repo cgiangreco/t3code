@@ -45,7 +45,7 @@ export interface SettingsAttributes {
   /** The default mitigation action for non-conforming requests. */
   validationDefaultMitigationAction: MitigationAction;
   /** The zone-wide override (`"none"` = validation disabled), if set. */
-  validationOverrideMitigationAction: "none" | (string & {}) | null;
+  validationOverrideMitigationAction: "none" | null;
   /**
    * The default action the zone had before Alchemy first managed these
    * settings. Restored on destroy.
@@ -55,7 +55,7 @@ export interface SettingsAttributes {
    * The override the zone had before Alchemy first managed these settings.
    * Restored on destroy.
    */
-  initialOverrideMitigationAction: "none" | (string & {}) | null;
+  initialOverrideMitigationAction: "none" | null;
 }
 
 export type Settings = Resource<
@@ -79,8 +79,11 @@ export type Settings = Resource<
  *
  * The `log` action is plan-gated (API Shield entitlement) on some zones —
  * setting it there fails with the typed `UnentitledMitigationAction` error.
- * ### Managing the zone default
- * **Example:** Block non-conforming requests
+ * @resource
+ * @product Schema Validation
+ * @category Application Security
+ * @section Managing the zone default
+ * @example Block non-conforming requests
  * ```typescript
  * yield* Cloudflare.SchemaValidation.Settings("Validation", {
  *   zoneId: zone.zoneId,
@@ -88,8 +91,8 @@ export type Settings = Resource<
  * });
  * ```
  *
- * ### Kill switch
- * **Example:** Temporarily disable validation zone-wide
+ * @section Kill switch
+ * @example Temporarily disable validation zone-wide
  * ```typescript
  * yield* Cloudflare.SchemaValidation.Settings("Validation", {
  *   zoneId: zone.zoneId,
@@ -100,10 +103,6 @@ export type Settings = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/api-shield/security/schema-validation/
- *
- * @resource
- * @product Schema Validation
- * @category Application Security
  */
 export const Settings = Resource<Settings>(TypeId);
 
@@ -265,7 +264,7 @@ const toAttributes = (
   setting: SettingResponse,
   initial: {
     defaultAction: MitigationAction;
-    overrideAction: "none" | (string & {}) | null;
+    overrideAction: "none" | null;
   },
 ): SettingsAttributes => {
   const current = observedState(setting);

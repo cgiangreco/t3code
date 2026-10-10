@@ -1,20 +1,18 @@
 import { preloadPatchFile } from "@pierre/diffs/ssr";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ComposerPromptEditor, type ComposerPromptEditorHandle } from "../ComposerPromptEditor";
-import { EMPTY_COMPOSER_CONTEXT_RECORDS } from "../composerContextPresentation";
 import { terminalThemeFromApp } from "../ThreadTerminalDrawer";
 import { useTheme } from "../../hooks/useTheme";
-import { DISCONNECTED_COMPOSER_PLACEHOLDER } from "../../composerPlaceholder";
 import { resolveDiffThemeName, type DiffThemeName } from "../../lib/diffRendering";
-import { PREFERRED_HIGHLIGHTER } from "../../lib/syntaxHighlighting";
 import { GhosttyTerminalSurface } from "~/terminal/ghostty/surface";
 
 // The font previews are the real surfaces, not lookalikes: the composer's
-// Tiptap editor, the diff panel's file diff, and the Ghostty canvas
+// Lexical editor, the diff panel's file diff, and the Ghostty canvas
 // renderer. Each already consumes the appearance font tokens (or, for the
 // terminal, the settings passed down as props), so what the row shows is
 // exactly what the app renders.
 
+const EMPTY_TERMINAL_CONTEXTS: ReadonlyArray<never> = [];
 const EMPTY_SKILLS: ReadonlyArray<never> = [];
 
 // Serialized the way the composer stores inline tokens: the $skill and the
@@ -39,15 +37,15 @@ export function PromptFontPreview() {
   return (
     <div className="mt-1 mb-2 rounded-lg border border-border bg-background px-3 py-2">
       <ComposerPromptEditor
-        ariaLabel="Prompt font preview"
         editorRef={editorRef}
         value={prompt}
         cursor={cursor}
-        contextRecords={EMPTY_COMPOSER_CONTEXT_RECORDS}
+        terminalContexts={EMPTY_TERMINAL_CONTEXTS}
         skills={EMPTY_SKILLS}
         disabled={false}
-        placeholder={DISCONNECTED_COMPOSER_PLACEHOLDER}
-        className="max-h-42 min-h-14"
+        placeholder="Ask for follow-up changes or attach images"
+        className="max-h-40 min-h-12"
+        onRemoveTerminalContext={noop}
         onChange={onChange}
         onPaste={noop}
       />
@@ -80,7 +78,7 @@ function loadDiffPreviewHtml(theme: DiffThemeName): Promise<readonly string[]> {
   if (promise === undefined) {
     promise = preloadPatchFile({
       patch: DIFF_PREVIEW_PATCH,
-      options: { diffStyle: "unified", theme, preferredHighlighter: PREFERRED_HIGHLIGHTER },
+      options: { diffStyle: "unified", theme },
     }).then((results) => results.map((result) => result.prerenderedHTML));
     diffPreviewHtmlByTheme.set(theme, promise);
   }
@@ -240,6 +238,7 @@ export function TerminalFontPreview({ family, size }: { family: string; size: nu
       onData: echo,
       onResize: noop,
       onSelectionChange: noop,
+      onCopy: (text) => void navigator.clipboard?.writeText(text).catch(noop),
       // Tab keeps walking the settings page instead of feeding the echo loop.
       beforeKey: (event) => event.key !== "Tab",
       onLinkActivate: noop,

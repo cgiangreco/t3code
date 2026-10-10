@@ -16,8 +16,9 @@ export interface GetQAppSessionRequest extends Omit<
  *
  * Retrieves the current state of a Q App session — execution status plus the per-card status map. Provide the implementation with
  * `Effect.provide(AWS.QApps.GetQAppSessionHttp)`.
- * ### Sessions
- * **Example:** Poll a Session Until It Completes
+ * @binding
+ * @section Sessions
+ * @example Poll a Session Until It Completes
  * ```typescript
  * // init — bind the operation to the Q App
  * const getQAppSession = yield* AWS.QApps.GetQAppSession(app);
@@ -26,8 +27,6 @@ export interface GetQAppSessionRequest extends Omit<
  * const state = yield* getQAppSession({ sessionId });
  * if (state.status === "COMPLETED") console.log(state.cardStatus);
  * ```
- *
- * @binding
  */
 export interface GetQAppSession extends Binding.Service<
   GetQAppSession,

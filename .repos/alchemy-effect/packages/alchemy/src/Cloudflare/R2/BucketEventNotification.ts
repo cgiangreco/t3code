@@ -127,8 +127,11 @@ export type BucketEventNotification = Resource<
  * either triggers a replacement, while rule changes are applied in place
  * (the provider converges the pair's configuration to exactly the
  * declared rule set).
- * ### Notifying a Queue
- * **Example:** Notify on every upload and delete
+ * @resource
+ * @product R2
+ * @category Storage & Databases
+ * @section Notifying a Queue
+ * @example Notify on every upload and delete
  * ```typescript
  * const bucket = yield* Cloudflare.R2.Bucket("Uploads");
  * const queue = yield* Cloudflare.Queues.Queue("UploadEvents");
@@ -144,7 +147,7 @@ export type BucketEventNotification = Resource<
  * });
  * ```
  *
- * **Example:** Scope notifications to a key prefix and suffix
+ * @example Scope notifications to a key prefix and suffix
  * ```typescript
  * yield* Cloudflare.R2.BucketEventNotification("ImageNotifications", {
  *   bucketName: bucket.bucketName,
@@ -160,8 +163,8 @@ export type BucketEventNotification = Resource<
  * });
  * ```
  *
- * ### Multiple rules
- * **Example:** Separate rules per key range
+ * @section Multiple rules
+ * @example Separate rules per key range
  * ```typescript
  * // Rules must cover non-overlapping key ranges — Cloudflare rejects
  * // overlapping prefixes/suffixes even when the actions are disjoint.
@@ -176,10 +179,6 @@ export type BucketEventNotification = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/r2/buckets/event-notifications/
- *
- * @resource
- * @product R2
- * @category Storage & Databases
  */
 export const BucketEventNotification =
   Resource<BucketEventNotification>(TypeId);
@@ -420,17 +419,19 @@ export const BucketEventNotificationProvider = () =>
                     (q): q is typeof q & { queueId: string } =>
                       q.queueId != null,
                   )
-                  .map((q): BucketEventNotificationAttributes => ({
-                    bucketName,
-                    // The endpoint echoes the queue ID in dashed-UUID
-                    // form; normalise to the undashed form
-                    // `Queue.queueId` uses so list items match `read`.
-                    queueId: q.queueId.replace(/-/g, ""),
-                    queueName: q.queueName ?? undefined,
-                    accountId,
-                    jurisdiction,
-                    rules: (q.rules ?? []).map(toRuleAttributes),
-                  })),
+                  .map(
+                    (q): BucketEventNotificationAttributes => ({
+                      bucketName,
+                      // The endpoint echoes the queue ID in dashed-UUID
+                      // form; normalise to the undashed form
+                      // `Queue.queueId` uses so list items match `read`.
+                      queueId: q.queueId.replace(/-/g, ""),
+                      queueName: q.queueName ?? undefined,
+                      accountId,
+                      jurisdiction,
+                      rules: (q.rules ?? []).map(toRuleAttributes),
+                    }),
+                  ),
               ),
               // A bucket with no event-notification config (or a bucket
               // that vanished mid-enumeration) is not an error — skip it.

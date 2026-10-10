@@ -16,8 +16,9 @@ export interface DescribeContinuousBackupsRequest extends Omit<
  * status (including the earliest and latest restorable times), automatically
  * injecting the table name. Provide the `DescribeContinuousBackupsHttp` layer
  * on the Function to satisfy the binding.
- * ### Backup and Restore
- * **Example:** Read the PITR Window
+ * @binding
+ * @section Backup and Restore
+ * @example Read the PITR Window
  * ```typescript
  * const describeContinuousBackups =
  *   yield* AWS.DynamoDB.DescribeContinuousBackups(table);
@@ -26,8 +27,6 @@ export interface DescribeContinuousBackupsRequest extends Omit<
  * const pitr =
  *   response.ContinuousBackupsDescription?.PointInTimeRecoveryDescription;
  * ```
- *
- * @binding
  */
 export interface DescribeContinuousBackups extends Binding.Service<
   DescribeContinuousBackups,

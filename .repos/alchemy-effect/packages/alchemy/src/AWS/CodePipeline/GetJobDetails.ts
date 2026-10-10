@@ -12,15 +12,14 @@ export interface GetJobDetailsRequest extends SVC.GetJobDetailsInput {}
  * CodePipeline job operations do not support resource-level permissions, so
  * the grant is on `*`. The binding takes no resource — the job id arrives
  * with the invocation event.
- * ### Job Workers
- * **Example:** Fetch Job Details
+ * @binding
+ * @section Job Workers
+ * @example Fetch Job Details
  * ```typescript
  * const getJobDetails = yield* AWS.CodePipeline.GetJobDetails();
  *
  * const { jobDetails } = yield* getJobDetails({ jobId });
  * ```
- *
- * @binding
  */
 export interface GetJobDetails extends Binding.Service<
   GetJobDetails,

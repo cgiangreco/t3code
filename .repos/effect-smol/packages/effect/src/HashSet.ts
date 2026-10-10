@@ -26,23 +26,23 @@ const TypeId = internal.HashSetTypeId
  *
  * **Example** (Creating and updating a HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * // Create a HashSet
  * const set = HashSet.make("apple", "banana", "cherry")
  *
  * // Check membership
- * HashSet.has(set, "apple") // => true
- * HashSet.has(set, "grape") // => false
+ * console.log(HashSet.has(set, "apple")) // true
+ * console.log(HashSet.has(set, "grape")) // false
  *
  * // Add values (returns new HashSet)
  * const updated = HashSet.add(set, "grape")
- * updated // => HashSet.make("apple", "banana", "cherry", "grape")
+ * console.log(HashSet.size(updated)) // 4
  *
  * // Remove values (returns new HashSet)
  * const smaller = HashSet.remove(set, "banana")
- * smaller // => HashSet.make("apple", "cherry")
+ * console.log(HashSet.size(smaller)) // 2
  * ```
  *
  * @category models
@@ -58,7 +58,7 @@ export interface HashSet<out Value> extends Iterable<Value>, Equal, Pipeable, In
  *
  * **Example** (Extracting value types from a HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * // Create a concrete HashSet for type extraction
@@ -71,7 +71,6 @@ export interface HashSet<out Value> extends Iterable<Value>, Equal, Pipeable, In
  * const processFruit = (fruit: Fruit) => {
  *   return `Processing ${fruit}`
  * }
- * processFruit("apple") // => "Processing apple"
  * ```
  *
  * @since 2.0.0
@@ -86,7 +85,7 @@ export declare namespace HashSet {
    *
    * **Example** (Extracting a HashSet value type)
    *
-   * ```ts import.meta.vitest
+   * ```ts
    * import { HashSet } from "effect"
    *
    * const numbers = HashSet.make(1, 2, 3, 4, 5)
@@ -95,7 +94,6 @@ export declare namespace HashSet {
    * type NumberType = HashSet.HashSet.Value<typeof numbers> // number
    *
    * const processNumber = (n: NumberType) => n * 2
-   * processNumber(3) // => 6
    * ```
    *
    * @category utility types
@@ -109,17 +107,17 @@ export declare namespace HashSet {
  *
  * **Example** (Creating an empty HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const set = HashSet.empty<string>()
  *
- * HashSet.size(set) // => 0
- * HashSet.isEmpty(set) // => true
+ * console.log(HashSet.size(set)) // 0
+ * console.log(HashSet.isEmpty(set)) // true
  *
  * // Add some values
  * const withValues = HashSet.add(HashSet.add(set, "hello"), "world")
- * withValues // => HashSet.make("hello", "world")
+ * console.log(HashSet.size(withValues)) // 2
  * ```
  *
  * @category constructors
@@ -132,14 +130,17 @@ export const empty: <V = never>() => HashSet<V> = internal.empty
  *
  * **Example** (Creating a HashSet from values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.make("apple", "banana", "cherry") // => HashSet.make("apple", "banana", "cherry")
+ * const fruits = HashSet.make("apple", "banana", "cherry")
+ * console.log(HashSet.size(fruits)) // 3
  *
- * HashSet.make(1, 2, 3, 2, 1) // => HashSet.make(1, 2, 3)
+ * const numbers = HashSet.make(1, 2, 3, 2, 1) // Duplicates ignored
+ * console.log(HashSet.size(numbers)) // 3
  *
- * HashSet.make("hello", 42, true) // => HashSet.make("hello", 42, true)
+ * const mixed = HashSet.make("hello", 42, true)
+ * console.log(HashSet.size(mixed)) // 3
  * ```
  *
  * @category constructors
@@ -154,14 +155,17 @@ export const make: <Values extends ReadonlyArray<any>>(
  *
  * **Example** (Creating a HashSet from an iterable)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.fromIterable(["a", "b", "c", "b", "a"]) // => HashSet.make("a", "b", "c")
+ * const fromArray = HashSet.fromIterable(["a", "b", "c", "b", "a"])
+ * console.log(HashSet.size(fromArray)) // 3
  *
- * HashSet.fromIterable(new Set([1, 2, 3])) // => HashSet.make(1, 2, 3)
+ * const fromSet = HashSet.fromIterable(new Set([1, 2, 3]))
+ * console.log(HashSet.size(fromSet)) // 3
  *
- * HashSet.fromIterable("hello") // => HashSet.make("h", "e", "l", "o")
+ * const fromString = HashSet.fromIterable("hello")
+ * console.log(Array.from(fromString)) // ["h", "e", "l", "o"]
  * ```
  *
  * @category constructors
@@ -174,15 +178,15 @@ export const fromIterable: <V>(values: Iterable<V>) => HashSet<V> = internal.fro
  *
  * **Example** (Checking for a HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const set = HashSet.make(1, 2, 3)
  * const array = [1, 2, 3]
  *
- * HashSet.isHashSet(set) // => true
- * HashSet.isHashSet(array) // => false
- * HashSet.isHashSet(null) // => false
+ * console.log(HashSet.isHashSet(set)) // true
+ * console.log(HashSet.isHashSet(array)) // false
+ * console.log(HashSet.isHashSet(null)) // false
  * ```
  *
  * @category guards
@@ -198,18 +202,19 @@ export const isHashSet: {
  *
  * **Example** (Adding values to a HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const set = HashSet.make("a", "b")
  * const withC = HashSet.add(set, "c")
  *
- * set // => HashSet.make("a", "b")
- * withC // => HashSet.make("a", "b", "c")
- * HashSet.has(withC, "c") // => true
+ * console.log(HashSet.size(set)) // 2 (original unchanged)
+ * console.log(HashSet.size(withC)) // 3
+ * console.log(HashSet.has(withC, "c")) // true
  *
  * // Adding existing value has no effect
- * HashSet.add(set, "a") // => HashSet.make("a", "b")
+ * const same = HashSet.add(set, "a")
+ * console.log(HashSet.size(same)) // 2
  * ```
  *
  * @category mutations
@@ -228,15 +233,15 @@ export const add: {
  *
  * **Example** (Checking HashSet membership)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Equal, Hash, HashSet } from "effect"
  *
  * // Works with any type that implements Equal
  *
  * const set = HashSet.make("apple", "banana", "cherry")
  *
- * HashSet.has(set, "apple") // => true
- * HashSet.has(set, "grape") // => false
+ * console.log(HashSet.has(set, "apple")) // true
+ * console.log(HashSet.has(set, "grape")) // false
  *
  * class Person implements Equal.Equal {
  *   constructor(readonly name: string) {}
@@ -251,10 +256,10 @@ export const add: {
  * }
  *
  * const people = HashSet.make(new Person("Alice"), new Person("Bob"))
- * HashSet.has(people, new Person("Alice")) // => true
+ * console.log(HashSet.has(people, new Person("Alice"))) // true
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 2.0.0
  */
 export const has: {
@@ -270,18 +275,19 @@ export const has: {
  *
  * **Example** (Removing values from a HashSet)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const set = HashSet.make("a", "b", "c")
  * const withoutB = HashSet.remove(set, "b")
  *
- * set // => HashSet.make("a", "b", "c")
- * withoutB // => HashSet.make("a", "c")
- * HashSet.has(withoutB, "b") // => false
+ * console.log(HashSet.size(set)) // 3 (original unchanged)
+ * console.log(HashSet.size(withoutB)) // 2
+ * console.log(HashSet.has(withoutB, "b")) // false
  *
  * // Removing non-existent value has no effect
- * HashSet.remove(set, "d") // => HashSet.make("a", "b", "c")
+ * const same = HashSet.remove(set, "d")
+ * console.log(HashSet.size(same)) // 3
  * ```
  *
  * @category mutations
@@ -300,14 +306,17 @@ export const remove: {
  *
  * **Example** (Getting the HashSet size)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.size(HashSet.empty<string>()) // => 0
+ * const empty = HashSet.empty<string>()
+ * console.log(HashSet.size(empty)) // 0
  *
- * HashSet.size(HashSet.make("a", "b")) // => 2
+ * const small = HashSet.make("a", "b")
+ * console.log(HashSet.size(small)) // 2
  *
- * HashSet.size(HashSet.fromIterable(["x", "y", "z", "x", "y"])) // => 3
+ * const withDuplicates = HashSet.fromIterable(["x", "y", "z", "x", "y"])
+ * console.log(HashSet.size(withDuplicates)) // 3
  * ```
  *
  * @category getters
@@ -320,15 +329,17 @@ export const size: <V>(self: HashSet<V>) => number = internal.size
  *
  * **Example** (Checking whether a HashSet is empty)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.isEmpty(HashSet.empty<string>()) // => true
+ * const empty = HashSet.empty<string>()
+ * console.log(HashSet.isEmpty(empty)) // true
  *
- * HashSet.isEmpty(HashSet.make("a")) // => false
+ * const nonEmpty = HashSet.make("a")
+ * console.log(HashSet.isEmpty(nonEmpty)) // false
  * ```
  *
- * @category predicates
+ * @category getters
  * @since 4.0.0
  */
 export const isEmpty: <V>(self: HashSet<V>) => boolean = internal.isEmpty
@@ -338,10 +349,15 @@ export const isEmpty: <V>(self: HashSet<V>) => boolean = internal.isEmpty
  *
  * **Example** (Combining HashSets)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.union(HashSet.make("a", "b"), HashSet.make("b", "c")) // => HashSet.make("a", "b", "c")
+ * const set1 = HashSet.make("a", "b")
+ * const set2 = HashSet.make("b", "c")
+ * const combined = HashSet.union(set1, set2)
+ *
+ * console.log(Array.from(combined).sort()) // ["a", "b", "c"]
+ * console.log(HashSet.size(combined)) // 3
  * ```
  *
  * @category combinators
@@ -360,10 +376,15 @@ export const union: {
  *
  * **Example** (Finding common HashSet values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.intersection(HashSet.make("a", "b", "c"), HashSet.make("b", "c", "d")) // => HashSet.make("b", "c")
+ * const set1 = HashSet.make("a", "b", "c")
+ * const set2 = HashSet.make("b", "c", "d")
+ * const common = HashSet.intersection(set1, set2)
+ *
+ * console.log(Array.from(common).sort()) // ["b", "c"]
+ * console.log(HashSet.size(common)) // 2
  * ```
  *
  * @category combinators
@@ -382,10 +403,15 @@ export const intersection: {
  *
  * **Example** (Finding HashSet differences)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.difference(HashSet.make("a", "b", "c"), HashSet.make("b", "d")) // => HashSet.make("a", "c")
+ * const set1 = HashSet.make("a", "b", "c")
+ * const set2 = HashSet.make("b", "d")
+ * const diff = HashSet.difference(set1, set2)
+ *
+ * console.log(Array.from(diff).sort()) // ["a", "c"]
+ * console.log(HashSet.size(diff)) // 2
  * ```
  *
  * @category combinators
@@ -404,20 +430,20 @@ export const difference: {
  *
  * **Example** (Checking subset relationships)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const small = HashSet.make("a", "b")
  * const large = HashSet.make("a", "b", "c", "d")
  * const other = HashSet.make("x", "y")
  *
- * HashSet.isSubset(small, large) // => true
- * HashSet.isSubset(large, small) // => false
- * HashSet.isSubset(small, other) // => false
- * HashSet.isSubset(small, small) // => true
+ * console.log(HashSet.isSubset(small, large)) // true
+ * console.log(HashSet.isSubset(large, small)) // false
+ * console.log(HashSet.isSubset(small, other)) // false
+ * console.log(HashSet.isSubset(small, small)) // true
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 2.0.0
  */
 export const isSubset: {
@@ -433,18 +459,19 @@ export const isSubset: {
  *
  * **Example** (Mapping HashSet values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const numbers = HashSet.make(1, 2, 3)
  * const doubled = HashSet.map(numbers, (n) => n * 2)
  *
- * doubled // => HashSet.make(2, 4, 6)
+ * console.log(Array.from(doubled).sort()) // [2, 4, 6]
+ * console.log(HashSet.size(doubled)) // 3
  *
  * // Mapping can reduce size if function produces duplicates
  * const strings = HashSet.make("apple", "banana", "cherry")
  * const lengths = HashSet.map(strings, (s) => s.length)
- * lengths // => HashSet.make(5, 6)
+ * console.log(Array.from(lengths).sort()) // [5, 6] (apple=5, banana=6, cherry=6)
  * ```
  *
  * @category mapping
@@ -463,10 +490,14 @@ export const map: {
  *
  * **Example** (Filtering HashSet values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
- * HashSet.filter(HashSet.make(1, 2, 3, 4, 5, 6), (n) => n % 2 === 0) // => HashSet.make(2, 4, 6)
+ * const numbers = HashSet.make(1, 2, 3, 4, 5, 6)
+ * const evens = HashSet.filter(numbers, (n) => n % 2 === 0)
+ *
+ * console.log(Array.from(evens).sort()) // [2, 4, 6]
+ * console.log(HashSet.size(evens)) // 3
  * ```
  *
  * @category filtering
@@ -493,18 +524,19 @@ export const filter: {
  *
  * **Example** (Testing whether some values match)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const numbers = HashSet.make(1, 2, 3, 4, 5)
  *
- * HashSet.some(numbers, (n) => n > 3) // => true
- * HashSet.some(numbers, (n) => n > 10) // => false
+ * console.log(HashSet.some(numbers, (n) => n > 3)) // true
+ * console.log(HashSet.some(numbers, (n) => n > 10)) // false
  *
- * HashSet.some(HashSet.empty<number>(), (n) => n > 0) // => false
+ * const empty = HashSet.empty<number>()
+ * console.log(HashSet.some(empty, (n) => n > 0)) // false
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 2.0.0
  */
 export const some: {
@@ -520,18 +552,19 @@ export const some: {
  *
  * **Example** (Testing whether every value matches)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const numbers = HashSet.make(2, 4, 6, 8)
  *
- * HashSet.every(numbers, (n) => n % 2 === 0) // => true
- * HashSet.every(numbers, (n) => n > 5) // => false
+ * console.log(HashSet.every(numbers, (n) => n % 2 === 0)) // true
+ * console.log(HashSet.every(numbers, (n) => n > 5)) // false
  *
- * HashSet.every(HashSet.empty<number>(), (n) => n > 0) // => true
+ * const empty = HashSet.empty<number>()
+ * console.log(HashSet.every(empty, (n) => n > 0)) // true (vacuously true)
  * ```
  *
- * @category predicates
+ * @category elements
  * @since 2.0.0
  */
 export const every: {
@@ -547,11 +580,17 @@ export const every: {
  *
  * **Example** (Reducing HashSet values)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { HashSet } from "effect"
  *
  * const numbers = HashSet.make(1, 2, 3, 4, 5)
- * HashSet.reduce(numbers, 0, (acc, n) => acc + n) // => 15
+ * const sum = HashSet.reduce(numbers, 0, (acc, n) => acc + n)
+ *
+ * console.log(sum) // 15
+ *
+ * const strings = HashSet.make("a", "b", "c")
+ * const concatenated = HashSet.reduce(strings, "", (acc, s) => acc + s)
+ * console.log(concatenated) // Order may vary: "abc", "bac", etc.
  * ```
  *
  * @category folding

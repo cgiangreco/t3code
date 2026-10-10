@@ -9,10 +9,10 @@ import * as FileSystem from "effect/FileSystem";
 import * as Option from "effect/Option";
 import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
-import { Argument, Command, Flag } from "effect/cli";
+import { Argument, Command, Flag } from "effect/unstable/cli";
 import { fromJsonStringPretty } from "@t3tools/shared/schemaJson";
 
-export class ReleasePackageManifestError extends Schema.TaggedError<ReleasePackageManifestError>()(
+export class ReleasePackageManifestError extends Schema.TaggedErrorClass<ReleasePackageManifestError>()(
   "ReleasePackageManifestError",
   {
     operation: Schema.Literals(["read", "decode", "encode", "write"]),
@@ -25,7 +25,7 @@ export class ReleasePackageManifestError extends Schema.TaggedError<ReleasePacka
   }
 }
 
-export class ReleaseGitHubOutputConfigurationError extends Schema.TaggedError<ReleaseGitHubOutputConfigurationError>()(
+export class ReleaseGitHubOutputConfigurationError extends Schema.TaggedErrorClass<ReleaseGitHubOutputConfigurationError>()(
   "ReleaseGitHubOutputConfigurationError",
   { cause: Schema.Defect() },
 ) {
@@ -34,7 +34,7 @@ export class ReleaseGitHubOutputConfigurationError extends Schema.TaggedError<Re
   }
 }
 
-export class ReleaseGitHubOutputWriteError extends Schema.TaggedError<ReleaseGitHubOutputWriteError>()(
+export class ReleaseGitHubOutputWriteError extends Schema.TaggedErrorClass<ReleaseGitHubOutputWriteError>()(
   "ReleaseGitHubOutputWriteError",
   {
     filePath: Schema.String,
@@ -125,7 +125,7 @@ export const updateReleasePackageVersions = Effect.fn("updateReleasePackageVersi
 
 const writeGithubOutput = Effect.fn("writeGithubOutput")(function* (changed: boolean) {
   const fs = yield* FileSystem.FileSystem;
-  const githubOutputPath = yield* Config.NonEmptyString("GITHUB_OUTPUT").pipe(
+  const githubOutputPath = yield* Config.nonEmptyString("GITHUB_OUTPUT").pipe(
     Effect.mapError(
       (cause) =>
         new ReleaseGitHubOutputConfigurationError({
@@ -147,14 +147,14 @@ const writeGithubOutput = Effect.fn("writeGithubOutput")(function* (changed: boo
 export const updateReleasePackageVersionsCommand = Command.make(
   "update-release-package-versions",
   {
-    version: Argument.String("version").pipe(
+    version: Argument.string("version").pipe(
       Argument.withDescription("Release version to write into each releasable package.json."),
     ),
-    root: Flag.String("root").pipe(
+    root: Flag.string("root").pipe(
       Flag.withDescription("Workspace root used to resolve the release package manifests."),
       Flag.optional,
     ),
-    githubOutput: Flag.Boolean("github-output").pipe(
+    githubOutput: Flag.boolean("github-output").pipe(
       Flag.withDescription("Append changed=<boolean> to GITHUB_OUTPUT."),
       Flag.withDefault(false),
     ),

@@ -15,8 +15,9 @@ export interface GetEffectivePermissionsForPathRequest
  * tables stored under a registered S3 path — an authorization audit for a
  * data location. Provide the implementation with
  * `Effect.provide(AWS.LakeFormation.GetEffectivePermissionsForPathHttp)`.
- * ### Auditing Permissions
- * **Example:** Audit Permissions on a Registered Location
+ * @binding
+ * @section Auditing Permissions
+ * @example Audit Permissions on a Registered Location
  * ```typescript
  * // init — account-level binding takes no resource
  * const getEffectivePermissions =
@@ -27,8 +28,6 @@ export interface GetEffectivePermissionsForPathRequest
  *   ResourceArn: location.resourceArn,
  * });
  * ```
- *
- * @binding
  */
 export interface GetEffectivePermissionsForPath extends Binding.Service<
   GetEffectivePermissionsForPath,

@@ -16,8 +16,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StartTextDetectionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Start Text Detection
+ * @binding
+ * @section Video Analysis
+ * @example Start Text Detection
  * ```typescript
  * // init
  * const startTextDetection = yield* AWS.Rekognition.StartTextDetection();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * // started.JobId
  * ```
- *
- * @binding
  */
 export interface StartTextDetection extends Binding.Service<
   StartTextDetection,

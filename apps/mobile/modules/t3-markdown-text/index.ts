@@ -21,8 +21,6 @@ export {
   type MarkdownHighlightedToken,
 } from "./src/SelectableMarkdownText";
 export type {
-  MarkdownFileContextMenu,
-  MarkdownFileContextMenuAction,
   NativeMarkdownTextStyle,
   SelectableMarkdownSkill,
   SelectableMarkdownTextProps,

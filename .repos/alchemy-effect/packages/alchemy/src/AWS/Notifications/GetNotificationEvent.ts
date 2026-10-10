@@ -14,8 +14,9 @@ export interface GetNotificationEventRequest
  * Fetch one notification event (headline, message components, source event
  * metadata) by its ARN. Provide the implementation with
  * `Effect.provide(AWS.Notifications.GetNotificationEventHttp)`.
- * ### Reading Notification Events
- * **Example:** Fetch a Notification Event
+ * @binding
+ * @section Reading Notification Events
+ * @example Fetch a Notification Event
  * ```typescript
  * // init — account-level binding takes no resource
  * const getNotificationEvent = yield* AWS.Notifications.GetNotificationEvent();
@@ -24,8 +25,6 @@ export interface GetNotificationEventRequest
  * const event = yield* getNotificationEvent({ arn: eventArn });
  * const headline = event.content.messageComponents.headline;
  * ```
- *
- * @binding
  */
 export interface GetNotificationEvent extends Binding.Service<
   GetNotificationEvent,

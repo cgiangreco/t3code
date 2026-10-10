@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Starts generating a least-privilege policy for a principal from its access
  * activity (optionally a CloudTrail trail). Provide the implementation with
  * `Effect.provide(AWS.AccessAnalyzer.StartPolicyGenerationHttp)`.
- * ### Policy Generation
- * **Example:** Generate a Policy for a Role
+ * @binding
+ * @section Policy Generation
+ * @example Generate a Policy for a Role
  * ```typescript
  * const startGeneration =
  *   yield* AWS.AccessAnalyzer.StartPolicyGeneration();
@@ -17,8 +18,6 @@ import * as Binding from "../../Binding.ts";
  *   policyGenerationDetails: { principalArn: roleArn },
  * });
  * ```
- *
- * @binding
  */
 export interface StartPolicyGeneration extends Binding.Service<
   StartPolicyGeneration,

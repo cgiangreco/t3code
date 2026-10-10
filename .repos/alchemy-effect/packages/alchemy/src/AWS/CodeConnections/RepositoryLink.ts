@@ -67,8 +67,9 @@ export interface RepositoryLink extends Resource<
  *
  * Requires a connection in the `AVAILABLE` state; the connection's OAuth
  * handshake is a one-time **manual** console step.
- * ### Linking a Repository
- * **Example:** Link a GitHub Repository
+ * @resource
+ * @section Linking a Repository
+ * @example Link a GitHub Repository
  * ```typescript
  * const link = yield* CodeConnections.RepositoryLink("Repo", {
  *   connectionArn: connection.connectionArn,
@@ -77,7 +78,7 @@ export interface RepositoryLink extends Resource<
  * });
  * ```
  *
- * **Example:** Encrypted Repository Link
+ * @example Encrypted Repository Link
  * ```typescript
  * const link = yield* CodeConnections.RepositoryLink("Repo", {
  *   connectionArn: connection.connectionArn,
@@ -86,8 +87,6 @@ export interface RepositoryLink extends Resource<
  *   encryptionKeyArn: key.keyArn,
  * });
  * ```
- *
- * @resource
  */
 export const RepositoryLink = Resource<RepositoryLink>(
   "AWS.CodeConnections.RepositoryLink",

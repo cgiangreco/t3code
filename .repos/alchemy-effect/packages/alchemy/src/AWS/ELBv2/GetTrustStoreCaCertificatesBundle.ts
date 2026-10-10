@@ -13,8 +13,9 @@ import type { TrustStore } from "./TrustStore.ts";
  * serves or audits the mTLS CA bundle currently in force. The trust-store
  * ARN is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.ELBv2.GetTrustStoreCaCertificatesBundleHttp)`.
- * ### Trust Store Content
- * **Example:** Fetch the presigned CA-bundle location
+ * @binding
+ * @section Trust Store Content
+ * @example Fetch the presigned CA-bundle location
  * ```typescript
  * // init — bind the operation to the trust store
  * const getCaBundle = yield* AWS.ELBv2.GetTrustStoreCaCertificatesBundle(trustStore);
@@ -22,8 +23,6 @@ import type { TrustStore } from "./TrustStore.ts";
  * // runtime — Location is a presigned S3 URL valid for ten minutes
  * const { Location } = yield* getCaBundle();
  * ```
- *
- * @binding
  */
 export interface GetTrustStoreCaCertificatesBundle extends Binding.Service<
   GetTrustStoreCaCertificatesBundle,

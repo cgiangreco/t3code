@@ -4,7 +4,7 @@ import { expect } from "alchemy-test";
 import * as Effect from "effect/Effect";
 import { MinimumLogLevel } from "effect/References";
 import * as Schedule from "effect/Schedule";
-import * as HttpClient from "effect/http/HttpClient";
+import * as HttpClient from "effect/unstable/http/HttpClient";
 import Stack from "./fixtures/bindings-stack.ts";
 
 const { test, beforeAll, afterAll, deploy, destroy } = Test.make({
@@ -16,8 +16,16 @@ const logLevel = Effect.provideService(
   process.env.DEBUG ? "Debug" : "Info",
 );
 
-const stack = beforeAll(deploy(Stack), { timeout: 120_000 });
-afterAll.skipIf(!!process.env.NO_DESTROY)(destroy(Stack), { timeout: 120_000 });
+// Teardown contains a deterministic, bounded long wait that exceeds the 120s
+// default hook timeout: deleting the AiSearch instance returns immediately,
+// but Cloudflare releases the instance's service token only after its managed
+// Vectorize index tears down asynchronously. `AiSearchToken.delete` therefore
+// retries `TokenInUseByInstances` for up to ~5 minutes (60 x 5s) — well past
+// 120s on its own. Size both hooks above that worst case (plus the rest of the
+// teardown) so the destroy completes its real wait instead of being killed
+// mid-retry.
+const stack = beforeAll(deploy(Stack), { timeout: 420_000 });
+afterAll.skipIf(!!process.env.NO_DESTROY)(destroy(Stack), { timeout: 420_000 });
 
 // Deploying the Worker succeeding at all proves Cloudflare accepted both the
 // `ai_search` and `ai_search_namespace` bindings. The `/bindings` route then
@@ -65,16 +73,7 @@ test(
     expect(body.ns).toBe("object");
     expect(body.nsGet).toBe("function");
   }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:ai",
-      "provider:cloudflare:r2",
-      "provider:cloudflare:worker",
-      "live",
-    ],
-    timeout: 240_000,
-  },
+  { timeout: 240_000 },
 );
 
 // The Effect worker attaches the same two binding flavors via
@@ -129,14 +128,5 @@ test(
     expect(["object", "function"]).toContain(body.nsRaw);
     expect(body.nsChatCompletions).toBe("function");
   }).pipe(logLevel),
-  {
-    tags: [
-      "provider:cloudflare",
-      "provider:cloudflare:ai",
-      "provider:cloudflare:r2",
-      "provider:cloudflare:worker",
-      "live",
-    ],
-    timeout: 240_000,
-  },
+  { timeout: 240_000 },
 );

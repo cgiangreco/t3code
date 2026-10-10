@@ -23,7 +23,7 @@ import {
 } from "@t3tools/tailscale";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
-import type { ChildProcessSpawner } from "effect/process";
+import type { ChildProcessSpawner } from "effect/unstable/process";
 
 /**
  * Human-readable gloss for each diagnostic. Deliberately our own words rather
@@ -55,7 +55,7 @@ const explainCommandFailure = (error: TailscaleCommandError): string | undefined
  * Each wraps a real underlying failure and so keeps it as `cause`; the message
  * is derived only from the structural fields, never from `cause.message`.
  */
-export class TailscaleUnavailableError extends Schema.TaggedError<TailscaleUnavailableError>()(
+export class TailscaleUnavailableError extends Schema.TaggedErrorClass<TailscaleUnavailableError>()(
   "TailscaleUnavailableError",
   { cause: Schema.Defect() },
 ) {
@@ -69,7 +69,7 @@ export class TailscaleUnavailableError extends Schema.TaggedError<TailscaleUnava
 }
 
 /** No underlying failure: the status read succeeded and simply had no name. */
-export class TailnetNameMissingError extends Schema.TaggedError<TailnetNameMissingError>()(
+export class TailnetNameMissingError extends Schema.TaggedErrorClass<TailnetNameMissingError>()(
   "TailnetNameMissingError",
   {},
 ) {
@@ -87,7 +87,7 @@ export class TailnetNameMissingError extends Schema.TaggedError<TailnetNameMissi
  * semantics (a `tailscale serve` invocation failed for this port) and differ
  * only in which one, which the message states plainly.
  */
-export class DevServeFailedError extends Schema.TaggedError<DevServeFailedError>()(
+export class DevServeFailedError extends Schema.TaggedErrorClass<DevServeFailedError>()(
   "DevServeFailedError",
   {
     stage: Schema.Literals(["clear-existing", "serve"]),
@@ -110,10 +110,13 @@ export class DevServeFailedError extends Schema.TaggedError<DevServeFailedError>
   }
 }
 
-export type DevShareError =
-  | TailscaleUnavailableError
-  | TailnetNameMissingError
-  | DevServeFailedError;
+export const DevShareError = Schema.Union([
+  TailscaleUnavailableError,
+  TailnetNameMissingError,
+  DevServeFailedError,
+]);
+export type DevShareError = typeof DevShareError.Type;
+export const isDevShareError = Schema.is(DevShareError);
 
 /**
  * Removes any mapping for `webPort`, reporting whether the port is now clear.
@@ -192,17 +195,7 @@ export const shareDevServer = Effect.fn("devShare.shareDevServer")(function* (in
     });
   }
 
-  // Proxy to the hostname Vite binds rather than the package default of
-  // 127.0.0.1. Vite listens on `localhost`, which Node 17+ resolves to `::1`
-  // first, so it only binds the IPv6 loopback and a 127.0.0.1 target has
-  // nothing behind it (tailscale answers 502). Passing `localhost` lets the
-  // tailscale proxy resolve it the same way Node did. Not a literal `[::1]`:
-  // tailscale rejects that form.
-  yield* ensureTailscaleServe({
-    localPort: input.webPort,
-    servePort: input.webPort,
-    localHost: "localhost",
-  }).pipe(
+  yield* ensureTailscaleServe({ localPort: input.webPort, servePort: input.webPort }).pipe(
     Effect.mapError((error) => {
       const explanation = explainCommandFailure(error);
       return new DevServeFailedError({

@@ -15,14 +15,13 @@ export interface StartResourceScanRequest extends Omit<
  * Immediately rescans a resource's policy instead of waiting for the
  * analyzer's periodic scan. Provide the implementation with
  * `Effect.provide(AWS.AccessAnalyzer.StartResourceScanHttp)`.
- * ### Scanning Resources
- * **Example:** Rescan a Bucket After a Policy Change
+ * @binding
+ * @section Scanning Resources
+ * @example Rescan a Bucket After a Policy Change
  * ```typescript
  * const startScan = yield* AWS.AccessAnalyzer.StartResourceScan(analyzer);
  * yield* startScan({ resourceArn: bucket.bucketArn });
  * ```
- *
- * @binding
  */
 export interface StartResourceScan extends Binding.Service<
   StartResourceScan,

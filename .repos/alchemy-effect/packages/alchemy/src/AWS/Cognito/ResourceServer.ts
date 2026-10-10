@@ -57,8 +57,9 @@ export interface ResourceServer extends Resource<
  * An OAuth 2.0 resource server for an Amazon Cognito user pool. Resource
  * servers declare custom scopes that app clients can request in
  * `client_credentials` and authorization-code flows.
- * ### Creating a Resource Server
- * **Example:** API with Custom Scopes
+ * @resource
+ * @section Creating a Resource Server
+ * @example API with Custom Scopes
  * ```typescript
  * import * as Cognito from "alchemy/AWS/Cognito";
  *
@@ -73,7 +74,7 @@ export interface ResourceServer extends Resource<
  * });
  * ```
  *
- * **Example:** Client Requesting Resource-Server Scopes
+ * @example Client Requesting Resource-Server Scopes
  * ```typescript
  * const client = yield* Cognito.UserPoolClient("Machine", {
  *   userPoolId: pool.userPoolId,
@@ -83,8 +84,6 @@ export interface ResourceServer extends Resource<
  *   allowedOAuthScopes: ["https://api.example.com/read"],
  * });
  * ```
- *
- * @resource
  */
 export const ResourceServer = Resource<ResourceServer>(
   "AWS.Cognito.ResourceServer",

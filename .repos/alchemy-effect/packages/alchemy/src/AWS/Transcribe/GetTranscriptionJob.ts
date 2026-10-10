@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * resource-level IAM). Poll `TranscriptionJob.TranscriptionJobStatus` until
  * it reaches `COMPLETED` or `FAILED`.
  *
- * ### Polling a Transcription Job
- * **Example:** Poll a Job to Completion
+ * @binding
+ * @section Polling a Transcription Job
+ * @example Poll a Job to Completion
  * ```typescript
  * // init
  * const getJob = yield* AWS.Transcribe.GetTranscriptionJob();
@@ -24,8 +25,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const status = TranscriptionJob?.TranscriptionJobStatus;
  * ```
- *
- * @binding
  */
 export interface GetTranscriptionJob extends Binding.Service<
   GetTranscriptionJob,

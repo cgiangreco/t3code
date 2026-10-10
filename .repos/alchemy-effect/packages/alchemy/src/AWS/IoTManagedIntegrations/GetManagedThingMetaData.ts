@@ -12,16 +12,15 @@ import type { ManagedThing } from "./ManagedThing.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.IoTManagedIntegrations.GetManagedThingMetaDataHttp)`.
  *
- * ### Reading Device State
- * **Example:** Read Device Metadata
+ * @binding
+ * @section Reading Device State
+ * @example Read Device Metadata
  * ```typescript
  * const getMetaData =
  *   yield* IoTManagedIntegrations.GetManagedThingMetaData(thing);
  *
  * const { MetaData } = yield* getMetaData();
  * ```
- *
- * @binding
  */
 export interface GetManagedThingMetaData extends Binding.Service<
   GetManagedThingMetaData,

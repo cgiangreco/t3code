@@ -215,8 +215,11 @@ export type Job = Resource<TypeId, JobProps, JobAttributes, never, Providers>;
  * Jobs can be account-scoped (default) or zone-scoped (pass `zoneId`).
  * The dataset, kind, and scope are fixed at creation — changing any of
  * them triggers a replacement; everything else updates in place.
- * ### Pushing Workers trace events to R2
- * **Example:** Account-scoped job writing to an R2 bucket
+ * @resource
+ * @product Logpush
+ * @category Observability & Analytics
+ * @section Pushing Workers trace events to R2
+ * @example Account-scoped job writing to an R2 bucket
  * The R2 destination authenticates with S3-compatible credentials embedded
  * in the destination URI, so no ownership challenge is required.
  * ```typescript
@@ -229,8 +232,8 @@ export type Job = Resource<TypeId, JobProps, JobAttributes, never, Providers>;
  * });
  * ```
  *
- * ### Zone-scoped jobs
- * **Example:** HTTP requests dataset on a zone (Enterprise)
+ * @section Zone-scoped jobs
+ * @example HTTP requests dataset on a zone (Enterprise)
  * ```typescript
  * const job = yield* Cloudflare.Logpush.Job("http-logs", {
  *   zoneId: zone.zoneId,
@@ -240,8 +243,8 @@ export type Job = Resource<TypeId, JobProps, JobAttributes, never, Providers>;
  * });
  * ```
  *
- * ### Output configuration
- * **Example:** Selecting fields and batching limits
+ * @section Output configuration
+ * @example Selecting fields and batching limits
  * ```typescript
  * const job = yield* Cloudflare.Logpush.Job("worker-logs", {
  *   dataset: "workers_trace_events",
@@ -256,10 +259,6 @@ export type Job = Resource<TypeId, JobProps, JobAttributes, never, Providers>;
  * ```
  *
  * @see https://developers.cloudflare.com/logs/logpush/
- *
- * @resource
- * @product Logpush
- * @category Observability & Analytics
  */
 export const Job = Resource<Job>(TypeId);
 

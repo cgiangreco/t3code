@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.GetTextDetectionHttp)`.
  *
- * ### Video Analysis
- * **Example:** Poll Text Detection Results
+ * @binding
+ * @section Video Analysis
+ * @example Poll Text Detection Results
  * ```typescript
  * // init
  * const getTextDetection = yield* AWS.Rekognition.GetTextDetection();
@@ -23,8 +24,6 @@ import * as Binding from "../../Binding.ts";
  *   // consume the detections
  * }
  * ```
- *
- * @binding
  */
 export interface GetTextDetection extends Binding.Service<
   GetTextDetection,

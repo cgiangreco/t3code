@@ -57,15 +57,16 @@ export interface CompositeAlarm extends Resource<
  * A CloudWatch composite alarm — combines the states of other alarms with
  * a boolean `AlarmRule` expression so a single alarm (and its actions)
  * reflects overall health.
- * ### Creating Composite Alarms
- * **Example:** Composite Rule
+ * @resource
+ * @section Creating Composite Alarms
+ * @example Composite Rule
  * ```typescript
  * const composite = yield* CompositeAlarm("HighSeverity", {
  *   AlarmRule: 'ALARM("HighErrors") OR ALARM("HighLatency")',
  * });
  * ```
  *
- * **Example:** Compose Alarm Resources with Output.interpolate
+ * @example Compose Alarm Resources with Output.interpolate
  * ```typescript
  * const errors = yield* Alarm("HighErrors", {
  *   MetricName: "Errors",
@@ -81,8 +82,6 @@ export interface CompositeAlarm extends Resource<
  *   AlarmRule: Output.interpolate`ALARM("${errors.alarmName}")`,
  * });
  * ```
- *
- * @resource
  */
 export const CompositeAlarm = Resource<CompositeAlarm>(
   "AWS.CloudWatch.CompositeAlarm",

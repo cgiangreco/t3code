@@ -24,6 +24,7 @@ test.provider(
       }: {
         functionConfig?: AWS.Lambda.EventInvokeConfig;
         alias?: {
+          functionVersion: string;
           eventInvokeConfig?: AWS.Lambda.EventInvokeConfig;
         };
       }) =>
@@ -36,7 +37,7 @@ test.provider(
             main: timeoutHandlerPath,
             handler: "handler",
             isExternal: true,
-            functionUrl: false,
+            url: false,
             eventInvokeConfig: functionConfig,
           });
 
@@ -50,13 +51,10 @@ test.provider(
             ],
           });
 
-          const version = yield* AWS.Lambda.Version("AsyncVersion", {
-            function: fn,
-          });
-
           const live = alias
             ? yield* AWS.Lambda.Alias("LiveAlias", {
-                version,
+                functionName: fn.functionName,
+                functionVersion: alias.functionVersion,
                 aliasName: "live",
                 eventInvokeConfig: alias.eventInvokeConfig,
               })
@@ -116,9 +114,14 @@ test.provider(
       yield* expectNoConfig(removed.fn.functionName);
 
       // --- alias-scoped config ---
+      const version = yield* publishVersion(
+        removed.fn.functionName,
+        "version 1",
+      );
       const withAlias = yield* stack.deploy(
         program({
           alias: {
+            functionVersion: version,
             eventInvokeConfig: {
               maximumRetryAttempts: 2,
               maximumEventAge: "5 minutes",
@@ -150,7 +153,9 @@ test.provider(
       yield* expectNoConfig(withAlias.fn.functionName);
 
       // --- omit the alias prop: the alias-scoped config is deleted ---
-      const aliasCleared = yield* stack.deploy(program({ alias: {} }));
+      const aliasCleared = yield* stack.deploy(
+        program({ alias: { functionVersion: version } }),
+      );
       yield* expectNoConfig(
         aliasCleared.fn.functionName,
         aliasCleared.live!.aliasName,
@@ -180,10 +185,7 @@ test.provider(
       Effect.tap(() => stack.destroy()),
       Effect.onError(() => stack.destroy().pipe(Effect.ignore)),
     ),
-  {
-    tags: ["provider:aws", "provider:aws:lambda", "provider:aws:sqs", "live"],
-    timeout: 360_000,
-  },
+  { timeout: 360_000 },
 );
 
 const getConfigOrUndefined = Effect.fn(function* (
@@ -240,4 +242,24 @@ const expectNoConfig = Effect.fn(function* (
       schedule: Schedule.max([Schedule.exponential(500), Schedule.recurs(10)]),
     }),
   );
+});
+
+const publishVersion = Effect.fn(function* (
+  functionName: string,
+  description: string,
+) {
+  const config = yield* Lambda.publishVersion({
+    FunctionName: functionName,
+    Description: description,
+  }).pipe(
+    Effect.retry({
+      while: (e) => e._tag === "ResourceConflictException",
+      schedule: Schedule.max([Schedule.exponential(500), Schedule.recurs(10)]),
+    }),
+    Effect.filterOrFail(
+      (config) => config.Version !== undefined,
+      () => new Error("Published Lambda version was missing Version."),
+    ),
+  );
+  return config.Version!;
 });

@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.GetInsightsHttp)`.
- * ### Working with Insights
- * **Example:** List Custom Insights
+ * @binding
+ * @section Working with Insights
+ * @example List Custom Insights
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getInsights = yield* AWS.SecurityHub.GetInsights();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { Insights } = yield* getInsights();
  * ```
- *
- * @binding
  */
 export interface GetInsights extends Binding.Service<
   GetInsights,

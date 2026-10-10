@@ -120,12 +120,13 @@ export interface RestApi extends Resource<
  * stack is the `RestApi` value itself: child resources accept `restApi: api`
  * and register themselves back onto the API so that deployments and stages
  * wait for them without any user-authored dependency lists.
- * ### Getting started
+ * @resource
+ * @section Getting started
  * A minimal API Gateway stack is four pieces: the `RestApi`, one or more
  * `Method`s, a `Deployment` that snapshots those methods, and a `Stage` that
  * exposes the deployment at a URL.
  *
- * **Example:** Mock HTTP GET on the root path
+ * @example Mock HTTP GET on the root path
  * ```typescript
  * import * as ApiGateway from "alchemy/AWS/ApiGateway";
  *
@@ -151,7 +152,7 @@ export interface RestApi extends Resource<
  * });
  * ```
  *
- * ### How dependencies flow
+ * @section How dependencies flow
  * Writing `restApi: api` on a child (rather than `restApiId: api.restApiId`)
  * does two things: it threads the restApi id through, and it registers a
  * `RestApiBinding` back onto the API. The Alchemy scheduler sees those
@@ -160,8 +161,8 @@ export interface RestApi extends Resource<
  * have to write a `DependsOn` list or a `triggers` hash — adding a new
  * `Method` automatically orders it before the next `Deployment`.
  *
- * ### Private REST APIs
- * **Example:** Private REST API
+ * @section Private REST APIs
+ * @example Private REST API
  * ```typescript
  * const api = yield* ApiGateway.RestApi("PrivateApi", {
  *   endpointConfiguration: {
@@ -180,8 +181,8 @@ export interface RestApi extends Resource<
  * });
  * ```
  *
- * ### Binary payloads
- * **Example:** Enable binary media types
+ * @section Binary payloads
+ * @example Enable binary media types
  * ```typescript
  * const api = yield* ApiGateway.RestApi("BinaryApi", {
  *   binaryMediaTypes: ["application/octet-stream", "image/png"],
@@ -189,16 +190,14 @@ export interface RestApi extends Resource<
  * });
  * ```
  *
- * ### Endpoint hardening
- * **Example:** Disable the default execute-api endpoint
+ * @section Endpoint hardening
+ * @example Disable the default execute-api endpoint
  * ```typescript
  * const api = yield* ApiGateway.RestApi("CustomDomainOnlyApi", {
  *   endpointConfiguration: { types: ["REGIONAL"] },
  *   disableExecuteApiEndpoint: true,
  * });
  * ```
- *
- * @resource
  */
 export const RestApi = Resource<RestApi>("AWS.ApiGateway.RestApi");
 

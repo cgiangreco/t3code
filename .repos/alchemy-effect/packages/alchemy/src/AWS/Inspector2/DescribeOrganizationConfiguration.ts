@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.DescribeOrganizationConfigurationHttp)`.
- * ### Organization & Members
- * **Example:** Read Organization Auto-Enable Settings
+ * @binding
+ * @section Organization & Members
+ * @example Read Organization Auto-Enable Settings
  * ```typescript
  * // init
  * const describeOrganizationConfiguration = yield* AWS.Inspector2.DescribeOrganizationConfiguration();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { autoEnable } = yield* describeOrganizationConfiguration();
  * ```
- *
- * @binding
  */
 export interface DescribeOrganizationConfiguration extends Binding.Service<
   DescribeOrganizationConfiguration,

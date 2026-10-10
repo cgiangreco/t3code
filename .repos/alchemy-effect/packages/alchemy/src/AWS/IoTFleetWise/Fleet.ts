@@ -60,16 +60,15 @@ export interface Fleet extends Resource<
  * Fleets are free, provisioned near-instantly, and only carry a
  * description besides their signal-catalog association. AWS IoT FleetWise
  * is allowlist-gated and offered in `us-east-1`/`eu-central-1` only.
- * ### Creating a Fleet
- * **Example:** Basic Fleet
+ * @resource
+ * @section Creating a Fleet
+ * @example Basic Fleet
  * ```typescript
  * const fleet = yield* Fleet("TestFleet", {
  *   signalCatalogArn: catalog.signalCatalogArn,
  *   description: "west-coast pilot vehicles",
  * });
  * ```
- *
- * @resource
  */
 export const Fleet = Resource<Fleet>("AWS.IoTFleetWise.Fleet");
 

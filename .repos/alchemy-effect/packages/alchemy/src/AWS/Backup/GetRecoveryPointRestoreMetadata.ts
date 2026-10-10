@@ -20,8 +20,9 @@ export interface GetRecoveryPointRestoreMetadataRequest extends Omit<
  * {@link BackupVault} — the key/value set passed to `StartRestoreJob` as its
  * `Metadata`. Provide the implementation with
  * `Effect.provide(AWS.Backup.GetRecoveryPointRestoreMetadataHttp)`.
- * ### Restoring Recovery Points
- * **Example:** Fetch Restore Metadata Then Restore
+ * @binding
+ * @section Restoring Recovery Points
+ * @example Fetch Restore Metadata Then Restore
  * ```typescript
  * const getRestoreMetadata =
  *   yield* AWS.Backup.GetRecoveryPointRestoreMetadata(vault);
@@ -35,8 +36,6 @@ export interface GetRecoveryPointRestoreMetadataRequest extends Omit<
  *   Metadata: RestoreMetadata!,
  * });
  * ```
- *
- * @binding
  */
 export interface GetRecoveryPointRestoreMetadata extends Binding.Service<
   GetRecoveryPointRestoreMetadata,

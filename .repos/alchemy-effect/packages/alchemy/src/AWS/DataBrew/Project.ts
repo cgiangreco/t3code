@@ -75,8 +75,9 @@ export interface Project extends Resource<
  * An AWS Glue DataBrew project — the interactive workspace binding a dataset
  * to a recipe's working version. The project definition is free; costs only
  * accrue when an interactive session is started in the console.
- * ### Creating Projects
- * **Example:** Dataset + Recipe Project
+ * @resource
+ * @section Creating Projects
+ * @example Dataset + Recipe Project
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -87,7 +88,7 @@ export interface Project extends Resource<
  * });
  * ```
  *
- * **Example:** Custom Sample
+ * @example Custom Sample
  * ```typescript
  * const project = yield* AWS.DataBrew.Project("Explore", {
  *   datasetName: dataset.datasetName,
@@ -96,8 +97,6 @@ export interface Project extends Resource<
  *   role: role.roleArn,
  * });
  * ```
- *
- * @resource
  */
 export const Project = Resource<Project>("AWS.DataBrew.Project");
 

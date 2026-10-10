@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Poll the returned `JobId` with `GetDocumentTextDetection`. The caller
  * needs `s3:GetObject` on the input bucket.
  *
- * ### Asynchronous Text Detection
- * **Example:** Start a Text Detection Job
+ * @binding
+ * @section Asynchronous Text Detection
+ * @example Start a Text Detection Job
  * ```typescript
  * // init
  * const startDocumentTextDetection =
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   DocumentLocation: { S3Object: { Bucket: bucketName, Name: "doc.pdf" } },
  * });
  * ```
- *
- * @binding
  */
 export interface StartDocumentTextDetection extends Binding.Service<
   StartDocumentTextDetection,

@@ -11,8 +11,9 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * virtual cluster ID is injected from the binding; pass the endpoint `id`.
  * Provide the implementation with
  * `Effect.provide(AWS.EMRContainers.DescribeManagedEndpointHttp)`.
- * ### Managed Endpoints
- * **Example:** Check An Endpoint Is Active
+ * @binding
+ * @section Managed Endpoints
+ * @example Check An Endpoint Is Active
  * ```typescript
  * // init
  * const describeManagedEndpoint =
@@ -22,8 +23,6 @@ import type { VirtualCluster } from "./VirtualCluster.ts";
  * const { endpoint } = yield* describeManagedEndpoint({ id: endpointId });
  * yield* Effect.log(`endpoint state: ${endpoint?.state}`);
  * ```
- *
- * @binding
  */
 export interface DescribeManagedEndpoint extends Binding.Service<
   DescribeManagedEndpoint,

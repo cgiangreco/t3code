@@ -11,12 +11,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-places:Geocode`. Requests and responses are raw distilled types (no
  * marshalling).
  *
- * ### Geocoding Addresses
+ * @binding
+ * @section Geocoding Addresses
  * Provide the `GeocodeHttp` implementation layer on the Function effect
  * (`.pipe(Effect.provide(AWS.GeoPlaces.GeocodeHttp))`), bind in the init
  * phase, then call the client at runtime.
  *
- * **Example:** Geocode an address to coordinates
+ * @example Geocode an address to coordinates
  * ```typescript
  * // init
  * const geocode = yield* AWS.GeoPlaces.Geocode();
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const position = result.ResultItems?.[0]?.Position; // [lng, lat]
  * ```
- *
- * @binding
  */
 export interface Geocode extends Binding.Service<
   Geocode,

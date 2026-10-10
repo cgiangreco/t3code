@@ -16,8 +16,9 @@ export interface DescribeBatchLoadTaskRequest
  * Provide `Timestream.DescribeBatchLoadTaskHttp` on the Function to implement
  * the binding.
  *
- * ### Batch Loading
- * **Example:** Poll an import until it finishes
+ * @binding
+ * @section Batch Loading
+ * @example Poll an import until it finishes
  * ```typescript
  * // init — account-level binding, no resource argument
  * const describeBatchLoadTask = yield* Timestream.DescribeBatchLoadTask();
@@ -26,8 +27,6 @@ export interface DescribeBatchLoadTaskRequest
  * const described = yield* describeBatchLoadTask({ TaskId: task.TaskId });
  * // described.BatchLoadTaskDescription?.TaskStatus === "SUCCEEDED"
  * ```
- *
- * @binding
  */
 export interface DescribeBatchLoadTask extends Binding.Service<
   DescribeBatchLoadTask,

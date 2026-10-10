@@ -4,19 +4,11 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Result from "effect/Result";
-import { HttpServerRequest } from "effect/http/HttpServerRequest";
-import * as HttpServerResponse from "effect/http/HttpServerResponse";
+import { HttpServerRequest } from "effect/unstable/http/HttpServerRequest";
+import * as HttpServerResponse from "effect/unstable/http/HttpServerResponse";
 import path from "pathe";
 
 const main = path.resolve(import.meta.dirname, "handler.ts");
-
-const failureJson = (failure: { readonly _tag: string }) => ({
-  errorTag: failure._tag,
-  errorMessage:
-    "message" in failure && typeof failure.message === "string"
-      ? failure.message
-      : undefined,
-});
 
 export class KinesisVideoTestFunction extends AWS.Lambda.Function<AWS.Lambda.Function>()(
   "KinesisVideoTestFunction",
@@ -25,7 +17,7 @@ export class KinesisVideoTestFunction extends AWS.Lambda.Function<AWS.Lambda.Fun
 export default KinesisVideoTestFunction.make(
   {
     main,
-    functionUrl: true,
+    url: true,
     // every route fans out to GetDataEndpoint/GetSignalingChannelEndpoint
     // plus the data-plane call; the 3s default is too tight
     timeout: Duration.seconds(30),
@@ -72,7 +64,9 @@ export default KinesisVideoTestFunction.make(
               url: result.success.HLSStreamingSessionURL,
             });
           }
-          return yield* HttpServerResponse.json(failureJson(result.failure));
+          return yield* HttpServerResponse.json({
+            errorTag: result.failure._tag,
+          });
         }
 
         if (request.method === "GET" && pathname === "/dash") {
@@ -87,7 +81,7 @@ export default KinesisVideoTestFunction.make(
             });
           }
           return yield* HttpServerResponse.json({
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 
@@ -115,7 +109,7 @@ export default KinesisVideoTestFunction.make(
           }
           return yield* HttpServerResponse.json({
             ok: false,
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 
@@ -140,7 +134,7 @@ export default KinesisVideoTestFunction.make(
           }
           return yield* HttpServerResponse.json({
             ok: false,
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 
@@ -163,7 +157,7 @@ export default KinesisVideoTestFunction.make(
           }
           return yield* HttpServerResponse.json({
             ok: false,
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 
@@ -184,7 +178,7 @@ export default KinesisVideoTestFunction.make(
           }
           return yield* HttpServerResponse.json({
             ok: false,
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 
@@ -196,7 +190,7 @@ export default KinesisVideoTestFunction.make(
           return yield* HttpServerResponse.json(
             Result.isSuccess(result)
               ? { ok: true }
-              : { ok: false, ...failureJson(result.failure) },
+              : { ok: false, errorTag: result.failure._tag },
           );
         }
 
@@ -207,7 +201,7 @@ export default KinesisVideoTestFunction.make(
           return yield* HttpServerResponse.json(
             Result.isSuccess(result)
               ? { ok: true }
-              : { ok: false, ...failureJson(result.failure) },
+              : { ok: false, errorTag: result.failure._tag },
           );
         }
 
@@ -236,22 +230,14 @@ export default KinesisVideoTestFunction.make(
           }
           return yield* HttpServerResponse.json({
             ok: false,
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 
         if (request.method === "GET" && pathname === "/ice") {
-          const result = yield* Effect.result(
-            getIceServers({ ClientId: "alchemy-test" }),
-          );
-          if (Result.isFailure(result)) {
-            return yield* HttpServerResponse.json({
-              ok: false,
-              ...failureJson(result.failure),
-            });
-          }
+          const config = yield* getIceServers({ ClientId: "alchemy-test" });
           return yield* HttpServerResponse.json({
-            servers: (result.success.IceServerList ?? []).map((server) => ({
+            servers: (config.IceServerList ?? []).map((server) => ({
               uris: server.Uris ?? [],
               hasCredentials:
                 server.Username !== undefined && server.Password !== undefined,
@@ -284,7 +270,7 @@ export default KinesisVideoTestFunction.make(
           }
           return yield* HttpServerResponse.json({
             ok: false,
-            ...failureJson(result.failure),
+            errorTag: result.failure._tag,
           });
         }
 

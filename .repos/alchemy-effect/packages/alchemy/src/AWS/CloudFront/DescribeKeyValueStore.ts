@@ -15,8 +15,9 @@ export interface DescribeKeyValueStoreRequest extends Omit<
  * size, and the current `ETag` that write operations ({@link PutKey},
  * {@link DeleteKey}, {@link UpdateKeys}) require as `IfMatch`. Provide the
  * implementation with `Effect.provide(AWS.CloudFront.DescribeKeyValueStoreHttp)`.
- * ### Reading KeyValueStore Data
- * **Example:** Fetch the Store's ETag Before a Write
+ * @binding
+ * @section Reading KeyValueStore Data
+ * @example Fetch the Store's ETag Before a Write
  * ```typescript
  * // init — bind the operation to the store
  * const describeStore = yield* CloudFront.DescribeKeyValueStore(store);
@@ -25,8 +26,6 @@ export interface DescribeKeyValueStoreRequest extends Omit<
  * const meta = yield* describeStore({});
  * console.log(meta.ETag, meta.ItemCount);
  * ```
- *
- * @binding
  */
 export interface DescribeKeyValueStore extends Binding.Service<
   DescribeKeyValueStore,

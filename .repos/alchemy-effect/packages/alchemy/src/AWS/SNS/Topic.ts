@@ -66,15 +66,16 @@ export interface Topic extends Resource<
  * available through the `attributes` prop so the full core pub/sub surface can
  * be configured without waiting on additional typed wrappers. A topic name is
  * auto-generated unless you provide one explicitly.
- * ### Creating Topics
- * **Example:** Standard Topic
+ * @resource
+ * @section Creating Topics
+ * @example Standard Topic
  * ```typescript
  * import * as SNS from "alchemy/AWS/SNS";
  *
  * const topic = yield* SNS.Topic("OrdersTopic");
  * ```
  *
- * **Example:** Topic with Display Name
+ * @example Topic with Display Name
  * ```typescript
  * const topic = yield* SNS.Topic("NotificationsTopic", {
  *   attributes: {
@@ -83,7 +84,7 @@ export interface Topic extends Resource<
  * });
  * ```
  *
- * **Example:** FIFO Topic
+ * @example FIFO Topic
  * ```typescript
  * const topic = yield* SNS.Topic("OrdersFifoTopic", {
  *   fifo: true,
@@ -93,11 +94,11 @@ export interface Topic extends Resource<
  * });
  * ```
  *
- * ### Runtime Publishing
+ * @section Runtime Publishing
  * Bind publish operations in the init phase and use them in runtime
  * handlers.
  *
- * **Example:** Publish from a handler
+ * @example Publish from a handler
  * ```typescript
  * // init
  * const publish = yield* SNS.Publish(topic);
@@ -114,12 +115,12 @@ export interface Topic extends Resource<
  * };
  * ```
  *
- * ### Subscriptions
+ * @section Subscriptions
  * Subscribe a Lambda function to process messages published to the
  * topic. The subscription and invoke permissions are created
  * automatically.
  *
- * **Example:** Process topic notifications
+ * @example Process topic notifications
  * ```typescript
  * // init
  * yield* SNS.consumeTopicNotifications(topic, (stream) =>
@@ -130,8 +131,6 @@ export interface Topic extends Resource<
  *   ),
  * );
  * ```
- *
- * @resource
  */
 export const Topic = Resource<Topic>("AWS.SNS.Topic");
 

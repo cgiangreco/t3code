@@ -14,7 +14,7 @@ import * as Queue from "effect/Queue";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
 import * as SubscriptionRef from "effect/SubscriptionRef";
-import { AppState } from "react-native";
+import { AppState, type AppStateStatus } from "react-native";
 
 import * as MobileStorage from "../persistence/mobile-storage";
 import {
@@ -27,25 +27,23 @@ const REPORT_INTERVAL_MS = 25_000;
 const LEASE_TTL_MS = 45_000;
 const BASELINE_SCOPES: ReadonlyArray<BackgroundScope> = [{ type: "provider-status" }];
 
-// `AppState.currentState` is a loosely typed string that can be unset before
-// the first change event; anything outside the known states reports as unknown.
 function normalizeAppState(
-  state: string | null | undefined,
+  state: AppStateStatus,
 ): NonNullable<ClientActivityReportInput["appState"]> {
   if (state === "active" || state === "inactive" || state === "background") return state;
   return "unknown";
 }
 
-export const layerObserver = Layer.succeed(
+export const mobileBackgroundActivityObserverLayer = Layer.succeed(
   EnvironmentRpcSubscriptionObserver,
   EnvironmentRpcSubscriptionObserver.of({
     observe: observeMobileBackgroundActivitySubscription,
   }),
 );
 
-export const layerReporter = Layer.effectDiscard(
+export const mobileBackgroundActivityReporterLayer = Layer.effectDiscard(
   Effect.gen(function* () {
-    const registry = yield* EnvironmentRegistry.EnvironmentRegistry;
+    const registry = yield* EnvironmentRegistry;
     const storage = yield* MobileStorage.MobileStorage;
     const clientId = yield* storage.loadOrCreateAgentAwarenessDeviceId.pipe(
       Effect.map((deviceId) => `mobile-${deviceId}`),

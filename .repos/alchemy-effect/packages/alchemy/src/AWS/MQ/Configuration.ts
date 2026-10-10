@@ -78,8 +78,9 @@ export interface Configuration extends Resource<
  * engine-level settings. Each edit to `data` publishes a new immutable
  * revision; a broker pins a specific `{ id, revision }` pair.
  *
- * ### Creating a Configuration
- * **Example:** Default ActiveMQ Configuration
+ * @resource
+ * @section Creating a Configuration
+ * @example Default ActiveMQ Configuration
  * ```typescript
  * const config = yield* MQ.Configuration("BrokerConfig", {
  *   engineType: "ACTIVEMQ",
@@ -87,7 +88,7 @@ export interface Configuration extends Resource<
  * });
  * ```
  *
- * **Example:** Custom ActiveMQ Configuration Document
+ * @example Custom ActiveMQ Configuration Document
  * ```typescript
  * const config = yield* MQ.Configuration("BrokerConfig", {
  *   engineType: "ACTIVEMQ",
@@ -103,8 +104,8 @@ export interface Configuration extends Resource<
  * // config.configurationRevision -> 2 (the published revision)
  * ```
  *
- * ### Attaching to a Broker
- * **Example:** Reference a Configuration from a Broker
+ * @section Attaching to a Broker
+ * @example Reference a Configuration from a Broker
  * ```typescript
  * const broker = yield* MQ.Broker("Orders", {
  *   engineType: "ACTIVEMQ",
@@ -117,8 +118,6 @@ export interface Configuration extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Configuration = Resource<Configuration>("AWS.MQ.Configuration");
 

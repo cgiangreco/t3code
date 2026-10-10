@@ -123,17 +123,8 @@ export interface ParsedModuleJSDoc {
   readonly range: readonly [number, number]
 }
 
-/**
- * Stability of a documented public API. Untagged APIs are stable.
- *
- * @category models
- * @since 4.0.0
- */
-export type JSDocStability = "stable" | "unstable" | "experimental"
-
 interface ParsedModuleTags {
   readonly since: string
-  readonly stability: JSDocStability
   readonly deprecated: string | null
   readonly see: ReadonlyArray<ParsedSeeTag>
 }
@@ -147,7 +138,6 @@ interface ParsedModuleTags {
 export interface ParsedDeclarationTags {
   readonly category: string
   readonly since: string
-  readonly stability: JSDocStability
   readonly deprecated: string | null
   readonly see: ReadonlyArray<ParsedSeeTag>
 }
@@ -161,7 +151,6 @@ export interface ParsedDeclarationTags {
 export interface ParsedNamespaceTags {
   readonly category: string | null
   readonly since: string
-  readonly stability: JSDocStability
   readonly deprecated: string | null
   readonly see: ReadonlyArray<ParsedSeeTag>
 }
@@ -174,7 +163,6 @@ export interface ParsedNamespaceTags {
  */
 export interface ParsedMemberTags {
   readonly since: string | null
-  readonly stability: JSDocStability
   readonly default: string | null
   readonly deprecated: string | null
   readonly see: ReadonlyArray<ParsedSeeTag>
@@ -287,20 +275,8 @@ export interface ParsedJSDocImports {
   readonly flatNames: ReadonlyArray<string>
 }
 
-/**
- * Kinds of public API records represented in a JSDoc model.
- *
- * @category models
- * @since 4.0.0
- */
 export type JSDocApiKind = "root-declaration" | "namespace" | "namespace-declaration" | "member"
 
-/**
- * Recommended import declaration and usage for an importable API.
- *
- * @category models
- * @since 4.0.0
- */
 export type JSDocApiImportGuidance =
   | {
     readonly style: "namespace-barrel"
@@ -318,12 +294,6 @@ export type JSDocApiImportGuidance =
     readonly usage: string
   }
 
-/**
- * Resolution result for a link in an API's `@see` tags.
- *
- * @category models
- * @since 4.0.0
- */
 export type JSDocApiSeeLinkResolution =
   | {
     readonly _tag: "Resolved"
@@ -336,47 +306,22 @@ export type JSDocApiSeeLinkResolution =
     readonly candidates: ReadonlyArray<string>
   }
 
-/**
- * Parsed `@see` link paired with its public API resolution.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocApiSeeLink extends ParsedInlineLink {
   readonly resolution: JSDocApiSeeLinkResolution
 }
 
-/**
- * Parsed `@see` tag and its resolved links.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocApiSeeTag {
   readonly text: string
   readonly links: ReadonlyArray<JSDocApiSeeLink>
 }
 
-/**
- * Standard tags attached to a public API record.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocApiTags {
   readonly category: string | null
   readonly since: string | null
-  readonly stability: JSDocStability
   readonly deprecated: string | null
   readonly default: string | null
 }
 
-/**
- * One public API record in an extracted JSDoc model.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocApi {
   readonly id: string
   readonly kind: JSDocApiKind
@@ -481,9 +426,8 @@ const tagOrder = new Map([
   ["deprecated", 0],
   ["default", 1],
   ["see", 2],
-  ["stability", 3],
-  ["category", 4],
-  ["since", 5]
+  ["category", 3],
+  ["since", 4]
 ])
 const signatureTypeFormatFlags = ts.TypeFormatFlags.NoTruncation |
   ts.TypeFormatFlags.UseSingleQuotesForStringLiteralType
@@ -847,24 +791,12 @@ function resolveJSDocImports(
   }
 }
 
-/**
- * Reads source text from an Oxlint-compatible rule context.
- *
- * @category getters
- * @since 4.0.0
- */
 export function getSourceText(context: {
   readonly sourceCode: { readonly text?: string; getText(node?: unknown): string }
 }): string {
   return context.sourceCode.text ?? context.sourceCode.getText()
 }
 
-/**
- * Resolves the working directory from an Oxlint-compatible rule context.
- *
- * @category getters
- * @since 4.0.0
- */
 export function getCwd(context: { readonly cwd?: string; getCwd?: () => string }): string {
   return context.cwd ?? context.getCwd?.() ?? process.cwd()
 }
@@ -896,12 +828,6 @@ function skipDirectiveComments(source: string, end: number): number {
   return end
 }
 
-/**
- * Finds the JSDoc block immediately preceding an AST node.
- *
- * @category parsing
- * @since 4.0.0
- */
 export function findLeadingJSDoc(
   source: string,
   node: AstNode,
@@ -932,9 +858,7 @@ export function findLeadingJSDoc(
  *
  * **Example** (Parsing a block)
  *
- * ```ts import.meta.vitest
- * import { parseJSDoc } from "@effect/jsdocs"
- *
+ * ```ts
  * const rawBlock = [
  *   "/" + "**",
  *   " * A value.",
@@ -944,8 +868,6 @@ export function findLeadingJSDoc(
  *   " *" + "/"
  * ].join("\n")
  * const result = parseJSDoc(rawBlock)
- *
- * result._tag // => "Success"
  * ```
  *
  * @category parsing
@@ -1261,7 +1183,7 @@ function parseSection(lines: Array<string>, headingIndex: number): {
   while (index < lines.length) {
     const trimmed = lines[index].trim()
     if (trimmed.startsWith("```")) {
-      if (isTypeScriptFence(trimmed)) {
+      if (trimmed === "```ts") {
         diagnostics.push(diagnostic("loose-ts-fence", "TypeScript examples must use **Example** (Title) sections"))
       }
       inFence = !inFence
@@ -1290,8 +1212,6 @@ function parseSection(lines: Array<string>, headingIndex: number): {
   return { body: joinBody(bodyLines), nextIndex: index, diagnostics }
 }
 
-const isTypeScriptFence = (line: string): boolean => /^```ts(?:\s.*)?$/.test(line)
-
 function parseExample(lines: Array<string>, headingIndex: number): {
   readonly example?: ParsedExample
   readonly nextIndex: number
@@ -1312,7 +1232,7 @@ function parseExample(lines: Array<string>, headingIndex: number): {
   let fenceIndex = -1
   while (index < lines.length) {
     const trimmed = lines[index].trim()
-    if (isTypeScriptFence(trimmed)) {
+    if (trimmed === "```ts") {
       fenceIndex = index
       break
     }
@@ -1345,7 +1265,7 @@ function parseExample(lines: Array<string>, headingIndex: number): {
   index = fenceIndex + 1
   const codeStart = index
   while (index < lines.length && lines[index].trim() !== "```") {
-    if (isTypeScriptFence(lines[index].trim())) {
+    if (lines[index].trim() === "```ts") {
       diagnostics.push(diagnostic("malformed-example", "Examples must contain exactly one TypeScript code fence"))
     }
     index++
@@ -1474,12 +1394,12 @@ function buildTags(
 ): Result<ParsedModuleTags | ParsedDeclarationTags | ParsedNamespaceTags | ParsedMemberTags, JSDocParseError> {
   const diagnostics: Array<JSDocDiagnostic> = []
   const allowed = scope === "declaration"
-    ? new Set(["deprecated", "see", "stability", "category", "since"])
+    ? new Set(["deprecated", "see", "category", "since"])
     : scope === "member"
-    ? new Set(["deprecated", "default", "see", "stability", "since"])
+    ? new Set(["deprecated", "default", "see", "since"])
     : scope === "module"
-    ? new Set(["deprecated", "see", "stability", "since"])
-    : new Set(["deprecated", "see", "stability", "category", "since"])
+    ? new Set(["deprecated", "see", "since"])
+    : new Set(["deprecated", "see", "category", "since"])
   let previousOrder = -1
   const values = new Map<string, Array<string>>()
 
@@ -1510,9 +1430,7 @@ function buildTags(
     values.set(tag.name, [...values.get(tag.name) ?? [], tag.value.trim()])
   }
 
-  const singletonTags = scope === "member"
-    ? ["deprecated", "default", "stability", "since"]
-    : ["deprecated", "stability", "category", "since"]
+  const singletonTags = scope === "member" ? ["deprecated", "default", "since"] : ["deprecated", "category", "since"]
   for (const tag of singletonTags) {
     if ((values.get(tag)?.length ?? 0) > 1) {
       diagnostics.push(diagnostic("duplicate-tag", `JSDoc blocks may contain at most one @${tag} tag`))
@@ -1526,13 +1444,6 @@ function buildTags(
     }
   }
   const deprecated = values.get("deprecated")?.[0] ?? null
-  const stability = values.get("stability")?.[0]
-  if (stability !== undefined && stability !== "unstable" && stability !== "experimental") {
-    diagnostics.push(diagnostic("invalid-stability", "@stability must have the value unstable or experimental"))
-  }
-  const resolvedStability: JSDocStability = stability === "unstable" || stability === "experimental"
-    ? stability
-    : "stable"
   if (deprecated === "") diagnostics.push(diagnostic("empty-tag", "@deprecated must include a message"))
   const since = values.get("since")?.[0] ?? null
   if ((scope === "declaration" || scope === "namespace" || scope === "namespace-declaration") && since === null) {
@@ -1557,34 +1468,25 @@ function buildTags(
     if (diagnostics.length > 0 || category === null || since === null) {
       return { _tag: "Failure", error: { diagnostics } }
     }
-    return {
-      _tag: "Success",
-      value: { category, since, stability: resolvedStability, deprecated, see: see.map(parseSeeTag) }
-    }
+    return { _tag: "Success", value: { category, since, deprecated, see: see.map(parseSeeTag) } }
   }
 
   if (scope === "member") {
     const defaultValue = values.get("default")?.[0] ?? null
     if (defaultValue === "") diagnostics.push(diagnostic("empty-tag", "@default must include a value"))
     if (diagnostics.length > 0) return { _tag: "Failure", error: { diagnostics } }
-    return {
-      _tag: "Success",
-      value: { since, stability: resolvedStability, default: defaultValue, deprecated, see: see.map(parseSeeTag) }
-    }
+    return { _tag: "Success", value: { since, default: defaultValue, deprecated, see: see.map(parseSeeTag) } }
   }
 
   if (scope === "module") {
     if (diagnostics.length > 0 || since === null) return { _tag: "Failure", error: { diagnostics } }
-    return { _tag: "Success", value: { since, stability: resolvedStability, deprecated, see: see.map(parseSeeTag) } }
+    return { _tag: "Success", value: { since, deprecated, see: see.map(parseSeeTag) } }
   }
 
   const category = values.get("category")?.[0] ?? null
   if (category === "") diagnostics.push(diagnostic("empty-tag", "@category must include a value"))
   if (diagnostics.length > 0 || since === null) return { _tag: "Failure", error: { diagnostics } }
-  return {
-    _tag: "Success",
-    value: { category, since, stability: resolvedStability, deprecated, see: see.map(parseSeeTag) }
-  }
+  return { _tag: "Success", value: { category, since, deprecated, see: see.map(parseSeeTag) } }
 }
 
 function formatDiagnostic(diagnostic: ts.Diagnostic): string {
@@ -1619,12 +1521,6 @@ function collectTsConfigFiles(tsconfigPath: string, seen: Set<string>, fileNames
   return result
 }
 
-/**
- * Loads and caches the TypeScript program for a project configuration.
- *
- * @category constructors
- * @since 4.0.0
- */
 export function getProgram(tsconfigPath: string): ProgramCacheEntry {
   const cached = programCache.get(tsconfigPath)
   if (cached !== undefined) return cached
@@ -1837,22 +1733,10 @@ function attachSeeLinkSymbols<T extends ParsedDeclarationTags | ParsedNamespaceT
   return attachSeeLinkSymbolsFromSourceFile(tags, node.getSourceFile(), block, linkContext)
 }
 
-/**
- * JSDoc diagnostic paired with its source range.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocModelDiagnostic extends JSDocDiagnostic {
   readonly range: readonly [number, number]
 }
 
-/**
- * Parsed JSDoc and diagnostics for one source file in a model.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocModelFile extends ParsedJSDocFile {
   readonly file: string
   readonly hash: string
@@ -1860,14 +1744,8 @@ export interface JSDocModelFile extends ParsedJSDocFile {
   readonly imports?: ParsedJSDocImports
 }
 
-/**
- * Versioned output of a repository JSDoc extraction.
- *
- * @category models
- * @since 4.0.0
- */
 export interface JSDocModel {
-  readonly version: 3
+  readonly version: 2
   readonly generatedBy: "@effect/jsdocs"
   readonly generatedAt: string
   readonly inputHash?: string
@@ -1875,12 +1753,6 @@ export interface JSDocModel {
   readonly apis: ReadonlyArray<JSDocApi>
 }
 
-/**
- * File selection and output configuration for JSDoc extraction.
- *
- * @category configuration
- * @since 4.0.0
- */
 export interface JSDocConfig {
   readonly tsconfig: string
   readonly include: ReadonlyArray<string>
@@ -1888,12 +1760,6 @@ export interface JSDocConfig {
   readonly output: string
 }
 
-/**
- * JSDoc extraction configuration with an optional working directory.
- *
- * @category configuration
- * @since 4.0.0
- */
 export interface ExtractJSDocsOptions extends JSDocConfig {
   readonly cwd?: string
 }
@@ -1905,12 +1771,6 @@ function addInputFile(files: Set<string>, filename: string) {
   }
 }
 
-/**
- * Computes the cache key for the configured JSDoc extraction inputs.
- *
- * @category hashing
- * @since 4.0.0
- */
 export function computeJSDocInputHash(options: ExtractJSDocsOptions): string {
   const cwd = path.resolve(options.cwd ?? process.cwd())
   const hash = crypto.createHash("sha256")
@@ -2001,7 +1861,6 @@ function apiTags(
   return {
     category: "category" in tags ? tags.category : null,
     since: tags.since,
-    stability: tags.stability,
     deprecated: tags.deprecated,
     default: "default" in tags ? tags.default : null
   }
@@ -2426,7 +2285,6 @@ function moduleSeeTags(
     ? tags.value as ParsedModuleTags
     : {
       since: "0.0.0",
-      stability: "stable",
       deprecated: null,
       see: block.tags.filter((tag) => tag.name === "see" && tag.value.trim() !== "").map((tag) =>
         parseSeeTag(tag.value.trim())
@@ -3392,29 +3250,13 @@ function parseSourceFileDocs(
   }
 }
 
-/**
- * Loads a JSDoc extraction configuration from JSON.
- *
- * @category configuration
- * @since 4.0.0
- */
 export function loadJSDocConfig(cwd = process.cwd(), configPath = "jsdocs.config.json"): JSDocConfig {
   const absolute = path.resolve(cwd, configPath)
   const parsed = JSON.parse(fs.readFileSync(absolute, "utf8")) as JSDocConfig
   return parsed
 }
 
-/**
- * Extracts a complete JSDoc model synchronously.
- *
- * @category extraction
- * @since 4.0.0
- */
 export function extractJSDocsSync(options: ExtractJSDocsOptions): JSDocModel {
-  // Share caches within an extraction, not across source snapshots.
-  programCache.clear()
-  packageMetadataCache.clear()
-  barrelExportCache.clear()
   const cwd = path.resolve(options.cwd ?? process.cwd())
   const tsconfigPath = path.resolve(cwd, options.tsconfig)
   const entry = getProgram(tsconfigPath)
@@ -3486,7 +3328,7 @@ export function extractJSDocsSync(options: ExtractJSDocsOptions): JSDocModel {
     cwd
   })
   return {
-    version: 3,
+    version: 2,
     generatedBy: "@effect/jsdocs",
     generatedAt: new Date().toISOString(),
     inputHash: computeJSDocInputHash(options),
@@ -3495,38 +3337,20 @@ export function extractJSDocsSync(options: ExtractJSDocsOptions): JSDocModel {
   }
 }
 
-/**
- * Extracts a complete JSDoc model in `Effect`.
- *
- * @category extraction
- * @since 4.0.0
- */
 export const extractJSDocs = (options: ExtractJSDocsOptions): Effect.Effect<JSDocModel> =>
   Effect.sync(() => extractJSDocsSync(options))
 
-/**
- * Writes a JSDoc model as formatted JSON.
- *
- * @category persistence
- * @since 4.0.0
- */
 export function writeJSDocModel(cwd: string, output: string, model: JSDocModel) {
   const filename = path.resolve(cwd, output)
   fs.mkdirSync(path.dirname(filename), { recursive: true })
   fs.writeFileSync(filename, `${JSON.stringify(model, null, 2)}\n`)
 }
 
-/**
- * Reads and validates the outer structure of a persisted JSDoc model.
- *
- * @category persistence
- * @since 4.0.0
- */
 export function readJSDocModel(filename: string): Result<JSDocModel, string> {
   if (!fs.existsSync(filename)) return { _tag: "Failure", error: "missing" }
   try {
     const parsed = JSON.parse(fs.readFileSync(filename, "utf8")) as JSDocModel
-    if (parsed.version !== 3) return { _tag: "Failure", error: "Unsupported jsdocs model version" }
+    if (parsed.version !== 2) return { _tag: "Failure", error: "Unsupported jsdocs model version" }
     if (!Array.isArray(parsed.files)) return { _tag: "Failure", error: "Invalid jsdocs model: files must be an array" }
     if (!Array.isArray(parsed.apis)) return { _tag: "Failure", error: "Invalid jsdocs model: apis must be an array" }
     return { _tag: "Success", value: parsed }
@@ -3535,12 +3359,6 @@ export function readJSDocModel(filename: string): Result<JSDocModel, string> {
   }
 }
 
-/**
- * Computes the content hash stored for a source file in a JSDoc model.
- *
- * @category hashing
- * @since 4.0.0
- */
 export function sourceHash(source: string): string {
   return hashSource(source)
 }

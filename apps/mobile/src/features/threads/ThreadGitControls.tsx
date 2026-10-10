@@ -1,7 +1,4 @@
-import { createNativeHeaderMenu } from "../../components/nativeHeaderMenu.ios";
-import type { ScreenHeaderMenu } from "../../components/ScreenHeader.types";
 import {
-  AuthSourceControlWriteScope,
   EnvironmentId,
   type GitRunStackedActionResult,
   type ProjectScript,
@@ -18,14 +15,13 @@ import { NativeHeaderToolbar } from "../../native/StackHeader";
 import { useCallback, useMemo } from "react";
 import { Alert } from "react-native";
 import { tryOpenExternalUrl } from "../../lib/openExternalUrl";
-import { useEnvironmentScope } from "../../state/session";
 import {
   basename,
   getTerminalStatusLabel,
   projectScriptMenuIcon,
+  projectScriptMenuLabel,
   type TerminalMenuSession,
 } from "../terminal/terminalMenu";
-import { projectScriptMenuLabel } from "@t3tools/shared/projectScripts";
 
 function truncateMiddle(value: string, maxLength: number): string {
   if (value.length <= maxLength) {
@@ -90,8 +86,6 @@ export type ThreadGitMenuProps = {
   readonly gitOperationLabel: string | null;
   readonly onOpenFilesInspector?: () => void;
   readonly onOpenGitInspector?: () => void;
-  /** Present only on a thread whose work can be merged into the one it came from. */
-  readonly onMergeBack?: () => void;
   readonly onPull: () => Promise<void>;
   readonly onRunAction: (input: GitActionRequestInput) => Promise<GitRunStackedActionResult | null>;
 };
@@ -102,7 +96,6 @@ type ThreadGitControlsProps = ThreadGitMenuProps & {
     readonly onPress: () => void;
   };
   readonly canOpenTerminal: boolean;
-  readonly canOperateTerminal: boolean;
   readonly canOpenFiles: boolean;
   readonly projectScripts: ReadonlyArray<ProjectScript>;
   readonly terminalSessions: ReadonlyArray<TerminalMenuSession>;
@@ -116,10 +109,6 @@ type ThreadGitControlsProps = ThreadGitMenuProps & {
 function useThreadGitControlModel(props: ThreadGitMenuProps) {
   const navigation = useNavigation();
   const environmentId = props.environmentId;
-  const canWriteSourceControl = useEnvironmentScope(
-    environmentId ? EnvironmentId.make(String(environmentId)) : null,
-    AuthSourceControlWriteScope,
-  );
   const threadId = props.threadId;
   const { gitStatus, gitOperationLabel, onPull, onRunAction } = props;
 
@@ -129,24 +118,18 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
   const hasPrimaryRemote = gitStatus?.hasPrimaryRemote ?? false;
   const isDefaultRef = gitStatus?.isDefaultRef ?? false;
 
-  const quickAction = useMemo(() => {
-    if (!isRepo) {
-      return {
-        label: "Git unavailable",
-        disabled: true,
-        kind: "show_hint" as const,
-        hint: "This workspace is not a git repository.",
-      };
-    }
-    const action = resolveQuickAction(gitStatus, busy, isDefaultRef, hasPrimaryRemote);
-    return !canWriteSourceControl && (action.kind === "run_pull" || action.kind === "run_action")
-      ? {
-          ...action,
-          disabled: true,
-          hint: "This connection cannot change source control.",
-        }
-      : action;
-  }, [busy, canWriteSourceControl, gitStatus, hasPrimaryRemote, isDefaultRef, isRepo]);
+  const quickAction = useMemo(
+    () =>
+      isRepo
+        ? resolveQuickAction(gitStatus, busy, isDefaultRef, hasPrimaryRemote)
+        : {
+            label: "Git unavailable",
+            disabled: true,
+            kind: "show_hint" as const,
+            hint: "This workspace is not a git repository.",
+          },
+    [busy, gitStatus, hasPrimaryRemote, isDefaultRef, isRepo],
+  );
 
   const quickActionHint = quickAction.disabled
     ? (quickAction.hint ?? "This action is unavailable.")
@@ -176,7 +159,6 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
 
   const runActionWithPrompt = useCallback(
     async (input: GitActionRequestInput) => {
-      if (!canWriteSourceControl) return;
       const confirmableAction =
         input.action === "push" ||
         input.action === "create_pr" ||
@@ -205,19 +187,10 @@ function useThreadGitControlModel(props: ThreadGitMenuProps) {
 
       await onRunAction(input);
     },
-    [
-      canWriteSourceControl,
-      environmentId,
-      gitStatus,
-      isDefaultRef,
-      onRunAction,
-      navigation,
-      threadId,
-    ],
+    [environmentId, gitStatus, isDefaultRef, onRunAction, navigation, threadId],
   );
 
   const runQuickAction = useCallback(async () => {
-    if (quickAction.disabled) return;
     if (quickAction.kind === "open_pr") {
       await openExistingPr();
       return;
@@ -288,7 +261,6 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
           items: [
             ...props.projectScripts.map((script) => ({
               description: script.command,
-              disabled: !props.canOperateTerminal,
               icon: { name: projectScriptMenuIcon(script.icon), type: "sfSymbol" as const },
               label: projectScriptMenuLabel(script),
               onPress: () => void props.onRunProjectScript(script),
@@ -323,7 +295,6 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
             })),
             {
               description: "Start another shell for this thread",
-              disabled: !props.canOperateTerminal,
               icon: { name: "plus", type: "sfSymbol" },
               label: "Open new terminal",
               onPress: props.onOpenNewTerminal,
@@ -381,17 +352,6 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
               onPress: model.openReview,
               type: "action",
             },
-            ...(props.onMergeBack
-              ? [
-                  {
-                    description: "Bring this thread's latest turn into its source",
-                    icon: { name: "arrow.triangle.merge", type: "sfSymbol" as const },
-                    label: "Merge back to source",
-                    onPress: props.onMergeBack,
-                    type: "action" as const,
-                  },
-                ]
-              : []),
             {
               description: "Commit, files, branches",
               icon: { name: "ellipsis", type: "sfSymbol" },
@@ -420,9 +380,7 @@ function useThreadGitHeaderActionItems(props: ThreadGitControlsProps): ThreadGit
       model.runQuickAction,
       props.canOpenFiles,
       props.canOpenTerminal,
-      props.canOperateTerminal,
       props.gitStatus,
-      props.onMergeBack,
       props.onOpenNewTerminal,
       props.onOpenTerminal,
       props.onRunProjectScript,
@@ -468,7 +426,6 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
       ) : null}
       {showActionControls ? (
         <NativeHeaderToolbar.Menu
-          accessibilityLabel="Open terminal"
           icon="terminal"
           disabled={!props.canOpenTerminal}
           separateBackground
@@ -478,7 +435,6 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
               <NativeHeaderToolbar.MenuAction
                 key={script.id}
                 icon={projectScriptMenuIcon(script.icon)}
-                disabled={!props.canOperateTerminal}
                 onPress={() => void props.onRunProjectScript(script)}
                 subtitle={script.command}
               >
@@ -517,7 +473,6 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
           ))}
           <NativeHeaderToolbar.MenuAction
             icon="plus"
-            disabled={!props.canOperateTerminal}
             onPress={props.onOpenNewTerminal}
             subtitle="Start another shell for this thread"
           >
@@ -534,7 +489,7 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
           separateBackground
         />
       ) : null}
-      {showActionControls ? createNativeHeaderMenu(threadGitMenuDefinition(props, model)) : null}
+      {showActionControls ? <ThreadGitMenu {...props} /> : null}
     </NativeHeaderToolbar>
   );
 }
@@ -545,57 +500,43 @@ export function ThreadGitControls(props: ThreadGitControlsProps) {
  * chat header and the review screen's toolbar.
  */
 export function ThreadGitMenu(props: ThreadGitMenuProps) {
-  const menu = useThreadGitMenuDefinition(props);
-  return menu ? createNativeHeaderMenu(menu) : null;
-}
+  const model = useThreadGitControlModel(props);
 
-/** Returns menu data because native toolbars serialize direct items rather than rendering component children. */
-export function useThreadGitMenuDefinition(props: ThreadGitMenuProps): ScreenHeaderMenu | null {
-  return threadGitMenuDefinition(props, useThreadGitControlModel(props));
-}
-
-function threadGitMenuDefinition(
-  props: ThreadGitMenuProps,
-  model: ReturnType<typeof useThreadGitControlModel>,
-): ScreenHeaderMenu {
-  return {
-    title: "Git controls",
-    icon: "point.topleft.down.curvedto.point.bottomright.up",
-    separateBackground: false,
-    items: [
-      {
-        id: "git-status",
-        title: compactMenuBranchLabel(model.currentBranchLabel),
-        icon: "point.topleft.down.curvedto.point.bottomright.up",
-        disabled: true,
-        subtitle: compactMenuStatus(props.gitStatus),
-        onPress: () => {},
-      },
-      {
-        id: "git-quick-action",
-        title: model.quickAction.label,
-        icon: model.quickActionIcon,
-        disabled: model.quickAction.disabled,
-        subtitle: model.quickActionHint ?? undefined,
-        onPress: () => {
-          void model.runQuickAction();
-        },
-      },
-      {
-        id: "git-review",
-        title: "Review changes",
-        icon: "text.bubble",
-        disabled: !model.isRepo,
-        subtitle: "Turn diffs and worktree changes",
-        onPress: model.openReview,
-      },
-      {
-        id: "git-more",
-        title: "More",
-        icon: "ellipsis",
-        subtitle: "Commit, files, branches",
-        onPress: model.openGitInspector,
-      },
-    ],
-  };
+  return (
+    <NativeHeaderToolbar.Menu icon="point.topleft.down.curvedto.point.bottomright.up">
+      <NativeHeaderToolbar.MenuAction
+        icon="point.topleft.down.curvedto.point.bottomright.up"
+        disabled
+        onPress={() => {}}
+        subtitle={compactMenuStatus(props.gitStatus)}
+      >
+        <NativeHeaderToolbar.Label>
+          {compactMenuBranchLabel(model.currentBranchLabel)}
+        </NativeHeaderToolbar.Label>
+      </NativeHeaderToolbar.MenuAction>
+      <NativeHeaderToolbar.MenuAction
+        icon={model.quickActionIcon}
+        disabled={model.quickAction.disabled}
+        onPress={() => void model.runQuickAction()}
+        subtitle={model.quickActionHint ?? undefined}
+      >
+        <NativeHeaderToolbar.Label>{model.quickAction.label}</NativeHeaderToolbar.Label>
+      </NativeHeaderToolbar.MenuAction>
+      <NativeHeaderToolbar.MenuAction
+        icon="text.bubble"
+        disabled={!model.isRepo}
+        onPress={model.openReview}
+        subtitle="Turn diffs and worktree changes"
+      >
+        <NativeHeaderToolbar.Label>Review changes</NativeHeaderToolbar.Label>
+      </NativeHeaderToolbar.MenuAction>
+      <NativeHeaderToolbar.MenuAction
+        icon="ellipsis"
+        onPress={model.openGitInspector}
+        subtitle="Commit, files, branches"
+      >
+        <NativeHeaderToolbar.Label>More</NativeHeaderToolbar.Label>
+      </NativeHeaderToolbar.MenuAction>
+    </NativeHeaderToolbar.Menu>
+  );
 }

@@ -63,7 +63,7 @@ function makeWebSocketRpcTransport(ws: ServerWebSocketLike) {
         if (error) {
           return;
         }
-        data = typeof data === "string" ? data : data.toString();
+        data = typeof data === "string" ? data : data.toString("utf-8");
         if (receiveResolver) {
           receiveResolver(data);
           receiveResolver = undefined;

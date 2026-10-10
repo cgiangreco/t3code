@@ -17,15 +17,14 @@ export interface GetDeploymentRequest extends Omit<
  * Provide `AppConfig.GetDeploymentHttp` on the hosting function's Effect to
  * implement the binding.
  *
- * ### Deploying Configuration at Runtime
- * **Example:** Check a rollout's progress
+ * @binding
+ * @section Deploying Configuration at Runtime
+ * @example Check a rollout's progress
  * ```typescript
  * const getDeployment = yield* AppConfig.GetDeployment(app, env);
  * const deployment = yield* getDeployment({ DeploymentNumber: 2 });
  * // deployment.State, deployment.PercentageComplete
  * ```
- *
- * @binding
  */
 export interface GetDeployment extends Binding.Service<
   GetDeployment,

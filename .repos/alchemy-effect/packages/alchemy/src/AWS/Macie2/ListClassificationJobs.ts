@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.Macie2.ListClassificationJobsHttp)`.
- * ### Classification Jobs & Export
- * **Example:** List Classification Jobs
+ * @binding
+ * @section Classification Jobs & Export
+ * @example List Classification Jobs
  * ```typescript
  * // init — account-level binding, no resource argument
  * const listClassificationJobs = yield* AWS.Macie2.ListClassificationJobs();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { items } = yield* listClassificationJobs();
  * ```
- *
- * @binding
  */
 export interface ListClassificationJobs extends Binding.Service<
   ListClassificationJobs,

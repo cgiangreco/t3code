@@ -5,7 +5,7 @@ import {
 } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 
-export class RelayClientInstallConfirmationConflictError extends Schema.TaggedError<RelayClientInstallConfirmationConflictError>()(
+export class RelayClientInstallConfirmationConflictError extends Schema.TaggedErrorClass<RelayClientInstallConfirmationConflictError>()(
   "RelayClientInstallConfirmationConflictError",
   {
     requestedVersion: Schema.String,

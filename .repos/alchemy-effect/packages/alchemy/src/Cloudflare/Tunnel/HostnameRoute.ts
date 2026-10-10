@@ -60,8 +60,11 @@ export type HostnameRoute = Resource<
  * internal apps by name without publishing a public DNS record.
  *
  * All fields (hostname, tunnel, comment) are mutable in place via PATCH.
- * ### Creating a hostname route
- * **Example:** Route an internal hostname through a tunnel
+ * @resource
+ * @product Tunnels
+ * @category Cloudflare One (Zero Trust)
+ * @section Creating a hostname route
+ * @example Route an internal hostname through a tunnel
  * ```typescript
  * const tunnel = yield* Cloudflare.Tunnel.Tunnel("MyTunnel");
  * const route = yield* Cloudflare.Tunnel.HostnameRoute("AppRoute", {
@@ -70,7 +73,7 @@ export type HostnameRoute = Resource<
  * });
  * ```
  *
- * **Example:** Add a comment
+ * @example Add a comment
  * ```typescript
  * const route = yield* Cloudflare.Tunnel.HostnameRoute("AppRoute", {
  *   hostname: "app.internal.example.com",
@@ -80,10 +83,6 @@ export type HostnameRoute = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/private-net/cloudflared/
- *
- * @resource
- * @product Tunnels
- * @category Cloudflare One (Zero Trust)
  */
 export const HostnameRoute = Resource<HostnameRoute>(TypeId);
 

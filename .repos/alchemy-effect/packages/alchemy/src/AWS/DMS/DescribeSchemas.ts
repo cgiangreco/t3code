@@ -10,8 +10,9 @@ import type { Endpoint } from "./Endpoint.ts";
  * discovered at the endpoint's database (populated by a prior
  * `RefreshSchemas` run against a replication instance). Provide the
  * implementation with `Effect.provide(AWS.DMS.DescribeSchemasHttp)`.
- * ### Listing Discovered Schemas
- * **Example:** List Schemas at a Source Endpoint
+ * @binding
+ * @section Listing Discovered Schemas
+ * @example List Schemas at a Source Endpoint
  * ```typescript
  * // init — bind the operation to the endpoint
  * const describeSchemas = yield* AWS.DMS.DescribeSchemas(source);
@@ -19,8 +20,6 @@ import type { Endpoint } from "./Endpoint.ts";
  * // runtime
  * const { Schemas } = yield* describeSchemas();
  * ```
- *
- * @binding
  */
 export interface DescribeSchemas extends Binding.Service<
   DescribeSchemas,

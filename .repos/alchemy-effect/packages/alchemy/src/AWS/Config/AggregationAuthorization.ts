@@ -53,8 +53,9 @@ export interface AggregationAuthorization extends Resource<
  *
  * The authorization's identity is the `(account, region)` pair — changing
  * either replaces it.
- * ### Authorizing an Aggregator
- * **Example:** Authorize an aggregator account
+ * @resource
+ * @section Authorizing an Aggregator
+ * @example Authorize an aggregator account
  * ```typescript
  * import * as Config from "alchemy/AWS/Config";
  *
@@ -66,8 +67,6 @@ export interface AggregationAuthorization extends Resource<
  *   },
  * );
  * ```
- *
- * @resource
  */
 export const AggregationAuthorization = Resource<AggregationAuthorization>(
   "AWS.Config.AggregationAuthorization",

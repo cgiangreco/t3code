@@ -76,8 +76,11 @@ export type CustomTopics = Resource<
  * AI Security for Apps is entitlement-gated: on accounts without the
  * feature every call fails with the typed `AiSecurityNotEntitled` error
  * (Cloudflare error code 13101).
- * ### Managing custom topics
- * **Example:** Classify traffic into two custom topics
+ * @resource
+ * @product AI Security
+ * @category Application Security
+ * @section Managing custom topics
+ * @example Classify traffic into two custom topics
  * ```typescript
  * const topics = yield* Cloudflare.AI.CustomTopics("Topics", {
  *   zoneId: zone.zoneId,
@@ -88,7 +91,7 @@ export type CustomTopics = Resource<
  * });
  * ```
  *
- * **Example:** Clear all custom topics
+ * @example Clear all custom topics
  * ```typescript
  * yield* Cloudflare.AI.CustomTopics("Topics", {
  *   zoneId: zone.zoneId,
@@ -97,10 +100,6 @@ export type CustomTopics = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/waf/detections/firewall-for-ai/
- *
- * @resource
- * @product AI Security
- * @category Application Security
  */
 export const CustomTopics = Resource<CustomTopics>(TypeId, {
   aliases: ["Cloudflare.AiSecurity.CustomTopics"],

@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * Deleting an already-deleted access point surfaces the typed
  * `AccessPointNotFound`. Provide the implementation with
  * `Effect.provide(AWS.EFS.DeleteAccessPointHttp)`.
- * ### Managing Access Points at Runtime
- * **Example:** Delete a tenant's access point
+ * @binding
+ * @section Managing Access Points at Runtime
+ * @example Delete a tenant's access point
  * ```typescript
  * const deleteAccessPoint = yield* AWS.EFS.DeleteAccessPoint();
  *
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   Effect.catchTag("AccessPointNotFound", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteAccessPoint extends Binding.Service<
   DeleteAccessPoint,

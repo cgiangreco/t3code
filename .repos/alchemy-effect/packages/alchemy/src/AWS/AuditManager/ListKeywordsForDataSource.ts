@@ -9,14 +9,13 @@ import * as Binding from "../../Binding.ts";
  * data source (CloudTrail event names, Config rules, Security Hub
  * controls, …). Provide the
  * implementation with `Effect.provide(AWS.AuditManager.ListKeywordsForDataSourceHttp)`.
- * ### Control Data Sources
- * **Example:** Keywords for a Data Source
+ * @binding
+ * @section Control Data Sources
+ * @example Keywords for a Data Source
  * ```typescript
  * const listKeywordsForDataSource = yield* AWS.AuditManager.ListKeywordsForDataSource();
  * const result = yield* listKeywordsForDataSource({ source: "AWS_Cloudtrail" });
  * ```
- *
- * @binding
  */
 export interface ListKeywordsForDataSource extends Binding.Service<
   ListKeywordsForDataSource,

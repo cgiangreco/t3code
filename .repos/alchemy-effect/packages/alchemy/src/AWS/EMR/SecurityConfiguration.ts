@@ -44,8 +44,9 @@ export interface SecurityConfiguration extends Resource<
  *
  * Clusters capture the configuration at launch, so editing a configuration
  * only affects clusters launched afterwards.
- * ### Creating a Security Configuration
- * **Example:** Require IMDSv2 on Cluster Instances
+ * @resource
+ * @section Creating a Security Configuration
+ * @example Require IMDSv2 on Cluster Instances
  * ```typescript
  * const config = yield* SecurityConfiguration("Imds", {
  *   securityConfiguration: {
@@ -57,7 +58,7 @@ export interface SecurityConfiguration extends Resource<
  * });
  * ```
  *
- * **Example:** Encryption Settings
+ * @example Encryption Settings
  * ```typescript
  * const config = yield* SecurityConfiguration("Encryption", {
  *   securityConfiguration: {
@@ -72,8 +73,8 @@ export interface SecurityConfiguration extends Resource<
  * });
  * ```
  *
- * ### Using with a Cluster
- * **Example:** Reference by Name at Launch
+ * @section Using with a Cluster
+ * @example Reference by Name at Launch
  * ```typescript
  * const cluster = yield* Cluster("Secure", {
  *   releaseLabel: "emr-7.5.0",
@@ -82,8 +83,6 @@ export interface SecurityConfiguration extends Resource<
  *   securityConfiguration: config.securityConfigurationName,
  * });
  * ```
- *
- * @resource
  */
 export const SecurityConfiguration = Resource<SecurityConfiguration>(
   "AWS.EMR.SecurityConfiguration",

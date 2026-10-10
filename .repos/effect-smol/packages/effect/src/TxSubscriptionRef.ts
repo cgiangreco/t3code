@@ -22,7 +22,7 @@ import * as TxPubSub from "./TxPubSub.ts"
 import * as TxQueue from "./TxQueue.ts"
 import * as TxRef from "./TxRef.ts"
 
-const TypeId = "~effect/TxSubscriptionRef"
+const TypeId = "~effect/transactions/TxSubscriptionRef"
 
 /**
  * A TxSubscriptionRef is a transactional reference that allows subscribing to all
@@ -36,25 +36,24 @@ const TypeId = "~effect/TxSubscriptionRef"
  *
  * **Example** (Subscribing to transactional changes)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxQueue, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(0)
  *
- *   return yield* Effect.scoped(
+ *   yield* Effect.scoped(
  *     Effect.gen(function*() {
  *       const sub = yield* TxSubscriptionRef.changes(ref)
  *       const initial = yield* TxQueue.take(sub)
+ *       console.log(initial) // 0
  *
  *       yield* TxSubscriptionRef.set(ref, 1)
  *       const next = yield* TxQueue.take(sub)
- *       return [initial, next]
+ *       console.log(next) // 1
  *     })
  *   )
  * })
- *
- * await Effect.runPromise(program) // => [0, 1]
  * ```
  *
  * @see {@link make} for creating a transactional subscription reference
@@ -101,15 +100,14 @@ const TxSubscriptionRefProto: Omit<TxSubscriptionRef<any>, typeof TypeId | "ref"
  *
  * **Example** (Creating a transactional subscription reference)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(42)
- *   return yield* TxSubscriptionRef.get(ref)
+ *   const value = yield* TxSubscriptionRef.get(ref)
+ *   console.log(value) // 42
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
  * @see {@link changes} for subscribing to the created reference
@@ -142,15 +140,14 @@ export const make = <A>(value: A): Effect.Effect<TxSubscriptionRef<A>> =>
  *
  * **Example** (Reading the current value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make("hello")
- *   return yield* TxSubscriptionRef.get(ref)
+ *   const value = yield* TxSubscriptionRef.get(ref)
+ *   console.log(value) // "hello"
  * })
- *
- * await Effect.runPromise(program) // => "hello"
  * ```
  *
  * @see {@link changes} for reading the current value and subsequent updates
@@ -175,16 +172,15 @@ export const get = <A>(self: TxSubscriptionRef<A>): Effect.Effect<A> => TxRef.ge
  *
  * **Example** (Modifying and returning a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(10)
  *   const result = yield* TxSubscriptionRef.modify(ref, (n) => [`was ${n}`, n + 1])
- *   return [result, yield* TxSubscriptionRef.get(ref)]
+ *   console.log(result) // "was 10"
+ *   console.log(yield* TxSubscriptionRef.get(ref)) // 11
  * })
- *
- * await Effect.runPromise(program) // => ["was 10", 11]
  * ```
  *
  * @see {@link update} for deriving the next value without a separate return value
@@ -226,16 +222,14 @@ export const modify: {
  *
  * **Example** (Setting a new value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(0)
  *   yield* TxSubscriptionRef.set(ref, 42)
- *   return yield* TxSubscriptionRef.get(ref)
+ *   console.log(yield* TxSubscriptionRef.get(ref)) // 42
  * })
- *
- * await Effect.runPromise(program) // => 42
  * ```
  *
  * @see {@link update} for deriving the new value from the current value
@@ -263,16 +257,14 @@ export const set: {
  *
  * **Example** (Updating a value)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(5)
  *   yield* TxSubscriptionRef.update(ref, (n) => n * 2)
- *   return yield* TxSubscriptionRef.get(ref)
+ *   console.log(yield* TxSubscriptionRef.get(ref)) // 10
  * })
- *
- * await Effect.runPromise(program) // => 10
  * ```
  *
  * @see {@link set} for replacing the value directly
@@ -301,16 +293,15 @@ export const update: {
  *
  * **Example** (Getting and setting atomically)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make("a")
  *   const old = yield* TxSubscriptionRef.getAndSet(ref, "b")
- *   return [old, yield* TxSubscriptionRef.get(ref)]
+ *   console.log(old) // "a"
+ *   console.log(yield* TxSubscriptionRef.get(ref)) // "b"
  * })
- *
- * await Effect.runPromise(program) // => ["a", "b"]
  * ```
  *
  * @see {@link set} for setting without returning the previous value
@@ -338,16 +329,15 @@ export const getAndSet: {
  *
  * **Example** (Getting and updating atomically)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(1)
  *   const old = yield* TxSubscriptionRef.getAndUpdate(ref, (n) => n + 10)
- *   return [old, yield* TxSubscriptionRef.get(ref)]
+ *   console.log(old) // 1
+ *   console.log(yield* TxSubscriptionRef.get(ref)) // 11
  * })
- *
- * await Effect.runPromise(program) // => [1, 11]
  * ```
  *
  * @see {@link update} for updating without returning the previous value
@@ -376,15 +366,14 @@ export const getAndUpdate: {
  *
  * **Example** (Updating and reading atomically)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(3)
- *   return yield* TxSubscriptionRef.updateAndGet(ref, (n) => n * 3)
+ *   const result = yield* TxSubscriptionRef.updateAndGet(ref, (n) => n * 3)
+ *   console.log(result) // 9
  * })
- *
- * await Effect.runPromise(program) // => 9
  * ```
  *
  * @see {@link update} for updating without returning the new value
@@ -420,25 +409,24 @@ export const updateAndGet: {
  *
  * **Example** (Subscribing to changes)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, TxQueue, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
  *   const ref = yield* TxSubscriptionRef.make(0)
  *
- *   return yield* Effect.scoped(
+ *   yield* Effect.scoped(
  *     Effect.gen(function*() {
  *       const sub = yield* TxSubscriptionRef.changes(ref)
  *       const initial = yield* TxQueue.take(sub)
+ *       console.log(initial) // 0
  *
  *       yield* TxSubscriptionRef.set(ref, 1)
  *       const next = yield* TxQueue.take(sub)
- *       return [initial, next]
+ *       console.log(next) // 1
  *     })
  *   )
  * })
- *
- * await Effect.runPromise(program) // => [0, 1]
  * ```
  *
  * @see {@link changesStream} for subscribing through a `Stream`
@@ -471,7 +459,7 @@ export const changes = <A>(
  *
  * **Example** (Streaming changes)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Stream, TxSubscriptionRef } from "effect"
  *
  * const program = Effect.gen(function*() {
@@ -482,10 +470,8 @@ export const changes = <A>(
  *   const values = yield* Stream.runCollect(
  *     TxSubscriptionRef.changesStream(ref).pipe(Stream.take(1))
  *   )
- *   return Array.from(values)
+ *   console.log(values) // [2]
  * })
- *
- * await Effect.runPromise(program) // => [2]
  * ```
  *
  * @see {@link changes} for subscribing through a transactional queue
@@ -514,11 +500,14 @@ export const changesStream = <A>(self: TxSubscriptionRef<A>): Stream.Stream<A, n
  *
  * **Example** (Checking transactional subscription references)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { TxSubscriptionRef } from "effect"
  *
- * const someValue: unknown = {}
- * TxSubscriptionRef.isTxSubscriptionRef(someValue) // => false
+ * declare const someValue: unknown
+ *
+ * if (TxSubscriptionRef.isTxSubscriptionRef(someValue)) {
+ *   console.log("This is a TxSubscriptionRef")
+ * }
  * ```
  *
  * @see {@link make} for creating a `TxSubscriptionRef`

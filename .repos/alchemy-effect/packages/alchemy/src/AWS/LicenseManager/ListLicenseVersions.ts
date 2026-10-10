@@ -14,8 +14,9 @@ export interface ListLicenseVersionsRequest
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.ListLicenseVersionsHttp)`.
- * ### Reading Licenses and Grants
- * **Example:** List a License's Versions
+ * @binding
+ * @section Reading Licenses and Grants
+ * @example List a License's Versions
  * ```typescript
  * // init
  * const listVersions = yield* AWS.LicenseManager.ListLicenseVersions();
@@ -23,8 +24,6 @@ export interface ListLicenseVersionsRequest
  * // runtime
  * const { Licenses } = yield* listVersions({ LicenseArn: licenseArn });
  * ```
- *
- * @binding
  */
 export interface ListLicenseVersions extends Binding.Service<
   ListLicenseVersions,

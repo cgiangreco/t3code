@@ -88,8 +88,9 @@ export interface CapacityProvider extends Resource<
  * Only EC2 Auto Scaling Group-backed capacity providers are currently
  * supported. The reserved AWS providers `FARGATE` and `FARGATE_SPOT` do not
  * need to be created and can be referenced by name on a `Cluster` directly.
- * ### Creating Capacity Providers
- * **Example:** ASG-Backed Capacity Provider
+ * @resource
+ * @section Creating Capacity Providers
+ * @example ASG-Backed Capacity Provider
  * ```typescript
  * const provider = yield* CapacityProvider("AppCapacityProvider", {
  *   autoScalingGroupArn: asg.autoScalingGroupArn,
@@ -110,12 +111,12 @@ export interface CapacityProvider extends Resource<
  * });
  * ```
  *
- * ### Adopting Existing Capacity Providers
+ * @section Adopting Existing Capacity Providers
  * Foreign-tagged capacity providers (i.e. providers that exist in AWS but were
  * not created by this stack/stage/logical-id) are surfaced as `Unowned` by
  * `read`, and the engine fails with `OwnedBySomeoneElse` unless adoption is
  * explicitly opted in via `--adopt` or {@link adopt}.
- * **Example:** Adopt an existing provider
+ * @example Adopt an existing provider
  * ```typescript
  * import { adopt } from "alchemy/AdoptPolicy";
  *
@@ -124,8 +125,6 @@ export interface CapacityProvider extends Resource<
  *   autoScalingGroupArn: asg.autoScalingGroupArn,
  * }).pipe(adopt());
  * ```
- *
- * @resource
  */
 export const CapacityProvider = Resource<CapacityProvider>(
   "AWS.ECS.CapacityProvider",

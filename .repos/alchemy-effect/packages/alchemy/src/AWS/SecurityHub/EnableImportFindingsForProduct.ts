@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.EnableImportFindingsForProductHttp)`.
- * ### Product Integrations
- * **Example:** Enable a Product Integration
+ * @binding
+ * @section Product Integrations
+ * @example Enable a Product Integration
  * ```typescript
  * // init — account-level binding, no resource argument
  * const enableImportFindingsForProduct = yield* AWS.SecurityHub.EnableImportFindingsForProduct();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   ProductArn: productArn,
  * });
  * ```
- *
- * @binding
  */
 export interface EnableImportFindingsForProduct extends Binding.Service<
   EnableImportFindingsForProduct,

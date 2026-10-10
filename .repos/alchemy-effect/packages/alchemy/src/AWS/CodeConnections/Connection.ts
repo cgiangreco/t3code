@@ -67,8 +67,9 @@ export interface Connection extends Resource<
  * "Update pending connection" flow) — there is no API to finish the
  * handshake. Once completed the connection becomes `AVAILABLE` and can be
  * referenced by a CodePipeline `CodeStarSourceConnection` action.
- * ### Creating a Connection
- * **Example:** GitHub Connection (created PENDING)
+ * @resource
+ * @section Creating a Connection
+ * @example GitHub Connection (created PENDING)
  * ```typescript
  * const connection = yield* CodeConnections.Connection("GitHub", {
  *   providerType: "GitHub",
@@ -76,8 +77,6 @@ export interface Connection extends Resource<
  * // connection.connectionStatus === "PENDING"
  * // Complete the handshake in the console before using it in a pipeline.
  * ```
- *
- * @resource
  */
 export const Connection = Resource<Connection>(
   "AWS.CodeConnections.Connection",

@@ -102,8 +102,9 @@ export interface FeatureGroup extends Resource<
  *
  * With the online store enabled, functions read and write records at runtime
  * via the `AWS.SageMaker.GetRecord` / `AWS.SageMaker.PutRecord` bindings.
- * ### Creating Feature Groups
- * **Example:** Online-Store Feature Group
+ * @resource
+ * @section Creating Feature Groups
+ * @example Online-Store Feature Group
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -119,8 +120,8 @@ export interface FeatureGroup extends Resource<
  * });
  * ```
  *
- * ### Runtime Access
- * **Example:** Read and write records from a Lambda function
+ * @section Runtime Access
+ * @example Read and write records from a Lambda function
  * ```typescript
  * // init
  * const putRecord = yield* AWS.SageMaker.PutRecord(features);
@@ -138,8 +139,6 @@ export interface FeatureGroup extends Resource<
  *   RecordIdentifierValueAsString: "user-123",
  * });
  * ```
- *
- * @resource
  */
 export const FeatureGroup = Resource<FeatureGroup>(
   "AWS.SageMaker.FeatureGroup",

@@ -34,8 +34,9 @@ export interface CountTokensRequest extends Omit<
  * with a `ValidationException` ("The provided model doesn't support
  * counting tokens").
  *
- * ### Counting Tokens
- * **Example:** Count Tokens for a Converse Request
+ * @binding
+ * @section Counting Tokens
+ * @example Count Tokens for a Converse Request
  * ```typescript
  * // init
  * const countTokens = yield* Bedrock.CountTokens(
@@ -53,7 +54,7 @@ export interface CountTokensRequest extends Omit<
  * const tokens = result.inputTokens;
  * ```
  *
- * **Example:** Count Tokens for a Raw InvokeModel Payload
+ * @example Count Tokens for a Raw InvokeModel Payload
  * ```typescript
  * const result = yield* countTokens({
  *   input: {
@@ -65,8 +66,6 @@ export interface CountTokensRequest extends Omit<
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface CountTokens extends Binding.Service<
   CountTokens,

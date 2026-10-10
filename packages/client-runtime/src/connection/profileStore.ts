@@ -1,5 +1,6 @@
 import * as Context from "effect/Context";
 import type * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
 import type * as Option from "effect/Option";
 
 import type { ConnectionProfile } from "./catalog.ts";
@@ -18,3 +19,6 @@ export class ConnectionProfileStore extends Context.Service<
 
 export const make = (service: ConnectionProfileStore["Service"]) =>
   ConnectionProfileStore.of(service);
+
+export const layer = (service: ConnectionProfileStore["Service"]) =>
+  Layer.succeed(ConnectionProfileStore, make(service));

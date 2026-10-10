@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vite-plus/test";
 
 import {
+  compareRankedSearchResults,
   insertRankedSearchResult,
   normalizeSearchQuery,
   scoreQueryMatch,
@@ -89,5 +90,6 @@ describe("insertRankedSearchResult", () => {
     insertRankedSearchResult(ranked, { item: "c", score: 30, tieBreaker: "c" }, 2);
 
     expect(ranked.map((entry) => entry.item)).toEqual(["a", "b"]);
+    expect(compareRankedSearchResults(ranked[0]!, ranked[1]!)).toBeLessThan(0);
   });
 });

@@ -10,14 +10,13 @@ export interface SuspendMicrovmRequest extends microvms.SuspendMicrovmRequest {}
  *
  * Bind it to a {@link MicrovmImage} to get a callable that suspends a running
  * MicroVM (snapshotting memory + disk) by `microvmIdentifier`.
- * ### Lifecycle
- * **Example:** Suspend a MicroVM
+ * @binding
+ * @section Lifecycle
+ * @example Suspend a MicroVM
  * ```typescript
  * const suspendMicrovm = yield* AWS.Lambda.SuspendMicrovm(Sandbox);
  * yield* suspendMicrovm({ microvmIdentifier: id });
  * ```
- *
- * @binding
  */
 export interface SuspendMicrovm extends Binding.Service<
   SuspendMicrovm,

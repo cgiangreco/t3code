@@ -12,8 +12,9 @@ import type { Farm } from "./Farm.ts";
  * The farm's `farmId` is injected from the binding. Provide the
  * implementation with
  * `Effect.provide(AWS.Deadline.GetSessionsStatisticsAggregationHttp)`.
- * ### Usage Statistics
- * **Example:** Poll An Aggregation Until It Completes
+ * @binding
+ * @section Usage Statistics
+ * @example Poll An Aggregation Until It Completes
  * ```typescript
  * // init — bind the operation to the farm
  * const getAggregation =
@@ -28,8 +29,6 @@ import type { Farm } from "./Farm.ts";
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface GetSessionsStatisticsAggregation extends Binding.Service<
   GetSessionsStatisticsAggregation,

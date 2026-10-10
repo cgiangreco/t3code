@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.GetCoverageStatisticsHttp)`.
- * ### Usage & Coverage
- * **Example:** Coverage by Resource Type
+ * @binding
+ * @section Usage & Coverage
+ * @example Coverage by Resource Type
  * ```typescript
  * // init
  * const getCoverageStatistics = yield* AWS.GuardDuty.GetCoverageStatistics(detector);
@@ -21,8 +22,6 @@ import type { Detector } from "./Detector.ts";
  *   StatisticsType: ["COUNT_BY_RESOURCE_TYPE"],
  * });
  * ```
- *
- * @binding
  */
 export interface GetCoverageStatistics extends Binding.Service<
   GetCoverageStatistics,

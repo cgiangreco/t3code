@@ -63,8 +63,9 @@ export interface Subscription extends Resource<
  * `Subscription` keeps the lifecycle of the subscription itself separate from the
  * topic, which lets Lambda event sources and manually managed subscriptions share
  * the same canonical resource model.
- * ### Creating Subscriptions
- * **Example:** Lambda Subscription
+ * @resource
+ * @section Creating Subscriptions
+ * @example Lambda Subscription
  * ```typescript
  * const subscription = yield* Subscription("TopicSubscription", {
  *   topicArn: topic.topicArn,
@@ -73,7 +74,7 @@ export interface Subscription extends Resource<
  * });
  * ```
  *
- * **Example:** Fan Out a Topic to an SQS Queue
+ * @example Fan Out a Topic to an SQS Queue
  * ```typescript
  * const topic = yield* SNS.Topic("Events");
  * const queue = yield* SQS.Queue("Notifications");
@@ -86,7 +87,7 @@ export interface Subscription extends Resource<
  * });
  * ```
  *
- * **Example:** Filtered Subscription
+ * @example Filtered Subscription
  * ```typescript
  * const subscription = yield* Subscription("OrderSubscription", {
  *   topicArn: topic.topicArn,
@@ -97,8 +98,6 @@ export interface Subscription extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const Subscription = Resource<Subscription>("AWS.SNS.Subscription");
 
@@ -295,13 +294,7 @@ export const SubscriptionProvider = () =>
             topicArn: (output.topicArn ?? olds.topicArn) as string | undefined,
             protocol: output.protocol ?? olds.protocol,
             endpoint: (output.endpoint ?? olds.endpoint) as string | undefined,
-          }).pipe(
-            // The topic is already gone — SNS drops its subscriptions with
-            // it, so there is nothing left to unsubscribe.
-            Effect.catchTag("NotFoundException", () =>
-              Effect.succeed(undefined),
-            ),
-          )
+          })
         : output.subscriptionArn;
 
       if (!subscriptionArn) {
@@ -372,28 +365,14 @@ const readSubscription = Effect.fn(function* ({
   protocol?: string;
   endpoint: string | undefined;
 }) {
-  let resolvedSubscriptionArn: string | undefined;
-  if (subscriptionArn && !isPendingConfirmation(subscriptionArn)) {
-    resolvedSubscriptionArn = subscriptionArn;
-  } else {
-    // No concrete ARN to hydrate — list the topic's subscriptions and match
-    // by (protocol, endpoint). If the topic itself no longer exists (deleted
-    // out of band, or by an interrupted destroy that committed the topic's
-    // state row late) then the subscription is gone too: report "missing"
-    // rather than failing the read, so a subsequent destroy can proceed.
-    const found = yield* findSubscription({
-      topicArn,
-      protocol,
-      endpoint,
-    }).pipe(
-      Effect.map((arn) => ({ arn })),
-      Effect.catchTag("NotFoundException", () => Effect.succeed(undefined)),
-    );
-    if (found === undefined) {
-      return undefined;
-    }
-    resolvedSubscriptionArn = found.arn;
-  }
+  const resolvedSubscriptionArn =
+    subscriptionArn && !isPendingConfirmation(subscriptionArn)
+      ? subscriptionArn
+      : yield* findSubscription({
+          topicArn,
+          protocol,
+          endpoint,
+        });
 
   if (!resolvedSubscriptionArn) {
     if (!topicArn || !protocol) {

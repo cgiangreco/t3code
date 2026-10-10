@@ -38,8 +38,9 @@ export interface AlertManagerDefinition extends Resource<
  * workspace — configures how firing alerts are grouped, routed, and
  * dispatched to receivers (SNS, etc.). A workspace has at most one.
  *
- * ### Creating an Alert Manager Definition
- * **Example:** Basic Definition
+ * @resource
+ * @section Creating an Alert Manager Definition
+ * @example Basic Definition
  * ```typescript
  * const workspace = yield* AMP.Workspace("Metrics", {});
  * const alerts = yield* AMP.AlertManagerDefinition("Alerts", {
@@ -51,8 +52,6 @@ export interface AlertManagerDefinition extends Resource<
  *     - name: default`,
  * });
  * ```
- *
- * @resource
  */
 export const AlertManagerDefinition = Resource<AlertManagerDefinition>(
   "AWS.AMP.AlertManagerDefinition",

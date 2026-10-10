@@ -7,7 +7,7 @@ import * as Scope from "effect/Scope";
 
 import * as Electron from "electron";
 
-export class ElectronThemeSetSourceError extends Schema.TaggedError<ElectronThemeSetSourceError>()(
+export class ElectronThemeSetSourceError extends Schema.TaggedErrorClass<ElectronThemeSetSourceError>()(
   "ElectronThemeSetSourceError",
   {
     source: DesktopThemeSchema,
@@ -19,6 +19,8 @@ export class ElectronThemeSetSourceError extends Schema.TaggedError<ElectronThem
   }
 }
 
+export const isElectronThemeSetSourceError = Schema.is(ElectronThemeSetSourceError);
+
 export class ElectronTheme extends Context.Service<
   ElectronTheme,
   {
@@ -28,7 +30,6 @@ export class ElectronTheme extends Context.Service<
   }
 >()("@t3tools/desktop/electron/ElectronTheme") {}
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = ElectronTheme.of({
   shouldUseDarkColors: Effect.sync(() => Electron.nativeTheme.shouldUseDarkColors),
   setSource: (theme) =>

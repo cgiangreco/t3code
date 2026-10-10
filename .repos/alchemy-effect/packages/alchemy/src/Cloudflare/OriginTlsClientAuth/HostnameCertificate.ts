@@ -91,23 +91,26 @@ export type HostnameCertificate = Resource<
  * property triggers a replacement. Deployment is asynchronous — the
  * certificate starts in `pending_deployment` and becomes `active` within a
  * few minutes; deletion likewise passes through `pending_deletion`.
- * ### Uploading a hostname certificate
- * **Example:** Hostname client certificate
+ * @resource
+ * @product Origin TLS Client Auth
+ * @category SSL/TLS & Certificates
+ * @section Uploading a hostname certificate
+ * @example Hostname client certificate
  * ```typescript
  * const cert = yield* Cloudflare.OriginTlsClientAuth.HostnameCertificate("AopHostCert", {
  *   zoneId: zone.zoneId,
  *   certificate: clientCertPem,
- *   privateKey: yield* Config.Redacted("AOP_CLIENT_KEY"),
+ *   privateKey: alchemy.secret.env.AOP_CLIENT_KEY,
  * });
  * ```
  *
- * ### Enabling AOP for a hostname
- * **Example:** Upload the certificate and associate a hostname
+ * @section Enabling AOP for a hostname
+ * @example Upload the certificate and associate a hostname
  * ```typescript
  * const cert = yield* Cloudflare.OriginTlsClientAuth.HostnameCertificate("AopHostCert", {
  *   zoneId: zone.zoneId,
  *   certificate: clientCertPem,
- *   privateKey: yield* Config.Redacted("AOP_CLIENT_KEY"),
+ *   privateKey: alchemy.secret.env.AOP_CLIENT_KEY,
  * });
  *
  * yield* Cloudflare.OriginTlsClientAuth.HostnameAssociation("AopHost", {
@@ -119,10 +122,6 @@ export type HostnameCertificate = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/ssl/origin-configuration/authenticated-origin-pull/set-up/per-hostname/
- *
- * @resource
- * @product Origin TLS Client Auth
- * @category SSL/TLS & Certificates
  */
 export const HostnameCertificate = Resource<HostnameCertificate>(TypeId);
 

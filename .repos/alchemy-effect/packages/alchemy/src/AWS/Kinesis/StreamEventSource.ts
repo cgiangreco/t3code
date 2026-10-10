@@ -86,8 +86,9 @@ export interface StreamEventSourceProps {
  * stream, grants the read IAM actions, and forwards `aws:kinesis` records
  * into the handler's `Stream`. Use the {@link consumeStreamRecords} helper
  * rather than calling the service directly.
- * ### Consuming Records
- * **Example:** Process Stream Records in a Lambda Function
+ * @binding
+ * @section Consuming Records
+ * @example Process Stream Records in a Lambda Function
  * ```typescript
  * export default MyFunction.make(
  *   { main: import.meta.url },
@@ -112,8 +113,6 @@ export interface StreamEventSourceProps {
  *   }).pipe(Effect.provide(AWS.Lambda.StreamEventSource)),
  * );
  * ```
- *
- * @binding
  */
 export interface StreamEventSource extends Binding.Service<
   StreamEventSource,

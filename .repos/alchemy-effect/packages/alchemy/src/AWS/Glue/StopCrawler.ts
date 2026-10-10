@@ -11,8 +11,9 @@ import type { Crawler } from "./Crawler.ts";
  * `CrawlerStoppingException` when a stop is already underway. The crawler
  * name is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.StopCrawlerHttp)`.
- * ### Running Crawlers
- * **Example:** Stop a Crawl
+ * @binding
+ * @section Running Crawlers
+ * @example Stop a Crawl
  * ```typescript
  * // init
  * const stopCrawler = yield* AWS.Glue.StopCrawler(crawler);
@@ -25,8 +26,6 @@ import type { Crawler } from "./Crawler.ts";
  *   ),
  * );
  * ```
- *
- * @binding
  */
 export interface StopCrawler extends Binding.Service<
   StopCrawler,

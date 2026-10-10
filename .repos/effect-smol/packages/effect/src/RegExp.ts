@@ -22,13 +22,15 @@ import * as predicate from "./Predicate.ts"
  *
  * **Example** (Creating a regular expression)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { RegExp } from "effect"
  *
+ * // Create a regular expression using Effect's RegExp constructor
  * const pattern = new RegExp.RegExp("hello", "i")
- * pattern // => /hello/i
- * pattern.test("Hello World") // => true
- * pattern.test("goodbye") // => false
+ *
+ * // Test the pattern
+ * console.log(pattern.test("Hello World")) // true
+ * console.log(pattern.test("goodbye")) // false
  * ```
  *
  * @category constructors
@@ -45,11 +47,12 @@ export const RegExp = globalThis.RegExp
  *
  * **Example** (Checking for regular expressions)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { RegExp } from "effect"
+ * import * as assert from "node:assert"
  *
- * RegExp.isRegExp(/a/) // => true
- * RegExp.isRegExp("a") // => false
+ * assert.deepStrictEqual(RegExp.isRegExp(/a/), true)
+ * assert.deepStrictEqual(RegExp.isRegExp("a"), false)
  * ```
  *
  * @category guards
@@ -66,13 +69,14 @@ export const isRegExp: (input: unknown) => input is RegExp = predicate.isRegExp
  *
  * **Example** (Escaping a pattern string)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { RegExp } from "effect"
+ * import * as assert from "node:assert"
  *
- * RegExp.escape("a*b") // => "a\\*b"
+ * assert.deepStrictEqual(RegExp.escape("a*b"), "a\\*b")
  * ```
  *
- * @category transforming
+ * @category RegExp
  * @since 2.0.0
  */
 export const escape = (string: string): string => string.replace(/[/\\^$*+?.()|[\]{}]/g, "\\$&")

@@ -9,16 +9,15 @@ export interface GetRunRequest extends omics.GetRunRequest {}
  *
  * An account-level run-control operation (no resource argument) that reads the status and details of a run.
  * Provide the implementation with `Effect.provide(AWS.Omics.GetRunHttp)`.
- * ### Runs
- * **Example:** Call GetRun
+ * @binding
+ * @section Runs
+ * @example Call GetRun
  * ```typescript
  * // init — account-level binding takes no resource
  * const getRun = yield* AWS.Omics.GetRun();
  * // runtime
  * const result = yield* getRun({ id: runId });
  * ```
- *
- * @binding
  */
 export interface GetRun extends Binding.Service<
   GetRun,

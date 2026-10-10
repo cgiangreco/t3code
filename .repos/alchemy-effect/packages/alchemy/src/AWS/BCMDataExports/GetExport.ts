@@ -11,8 +11,9 @@ import type { Export } from "./Export.ts";
  * cadence — from inside a function runtime. Useful for cost dashboards that
  * surface where their billing data lands. Provide the implementation with
  * `Effect.provide(AWS.BCMDataExports.GetExportHttp)`.
- * ### Inspecting an Export
- * **Example:** Read the Export's Definition
+ * @binding
+ * @section Inspecting an Export
+ * @example Read the Export's Definition
  * ```typescript
  * // init — bind the operation to the export
  * const getExport = yield* AWS.BCMDataExports.GetExport(cur);
@@ -21,8 +22,6 @@ import type { Export } from "./Export.ts";
  * const { Export: definition } = yield* getExport();
  * const bucket = definition?.DestinationConfigurations.S3Destination.S3Bucket;
  * ```
- *
- * @binding
  */
 export interface GetExport extends Binding.Service<
   GetExport,

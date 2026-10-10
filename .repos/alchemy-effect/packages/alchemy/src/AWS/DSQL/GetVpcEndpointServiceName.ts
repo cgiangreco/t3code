@@ -13,8 +13,9 @@ import type { Cluster } from "./Cluster.ts";
  * Provide `DSQL.GetVpcEndpointServiceNameHttp` on the Function effect to
  * implement the binding.
  *
- * ### Resolving the VPC Endpoint Service Name
- * **Example:** Look Up the PrivateLink Service Name
+ * @binding
+ * @section Resolving the VPC Endpoint Service Name
+ * @example Look Up the PrivateLink Service Name
  * ```typescript
  * // init
  * const getVpcEndpointServiceName =
@@ -28,8 +29,6 @@ import type { Cluster } from "./Cluster.ts";
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface GetVpcEndpointServiceName extends Binding.Service<
   GetVpcEndpointServiceName,

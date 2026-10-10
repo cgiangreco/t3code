@@ -18,11 +18,11 @@ import * as predicate from "./Predicate.ts"
  *
  * **Example** (Checking for symbols)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Symbol } from "effect"
  *
- * Symbol.isSymbol(globalThis.Symbol.for("a")) // => true
- * Symbol.isSymbol("a") // => false
+ * console.log(Symbol.isSymbol(globalThis.Symbol.for("a"))) // true
+ * console.log(Symbol.isSymbol("a")) // false
  * ```
  *
  * @category guards

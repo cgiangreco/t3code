@@ -20,8 +20,9 @@ export interface CheckDocumentAccessRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.QBusiness.CheckDocumentAccessHttp)`.
  *
- * ### Document Ingestion
- * **Example:** Check a User's Document Access
+ * @binding
+ * @section Document Ingestion
+ * @example Check a User's Document Access
  * ```typescript
  * const checkAccess = yield* AWS.QBusiness.CheckDocumentAccess(index);
  *
@@ -30,8 +31,6 @@ export interface CheckDocumentAccessRequest extends Omit<
  *   documentId: "welcome",
  * });
  * ```
- *
- * @binding
  */
 export interface CheckDocumentAccess extends Binding.Service<
   CheckDocumentAccess,

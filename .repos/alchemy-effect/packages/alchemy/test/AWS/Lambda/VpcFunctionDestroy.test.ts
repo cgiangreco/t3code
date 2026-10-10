@@ -1,7 +1,6 @@
 import * as AWS from "@/AWS";
 import * as Test from "@/Test/Alchemy";
 import * as EC2 from "@distilled.cloud/aws/ec2";
-import * as Lambda from "@distilled.cloud/aws/lambda";
 import { expect } from "alchemy-test";
 import * as Effect from "effect/Effect";
 import * as Schedule from "effect/Schedule";
@@ -51,7 +50,7 @@ test.provider.skipIf(!!process.env.FAST)(
           main: handlerPath,
           handler: "handler",
           isExternal: true,
-          functionUrl: false,
+          url: false,
           vpc: {
             subnetIds: network.privateSubnetIds,
             securityGroupIds: [sg.groupId],
@@ -67,12 +66,6 @@ test.provider.skipIf(!!process.env.FAST)(
       });
 
       const deployed = yield* stack.deploy(program);
-      const configuration = yield* Lambda.getFunctionConfiguration({
-        FunctionName: deployed.functionName,
-      });
-      expect(configuration.State).toBe("Active");
-      expect(configuration.LastUpdateStatus).toBe("Successful");
-      expect(configuration.VpcConfig?.VpcId).toBe(deployed.vpcId);
 
       // The function's Hyperplane ENI(s) materialize in the private subnets
       // shortly after the function goes Active — poll (describe is
@@ -105,8 +98,5 @@ test.provider.skipIf(!!process.env.FAST)(
       );
       expect(vpcs.Vpcs ?? []).toHaveLength(0);
     }),
-  {
-    tags: ["provider:aws", "provider:aws:ec2", "provider:aws:lambda", "live"],
-    timeout: 30 * 60 * 1000,
-  },
+  { timeout: 30 * 60 * 1000 },
 );

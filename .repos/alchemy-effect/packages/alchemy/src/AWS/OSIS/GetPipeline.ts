@@ -11,8 +11,9 @@ import type { Pipeline } from "./Pipeline.ts";
  * pipeline or discover its ingest endpoints at runtime. The pipeline name is
  * injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.OSIS.GetPipelineHttp)`.
- * ### Monitoring a Pipeline
- * **Example:** Check the Pipeline's Status
+ * @binding
+ * @section Monitoring a Pipeline
+ * @example Check the Pipeline's Status
  * ```typescript
  * // init — bind the operation to the pipeline
  * const getPipeline = yield* AWS.OSIS.GetPipeline(pipeline);
@@ -23,8 +24,6 @@ import type { Pipeline } from "./Pipeline.ts";
  *   yield* Effect.logWarning(`pipeline is ${Pipeline?.Status}`);
  * }
  * ```
- *
- * @binding
  */
 export interface GetPipeline extends Binding.Service<
   GetPipeline,

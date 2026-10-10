@@ -13,7 +13,7 @@ import { sql } from "drizzle-orm";
 import * as RelayDb from "../db.ts";
 import { relayLiveActivities, relayMobileDevices } from "../persistence/schema.ts";
 
-export class DeviceRegistrationPersistenceError extends Schema.TaggedError<DeviceRegistrationPersistenceError>()(
+export class DeviceRegistrationPersistenceError extends Schema.TaggedErrorClass<DeviceRegistrationPersistenceError>()(
   "DeviceRegistrationPersistenceError",
   {
     userId: Schema.String,
@@ -27,7 +27,7 @@ export class DeviceRegistrationPersistenceError extends Schema.TaggedError<Devic
   }
 }
 
-export class DeviceUnregistrationPersistenceError extends Schema.TaggedError<DeviceUnregistrationPersistenceError>()(
+export class DeviceUnregistrationPersistenceError extends Schema.TaggedErrorClass<DeviceUnregistrationPersistenceError>()(
   "DeviceUnregistrationPersistenceError",
   {
     userId: Schema.String,
@@ -41,7 +41,7 @@ export class DeviceUnregistrationPersistenceError extends Schema.TaggedError<Dev
   }
 }
 
-export class DeviceListPersistenceError extends Schema.TaggedError<DeviceListPersistenceError>()(
+export class DeviceListPersistenceError extends Schema.TaggedErrorClass<DeviceListPersistenceError>()(
   "DeviceListPersistenceError",
   {
     userId: Schema.String,
@@ -128,8 +128,7 @@ export const make = Effect.gen(function* () {
           deviceId: registration.deviceId,
           label: registration.label,
           platform: registration.platform,
-          iosMajorVersion: registration.iosMajorVersion ?? null,
-          androidApiLevel: registration.androidApiLevel ?? null,
+          iosMajorVersion: registration.iosMajorVersion,
           appVersion: registration.appVersion ?? null,
           bundleId: registration.bundleId ?? null,
           apsEnvironment: registration.apsEnvironment ?? null,
@@ -144,8 +143,7 @@ export const make = Effect.gen(function* () {
           set: {
             platform: registration.platform,
             label: registration.label,
-            iosMajorVersion: registration.iosMajorVersion ?? null,
-            androidApiLevel: registration.androidApiLevel ?? null,
+            iosMajorVersion: registration.iosMajorVersion,
             appVersion: registration.appVersion ?? null,
             // Preserve routing from newer app builds when an older build
             // re-registers without these fields.
@@ -227,7 +225,6 @@ export const make = Effect.gen(function* () {
           label: relayMobileDevices.label,
           platform: relayMobileDevices.platform,
           iosMajorVersion: relayMobileDevices.iosMajorVersion,
-          androidApiLevel: relayMobileDevices.androidApiLevel,
           appVersion: relayMobileDevices.appVersion,
           preferences: relayMobileDevices.preferencesJson,
           updatedAt: relayMobileDevices.updatedAt,
@@ -244,7 +241,6 @@ export const make = Effect.gen(function* () {
         label: row.label,
         platform: row.platform,
         iosMajorVersion: row.iosMajorVersion,
-        androidApiLevel: row.androidApiLevel,
         appVersion: row.appVersion,
         notifications: {
           enabled: row.preferences.notificationsEnabled,

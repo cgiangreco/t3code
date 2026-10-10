@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.ListUsersHttp)`.
  *
- * ### User Search
- * **Example:** List Users in a Collection
+ * @binding
+ * @section User Search
+ * @example List Users in a Collection
  * ```typescript
  * // init
  * const listUsers = yield* AWS.Rekognition.ListUsers();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  * const page = yield* listUsers({ CollectionId: "tenant-42" });
  * const userIds = (page.Users ?? []).map((u) => u.UserId);
  * ```
- *
- * @binding
  */
 export interface ListUsers extends Binding.Service<
   ListUsers,

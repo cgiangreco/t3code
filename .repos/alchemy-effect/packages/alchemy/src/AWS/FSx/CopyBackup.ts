@@ -12,8 +12,9 @@ import * as Binding from "../../Binding.ts";
  * with {@link CreateBackup}. A missing source backup surfaces the typed
  * `BackupNotFound`. Provide the implementation with
  * `Effect.provide(AWS.FSx.CopyBackupHttp)`.
- * ### Managing Backups at Runtime
- * **Example:** Copy a backup from another region for DR
+ * @binding
+ * @section Managing Backups at Runtime
+ * @example Copy a backup from another region for DR
  * ```typescript
  * const copyBackup = yield* AWS.FSx.CopyBackup();
  *
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   SourceRegion: "us-east-1",
  * });
  * ```
- *
- * @binding
  */
 export interface CopyBackup extends Binding.Service<
   CopyBackup,

@@ -96,8 +96,9 @@ export interface DBProxyEndpoint extends Resource<
  *
  * Changing the name, owning proxy, subnets, or target role replaces the
  * endpoint; security groups and tags update in place.
- * ### Creating Proxy Endpoints
- * **Example:** Read-Only Endpoint
+ * @resource
+ * @section Creating Proxy Endpoints
+ * @example Read-Only Endpoint
  * ```typescript
  * const readerEndpoint = yield* DBProxyEndpoint("ReaderEndpoint", {
  *   dbProxyName: proxy.dbProxyName,
@@ -106,8 +107,6 @@ export interface DBProxyEndpoint extends Resource<
  *   targetRole: "READ_ONLY",
  * });
  * ```
- *
- * @resource
  */
 export const DBProxyEndpoint = Resource<DBProxyEndpoint>(
   "AWS.RDS.DBProxyEndpoint",

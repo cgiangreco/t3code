@@ -78,16 +78,15 @@ export interface TopicRule extends Resource<
  * published to MQTT topics and routes matching messages to one or more
  * actions (invoke a Lambda, enqueue to SQS, republish, etc.).
  *
- * ### Creating a Rule
- * **Example:** Route Messages to a Lambda
+ * @resource
+ * @section Creating a Rule
+ * @example Route Messages to a Lambda
  * ```typescript
  * const rule = yield* TopicRule("ingest", {
  *   sql: "SELECT * FROM 'sensors/+/telemetry'",
  *   actions: [{ lambda: { functionArn: yield* fn.functionArn } }],
  * });
  * ```
- *
- * @resource
  */
 export const TopicRule = Resource<TopicRule>("AWS.IoT.TopicRule");
 

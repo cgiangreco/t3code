@@ -89,8 +89,9 @@ export interface AppSyncResolver extends Resource<
  * sequence of {@link Function}s. The modern default is `APPSYNC_JS` code
  * (a module exporting `request(ctx)` / `response(ctx)`); VTL mapping
  * templates remain supported.
- * ### Unit Resolvers
- * **Example:** JavaScript unit resolver over a Lambda data source
+ * @resource
+ * @section Unit Resolvers
+ * @example JavaScript unit resolver over a Lambda data source
  * ```typescript
  * const resolver = yield* AppSync.Resolver("AddResolver", {
  *   api,
@@ -108,8 +109,8 @@ export interface AppSyncResolver extends Resource<
  * });
  * ```
  *
- * ### Pipeline Resolvers
- * **Example:** Pipeline resolver running one function
+ * @section Pipeline Resolvers
+ * @example Pipeline resolver running one function
  * ```typescript
  * const fn = yield* AppSync.Function("Step", {
  *   api,
@@ -128,8 +129,6 @@ export interface AppSyncResolver extends Resource<
  *   `,
  * });
  * ```
- *
- * @resource
  */
 export const ResolverResource = Resource<AppSyncResolver>(
   "AWS.AppSync.Resolver",

@@ -60,17 +60,16 @@ export type Routing = Resource<
  * Enables Cloudflare Email Routing on a zone. This is the prerequisite for
  * receiving mail at any address on the domain and for sending email from a
  * Worker via `send_email` bindings.
- * ### Enabling Email Routing
- * **Example:** Enable on a zone you own
+ * @resource
+ * @product Email
+ * @category Email
+ * @section Enabling Email Routing
+ * @example Enable on a zone you own
  * ```typescript
  * const routing = yield* Cloudflare.Email.Routing("Routing", {
  *   zone: "example.com",
  * });
  * ```
- *
- * @resource
- * @product Email
- * @category Email
  */
 export const Routing = Resource<Routing>("Cloudflare.Email.Routing", {
   aliases: ["Cloudflare.EmailRouting"],
@@ -137,7 +136,10 @@ export const RoutingProvider = () =>
       const desired = news.enabled ?? true;
 
       if (desired) {
-        const result = yield* emailRouting.enableEmailRouting({ zoneId });
+        const result = yield* emailRouting.enableEmailRouting({
+          zoneId,
+          body: {},
+        });
         return {
           routingId: result.id,
           zoneId,
@@ -146,7 +148,10 @@ export const RoutingProvider = () =>
           status: (result.status ?? undefined) as RoutingStatus | undefined,
         };
       } else {
-        const result = yield* emailRouting.disableEmailRouting({ zoneId });
+        const result = yield* emailRouting.disableEmailRouting({
+          zoneId,
+          body: {},
+        });
         return {
           routingId: result.id,
           zoneId,
@@ -158,7 +163,7 @@ export const RoutingProvider = () =>
     }),
     delete: Effect.fn(function* ({ output }) {
       yield* emailRouting
-        .disableEmailRouting({ zoneId: output.zoneId })
+        .disableEmailRouting({ zoneId: output.zoneId, body: {} })
         .pipe(Effect.catch(() => Effect.void));
     }),
   });

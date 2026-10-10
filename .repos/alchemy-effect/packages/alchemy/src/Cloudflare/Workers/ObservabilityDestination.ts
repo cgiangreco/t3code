@@ -133,8 +133,11 @@ export type ObservabilityDestination = Resource<
  * account for a destination with the same name and reports it as
  * `Unowned`, so the engine refuses to take it over unless `--adopt` (or
  * `adopt(true)`) is set.
- * ### Exporting Workers traces
- * **Example:** Push traces to an OTLP collector
+ * @resource
+ * @product Workers
+ * @category Workers & Compute
+ * @section Exporting Workers traces
+ * @example Push traces to an OTLP collector
  * ```typescript
  * const traces = yield* Cloudflare.Workers.ObservabilityDestination("Traces", {
  *   url: "https://otel.example.com/v1/traces",
@@ -143,8 +146,8 @@ export type ObservabilityDestination = Resource<
  * });
  * ```
  *
- * ### Exporting Workers logs
- * **Example:** Push logs, skipping the create-time preflight
+ * @section Exporting Workers logs
+ * @example Push logs, skipping the create-time preflight
  * ```typescript
  * const logs = yield* Cloudflare.Workers.ObservabilityDestination("Logs", {
  *   name: "my-app-logs",
@@ -154,8 +157,8 @@ export type ObservabilityDestination = Resource<
  * });
  * ```
  *
- * ### Pausing an export
- * **Example:** Disable the destination without deleting it
+ * @section Pausing an export
+ * @example Disable the destination without deleting it
  * ```typescript
  * yield* Cloudflare.Workers.ObservabilityDestination("Logs", {
  *   name: "my-app-logs",
@@ -164,10 +167,6 @@ export type ObservabilityDestination = Resource<
  *   enabled: false,
  * });
  * ```
- *
- * @resource
- * @product Workers
- * @category Workers & Compute
  */
 export const ObservabilityDestination =
   Resource<ObservabilityDestination>(TypeId);

@@ -15,8 +15,9 @@ export interface DescribeStreamConsumerRequest extends Omit<
  * consumer's status and ARN — the consumer ARN is injected automatically.
  * Provide the implementation with
  * `Effect.provide(AWS.Kinesis.DescribeStreamConsumerHttp)`.
- * ### Enhanced Fan-Out
- * **Example:** Describe a Registered Consumer
+ * @binding
+ * @section Enhanced Fan-Out
+ * @example Describe a Registered Consumer
  * ```typescript
  * const consumer = yield* AWS.Kinesis.StreamConsumer("Analytics", {
  *   streamArn: stream.streamArn,
@@ -29,8 +30,6 @@ export interface DescribeStreamConsumerRequest extends Omit<
  * const result = yield* describeStreamConsumer();
  * const status = result.ConsumerDescription.ConsumerStatus;
  * ```
- *
- * @binding
  */
 export interface DescribeStreamConsumer extends Binding.Service<
   DescribeStreamConsumer,

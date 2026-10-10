@@ -118,8 +118,11 @@ export type TestSchedule = Resource<
  * state, `read` reports an existing schedule for the same `(url, region)` as
  * `Unowned`, so the engine refuses to take it over unless `--adopt` (or
  * `adopt(true)`) is set.
- * ### Scheduling a test
- * **Example:** Weekly test of the home page
+ * @resource
+ * @product Speed
+ * @category Performance & Reliability
+ * @section Scheduling a test
+ * @example Weekly test of the home page
  * ```typescript
  * yield* Cloudflare.Speed.TestSchedule("HomePageSpeed", {
  *   zoneId: zone.zoneId,
@@ -128,7 +131,7 @@ export type TestSchedule = Resource<
  * });
  * ```
  *
- * **Example:** Daily test of a specific page from Europe
+ * @example Daily test of a specific page from Europe
  * ```typescript
  * yield* Cloudflare.Speed.TestSchedule("PricingSpeedEU", {
  *   zoneId: zone.zoneId,
@@ -139,10 +142,6 @@ export type TestSchedule = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/speed/speed-test/
- *
- * @resource
- * @product Speed
- * @category Performance & Reliability
  */
 export const TestSchedule = Resource<TestSchedule>(TypeId);
 

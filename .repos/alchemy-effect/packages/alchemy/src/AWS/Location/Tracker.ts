@@ -77,23 +77,22 @@ export interface Tracker extends Resource<
  * immutable; position filtering, EventBridge publishing, and the description
  * can be updated in place.
  *
- * ### Creating Trackers
- * **Example:** Basic Tracker
+ * @resource
+ * @section Creating Trackers
+ * @example Basic Tracker
  * ```typescript
  * import * as Location from "alchemy/AWS/Location";
  *
  * const tracker = yield* Location.Tracker("Devices", {});
  * ```
  *
- * **Example:** Distance-Filtered Tracker with EventBridge
+ * @example Distance-Filtered Tracker with EventBridge
  * ```typescript
  * const tracker = yield* Location.Tracker("Fleet", {
  *   positionFiltering: "DistanceBased",
  *   eventBridgeEnabled: true,
  * });
  * ```
- *
- * @resource
  */
 export const Tracker = Resource<Tracker>("AWS.Location.Tracker");
 

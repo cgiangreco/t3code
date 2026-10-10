@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.InviteMembersHttp)`.
- * ### Member Administration
- * **Example:** Invite Members
+ * @binding
+ * @section Member Administration
+ * @example Invite Members
  * ```typescript
  * // init
  * const inviteMembers = yield* AWS.GuardDuty.InviteMembers(detector);
@@ -22,8 +23,6 @@ import type { Detector } from "./Detector.ts";
  *   Message: "Please enable GuardDuty",
  * });
  * ```
- *
- * @binding
  */
 export interface InviteMembers extends Binding.Service<
   InviteMembers,

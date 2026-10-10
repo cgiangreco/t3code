@@ -23,8 +23,9 @@ export interface CreateUsagePlanKeyRequest extends Omit<
  * and meters it. Provide `ApiGateway.CreateUsagePlanKeyHttp` on the
  * Function effect to implement the binding.
  *
- * ### Managing plan keys
- * **Example:** Enroll a freshly issued key
+ * @binding
+ * @section Managing plan keys
+ * @example Enroll a freshly issued key
  * ```typescript
  * // init
  * const createApiKey = yield* ApiGateway.CreateApiKey();
@@ -34,8 +35,6 @@ export interface CreateUsagePlanKeyRequest extends Omit<
  * const key = yield* createApiKey({ name: customerId, enabled: true });
  * yield* createUsagePlanKey({ keyId: key.id! });
  * ```
- *
- * @binding
  */
 export interface CreateUsagePlanKey extends Binding.Service<
   CreateUsagePlanKey,

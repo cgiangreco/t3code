@@ -12,11 +12,12 @@ export interface PutMetricDataRequest extends cloudwatch.PutMetricDataInput {}
  * satisfy the requirement. For high-volume publishing prefer the batching
  * {@link MetricSink}, which packs datums into 1000-datum `PutMetricData`
  * calls.
- * ### Publishing Metrics
- * **Example:** Publish a Custom Metric from a Lambda Function
+ * @binding
+ * @section Publishing Metrics
+ * @example Publish a Custom Metric from a Lambda Function
  * ```typescript
  * export default MyFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     // init — grants cloudwatch:PutMetricData to the function
  *     const putMetricData = yield* AWS.CloudWatch.PutMetricData();
@@ -36,8 +37,6 @@ export interface PutMetricDataRequest extends cloudwatch.PutMetricDataInput {}
  *   }).pipe(Effect.provide(AWS.CloudWatch.PutMetricDataHttp)),
  * );
  * ```
- *
- * @binding
  */
 export interface PutMetricData extends Binding.Service<
   PutMetricData,

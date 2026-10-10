@@ -192,8 +192,11 @@ export type LoadBalancer = Resource<
  * Requires the Load Balancing subscription to be enabled for the zone;
  * without it, creation fails with the typed `LoadBalancingNotEnabledForZone`
  * error.
- * ### Creating a Load Balancer
- * **Example:** DNS-only (unproxied) load balancer
+ * @resource
+ * @product Load Balancers
+ * @category Performance & Reliability
+ * @section Creating a Load Balancer
+ * @example DNS-only (unproxied) load balancer
  * ```typescript
  * const lb = yield* Cloudflare.LoadBalancer.LoadBalancer("ApiLb", {
  *   zoneId: zone.zoneId,
@@ -205,7 +208,7 @@ export type LoadBalancer = Resource<
  * });
  * ```
  *
- * **Example:** Proxied load balancer with steering and affinity
+ * @example Proxied load balancer with steering and affinity
  * ```typescript
  * const lb = yield* Cloudflare.LoadBalancer.LoadBalancer("AppLb", {
  *   zoneId: zone.zoneId,
@@ -218,8 +221,8 @@ export type LoadBalancer = Resource<
  * });
  * ```
  *
- * ### Geo steering
- * **Example:** Region pools
+ * @section Geo steering
+ * @example Region pools
  * ```typescript
  * yield* Cloudflare.LoadBalancer.LoadBalancer("GeoLb", {
  *   zoneId: zone.zoneId,
@@ -235,10 +238,6 @@ export type LoadBalancer = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/load-balancing/
- *
- * @resource
- * @product Load Balancers
- * @category Performance & Reliability
  */
 export const LoadBalancer = Resource<LoadBalancer>(TypeId, {
   aliases: ["Cloudflare.LoadBalancer"],
@@ -385,11 +384,11 @@ const findByName = (zoneId: string, name: string) =>
 
 const resolvePools = (
   pools: Record<string, ReadonlyArray<Input<string>>> | undefined,
-): Record<string, string[]> | undefined =>
+): Record<string, unknown> | undefined =>
   pools === undefined
     ? undefined
     : Object.fromEntries(
-        Object.entries(pools).map(([k, v]) => [k, Array.from(v as string[])]),
+        Object.entries(pools).map(([k, v]) => [k, v as string[]]),
       );
 
 const buildBody = (news: Props) => ({

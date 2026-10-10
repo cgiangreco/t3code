@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Amazon Transcribe batch actions have no resource-level IAM; the host is
  * granted `transcribe:UpdateVocabulary` on `*`.
  *
- * ### Custom Vocabularies
- * **Example:** Update a Custom Vocabulary
+ * @binding
+ * @section Custom Vocabularies
+ * @example Update a Custom Vocabulary
  * ```typescript
  * // init
  * const updateVocabulary = yield* AWS.Transcribe.UpdateVocabulary();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   Phrases: ["Alchemy", "workerd", "distilled"],
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateVocabulary extends Binding.Service<
   UpdateVocabulary,

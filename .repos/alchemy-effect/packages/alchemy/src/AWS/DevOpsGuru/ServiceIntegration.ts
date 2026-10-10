@@ -55,15 +55,15 @@ export interface ServiceIntegration extends Resource<
  * Alchemy did not create requires `--adopt`. Destroying the resource
  * restores the account defaults (everything disabled, AWS-owned key).
  *
- * ### Configuring the Integration
- * **Example:** Enable Log Anomaly Detection
+ * @section Configuring the Integration
+ * @example Enable Log Anomaly Detection
  * ```typescript
  * const integration = yield* DevOpsGuru.ServiceIntegration("Integration", {
  *   logsAnomalyDetection: true,
  * });
  * ```
  *
- * **Example:** File an OpsItem for Every Insight
+ * @example File an OpsItem for Every Insight
  * ```typescript
  * const integration = yield* DevOpsGuru.ServiceIntegration("Integration", {
  *   opsCenter: true,
@@ -71,13 +71,12 @@ export interface ServiceIntegration extends Resource<
  * });
  * ```
  *
- * **Example:** Encrypt with a Customer-Managed Key
+ * @example Encrypt with a Customer-Managed Key
  * ```typescript
  * const integration = yield* DevOpsGuru.ServiceIntegration("Integration", {
  *   kmsKeyId: key.keyId,
  * });
  * ```
- *
  * @resource
  */
 export const ServiceIntegration = Resource<ServiceIntegration>(

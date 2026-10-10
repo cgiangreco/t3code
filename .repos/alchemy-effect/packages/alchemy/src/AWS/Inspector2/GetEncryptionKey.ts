@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.GetEncryptionKeyHttp)`.
- * ### Account Settings & Usage
- * **Example:** Read the CMK for a Scan Type
+ * @binding
+ * @section Account Settings & Usage
+ * @example Read the CMK for a Scan Type
  * ```typescript
  * // init
  * const getEncryptionKey = yield* AWS.Inspector2.GetEncryptionKey();
@@ -21,8 +22,6 @@ import * as Binding from "../../Binding.ts";
  *   scanType: "PACKAGE",
  * });
  * ```
- *
- * @binding
  */
 export interface GetEncryptionKey extends Binding.Service<
   GetEncryptionKey,

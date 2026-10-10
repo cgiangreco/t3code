@@ -1,3 +1,4 @@
+// @effect-diagnostics globalDate:off - This isolated Electron preload does not run inside an Effect runtime.
 import type { DesktopPreviewRecordingFrame } from "@t3tools/contracts";
 import { contextBridge, ipcRenderer } from "electron";
 

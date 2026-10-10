@@ -41,8 +41,9 @@ export type RecordsSinkError =
  * Provide `Timestream.RecordsSinkHttp` on the Function to implement the
  * binding.
  *
- * ### Streaming Records
- * **Example:** Stream records into a table
+ * @binding
+ * @section Streaming Records
+ * @example Stream records into a table
  * ```typescript
  * // init — bind the sink to the table; shared attributes are sent once per
  * // batch as CommonAttributes and merged into every record server-side
@@ -63,8 +64,6 @@ export type RecordsSinkError =
  *   })),
  * ).pipe(Stream.run(sink));
  * ```
- *
- * @binding
  */
 export interface RecordsSink extends Binding.Service<
   RecordsSink,

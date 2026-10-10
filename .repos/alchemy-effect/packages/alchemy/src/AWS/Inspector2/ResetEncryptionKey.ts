@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  *
  * Provide the implementation with
  * `Effect.provide(AWS.Inspector2.ResetEncryptionKeyHttp)`.
- * ### Account Settings & Usage
- * **Example:** Reset to the AWS-Owned Key
+ * @binding
+ * @section Account Settings & Usage
+ * @example Reset to the AWS-Owned Key
  * ```typescript
  * // init
  * const resetEncryptionKey = yield* AWS.Inspector2.ResetEncryptionKey();
@@ -22,8 +23,6 @@ import * as Binding from "../../Binding.ts";
  *   scanType: "PACKAGE",
  * });
  * ```
- *
- * @binding
  */
 export interface ResetEncryptionKey extends Binding.Service<
   ResetEncryptionKey,

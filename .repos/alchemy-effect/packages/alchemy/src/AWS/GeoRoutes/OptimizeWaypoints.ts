@@ -12,12 +12,13 @@ import * as Binding from "../../Binding.ts";
  * `geo-routes:OptimizeWaypoints`. Requests and responses are raw distilled
  * types (positions are `[longitude, latitude]` pairs).
  *
- * ### Optimizing Waypoints
+ * @binding
+ * @section Optimizing Waypoints
  * Provide the `OptimizeWaypointsHttp` implementation layer on the Function
  * effect (`.pipe(Effect.provide(AWS.GeoRoutes.OptimizeWaypointsHttp))`), bind
  * in the init phase, then call the client at runtime.
  *
- * **Example:** Optimize the visiting order of two stops
+ * @example Optimize the visiting order of two stops
  * ```typescript
  * // init
  * const optimizeWaypoints = yield* AWS.GeoRoutes.OptimizeWaypoints();
@@ -33,8 +34,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * const order = result.OptimizedWaypoints.map((w) => w.Id);
  * ```
- *
- * @binding
  */
 export interface OptimizeWaypoints extends Binding.Service<
   OptimizeWaypoints,

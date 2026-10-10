@@ -35,7 +35,7 @@ export const decodeCloudWatchLogsEvent = (
   Effect.try({
     try: () =>
       JSON.parse(
-        gunzipSync(Buffer.from(event.awslogs.data, "base64")).toString(),
+        gunzipSync(Buffer.from(event.awslogs.data, "base64")).toString("utf8"),
       ) as LogsSubscriptionPayload,
     catch: (cause) =>
       new Error("failed to decode CloudWatch Logs subscription payload", {
@@ -54,8 +54,9 @@ export const decodeCloudWatchLogsEvent = (
  * 2. At runtime it decodes the gzipped/base64 `awslogs.data` payload of
  *    incoming invocations and forwards each log event into the supplied
  *    handler as a typed `LogEventRecord` stream.
- * ### Consuming Log Events
- * **Example:** Forward Another Function's Error Logs
+ * @binding
+ * @section Consuming Log Events
+ * @example Forward Another Function's Error Logs
  * ```typescript
  * yield* AWS.Logs.consumeLogEvents(
  *   logGroup,
@@ -66,8 +67,6 @@ export const decodeCloudWatchLogsEvent = (
  *     ),
  * );
  * ```
- *
- * @binding
  */
 export const LogGroupEventSource = Layer.effect(
   LogsLogGroupEventSource,
@@ -136,15 +135,17 @@ export const LogGroupEventSource = Layer.effect(
                 }
                 yield* process(
                   Stream.fromArray(
-                    payload.logEvents.map((logEvent): LogEventRecord => ({
-                      id: logEvent.id,
-                      timestamp: logEvent.timestamp,
-                      message: logEvent.message,
-                      logGroup: payload.logGroup,
-                      logStream: payload.logStream,
-                      owner: payload.owner,
-                      subscriptionFilters: payload.subscriptionFilters,
-                    })),
+                    payload.logEvents.map(
+                      (logEvent): LogEventRecord => ({
+                        id: logEvent.id,
+                        timestamp: logEvent.timestamp,
+                        message: logEvent.message,
+                        logGroup: payload.logGroup,
+                        logStream: payload.logStream,
+                        owner: payload.owner,
+                        subscriptionFilters: payload.subscriptionFilters,
+                      }),
+                    ),
                   ),
                 );
               }).pipe(Effect.orDie);

@@ -17,12 +17,13 @@ export interface DeleteQueuedMessagesRequest extends Omit<
  * downlink messages for the bound wireless device from a deployed Lambda or
  * Task.
  *
- * ### Purging the Downlink Queue
+ * @binding
+ * @section Purging the Downlink Queue
  * Provide the `DeleteQueuedMessagesHttp` implementation layer on the
  * Function effect, bind the device in the init phase, then call the
  * returned client at runtime.
  *
- * **Example:** Purge All Pending Downlinks
+ * @example Purge All Pending Downlinks
  * ```typescript
  * // init
  * const deleteQueued = yield* AWS.IoTWireless.DeleteQueuedMessages(device);
@@ -32,8 +33,6 @@ export interface DeleteQueuedMessagesRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTWireless.DeleteQueuedMessagesHttp))
  * ```
- *
- * @binding
  */
 export interface DeleteQueuedMessages extends Binding.Service<
   DeleteQueuedMessages,

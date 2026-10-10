@@ -5,7 +5,7 @@ import * as Option from "effect/Option";
 import * as Schedule from "effect/Schedule";
 import * as Stream from "effect/Stream";
 
-import type { ScopedPlanStatusSession } from "../../Report.ts";
+import type { ScopedPlanStatusSession } from "../../Cli/Cli.ts";
 import { isResolved } from "../../Diff.ts";
 import * as Provider from "../../Provider.ts";
 import { Resource } from "../../Resource.ts";
@@ -173,11 +173,12 @@ export interface NatGateway extends Resource<
  * `connectivityType`, `allocationId`) are immutable, so changing them replaces
  * the gateway.
  *
- * ### Public NAT Gateways
+ * @resource
+ * @section Public NAT Gateways
  * Public gateways translate private addresses to a stable public IP, so they
  * must be placed in a public subnet (one with a route to an internet gateway)
  * and given an Elastic IP allocation.
- * **Example:** Public NAT Gateway with an Elastic IP
+ * @example Public NAT Gateway with an Elastic IP
  * ```typescript
  * const eip = yield* AWS.EC2.EIP("NatEip", {});
  *
@@ -193,10 +194,10 @@ export interface NatGateway extends Resource<
  * omitted; this is the standard way to give private instances outbound internet
  * access.
  *
- * ### Private NAT Gateways
+ * @section Private NAT Gateways
  * Private gateways have no public IP and route traffic between VPCs or to
  * on-premises networks without exposing it to the internet.
- * **Example:** Private NAT Gateway with a Fixed Private IP
+ * @example Private NAT Gateway with a Fixed Private IP
  * ```typescript
  * const natGateway = yield* AWS.EC2.NatGateway("PrivateNat", {
  *   subnetId: privateSubnet.subnetId,
@@ -208,7 +209,7 @@ export interface NatGateway extends Resource<
  * gateway with no public address; `privateIpAddress` pins it to a specific
  * address in the subnet instead of letting AWS choose one automatically.
  *
- * **Example:** Private NAT Gateway with Secondary Addresses
+ * @example Private NAT Gateway with Secondary Addresses
  * ```typescript
  * const natGateway = yield* AWS.EC2.NatGateway("ScaledNat", {
  *   subnetId: privateSubnet.subnetId,
@@ -221,8 +222,8 @@ export interface NatGateway extends Resource<
  * of simultaneous connections a private gateway can sustain to busy
  * destinations, which is only valid for private gateways.
  *
- * ### Routing Private Traffic
- * **Example:** Default Route Through the NAT Gateway
+ * @section Routing Private Traffic
+ * @example Default Route Through the NAT Gateway
  * ```typescript
  * const natRoute = yield* AWS.EC2.Route("NatRoute", {
  *   routeTableId: privateRouteTable.routeTableId,
@@ -233,8 +234,6 @@ export interface NatGateway extends Resource<
  * Without a route the gateway is inert; this entry sends all outbound traffic
  * from the private subnet's route table through the gateway so private instances
  * can reach the internet.
- *
- * @resource
  */
 export const NatGateway = Resource<NatGateway>("AWS.EC2.NatGateway");
 

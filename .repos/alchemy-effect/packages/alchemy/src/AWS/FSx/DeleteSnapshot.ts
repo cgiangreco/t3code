@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * runtime snapshot rotation built with {@link CreateSnapshot}. Deleting an
  * already-deleted snapshot surfaces the typed `SnapshotNotFound`. Provide
  * the implementation with `Effect.provide(AWS.FSx.DeleteSnapshotHttp)`.
- * ### Managing Snapshots at Runtime
- * **Example:** Rotate out an old snapshot
+ * @binding
+ * @section Managing Snapshots at Runtime
+ * @example Rotate out an old snapshot
  * ```typescript
  * const deleteSnapshot = yield* AWS.FSx.DeleteSnapshot();
  *
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  *   Effect.catchTag("SnapshotNotFound", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteSnapshot extends Binding.Service<
   DeleteSnapshot,

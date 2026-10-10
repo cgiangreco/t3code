@@ -20,13 +20,14 @@ export interface GetListElementsRequest extends Omit<
  * Elements decode as sensitive values (`string | Redacted<string>`); unwrap
  * with `Redacted.value` where needed.
  *
- * ### Reading List Elements
+ * @binding
+ * @section Reading List Elements
  * Provide the `GetListElementsHttp` implementation layer on the Function
  * effect, bind the list in the init phase, then call the returned client at
  * runtime. The binding grants `frauddetector:GetListElements` on the list and
  * injects its `name` automatically.
  *
- * **Example:** Read from a Lambda
+ * @example Read from a Lambda
  * ```typescript
  * // init
  * const getListElements = yield* FraudDetector.GetListElements(blockedIps);
@@ -41,8 +42,6 @@ export interface GetListElementsRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(FraudDetector.GetListElementsHttp))
  * ```
- *
- * @binding
  */
 export interface GetListElements extends Binding.Service<
   GetListElements,

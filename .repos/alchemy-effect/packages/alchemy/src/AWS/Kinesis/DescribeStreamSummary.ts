@@ -15,8 +15,9 @@ export interface DescribeStreamSummaryRequest extends Omit<
  * encryption, and open shard count without paginating the full shard map.
  * Provide the implementation with
  * `Effect.provide(AWS.Kinesis.DescribeStreamSummaryHttp)`.
- * ### Inspecting Streams
- * **Example:** Read the Stream Summary
+ * @binding
+ * @section Inspecting Streams
+ * @example Read the Stream Summary
  * ```typescript
  * // init
  * const describeStreamSummary = yield* AWS.Kinesis.DescribeStreamSummary(stream);
@@ -26,8 +27,6 @@ export interface DescribeStreamSummaryRequest extends Omit<
  * const summary = result.StreamDescriptionSummary;
  * yield* Effect.log(`${summary.StreamStatus}: ${summary.OpenShardCount} shards`);
  * ```
- *
- * @binding
  */
 export interface DescribeStreamSummary extends Binding.Service<
   DescribeStreamSummary,

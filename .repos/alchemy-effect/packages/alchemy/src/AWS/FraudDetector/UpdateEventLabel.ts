@@ -18,13 +18,14 @@ export interface UpdateEventLabelRequest extends Omit<
  * call made from a deployed Lambda or Task when ground truth arrives (e.g. a
  * chargeback confirms fraud). Labeled events improve future model training.
  *
- * ### Labeling Stored Events
+ * @binding
+ * @section Labeling Stored Events
  * Provide the `UpdateEventLabelHttp` implementation layer on the Function
  * effect, bind the event type in the init phase, then call the returned
  * client at runtime. The binding grants `frauddetector:UpdateEventLabel` on
  * the event type and injects its `eventTypeName` automatically.
  *
- * **Example:** Label from a Lambda
+ * @example Label from a Lambda
  * ```typescript
  * // init
  * const updateEventLabel = yield* FraudDetector.UpdateEventLabel(eventType);
@@ -43,8 +44,6 @@ export interface UpdateEventLabelRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(FraudDetector.UpdateEventLabelHttp))
  * ```
- *
- * @binding
  */
 export interface UpdateEventLabel extends Binding.Service<
   UpdateEventLabel,

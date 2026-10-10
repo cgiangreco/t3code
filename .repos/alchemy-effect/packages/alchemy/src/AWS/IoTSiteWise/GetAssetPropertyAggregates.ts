@@ -18,12 +18,13 @@ export interface GetAssetPropertyAggregatesRequest extends Omit<
  * `STANDARD_DEVIATION`) of one property of the bound asset over a time
  * range at a fixed resolution from a deployed Lambda or Task.
  *
- * ### Reading Aggregates
+ * @binding
+ * @section Reading Aggregates
  * Provide the `GetAssetPropertyAggregatesHttp` implementation layer on the
  * Function effect, bind the asset in the init phase, then call the returned
  * client at runtime.
  *
- * **Example:** Hourly Average over the Last Day
+ * @example Hourly Average over the Last Day
  * ```typescript
  * // init
  * const getAggregates = yield* AWS.IoTSiteWise.GetAssetPropertyAggregates(asset);
@@ -40,8 +41,6 @@ export interface GetAssetPropertyAggregatesRequest extends Omit<
  * // on the Function effect:
  * // .pipe(Effect.provide(AWS.IoTSiteWise.GetAssetPropertyAggregatesHttp))
  * ```
- *
- * @binding
  */
 export interface GetAssetPropertyAggregates extends Binding.Service<
   GetAssetPropertyAggregates,

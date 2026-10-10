@@ -20,8 +20,9 @@ export type GetDashboardForJobRunInput = Omit<
  * on-call engineer to debug a slow or failed job without console access.
  * Provide the implementation with
  * `Effect.provide(AWS.EMRServerless.GetDashboardForJobRunHttp)`.
- * ### Dashboards
- * **Example:** Link To A Job's Spark UI
+ * @binding
+ * @section Dashboards
+ * @example Link To A Job's Spark UI
  * ```typescript
  * // init
  * const getDashboardForJobRun =
@@ -30,8 +31,6 @@ export type GetDashboardForJobRunInput = Omit<
  * // runtime
  * const { url } = yield* getDashboardForJobRun({ jobRunId });
  * ```
- *
- * @binding
  */
 export interface GetDashboardForJobRun extends Binding.Service<
   GetDashboardForJobRun,

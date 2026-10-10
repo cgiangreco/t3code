@@ -19,11 +19,10 @@ import { Record as Route53Record } from "../Route53/Record.ts";
 import { Bucket } from "../S3/Bucket.ts";
 import type { AssetFileOption } from "./AssetDeployment.ts";
 import { AssetDeployment } from "./AssetDeployment.ts";
-import {
-  normalizeWebsiteDomain,
-  type SsrSiteRouteTargets,
-  type WebsiteInvalidationProps,
-  type WebsiteStandaloneDomainProps,
+import type {
+  SsrSiteRouteTargets,
+  WebsiteDomainProps,
+  WebsiteInvalidationProps,
 } from "./shared.ts";
 
 /**
@@ -34,8 +33,8 @@ export type SsrSiteServerOrigin =
   | {
       type: "lambda";
       /**
-       * Lambda Function created with `functionUrl` enabled — its function URL
-       * becomes the origin.
+       * Lambda Function created with `url` enabled — its function URL becomes
+       * the origin.
        */
       function: Function;
       /**
@@ -76,10 +75,9 @@ export interface SsrSiteProps {
    */
   server: SsrSiteServerOrigin;
   /**
-   * Optional custom domain managed through Route 53. A string is shorthand
-   * for `{ name }`; `null` explicitly clears a previously set domain.
+   * Optional custom domain managed through Route 53.
    */
-  domain?: string | WebsiteStandaloneDomainProps | null;
+  domain?: WebsiteDomainProps;
   /**
    * Optional static asset bundle to serve from S3.
    */
@@ -139,7 +137,7 @@ const serverUrlOf = (server: SsrSiteServerOrigin): Input<string> => {
       return Output.map((url: string | undefined) => {
         if (!url) {
           throw new Error(
-            "SsrSite lambda origins require a function created with `functionUrl` enabled.",
+            "SsrSite lambda origins require a function created with `url` enabled.",
           );
         }
         return url;
@@ -168,8 +166,9 @@ const serverOriginOf = (server: SsrSiteServerOrigin): Input<string> =>
  *
  * `SsrSite` serves a dynamic origin behind CloudFront and can optionally split
  * immutable static assets into a private S3 bucket origin.
- * ### Creating SSR Sites
- * **Example:** Lambda URL Origin
+ * @resource
+ * @section Creating SSR Sites
+ * @example Lambda URL Origin
  * ```typescript
  * const site = yield* SsrSite("App", {
  *   server: {
@@ -179,7 +178,7 @@ const serverOriginOf = (server: SsrSiteServerOrigin): Input<string> =>
  * });
  * ```
  *
- * **Example:** SSR With Static Assets
+ * @example SSR With Static Assets
  * ```typescript
  * const site = yield* SsrSite("App", {
  *   server: {
@@ -192,8 +191,8 @@ const serverOriginOf = (server: SsrSiteServerOrigin): Input<string> =>
  * });
  * ```
  *
- * ### Custom Domains
- * **Example:** SSR Site With A Route 53 Domain
+ * @section Custom Domains
+ * @example SSR Site With A Route 53 Domain
  * ```typescript
  * const site = yield* SsrSite("App", {
  *   server: {
@@ -207,8 +206,8 @@ const serverOriginOf = (server: SsrSiteServerOrigin): Input<string> =>
  * });
  * ```
  *
- * ### Router Composition
- * **Example:** Route Through An Existing Router
+ * @section Router Composition
+ * @example Route Through An Existing Router
  * ```typescript
  * // Skip the standalone distribution and register the returned
  * // routeTargets on an AWS.Website.Router instead.
@@ -226,12 +225,9 @@ const serverOriginOf = (server: SsrSiteServerOrigin): Input<string> =>
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const SsrSite = (id: string, props: SsrSiteProps) =>
   Effect.gen(function* () {
-    const domain = normalizeWebsiteDomain(props.domain);
     const assetPattern = props.assets?.pathPattern ?? "/_assets/*";
     const serverUrl = serverUrlOf(props.server);
     const serverOriginHost = serverOriginOf(props.server);
@@ -292,11 +288,10 @@ export const SsrSite = (id: string, props: SsrSiteProps) =>
         invalidation: undefined,
         routeTargets,
         url: undefined,
-        urls: [] as Input<string>[],
       };
     }
 
-    if (domain && domain.dns === false && !domain.cert) {
+    if (props.domain && props.domain.dns === false && !props.domain.cert) {
       return yield* Effect.fail(
         new Error(
           "SsrSite domain configuration with `dns: false` requires `cert`.",
@@ -305,22 +300,24 @@ export const SsrSite = (id: string, props: SsrSiteProps) =>
     }
 
     const certificate =
-      !domain || domain.cert
-        ? domain?.cert
-          ? { certificateArn: domain.cert }
+      !props.domain || props.domain.cert
+        ? props.domain?.cert
+          ? { certificateArn: props.domain.cert }
           : undefined
         : yield* Certificate("Certificate", {
-            domainName: domain.name,
+            domainName: props.domain.name,
             subjectAlternativeNames: [
-              ...(domain.aliases ?? []),
-              ...(domain.redirects ?? []),
+              ...(props.domain.aliases ?? []),
+              ...(props.domain.redirects ?? []),
             ],
-            hostedZoneId: domain.hostedZoneId,
+            hostedZoneId: props.domain.hostedZoneId,
             tags: props.tags,
           });
 
     const distribution = yield* Distribution("Distribution", {
-      aliases: domain ? [domain.name, ...(domain.aliases ?? [])] : undefined,
+      aliases: props.domain
+        ? [props.domain.name, ...(props.domain.aliases ?? [])]
+        : undefined,
       origins: [
         {
           id: "server",
@@ -405,18 +402,16 @@ export const SsrSite = (id: string, props: SsrSiteProps) =>
     }
 
     const records =
-      domain && domain.dns !== false
+      props.domain?.hostedZoneId && props.domain.dns !== false
         ? yield* Effect.forEach(
             [
-              domain.name,
-              ...(domain.aliases ?? []),
-              ...(domain.redirects ?? []),
+              props.domain.name,
+              ...(props.domain.aliases ?? []),
+              ...(props.domain.redirects ?? []),
             ],
             (name, index) =>
               Route53Record(`AliasRecord${index + 1}`, {
-                // Optional — the Record provider infers the most specific
-                // public zone containing `name` when omitted.
-                hostedZoneId: domain.hostedZoneId,
+                hostedZoneId: props.domain!.hostedZoneId!,
                 name,
                 type: "A",
                 aliasTarget: {
@@ -443,16 +438,6 @@ export const SsrSite = (id: string, props: SsrSiteProps) =>
                   : props.invalidate.paths,
           });
 
-    // Precedence: the canonical domain, then aliases in declaration order,
-    // then the CloudFront default domain. Redirect hostnames never appear.
-    const urls: Input<string>[] = domain
-      ? [
-          Output.interpolate`https://${domain.name}`,
-          ...(domain.aliases ?? []).map((alias) => `https://${alias}`),
-          Output.interpolate`https://${distribution.domainName}`,
-        ]
-      : [Output.interpolate`https://${distribution.domainName}`];
-
     return {
       assetBucket,
       assetFiles,
@@ -462,16 +447,8 @@ export const SsrSite = (id: string, props: SsrSiteProps) =>
       records,
       invalidation,
       routeTargets,
-      /**
-       * The most significant URL the site serves at — always `urls[0]`.
-       */
-      url: urls[0],
-      /**
-       * Every URL that serves this site, most significant first —
-       * `[https://<domain.name>?, ...aliases, <CloudFront default
-       * domain>]`. Redirect hostnames never appear — they serve no
-       * content.
-       */
-      urls,
+      url: props.domain
+        ? Output.interpolate`https://${props.domain.name}`
+        : Output.interpolate`https://${distribution.domainName}`,
     };
   }).pipe(Namespace.push(id));

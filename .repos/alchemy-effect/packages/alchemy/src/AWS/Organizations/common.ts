@@ -1,25 +1,8 @@
 import * as organizations from "@distilled.cloud/aws/organizations";
 import * as Effect from "effect/Effect";
-import * as Redacted from "effect/Redacted";
 import * as Schedule from "effect/Schedule";
 import { createPhysicalName } from "../../PhysicalName.ts";
 import { createInternalTags, diffTags } from "../../Tags.ts";
-
-/**
- * Distilled decodes `smithy.api#sensitive` strings (`Name`, `Email`,
- * `MasterAccountEmail`) into `Redacted.Redacted<string>` at runtime.
- * Attributes and equality checks must unwrap first — comparing the wrapper
- * against a plain string is always `false` and would persist
- * `{ "__redacted__": … }` into state.
- */
-export const unredact = (
-  value: string | Redacted.Redacted<string> | undefined,
-): string | undefined =>
-  value === undefined
-    ? undefined
-    : Redacted.isRedacted(value)
-      ? Redacted.value(value)
-      : value;
 
 export type OrganizationsTags = Record<string, string>;
 
@@ -104,10 +87,7 @@ export const updateResourceTags = Effect.fn(function* ({
   olds: Record<string, string> | undefined;
   news: Record<string, string> | undefined;
 }) {
-  // `olds` is freshly read from AWS. Do not synthesize ownership tags into
-  // that baseline: doing so hides missing tags from the diff while returning
-  // them as if they had been persisted.
-  const oldTags = olds ?? {};
+  const oldTags = yield* createManagedTags(id, olds);
   const newTags = yield* createManagedTags(id, news);
   const { removed, upsert } = diffTags(oldTags, newTags);
 

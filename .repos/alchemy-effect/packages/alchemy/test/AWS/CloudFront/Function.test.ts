@@ -44,14 +44,11 @@ test.provider(
       yield* stack.destroy();
       yield* assertFunctionDeleted(deployed.fn.functionName);
     }),
-  {
-    tags: ["provider:aws", "provider:aws:cloudfront", "live"],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 // `FunctionConfig.Comment` is patched optional in
-// submodules/distilled/packages/aws/patches/cloudfront.json — CloudFront omits `Comment`
+// distilled/packages/aws/patches/cloudfront.json — CloudFront omits `Comment`
 // in `listFunctions` responses for functions created without one, and a
 // comment-less function anywhere in the account used to fail the decode with
 // `SchemaError: Missing key ... FunctionConfig.Comment`.
@@ -82,10 +79,7 @@ test.provider(
       yield* stack.destroy();
       yield* assertFunctionDeleted(deployed.functionName);
     }),
-  {
-    tags: ["provider:aws", "provider:aws:cloudfront", "live"],
-    timeout: 300_000,
-  },
+  { timeout: 300_000 },
 );
 
 const assertFunctionDeleted = (name: string) =>

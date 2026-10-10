@@ -16,8 +16,9 @@ export interface UpdateQAppSessionMetadataRequest extends Omit<
  *
  * Updates a Q App session's metadata — rename it or reconfigure how it is shared with collaborators. Provide the implementation with
  * `Effect.provide(AWS.QApps.UpdateQAppSessionMetadataHttp)`.
- * ### Sessions
- * **Example:** Share a Session
+ * @binding
+ * @section Sessions
+ * @example Share a Session
  * ```typescript
  * // init — bind the operation to the Q App
  * const updateQAppSessionMetadata = yield* AWS.QApps.UpdateQAppSessionMetadata(app);
@@ -28,8 +29,6 @@ export interface UpdateQAppSessionMetadataRequest extends Omit<
  *   sharingConfiguration: { enabled: true, acceptResponses: true },
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateQAppSessionMetadata extends Binding.Service<
   UpdateQAppSessionMetadata,

@@ -111,8 +111,11 @@ export type DeviceSettings = Resource<
  * fields in place. The pre-management snapshot is captured on first touch
  * and restored on destroy (capture-and-restore), returning the account to
  * the state Alchemy found it in.
- * ### Managing device settings
- * **Example:** Enable the Gateway proxy
+ * @resource
+ * @product Devices
+ * @category Cloudflare One (Zero Trust)
+ * @section Managing device settings
+ * @example Enable the Gateway proxy
  * ```typescript
  * yield* Cloudflare.Devices.DeviceSettings("Devices", {
  *   gatewayProxyEnabled: true,
@@ -120,7 +123,7 @@ export type DeviceSettings = Resource<
  * });
  * ```
  *
- * **Example:** Allow one-hour WARP override codes
+ * @example Allow one-hour WARP override codes
  * ```typescript
  * yield* Cloudflare.Devices.DeviceSettings("Devices", {
  *   disableForTime: 3600,
@@ -128,10 +131,6 @@ export type DeviceSettings = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/
- *
- * @resource
- * @product Devices
- * @category Cloudflare One (Zero Trust)
  */
 export const DeviceSettings = Resource<DeviceSettings>(TypeId);
 

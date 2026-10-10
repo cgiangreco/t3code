@@ -19,8 +19,9 @@ export interface PutActionInteractionsRequest extends Omit<
  * Provide the implementation with
  * `Effect.provide(AWS.Personalize.PutActionInteractionsHttp)`.
  *
- * ### Streaming Events
- * **Example:** Record an Action Interaction
+ * @binding
+ * @section Streaming Events
+ * @example Record an Action Interaction
  * ```typescript
  * // init
  * const putActionInteractions = yield* Personalize.PutActionInteractions(tracker);
@@ -35,8 +36,6 @@ export interface PutActionInteractionsRequest extends Omit<
  *   }],
  * });
  * ```
- *
- * @binding
  */
 export interface PutActionInteractions extends Binding.Service<
   PutActionInteractions,

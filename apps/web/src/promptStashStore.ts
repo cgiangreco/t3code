@@ -1,11 +1,7 @@
-import { ComposerContextRecord, ForwardCompatibleArray } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 import { create } from "zustand";
 
-import {
-  PersistedComposerFileAttachment,
-  PersistedComposerImageAttachment,
-} from "./composerDraftStore";
+import { PersistedComposerImageAttachment } from "./composerDraftStore";
 import { createMemoryStorage, type StateStorage } from "./lib/storage";
 
 export const PROMPT_STASH_STORAGE_KEY = "t3code:prompt-stash:v2";
@@ -31,15 +27,16 @@ export const MAX_STASH_ENTRIES = 20;
 export const MAX_STASH_ENTRY_ATTACHMENT_CHARS = 2_700_000;
 
 /**
- * Stashed files keep signed-upload references instead of storing their bytes.
- * Image payloads remain subject to the localStorage budget.
+ * A stashed prompt carries only what every provider can accept: text and
+ * image attachments. Deliberately no provider instance or model selection —
+ * the point of stashing is to move a prompt into a different thread or
+ * provider, so restoring must never drag the old model choice along.
  */
 const StashEntrySchema = Schema.Struct({
   id: Schema.String,
   createdAt: Schema.String,
   prompt: Schema.String,
   attachments: Schema.Array(PersistedComposerImageAttachment),
-  files: Schema.optionalKey(Schema.Array(PersistedComposerFileAttachment)),
   /** Names of images that exceeded the attachment budget and were not saved. */
   droppedImageNames: Schema.Array(Schema.String),
   /**
@@ -56,12 +53,6 @@ const StashEntrySchema = Schema.Struct({
    * `finalizeEntryImages` lands, and flags entries orphaned by a reload.
    */
   pendingImageCount: Schema.optionalKey(Schema.Number),
-  /**
-   * Payloads behind the prompt's context links (terminal excerpts, review comments, preview
-   * annotations). Images and files have their own fields above. Optional: older entries
-   * decode without it.
-   */
-  records: Schema.optionalKey(ForwardCompatibleArray(ComposerContextRecord)),
 });
 export type PromptStashEntry = typeof StashEntrySchema.Type;
 

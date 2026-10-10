@@ -25,8 +25,9 @@ export interface SelectRequest extends Omit<
  * `Select` addresses the domain inside the expression itself rather than via
  * a request field, so the client accepts either a literal expression or a
  * function of the domain's resolved physical name.
- * ### Querying Items
- * **Example:** Select All Items
+ * @binding
+ * @section Querying Items
+ * @example Select All Items
  * ```typescript
  * const select = yield* AWS.SimpleDB.Select(domain);
  *
@@ -37,15 +38,13 @@ export interface SelectRequest extends Omit<
  * // result.Items: [{ Name: "user#123", Attributes: [...] }, ...]
  * ```
  *
- * **Example:** Select with a Where Clause
+ * @example Select with a Where Clause
  * ```typescript
  * const result = yield* select({
  *   SelectExpression: (domain) =>
  *     `select * from \`${domain}\` where plan = 'pro'`,
  * });
  * ```
- *
- * @binding
  */
 export interface Select extends Binding.Service<
   Select,

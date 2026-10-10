@@ -18,8 +18,9 @@ export interface GetActivityTaskRequest extends Omit<
  * `taskToken` means the poll timed out) — size the host's timeout
  * accordingly. Complete the returned task with `SendTaskSuccess` /
  * `SendTaskFailure`, keeping it alive with `SendTaskHeartbeat`.
- * ### Activity Workers
- * **Example:** Poll for a task and complete it
+ * @binding
+ * @section Activity Workers
+ * @example Poll for a task and complete it
  * ```typescript
  * const getActivityTask = yield* StepFunctions.GetActivityTask(activity);
  * const sendTaskSuccess = yield* StepFunctions.SendTaskSuccess(activity);
@@ -32,8 +33,6 @@ export interface GetActivityTaskRequest extends Omit<
  *   });
  * }
  * ```
- *
- * @binding
  */
 export interface GetActivityTask extends Binding.Service<
   GetActivityTask,

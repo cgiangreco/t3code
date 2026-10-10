@@ -21,16 +21,15 @@ export interface ListModelManifestNodesRequest extends Omit<
  * the implementation with
  * `Effect.provide(AWS.IoTFleetWise.ListModelManifestNodesHttp)`.
  *
- * ### Inspecting Signal Definitions
- * **Example:** List a Vehicle Model's Signals
+ * @binding
+ * @section Inspecting Signal Definitions
+ * @example List a Vehicle Model's Signals
  * ```typescript
  * const listModelManifestNodes =
  *   yield* IoTFleetWise.ListModelManifestNodes(model);
  *
  * const { nodes } = yield* listModelManifestNodes();
  * ```
- *
- * @binding
  */
 export interface ListModelManifestNodes extends Binding.Service<
   ListModelManifestNodes,

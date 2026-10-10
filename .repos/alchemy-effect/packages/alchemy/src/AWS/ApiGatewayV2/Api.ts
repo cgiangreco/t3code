@@ -107,19 +107,20 @@ export interface Api extends Resource<
  * (compared to REST v1). WebSocket APIs provide two-way real-time messaging
  * backed by Lambda route handlers. Child resources (`Integration`, `Route`,
  * `Stage`, `Authorizer`) reference the API by passing `api` in their props.
- * ### HTTP APIs
+ * @resource
+ * @section HTTP APIs
  * For the common "HTTP API in front of a Lambda function" case, prefer the
  * high-level {@link HttpApi} helper which wires up the integration, route,
  * stage, and invoke permission in one call.
  *
- * **Example:** Minimal HTTP API
+ * @example Minimal HTTP API
  * ```typescript
  * import * as ApiGatewayV2 from "alchemy/AWS/ApiGatewayV2";
  *
  * const api = yield* ApiGatewayV2.Api("Api", {});
  * ```
  *
- * **Example:** HTTP API with CORS
+ * @example HTTP API with CORS
  * ```typescript
  * const api = yield* ApiGatewayV2.Api("Api", {
  *   corsConfiguration: {
@@ -131,8 +132,8 @@ export interface Api extends Resource<
  * });
  * ```
  *
- * ### WebSocket APIs
- * **Example:** WebSocket API
+ * @section WebSocket APIs
+ * @example WebSocket API
  * ```typescript
  * const api = yield* ApiGatewayV2.Api("WsApi", {
  *   protocolType: "WEBSOCKET",
@@ -140,15 +141,13 @@ export interface Api extends Resource<
  * });
  * ```
  *
- * ### Endpoint hardening
- * **Example:** Disable the default execute-api endpoint
+ * @section Endpoint hardening
+ * @example Disable the default execute-api endpoint
  * ```typescript
  * const api = yield* ApiGatewayV2.Api("Api", {
  *   disableExecuteApiEndpoint: true,
  * });
  * ```
- *
- * @resource
  */
 export const Api = Resource<Api>("AWS.ApiGatewayV2.Api");
 

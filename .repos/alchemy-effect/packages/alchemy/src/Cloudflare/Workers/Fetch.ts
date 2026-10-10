@@ -4,12 +4,11 @@ import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Result from "effect/Result";
 import * as Stream from "effect/Stream";
-import * as HttpClientError from "effect/http/HttpClientError";
-import * as HttpClientRequest from "effect/http/HttpClientRequest";
-import * as HttpClientResponse from "effect/http/HttpClientResponse";
-import * as Url from "effect/http/Url";
+import * as HttpClientError from "effect/unstable/http/HttpClientError";
+import * as HttpClientRequest from "effect/unstable/http/HttpClientRequest";
+import * as HttpClientResponse from "effect/unstable/http/HttpClientResponse";
+import * as Url from "effect/unstable/http/Url";
 import * as Binding from "../../Binding.ts";
-import type { RuntimeContext } from "../../RuntimeContext.ts";
 import { isWorker, type Worker, WorkerEnvironment } from "./Worker.ts";
 
 /**
@@ -27,8 +26,7 @@ export interface Fetch extends Binding.Service<
       request: HttpClientRequest.HttpClientRequest,
     ) => Effect.Effect<
       HttpClientResponse.HttpClientResponse,
-      HttpClientError.RequestError,
-      RuntimeContext
+      HttpClientError.RequestError
     >
   >
 > {}
@@ -42,29 +40,25 @@ export const FetchBinding = Layer.effect(
 
     return Effect.fn(function* (worker: Worker) {
       if (!globalThis.__ALCHEMY_RUNTIME__) {
-        // Deploy-time only: register the service binding for the *target*
-        // worker on the host Worker.
         const host = yield* Binding.Host;
         if (isWorker(host)) {
-          yield* host.bind`${worker}`({
+          yield* host.bind`${host}`({
             bindings: [
               {
                 type: "service",
-                name: worker.LogicalId,
-                service: worker.workerName,
+                name: host.LogicalId,
+                service: host.workerName,
               },
             ],
           });
         }
       }
-      // Lazy — the `WorkerEnvironment` bindings are only populated at exec
-      // phase, so the fetcher must be resolved per call, not at bind time.
-      const fetcher = Effect.sync(
-        () => (env as Record<string, runtime.Fetcher>)[worker.LogicalId]!,
-      ) as Effect.Effect<runtime.Fetcher, never, RuntimeContext>;
+      const fetcher = (env as Record<string, runtime.Fetcher>)[
+        worker.LogicalId
+      ];
 
       return (request: HttpClientRequest.HttpClientRequest) =>
-        Effect.flatMap(fetcher, (f) => doFetch(f, request));
+        doFetch(fetcher, request);
     });
   }),
 );

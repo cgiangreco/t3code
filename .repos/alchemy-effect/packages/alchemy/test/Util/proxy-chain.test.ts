@@ -1,7 +1,6 @@
 import { proxyChain } from "@/Util/proxy-chain.ts";
 import { describe, expect, it } from "alchemy-test";
 import * as Effect from "effect/Effect";
-import * as Exit from "effect/Exit";
 
 const TIMEOUT = 5_000;
 
@@ -25,7 +24,7 @@ const makeDb = () => ({
 
 type Db = ReturnType<typeof makeDb>;
 
-describe("proxyChain", { tags: ["unit", "local"], timeout: 5000 }, () => {
+describe("proxyChain", () => {
   it.effect("replays a property-read + call chain when yielded", () =>
     Effect.gen(function* () {
       const db = proxyChain<Db>(Effect.succeed(makeDb()));
@@ -130,32 +129,6 @@ describe("proxyChain", { tags: ["unit", "local"], timeout: 5000 }, () => {
       );
 
       expect(result).toBe("recovered");
-    }),
-  );
-
-  /**
-   * effect ≥ 4.0.0-rc.113's generator runner asks `value[ExitTypeId] !==
-   * undefined` to tell an Exit from an Effect. If the proxy answered that
-   * brand probe with a chain step, every `yield*` would resume with the
-   * proxy itself instead of the query result (the bug behind `users.length`
-   * serializing as `{ _id: "Effect", op: "OnSuccess" }`).
-   */
-  it.effect("does not record Effect brand probes as chain steps", () =>
-    Effect.gen(function* () {
-      const db = proxyChain<Db>(Effect.succeed(makeDb()));
-      const query = db.select().from("users") as unknown as Record<
-        PropertyKey,
-        unknown
-      >;
-      expect(query["~effect/Exit"]).toBeUndefined();
-      expect(Exit.isExit(query)).toBe(false);
-      expect(Effect.isEffect(query)).toBe(true);
-      // Symbols the runtime does not define on an Effect are absent too.
-      expect(query[Symbol.for("some/unrelated/probe")]).toBeUndefined();
-      // …and the chain still resolves to the real value when yielded.
-      const rows = yield* db.select().from("users");
-      expect(Array.isArray(rows)).toBe(true);
-      expect(rows).toEqual(["hi/users"]);
     }),
   );
 
@@ -290,4 +263,4 @@ describe("proxyChain", { tags: ["unit", "local"], timeout: 5000 }, () => {
         }),
     );
   });
-});
+}, 5000);

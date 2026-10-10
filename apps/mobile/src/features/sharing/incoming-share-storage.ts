@@ -4,7 +4,7 @@ import { decodeIncomingShareDraft, type IncomingShareDraft } from "./incoming-sh
 
 const INCOMING_SHARE_DIRECTORY = "incoming-shares";
 
-export class IncomingShareStorageError extends Schema.TaggedError<IncomingShareStorageError>()(
+export class IncomingShareStorageError extends Schema.TaggedErrorClass<IncomingShareStorageError>()(
   "IncomingShareStorageError",
   {
     operation: Schema.Literals(["load", "write", "remove"]),
@@ -33,9 +33,7 @@ async function getFile(shareId: string) {
   return new File(await getDirectory(), fileName(shareId));
 }
 
-export async function loadIncomingShareDrafts(options?: {
-  readonly strict?: boolean;
-}): Promise<ReadonlyArray<IncomingShareDraft>> {
+export async function loadIncomingShareDrafts(): Promise<ReadonlyArray<IncomingShareDraft>> {
   try {
     const { File } = await import("expo-file-system");
     const drafts: IncomingShareDraft[] = [];
@@ -46,18 +44,14 @@ export async function loadIncomingShareDrafts(options?: {
       try {
         drafts.push(decodeIncomingShareDraft(JSON.parse(await entry.text()) as unknown));
       } catch (cause) {
-        const error = new IncomingShareStorageError({ operation: "load", shareId: null, cause });
-        if (options?.strict) {
-          throw error;
-        }
-        console.warn("[incoming-share] ignored invalid persisted share", error);
+        console.warn(
+          "[incoming-share] ignored invalid persisted share",
+          new IncomingShareStorageError({ operation: "load", shareId: null, cause }),
+        );
       }
     }
     return drafts.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
   } catch (cause) {
-    if (cause instanceof IncomingShareStorageError) {
-      throw cause;
-    }
     throw new IncomingShareStorageError({ operation: "load", shareId: null, cause });
   }
 }
@@ -68,7 +62,7 @@ export async function writeIncomingShareDraft(draft: IncomingShareDraft): Promis
     if (!file.exists) {
       file.create({ intermediates: true, overwrite: true });
     }
-    await file.write(JSON.stringify(draft));
+    file.write(JSON.stringify(draft));
   } catch (cause) {
     throw new IncomingShareStorageError({ operation: "write", shareId: draft.id, cause });
   }

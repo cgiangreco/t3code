@@ -178,8 +178,11 @@ export type BotManagement = Resource<
  * Fields that were never set by this resource are not touched. Settings
  * changed out-of-band after the snapshot was taken, or fields the zone's
  * plan no longer accepts, cannot be restored.
- * ### Super Bot Fight Mode
- * **Example:** Challenge definitely automated traffic (Pro and above)
+ * @resource
+ * @product Bot Management
+ * @category Application Security
+ * @section Super Bot Fight Mode
+ * @example Challenge definitely automated traffic (Pro and above)
  * ```typescript
  * yield* Cloudflare.BotManagement.BotManagement("Bots", {
  *   zoneId: zone.zoneId,
@@ -188,7 +191,7 @@ export type BotManagement = Resource<
  * });
  * ```
  *
- * **Example:** Static resource protection and WordPress optimization
+ * @example Static resource protection and WordPress optimization
  * ```typescript
  * yield* Cloudflare.BotManagement.BotManagement("Bots", {
  *   zoneId: zone.zoneId,
@@ -198,8 +201,8 @@ export type BotManagement = Resource<
  * });
  * ```
  *
- * ### AI bot protection
- * **Example:** Block AI scrapers and crawlers
+ * @section AI bot protection
+ * @example Block AI scrapers and crawlers
  * ```typescript
  * yield* Cloudflare.BotManagement.BotManagement("Bots", {
  *   zoneId: zone.zoneId,
@@ -208,8 +211,8 @@ export type BotManagement = Resource<
  * });
  * ```
  *
- * ### Bot Fight Mode (Free plans)
- * **Example:** Enable Bot Fight Mode
+ * @section Bot Fight Mode (Free plans)
+ * @example Enable Bot Fight Mode
  * ```typescript
  * yield* Cloudflare.BotManagement.BotManagement("Bots", {
  *   zoneId: zone.zoneId,
@@ -218,10 +221,6 @@ export type BotManagement = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/bots/
- *
- * @resource
- * @product Bot Management
- * @category Application Security
  */
 export const BotManagement = Resource<BotManagement>(TypeId, {
   aliases: ["Cloudflare.BotManagement"],

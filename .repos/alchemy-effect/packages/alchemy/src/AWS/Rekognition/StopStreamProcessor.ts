@@ -11,8 +11,9 @@ import * as Binding from "../../Binding.ts";
  * their identifiers are unknown at deploy time). Provide the
  * implementation with `Effect.provide(AWS.Rekognition.StopStreamProcessorHttp)`.
  *
- * ### Stream Processors
- * **Example:** Stop a Stream Processor
+ * @binding
+ * @section Stream Processors
+ * @example Stop a Stream Processor
  * ```typescript
  * // init
  * const stopStreamProcessor = yield* AWS.Rekognition.StopStreamProcessor();
@@ -20,8 +21,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * yield* stopStreamProcessor({ Name: "lobby-camera" });
  * ```
- *
- * @binding
  */
 export interface StopStreamProcessor extends Binding.Service<
   StopStreamProcessor,

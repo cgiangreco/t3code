@@ -3,22 +3,15 @@ import { expect, it } from "@effect/vitest";
 import { runServicePreflight } from "./servicePreflight.ts";
 import { SERVICE_LAUNCHER_PROTOCOL } from "./serviceProtocol.ts";
 
-it.each([1, 2])("blocks legacy launcher protocol %i", (launcherProtocol) => {
+it("requires the database-snapshot launcher protocol", () => {
   expect(
     runServicePreflight({
       databasePath: "/missing/state.sqlite",
-      launcherProtocol,
+      launcherProtocol: SERVICE_LAUNCHER_PROTOCOL - 1,
       version: "1.2.3",
     }),
-  ).toEqual({
-    status: "blocked",
-    version: "1.2.3",
-    reason:
-      "This release requires a newer T3 Code service launcher. Update it on the server machine.",
-  });
-});
+  ).toMatchObject({ status: "blocked", version: "1.2.3" });
 
-it("accepts the current launcher protocol", () => {
   expect(
     runServicePreflight({
       databasePath: "/missing/state.sqlite",

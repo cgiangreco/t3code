@@ -125,8 +125,9 @@ export interface IntegrationType extends Resource<
  * For HTTP APIs the common integration is `AWS_PROXY` with payload format
  * `2.0`, pointing directly at a Lambda function ARN. For WebSocket APIs the
  * `integrationUri` must be the full Lambda invocation URI.
- * ### Lambda proxy integration (HTTP API)
- * **Example:** AWS_PROXY integration with payload 2.0
+ * @resource
+ * @section Lambda proxy integration (HTTP API)
+ * @example AWS_PROXY integration with payload 2.0
  * ```typescript
  * const integration = yield* ApiGatewayV2.Integration("Fn", {
  *   api,
@@ -136,8 +137,8 @@ export interface IntegrationType extends Resource<
  * });
  * ```
  *
- * ### HTTP proxy integration
- * **Example:** Forward to an external HTTP endpoint
+ * @section HTTP proxy integration
+ * @example Forward to an external HTTP endpoint
  * ```typescript
  * const integration = yield* ApiGatewayV2.Integration("Upstream", {
  *   api,
@@ -147,8 +148,6 @@ export interface IntegrationType extends Resource<
  *   payloadFormatVersion: "1.0",
  * });
  * ```
- *
- * @resource
  */
 export const IntegrationResource = Resource<IntegrationType>(
   "AWS.ApiGatewayV2.Integration",

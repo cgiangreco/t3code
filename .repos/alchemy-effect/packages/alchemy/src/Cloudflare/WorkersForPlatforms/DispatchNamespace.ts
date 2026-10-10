@@ -75,21 +75,24 @@ export type DispatchNamespace = Resource<
  *
  * Note: Workers for Platforms is a paid add-on. On accounts without the
  * subscription, namespace creation fails with an entitlement error.
- * ### Creating a Dispatch Namespace
- * **Example:** Namespace with a generated name
+ * @resource
+ * @product Workers for Platforms
+ * @category Workers & Compute
+ * @section Creating a Dispatch Namespace
+ * @example Namespace with a generated name
  * ```typescript
  * const namespace = yield* Cloudflare.WorkersForPlatforms.DispatchNamespace("Customers", {});
  * ```
  *
- * **Example:** Namespace with an explicit name
+ * @example Namespace with an explicit name
  * ```typescript
  * const namespace = yield* Cloudflare.WorkersForPlatforms.DispatchNamespace("Customers", {
  *   name: "my-platform-customers",
  * });
  * ```
  *
- * ### Uploading user Workers
- * **Example:** Upload a customer Worker into the namespace
+ * @section Uploading user Workers
+ * @example Upload a customer Worker into the namespace
  * A {@link Cloudflare.Worker} deploys into the namespace as a "user worker"
  * (rather than as a routable account-level script) when its `namespace` prop is
  * set. Reference the namespace by its `name` output so it deploys first.
@@ -102,8 +105,8 @@ export type DispatchNamespace = Resource<
  * });
  * ```
  *
- * ### Dispatching from a platform Worker
- * **Example:** Effect-native binding via `Get`
+ * @section Dispatching from a platform Worker
+ * @example Effect-native binding via `Get`
  * `Cloudflare.WorkersForPlatforms.Get(namespace)` binds the namespace and
  * returns an Effect-native client; `get(name)` resolves a user Worker by script
  * name. Provide {@link GetBinding} on the Worker's runtime layer.
@@ -119,7 +122,7 @@ export type DispatchNamespace = Resource<
  * };
  * ```
  *
- * **Example:** Async binding via `env` + `InferEnv`
+ * @example Async binding via `env` + `InferEnv`
  * Passing the namespace on a Worker's `env` binds it as a native
  * `dispatch_namespace` binding; `Cloudflare.InferEnv` types `env.DISPATCH` as
  * the runtime `DispatchNamespace`, so the async handler calls `.get(name)`
@@ -140,10 +143,6 @@ export type DispatchNamespace = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/
- *
- * @resource
- * @product Workers for Platforms
- * @category Workers & Compute
  */
 export const DispatchNamespace = Resource<DispatchNamespace>(TypeId);
 

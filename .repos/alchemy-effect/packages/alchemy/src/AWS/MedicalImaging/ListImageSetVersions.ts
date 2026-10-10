@@ -21,16 +21,15 @@ export interface ListImageSetVersionsRequest extends Omit<
  * revertible. Provide the implementation with
  * `Effect.provide(AWS.MedicalImaging.ListImageSetVersionsHttp)`.
  *
- * ### Reading Image Sets
- * **Example:** List an Image Set's Versions
+ * @binding
+ * @section Reading Image Sets
+ * @example List an Image Set's Versions
  * ```typescript
  * const listVersions = yield* MedicalImaging.ListImageSetVersions(datastore);
  *
  * const versions = yield* listVersions({ imageSetId });
  * // versions.imageSetPropertiesList[i].versionId
  * ```
- *
- * @binding
  */
 export interface ListImageSetVersions extends Binding.Service<
   ListImageSetVersions,

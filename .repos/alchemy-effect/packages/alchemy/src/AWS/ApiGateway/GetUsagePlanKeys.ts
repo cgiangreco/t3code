@@ -15,8 +15,9 @@ export interface GetUsagePlanKeysRequest extends Omit<
  * Provide `ApiGateway.GetUsagePlanKeysHttp` on the Function effect to
  * implement the binding.
  *
- * ### Managing plan keys
- * **Example:** List enrolled keys
+ * @binding
+ * @section Managing plan keys
+ * @example List enrolled keys
  * ```typescript
  * // init
  * const getUsagePlanKeys = yield* ApiGateway.GetUsagePlanKeys(plan);
@@ -24,8 +25,6 @@ export interface GetUsagePlanKeysRequest extends Omit<
  * // runtime
  * const page = yield* getUsagePlanKeys({ limit: 100 });
  * ```
- *
- * @binding
  */
 export interface GetUsagePlanKeys extends Binding.Service<
   GetUsagePlanKeys,

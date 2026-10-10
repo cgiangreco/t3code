@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * identified by its `KeyAttributes` (`Type`/`Name`/`Environment`). Provide
  * the implementation with
  * `Effect.provide(AWS.ApplicationSignals.GetServiceHttp)`.
- * ### Discovering Services
- * **Example:** Get a Discovered Service
+ * @binding
+ * @section Discovering Services
+ * @example Get a Discovered Service
  * ```typescript
  * // init — account-level, no resource argument
  * const getService = yield* AWS.ApplicationSignals.GetService();
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface GetService extends Binding.Service<
   GetService,

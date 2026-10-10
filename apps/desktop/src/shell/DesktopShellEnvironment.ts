@@ -1,4 +1,3 @@
-import { listLoginShellCandidates } from "@t3tools/shared/shell";
 import * as Context from "effect/Context";
 import * as Duration from "effect/Duration";
 import * as Effect from "effect/Effect";
@@ -6,9 +5,8 @@ import * as FileSystem from "effect/FileSystem";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
-import * as Stream from "effect/Stream";
-import * as ChildProcess from "effect/process/ChildProcess";
-import * as ChildProcessSpawner from "effect/process/ChildProcessSpawner";
+import * as ChildProcess from "effect/unstable/process/ChildProcess";
+import * as ChildProcessSpawner from "effect/unstable/process/ChildProcessSpawner";
 
 import * as DesktopEnvironment from "../app/DesktopEnvironment.ts";
 
@@ -17,6 +15,7 @@ type EnvironmentPatch = Record<string, string>;
 interface ShellEnvironmentConfig {
   readonly env: NodeJS.ProcessEnv;
   readonly platform: NodeJS.Platform;
+  readonly userShell: Option.Option<string>;
 }
 
 interface WindowsProbeOptions {
@@ -37,7 +36,7 @@ const desktopShellEnvironmentCommandFields = {
   argumentCount: Schema.Number,
 };
 
-export class DesktopShellEnvironmentCommandError extends Schema.TaggedError<DesktopShellEnvironmentCommandError>()(
+export class DesktopShellEnvironmentCommandError extends Schema.TaggedErrorClass<DesktopShellEnvironmentCommandError>()(
   "DesktopShellEnvironmentCommandError",
   {
     ...desktopShellEnvironmentCommandFields,
@@ -49,7 +48,7 @@ export class DesktopShellEnvironmentCommandError extends Schema.TaggedError<Desk
   }
 }
 
-export class DesktopShellEnvironmentCommandTimeoutError extends Schema.TaggedError<DesktopShellEnvironmentCommandTimeoutError>()(
+export class DesktopShellEnvironmentCommandTimeoutError extends Schema.TaggedErrorClass<DesktopShellEnvironmentCommandTimeoutError>()(
   "DesktopShellEnvironmentCommandTimeoutError",
   {
     ...desktopShellEnvironmentCommandFields,
@@ -72,9 +71,6 @@ const LOGIN_SHELL_ENV_NAMES = [
   "PATH",
   "DBUS_SESSION_BUS_ADDRESS",
   "DISPLAY",
-  "LANG",
-  "LC_ALL",
-  "LC_CTYPE",
   "SSH_AUTH_SOCK",
   "HOMEBREW_PREFIX",
   "HOMEBREW_CELLAR",
@@ -86,11 +82,8 @@ const LOGIN_SHELL_ENV_NAMES = [
   "XDG_SESSION_DESKTOP",
   "XDG_SESSION_TYPE",
   "WAYLAND_DISPLAY",
-  "T3CODE_TELEMETRY_ENABLED",
 ] as const;
 const WINDOWS_PROFILE_ENV_NAMES = ["PATH", "FNM_DIR", "FNM_MULTISHELL_PATH"] as const;
-const LOCALE_ENV_NAMES = ["LANG", "LC_ALL", "LC_CTYPE"] as const;
-const FALLBACK_LC_CTYPE = "en_US.UTF-8";
 const WINDOWS_SHELL_CANDIDATES = ["pwsh.exe", "powershell.exe"] as const;
 const LOGIN_SHELL_TIMEOUT = Duration.seconds(5);
 const LAUNCHCTL_TIMEOUT = Duration.seconds(2);
@@ -124,13 +117,34 @@ const linuxRuntimeDirCandidates = (
   return candidates.filter((candidate) => candidate.length > 0);
 };
 
+function resolveDefaultLinuxDbusSessionBusPath(input: {
+  readonly env: NodeJS.ProcessEnv;
+  readonly uid: number | undefined;
+  readonly exists?: (path: string) => boolean;
+}): string | null {
+  for (const runtimeDir of linuxRuntimeDirCandidates(input.env, input.uid)) {
+    const busPath = `${runtimeDir}/bus`;
+    if (input.exists === undefined || input.exists(busPath)) {
+      return busPath;
+    }
+  }
+
+  return null;
+}
+
+export function resolveDefaultLinuxDbusSessionBusAddress(input: {
+  readonly env: NodeJS.ProcessEnv;
+  readonly exists: (path: string) => boolean;
+  readonly uid: number | undefined;
+}): string | null {
+  const busPath = resolveDefaultLinuxDbusSessionBusPath(input);
+  return busPath !== null && input.exists(busPath) ? `unix:path=${busPath}` : null;
+}
+
 const pathComparisonKey = (entry: string, platform: NodeJS.Platform) => {
   const normalized = entry.trim().replace(/^"+|"+$/g, "");
   return platform === "win32" ? normalized.toLowerCase() : normalized;
 };
-
-const sanitizePathEntry = (entry: string, platform: NodeJS.Platform) =>
-  platform === "win32" ? entry.replaceAll('"', "") : entry;
 
 const mergePaths = (
   platform: NodeJS.Platform,
@@ -144,18 +158,37 @@ const mergePaths = (
     if (Option.isNone(value)) continue;
 
     for (const entry of value.value.split(delimiter)) {
-      const sanitized = sanitizePathEntry(entry.trim(), platform);
-      if (sanitized.length === 0) continue;
+      const trimmed = entry.trim();
+      if (trimmed.length === 0) continue;
 
-      const key = pathComparisonKey(sanitized, platform);
+      const key = pathComparisonKey(trimmed, platform);
       if (key.length === 0 || seen.has(key)) continue;
 
       seen.add(key);
-      entries.push(sanitized);
+      entries.push(trimmed);
     }
   }
 
   return entries.length > 0 ? Option.some(entries.join(delimiter)) : Option.none();
+};
+
+const listLoginShellCandidates = (config: ShellEnvironmentConfig): ReadonlyArray<string> => {
+  const fallback =
+    config.platform === "darwin" ? "/bin/zsh" : config.platform === "linux" ? "/bin/bash" : "";
+  const seen = new Set<string>();
+  const candidates: string[] = [];
+
+  for (const candidate of [
+    trimNonEmpty(config.env.SHELL),
+    config.userShell,
+    trimNonEmpty(fallback),
+  ]) {
+    if (Option.isNone(candidate) || seen.has(candidate.value)) continue;
+    seen.add(candidate.value);
+    candidates.push(candidate.value);
+  }
+
+  return candidates;
 };
 
 const knownWindowsCliDirs = (env: NodeJS.ProcessEnv): ReadonlyArray<string> => [
@@ -174,7 +207,7 @@ const knownWindowsCliDirs = (env: NodeJS.ProcessEnv): ReadonlyArray<string> => [
   ...trimNonEmpty(env.USERPROFILE).pipe(
     Option.match({
       onNone: () => [],
-      onSome: (value) => [`${value}\\.local\\bin`, `${value}\\.bun\\bin`, `${value}\\scoop\\shims`],
+      onSome: (value) => [`${value}\\.bun\\bin`, `${value}\\scoop\\shims`],
     }),
   ),
 ];
@@ -249,49 +282,33 @@ const runCommandOutput = Effect.fn("desktop.shellEnvironment.runCommandOutput")(
   readonly shell?: boolean;
 }): Effect.fn.Return<string, never, ChildProcessSpawner.ChildProcessSpawner> {
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
-  const output = yield* Effect.scoped(
-    Effect.gen(function* () {
-      const child = yield* spawner.spawn(
-        ChildProcess.make(input.command, input.args, {
-          shell: input.shell ?? false,
-          stdin: "ignore",
-          stdout: "pipe",
-          stderr: "pipe",
-          killSignal: "SIGTERM",
-          forceKillAfter: PROCESS_TERMINATE_GRACE,
-        }),
-      );
-      return yield* Effect.all([Stream.mkString(Stream.decodeText(child.stdout)), child.exitCode], {
-        concurrency: 2,
-      });
-    }),
-  ).pipe(
-    Effect.mapError(
-      (cause) =>
-        new DesktopShellEnvironmentCommandError({
-          probe: input.probe,
-          executable: executableName(input.command),
-          argumentCount: input.args.length,
-          cause,
-        }),
-    ),
-    Effect.filterOrFail(
-      ([, exitCode]) => exitCode === 0,
-      ([, exitCode]) =>
-        new DesktopShellEnvironmentCommandError({
-          probe: input.probe,
-          executable: executableName(input.command),
-          argumentCount: input.args.length,
-          cause: { exitCode },
-        }),
-    ),
-    Effect.map(([stdout]) => stdout),
-    Effect.catchTags({
-      DesktopShellEnvironmentCommandError: (error) =>
-        logShellEnvironmentCommandError(error).pipe(Effect.as("")),
-    }),
-    Effect.timeoutOption(input.timeout),
-  );
+  const output = yield* spawner
+    .string(
+      ChildProcess.make(input.command, input.args, {
+        shell: input.shell ?? false,
+        stdin: "ignore",
+        stdout: "pipe",
+        stderr: "pipe",
+        killSignal: "SIGTERM",
+        forceKillAfter: PROCESS_TERMINATE_GRACE,
+      }),
+    )
+    .pipe(
+      Effect.mapError(
+        (cause) =>
+          new DesktopShellEnvironmentCommandError({
+            probe: input.probe,
+            executable: executableName(input.command),
+            argumentCount: input.args.length,
+            cause,
+          }),
+      ),
+      Effect.catchTags({
+        DesktopShellEnvironmentCommandError: (error) =>
+          logShellEnvironmentCommandError(error).pipe(Effect.as("")),
+      }),
+      Effect.timeoutOption(input.timeout),
+    );
   if (Option.isSome(output)) {
     return output.value;
   }
@@ -362,18 +379,10 @@ const installWindowsEnvironment = Effect.fn("desktop.shellEnvironment.installWin
   function* (
     config: ShellEnvironmentConfig,
   ): Effect.fn.Return<void, never, ChildProcessSpawner.ChildProcessSpawner> {
-    // Concurrent, not sequential: these two probes are independent (only their
-    // results are combined below) and each spawns its own PowerShell. Run in
-    // series they sit at offset 0 of desktop.startup, before anything else, and
-    // launch traces measured them at 2718ms then 2066ms — the entire 4.8s
-    // startup span, of which desktop.bootstrap is ~30ms.
-    const [noProfile, profile] = yield* Effect.all(
-      [
-        readWindowsEnvironment(["PATH"], { loadProfile: false }),
-        readWindowsEnvironment(WINDOWS_PROFILE_ENV_NAMES, { loadProfile: true }),
-      ],
-      { concurrency: 2 },
-    );
+    const noProfile = yield* readWindowsEnvironment(["PATH"], { loadProfile: false });
+    const profile = yield* readWindowsEnvironment(WINDOWS_PROFILE_ENV_NAMES, {
+      loadProfile: true,
+    });
     const mergedPath = mergePaths("win32", [
       trimNonEmpty(profile.PATH),
       trimNonEmpty(knownWindowsCliDirs(config.env).join(";")),
@@ -404,7 +413,7 @@ const installPosixEnvironment = Effect.fn("desktop.shellEnvironment.installPosix
     const fileSystem = yield* FileSystem.FileSystem;
     const shellEnvironment: EnvironmentPatch = {};
 
-    for (const shell of listLoginShellCandidates(config.platform, config.env.SHELL)) {
+    for (const shell of listLoginShellCandidates(config)) {
       Object.assign(
         shellEnvironment,
         yield* readLoginShellEnvironment(shell, LOGIN_SHELL_ENV_NAMES),
@@ -449,34 +458,9 @@ const installPosixEnvironment = Effect.fn("desktop.shellEnvironment.installPosix
       "XDG_DATA_HOME",
       "XDG_RUNTIME_DIR",
       "WAYLAND_DISPLAY",
-      // The telemetry opt-out is documented as a shell variable; GUI launches never see it.
-      "T3CODE_TELEMETRY_ENABLED",
     ] as const) {
       if (!config.env[name] && shellEnvironment[name]) {
         config.env[name] = shellEnvironment[name];
-      }
-    }
-
-    // Locale variables form one precedence group: LC_ALL can override an inherited
-    // LANG or LC_CTYPE, so only hydrate the group when the process has none of them.
-    if (
-      config.platform === "darwin" &&
-      LOCALE_ENV_NAMES.every((name) => Option.isNone(trimNonEmpty(config.env[name])))
-    ) {
-      for (const name of LOCALE_ENV_NAMES) {
-        const value = trimNonEmpty(shellEnvironment[name]);
-        if (Option.isSome(value)) {
-          config.env[name] = value.value;
-        }
-      }
-
-      // GUI launches inherit no locale from launchd, so spawned agents land in the C
-      // locale and pbcopy decodes their UTF-8 output as MacRoman. Older supported
-      // macOS releases do not provide C.UTF-8, so set only LC_CTYPE to a UTF-8 locale
-      // available on those releases. Leaving LANG unset keeps C-stable collation and
-      // formatting, so output parsing is unaffected.
-      if (LOCALE_ENV_NAMES.every((name) => Option.isNone(trimNonEmpty(config.env[name])))) {
-        config.env.LC_CTYPE = FALLBACK_LC_CTYPE;
       }
     }
 
@@ -510,7 +494,6 @@ const installShellEnvironment = (
   return Effect.void;
 };
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
   const environment = yield* DesktopEnvironment.DesktopEnvironment;
   const fileSystem = yield* FileSystem.FileSystem;
@@ -519,6 +502,7 @@ export const make = Effect.gen(function* () {
     installShellEnvironment({
       env: process.env,
       platform: environment.platform,
+      userShell: Option.none(),
     }).pipe(
       Effect.provideService(FileSystem.FileSystem, fileSystem),
       Effect.provideService(ChildProcessSpawner.ChildProcessSpawner, spawner),

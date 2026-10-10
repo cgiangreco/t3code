@@ -5,8 +5,9 @@ import type { Cluster } from "./Cluster.ts";
 
 /**
  * Runtime binding for `elasticmapreduce:ModifyInstanceFleet` — retargets the bound cluster's instance fleet (on-demand/spot capacities, resize specifications).
- * ### Scaling the Cluster
- * **Example:** Retarget a Fleet
+ * @binding
+ * @section Scaling the Cluster
+ * @example Retarget a Fleet
  * ```typescript
  * const modifyFleet = yield* AWS.EMR.ModifyInstanceFleet(cluster);
  *
@@ -17,8 +18,6 @@ import type { Cluster } from "./Cluster.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface ModifyInstanceFleet extends Binding.Service<
   ModifyInstanceFleet,

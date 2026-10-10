@@ -89,8 +89,9 @@ export interface Terminology extends Resource<
  * product names, domain jargon) are translated. Reference it by name from
  * `TranslateText`, `TranslateDocument`, or batch translation jobs.
  *
- * ### Managing Terminologies
- * **Example:** Import a CSV terminology
+ * @resource
+ * @section Managing Terminologies
+ * @example Import a CSV terminology
  * ```typescript
  * const glossary = yield* AWS.Translate.Terminology("BrandGlossary", {
  *   file: ["en,es", "Alchemy,Alquimia"].join("\n"),
@@ -98,7 +99,7 @@ export interface Terminology extends Resource<
  * });
  * ```
  *
- * **Example:** Translate text with the terminology applied
+ * @example Translate text with the terminology applied
  * ```typescript
  * const translateText = yield* AWS.Translate.TranslateText();
  * const result = yield* translateText({
@@ -108,8 +109,6 @@ export interface Terminology extends Resource<
  *   TerminologyNames: [glossary.terminologyName],
  * });
  * ```
- *
- * @resource
  */
 export const Terminology = Resource<Terminology>("AWS.Translate.Terminology");
 

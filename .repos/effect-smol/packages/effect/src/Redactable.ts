@@ -29,7 +29,7 @@ import { hasProperty } from "./Predicate.ts"
  *
  * **Example** (Masking an API key)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Context, Redactable } from "effect"
  *
  * class ApiKey {
@@ -39,8 +39,6 @@ import { hasProperty } from "./Predicate.ts"
  *     return this.raw.slice(0, 4) + "..."
  *   }
  * }
- *
- * Redactable.redact(new ApiKey("secret-key")) // => "secr..."
  * ```
  *
  * @see {@link Redactable} for the interface this symbol belongs to
@@ -65,7 +63,7 @@ export const symbolRedactable: unique symbol = Symbol.for("~effect/Redactable")
  *
  * **Example** (Masking an API key)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Context, Redactable } from "effect"
  *
  * class ApiKey {
@@ -75,8 +73,6 @@ export const symbolRedactable: unique symbol = Symbol.for("~effect/Redactable")
  *     return this.raw.slice(0, 4) + "..."
  *   }
  * }
- *
- * Redactable.redact(new ApiKey("secret-key")) // => "secr..."
  * ```
  *
  * @see {@link symbolRedactable} for the symbol key to implement
@@ -163,12 +159,9 @@ export function getRedacted(redactable: Redactable): unknown {
 /** @internal */
 export const currentFiberTypeId = "~effect/Fiber/currentFiber"
 
-const emptyMap = new Map()
 const emptyContext: Context.Context<never> = {
   "~effect/Context": {} as any,
-  base: emptyMap,
-  depth: 0,
-  mapUnsafe: emptyMap,
+  mapUnsafe: new Map(),
   pipe() {
     return pipeArguments(this, arguments)
   }

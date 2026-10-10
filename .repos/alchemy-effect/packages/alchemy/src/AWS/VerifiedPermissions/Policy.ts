@@ -76,8 +76,9 @@ export interface Policy extends Resource<
  * A static Cedar policy in a Verified Permissions policy store. Static
  * policies contain a complete Cedar statement and are evaluated for every
  * matching authorization request.
- * ### Creating Policies
- * **Example:** Permit a Specific Principal
+ * @resource
+ * @section Creating Policies
+ * @example Permit a Specific Principal
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -94,8 +95,8 @@ export interface Policy extends Resource<
  * });
  * ```
  *
- * ### Template-Linked Policies
- * **Example:** Instantiate a Policy Template for a Principal
+ * @section Template-Linked Policies
+ * @example Instantiate a Policy Template for a Principal
  * ```typescript
  * const template = yield* AWS.VerifiedPermissions.PolicyTemplate("ViewPhoto", {
  *   policyStoreId: store.policyStoreId,
@@ -112,8 +113,6 @@ export interface Policy extends Resource<
  *   principal: { entityType: "PhotoApp::User", entityId: "alice" },
  * });
  * ```
- *
- * @resource
  */
 export const Policy = Resource<Policy>("AWS.VerifiedPermissions.Policy");
 

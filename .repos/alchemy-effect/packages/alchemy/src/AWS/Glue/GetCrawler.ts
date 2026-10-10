@@ -11,8 +11,9 @@ import type { Crawler } from "./Crawler.ts";
  * can poll a crawl started with `StartCrawler` to completion. The crawler
  * name is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.Glue.GetCrawlerHttp)`.
- * ### Running Crawlers
- * **Example:** Poll a Crawl to Completion
+ * @binding
+ * @section Running Crawlers
+ * @example Poll a Crawl to Completion
  * ```typescript
  * // init
  * const startCrawler = yield* AWS.Glue.StartCrawler(crawler);
@@ -28,8 +29,6 @@ import type { Crawler } from "./Crawler.ts";
  *   }),
  * );
  * ```
- *
- * @binding
  */
 export interface GetCrawler extends Binding.Service<
   GetCrawler,

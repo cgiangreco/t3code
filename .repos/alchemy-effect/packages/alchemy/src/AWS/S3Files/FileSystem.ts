@@ -106,8 +106,9 @@ export interface FileSystem extends Resource<
  *
  * S3 Files is a newer service; availability varies by region and account.
  *
- * ### Creating a File System
- * **Example:** Basic File System
+ * @resource
+ * @section Creating a File System
+ * @example Basic File System
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -151,7 +152,7 @@ export interface FileSystem extends Resource<
  * });
  * ```
  *
- * **Example:** Prefix-Scoped File System
+ * @example Prefix-Scoped File System
  * ```typescript
  * const fs = yield* AWS.S3Files.FileSystem("Files", {
  *   bucket: bucket.bucketArn,
@@ -159,8 +160,6 @@ export interface FileSystem extends Resource<
  *   roleArn: role.roleArn,
  * });
  * ```
- *
- * @resource
  */
 export const FileSystem = Resource<FileSystem>("AWS.S3Files.FileSystem");
 

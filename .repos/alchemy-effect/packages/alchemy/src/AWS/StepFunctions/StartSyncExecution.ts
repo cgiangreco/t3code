@@ -15,8 +15,9 @@ export interface StartSyncExecutionRequest extends Omit<
  * runtime to run the workflow synchronously — the call returns once the
  * execution finishes, with its status and output. Not available for
  * `STANDARD` workflows.
- * ### Synchronous Execution
- * **Example:** Run an EXPRESS workflow and read its output
+ * @binding
+ * @section Synchronous Execution
+ * @example Run an EXPRESS workflow and read its output
  * ```typescript
  * const startSyncExecution = yield* StepFunctions.StartSyncExecution(machine);
  *
@@ -27,8 +28,6 @@ export interface StartSyncExecutionRequest extends Omit<
  *   const output = JSON.parse(String(result.output));
  * }
  * ```
- *
- * @binding
  */
 export interface StartSyncExecution extends Binding.Service<
   StartSyncExecution,

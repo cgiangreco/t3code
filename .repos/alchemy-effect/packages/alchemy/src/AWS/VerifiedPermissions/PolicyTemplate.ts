@@ -52,8 +52,9 @@ export interface PolicyTemplate extends Resource<
  * contain `?principal` / `?resource` placeholders; template-linked policies
  * instantiate the template for a concrete principal and resource, and every
  * linked policy automatically picks up template updates.
- * ### Creating Policy Templates
- * **Example:** Template with a Principal Placeholder
+ * @resource
+ * @section Creating Policy Templates
+ * @example Template with a Principal Placeholder
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -70,7 +71,7 @@ export interface PolicyTemplate extends Resource<
  * });
  * ```
  *
- * **Example:** Link a Policy to the Template
+ * @example Link a Policy to the Template
  * ```typescript
  * yield* AWS.VerifiedPermissions.Policy("AliceCanView", {
  *   policyStoreId: store.policyStoreId,
@@ -78,8 +79,6 @@ export interface PolicyTemplate extends Resource<
  *   principal: { entityType: "PhotoApp::User", entityId: "alice" },
  * });
  * ```
- *
- * @resource
  */
 export const PolicyTemplate = Resource<PolicyTemplate>(
   "AWS.VerifiedPermissions.PolicyTemplate",

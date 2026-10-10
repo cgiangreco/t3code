@@ -12,8 +12,9 @@ import type { CertificateAuthority } from "./CertificateAuthority.ts";
  * `ACMPCA.GetCertificateAuthorityCertificateHttp` on the Function effect to
  * implement the binding.
  *
- * ### Reading the CA Certificate
- * **Example:** Build a Trust Store
+ * @binding
+ * @section Reading the CA Certificate
+ * @example Build a Trust Store
  * ```typescript
  * // init
  * const getCaCertificate =
@@ -22,8 +23,6 @@ import type { CertificateAuthority } from "./CertificateAuthority.ts";
  * // runtime
  * const { Certificate, CertificateChain } = yield* getCaCertificate();
  * ```
- *
- * @binding
  */
 export interface GetCertificateAuthorityCertificate extends Binding.Service<
   GetCertificateAuthorityCertificate,

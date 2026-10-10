@@ -135,12 +135,6 @@ export const waitForWorkerToBeDeleted = Effect.fn(function* (
       while: (e): e is WorkerStillExists => e instanceof WorkerStillExists,
       schedule: Schedule.max([Schedule.exponential(100), Schedule.recurs(20)]),
     }),
-    // Deletion propagates in stages: getScript can briefly report the
-    // worker as existing-but-empty ("has no versions") before the 10007
-    // not-found lands. Both mean the worker is gone for our purposes.
-    Effect.catchTag(
-      ["WorkerNotFound", "WorkerHasNoVersions"],
-      () => Effect.void,
-    ),
+    Effect.catchTag("WorkerNotFound", () => Effect.void),
   );
 });

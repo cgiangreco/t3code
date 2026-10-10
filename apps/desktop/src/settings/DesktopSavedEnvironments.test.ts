@@ -2,9 +2,7 @@ import * as NodeServices from "@effect/platform-node/NodeServices";
 import { assert, describe, it } from "@effect/vitest";
 import { EnvironmentId, type PersistedSavedEnvironmentRecord } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
-import * as Base64 from "effect/encoding/Base64";
 import * as FileSystem from "effect/FileSystem";
-import * as Path from "effect/Path";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
 import * as PlatformError from "effect/PlatformError";
@@ -40,29 +38,16 @@ const SavedEnvironmentRegistryDocumentProbe = Schema.Struct({
 const SavedEnvironmentRegistryDocumentProbeJson = Schema.fromJsonString(
   SavedEnvironmentRegistryDocumentProbe,
 );
+const decodeSavedEnvironmentRegistryDocumentProbe = Schema.decodeEffect(
+  SavedEnvironmentRegistryDocumentProbeJson,
+);
 const encodeSavedEnvironmentRegistryDocumentProbe = Schema.encodeEffect(
   SavedEnvironmentRegistryDocumentProbeJson,
 );
-
-const seedSavedEnvironmentRegistry = Effect.fn(function* (encryptedBearerToken?: string) {
-  const environment = yield* DesktopEnvironment.DesktopEnvironment;
-  const fileSystem = yield* FileSystem.FileSystem;
-  yield* fileSystem.makeDirectory(environment.stateDir, { recursive: true });
-  const encoded = yield* encodeSavedEnvironmentRegistryDocumentProbe({
-    version: 1,
-    records: [
-      {
-        ...savedRegistryRecord,
-        ...(encryptedBearerToken === undefined ? {} : { encryptedBearerToken }),
-      },
-    ],
-  });
-  yield* fileSystem.writeFileString(environment.savedEnvironmentRegistryPath, `${encoded}\n`);
-});
-
-function layerSafeStorageFor(input: {
+function makeSafeStorageLayer(input: {
   readonly available: boolean;
   readonly availabilityError?: unknown;
+  readonly encryptError?: unknown;
   readonly decryptError?: unknown;
 }) {
   return Layer.succeed(ElectronSafeStorage.ElectronSafeStorage, {
@@ -74,7 +59,14 @@ function layerSafeStorageFor(input: {
               cause: input.availabilityError,
             }),
           ),
-    encryptString: (value) => Effect.succeed(textEncoder.encode(`enc:${value}`)),
+    encryptString: (value) =>
+      input.encryptError === undefined
+        ? Effect.succeed(textEncoder.encode(`enc:${value}`))
+        : Effect.fail(
+            new ElectronSafeStorage.ElectronSafeStorageEncryptError({
+              cause: input.encryptError,
+            }),
+          ),
     decryptString: (value) => {
       if (input.decryptError !== undefined) {
         return Effect.fail(
@@ -94,20 +86,21 @@ function layerSafeStorageFor(input: {
       }
       return Effect.succeed(decoded.slice("enc:".length));
     },
-    selectedStorageBackend: Effect.succeedNone,
+    selectedStorageBackend: Effect.succeed(Option.none()),
   } satisfies ElectronSafeStorage.ElectronSafeStorage["Service"]);
 }
 
-function layer(
+function makeLayer(
   baseDir: string,
   options?: {
     readonly availableSecretStorage?: boolean;
     readonly availabilityError?: unknown;
+    readonly encryptError?: unknown;
     readonly decryptError?: unknown;
   },
   fileSystemLayer: Layer.Layer<FileSystem.FileSystem> = NodeServices.layer,
 ) {
-  const layerEnvironment = DesktopEnvironment.layer({
+  const environmentLayer = DesktopEnvironment.layer({
     dirname: "/repo/apps/desktop/src",
     homeDirectory: baseDir,
     platform: "darwin",
@@ -123,19 +116,20 @@ function layer(
     ),
   );
 
-  const layerSafeStorage = layerSafeStorageFor({
+  const safeStorageLayer = makeSafeStorageLayer({
     available: options?.availableSecretStorage ?? true,
     availabilityError: options?.availabilityError,
+    encryptError: options?.encryptError,
     decryptError: options?.decryptError,
   });
-  const layerDependencies = Layer.mergeAll(
-    layerEnvironment,
-    layerSafeStorage,
+  const dependencies = Layer.mergeAll(
+    environmentLayer,
+    safeStorageLayer,
     NodeServices.layer,
     fileSystemLayer,
   );
 
-  return DesktopSavedEnvironments.layer.pipe(Layer.provideMerge(layerDependencies));
+  return DesktopSavedEnvironments.layer.pipe(Layer.provideMerge(dependencies));
 }
 
 const withSavedEnvironments = <A, E, R>(
@@ -143,6 +137,7 @@ const withSavedEnvironments = <A, E, R>(
   options?: {
     readonly availableSecretStorage?: boolean;
     readonly availabilityError?: unknown;
+    readonly encryptError?: unknown;
     readonly decryptError?: unknown;
   },
 ) =>
@@ -151,17 +146,24 @@ const withSavedEnvironments = <A, E, R>(
     const baseDir = yield* fileSystem.makeTempDirectoryScoped({
       prefix: "t3-desktop-saved-environments-test-",
     });
-    return yield* effect.pipe(Effect.provide(layer(baseDir, options)));
+    return yield* effect.pipe(Effect.provide(makeLayer(baseDir, options)));
   }).pipe(Effect.provide(NodeServices.layer), Effect.scoped);
 
 describe("DesktopSavedEnvironments", () => {
-  it.effect("reads saved environment metadata", () =>
+  it.effect("persists and reloads saved environment metadata", () =>
     withSavedEnvironments(
       Effect.gen(function* () {
+        const environment = yield* DesktopEnvironment.DesktopEnvironment;
+        const fileSystem = yield* FileSystem.FileSystem;
         const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
-        yield* seedSavedEnvironmentRegistry();
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
 
         assert.deepEqual(yield* savedEnvironments.getRegistry, [savedRegistryRecord]);
+        const persisted = yield* decodeSavedEnvironmentRegistryDocumentProbe(
+          yield* fileSystem.readFileString(environment.savedEnvironmentRegistryPath),
+        );
+        assert.equal(persisted.version, 1);
+        assert.lengthOf(persisted.records, 1);
       }),
     ),
   );
@@ -202,11 +204,18 @@ describe("DesktopSavedEnvironments", () => {
     ),
   );
 
-  it.effect("reads encrypted saved environment secrets when encryption is available", () =>
+  it.effect("persists encrypted saved environment secrets when encryption is available", () =>
     withSavedEnvironments(
       Effect.gen(function* () {
         const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
-        yield* seedSavedEnvironmentRegistry(Base64.encode(textEncoder.encode("enc:bearer-token")));
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
+
+        assert.isTrue(
+          yield* savedEnvironments.setSecret({
+            environmentId: savedRegistryRecord.environmentId,
+            secret: "bearer-token",
+          }),
+        );
 
         assert.deepEqual(
           yield* savedEnvironments.getSecret(savedRegistryRecord.environmentId),
@@ -220,8 +229,14 @@ describe("DesktopSavedEnvironments", () => {
     withSavedEnvironments(
       Effect.gen(function* () {
         const environment = yield* DesktopEnvironment.DesktopEnvironment;
+        const fileSystem = yield* FileSystem.FileSystem;
         const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
-        yield* seedSavedEnvironmentRegistry("%%%");
+        yield* fileSystem.makeDirectory(environment.stateDir, { recursive: true });
+        const encoded = yield* encodeSavedEnvironmentRegistryDocumentProbe({
+          version: 1,
+          records: [{ ...savedRegistryRecord, encryptedBearerToken: "%%%" }],
+        });
+        yield* fileSystem.writeFileString(environment.savedEnvironmentRegistryPath, `${encoded}\n`);
 
         const error = yield* savedEnvironments
           .getSecret(savedRegistryRecord.environmentId)
@@ -240,15 +255,17 @@ describe("DesktopSavedEnvironments", () => {
     ),
   );
 
-  it.effect("returns no secret while encryption is unavailable", () =>
+  it.effect("returns false when writing secrets while encryption is unavailable", () =>
     withSavedEnvironments(
       Effect.gen(function* () {
         const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
-        yield* seedSavedEnvironmentRegistry(Base64.encode(textEncoder.encode("enc:bearer-token")));
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
 
-        assert.deepEqual(
-          yield* savedEnvironments.getSecret(savedRegistryRecord.environmentId),
-          Option.none(),
+        assert.isFalse(
+          yield* savedEnvironments.setSecret({
+            environmentId: savedRegistryRecord.environmentId,
+            secret: "next-token",
+          }),
         );
       }),
       { availableSecretStorage: false },
@@ -261,10 +278,13 @@ describe("DesktopSavedEnvironments", () => {
       Effect.gen(function* () {
         const environment = yield* DesktopEnvironment.DesktopEnvironment;
         const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
-        yield* seedSavedEnvironmentRegistry(Base64.encode(textEncoder.encode("enc:bearer-token")));
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
 
         const error = yield* savedEnvironments
-          .getSecret(savedRegistryRecord.environmentId)
+          .setSecret({
+            environmentId: savedRegistryRecord.environmentId,
+            secret: "next-token",
+          })
           .pipe(Effect.flip);
 
         assert.instanceOf(
@@ -287,6 +307,45 @@ describe("DesktopSavedEnvironments", () => {
       { availabilityError: cause },
     );
   });
+
+  it.effect("removes saved environment secrets", () =>
+    withSavedEnvironments(
+      Effect.gen(function* () {
+        const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
+        yield* savedEnvironments.setSecret({
+          environmentId: savedRegistryRecord.environmentId,
+          secret: "bearer-token",
+        });
+
+        yield* savedEnvironments.removeSecret(savedRegistryRecord.environmentId);
+
+        assert.isTrue(
+          Option.isNone(yield* savedEnvironments.getSecret(savedRegistryRecord.environmentId)),
+        );
+      }),
+    ),
+  );
+
+  it.effect("removes saved environment metadata and its embedded secret atomically", () =>
+    withSavedEnvironments(
+      Effect.gen(function* () {
+        const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
+        yield* savedEnvironments.setSecret({
+          environmentId: savedRegistryRecord.environmentId,
+          secret: "bearer-token",
+        });
+
+        yield* savedEnvironments.removeEnvironment(savedRegistryRecord.environmentId);
+
+        assert.deepEqual(yield* savedEnvironments.getRegistry, []);
+        assert.isTrue(
+          Option.isNone(yield* savedEnvironments.getSecret(savedRegistryRecord.environmentId)),
+        );
+      }),
+    ),
+  );
 
   it.effect("treats empty saved environment documents as empty", () =>
     withSavedEnvironments(
@@ -328,32 +387,38 @@ describe("DesktopSavedEnvironments", () => {
           secretError,
           DesktopSavedEnvironments.DesktopSavedEnvironmentsDocumentDecodeError,
         );
+        const mutationError = yield* savedEnvironments
+          .setRegistry([savedRegistryRecord])
+          .pipe(Effect.flip);
+        assert.instanceOf(
+          mutationError,
+          DesktopSavedEnvironments.DesktopSavedEnvironmentsDocumentDecodeError,
+        );
       }),
     ),
   );
 
   it.effect("reports saved environment filesystem reads separately from document decoding", () =>
     Effect.gen(function* () {
-      const path = yield* Path.Path;
       const baseFileSystem = yield* FileSystem.FileSystem;
       const baseDir = yield* baseFileSystem.makeTempDirectoryScoped({
         prefix: "t3-desktop-saved-environments-test-",
       });
-      const registryPath = path.join(baseDir, "userdata", "saved-environments.json");
+      const registryPath = `${baseDir}/userdata/saved-environments.json`;
       const permissionError = PlatformError.systemError({
         _tag: "PermissionDenied",
         module: "FileSystem",
         method: "readFileString",
         pathOrDescriptor: registryPath,
       });
-      const layerFileSystem = Layer.succeed(
+      const fileSystemLayer = Layer.succeed(
         FileSystem.FileSystem,
         FileSystem.makeNoop({
           readFileString: () => Effect.fail(permissionError),
         }),
       );
       const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments.pipe(
-        Effect.provide(layer(baseDir, undefined, layerFileSystem)),
+        Effect.provide(makeLayer(baseDir, undefined, fileSystemLayer)),
       );
 
       const error = yield* savedEnvironments.getRegistry.pipe(Effect.flip);
@@ -363,5 +428,77 @@ describe("DesktopSavedEnvironments", () => {
       assert.equal(error.message, `Failed to read desktop saved environments at ${registryPath}.`);
       assert.notEqual(error.message, permissionError.message);
     }).pipe(Effect.provide(NodeServices.layer), Effect.scoped),
+  );
+
+  it.effect("reports the failed saved environment write operation and path", () =>
+    Effect.gen(function* () {
+      const baseFileSystem = yield* FileSystem.FileSystem;
+      const baseDir = yield* baseFileSystem.makeTempDirectoryScoped({
+        prefix: "t3-desktop-saved-environments-test-",
+      });
+      const permissionError = PlatformError.systemError({
+        _tag: "PermissionDenied",
+        module: "FileSystem",
+        method: "makeDirectory",
+        pathOrDescriptor: `${baseDir}/userdata`,
+      });
+      const fileSystemLayer = Layer.succeed(
+        FileSystem.FileSystem,
+        FileSystem.makeNoop({
+          readFileString: baseFileSystem.readFileString,
+          makeDirectory: () => Effect.fail(permissionError),
+        }),
+      );
+      const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments.pipe(
+        Effect.provide(makeLayer(baseDir, undefined, fileSystemLayer)),
+      );
+
+      const error = yield* savedEnvironments.setRegistry([savedRegistryRecord]).pipe(Effect.flip);
+      assert.instanceOf(error, DesktopSavedEnvironments.DesktopSavedEnvironmentsWriteError);
+      assert.equal(error.operation, "create-directory");
+      assert.equal(error.path, `${baseDir}/userdata`);
+      assert.strictEqual(error.cause, permissionError);
+      assert.equal(
+        error.message,
+        `Desktop saved-environment write failed during create-directory at ${baseDir}/userdata.`,
+      );
+      assert.notEqual(error.message, permissionError.message);
+    }).pipe(Effect.provide(NodeServices.layer), Effect.scoped),
+  );
+
+  it.effect("returns false when writing a secret without metadata", () =>
+    withSavedEnvironments(
+      Effect.gen(function* () {
+        const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
+
+        assert.isFalse(
+          yield* savedEnvironments.setSecret({
+            environmentId: savedRegistryRecord.environmentId,
+            secret: "bearer-token",
+          }),
+        );
+      }),
+    ),
+  );
+
+  it.effect("preserves encrypted secrets when metadata is rewritten", () =>
+    withSavedEnvironments(
+      Effect.gen(function* () {
+        const savedEnvironments = yield* DesktopSavedEnvironments.DesktopSavedEnvironments;
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
+        yield* savedEnvironments.setSecret({
+          environmentId: savedRegistryRecord.environmentId,
+          secret: "bearer-token",
+        });
+
+        yield* savedEnvironments.setRegistry([savedRegistryRecord]);
+
+        assert.deepEqual(yield* savedEnvironments.getRegistry, [savedRegistryRecord]);
+        assert.deepEqual(
+          yield* savedEnvironments.getSecret(savedRegistryRecord.environmentId),
+          Option.some("bearer-token"),
+        );
+      }),
+    ),
   );
 });

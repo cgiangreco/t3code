@@ -141,8 +141,9 @@ export interface Nodegroup extends Resource<
  * Scaling, labels, taints, update config, and version are mutable in place;
  * subnets, instance types, AMI type, disk size, node role, capacity type, and
  * remote access are immutable and force a replacement.
- * ### Creating Node Groups
- * **Example:** Managed Node Group
+ * @resource
+ * @section Creating Node Groups
+ * @example Managed Node Group
  * ```typescript
  * const nodes = yield* Nodegroup("AppNodes", {
  *   clusterName: cluster.clusterName,
@@ -153,7 +154,7 @@ export interface Nodegroup extends Resource<
  * });
  * ```
  *
- * **Example:** Spot Node Group with Labels and Taints
+ * @example Spot Node Group with Labels and Taints
  * ```typescript
  * const spot = yield* Nodegroup("SpotNodes", {
  *   clusterName: cluster.clusterName,
@@ -166,8 +167,6 @@ export interface Nodegroup extends Resource<
  *   taints: [{ key: "spot", value: "true", effect: "NO_SCHEDULE" }],
  * });
  * ```
- *
- * @resource
  */
 export const Nodegroup = Resource<Nodegroup>("AWS.EKS.Nodegroup");
 

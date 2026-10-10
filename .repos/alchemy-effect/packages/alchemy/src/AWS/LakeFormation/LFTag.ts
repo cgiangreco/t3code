@@ -48,8 +48,9 @@ export interface LFTag extends Resource<
  * Creating LF-tags requires the caller to be a data lake administrator — see
  * {@link DataLakeSettings | AWS.LakeFormation.DataLakeSettings}.
  *
- * ### Creating LF-Tags
- * **Example:** Environment Tag
+ * @resource
+ * @section Creating LF-Tags
+ * @example Environment Tag
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -58,8 +59,6 @@ export interface LFTag extends Resource<
  *   tagValues: ["dev", "staging", "prod"],
  * });
  * ```
- *
- * @resource
  */
 export const LFTag = Resource<LFTag>("AWS.LakeFormation.LFTag");
 

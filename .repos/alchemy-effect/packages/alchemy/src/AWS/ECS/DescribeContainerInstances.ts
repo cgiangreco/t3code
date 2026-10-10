@@ -16,8 +16,9 @@ export interface DescribeContainerInstancesRequest extends Omit<
  * cluster — remaining resources, running-task counts, agent status. The
  * cluster ARN is injected automatically and the host is granted
  * `ecs:DescribeContainerInstances` on the cluster's container instances.
- * ### Container Instances
- * **Example:** Inspect Remaining Capacity
+ * @binding
+ * @section Container Instances
+ * @example Inspect Remaining Capacity
  * ```typescript
  * const describeContainerInstances =
  *   yield* AWS.ECS.DescribeContainerInstances(cluster);
@@ -27,8 +28,6 @@ export interface DescribeContainerInstancesRequest extends Omit<
  * });
  * const remaining = response.containerInstances?.[0]?.remainingResources;
  * ```
- *
- * @binding
  */
 export interface DescribeContainerInstances extends Binding.Service<
   DescribeContainerInstances,

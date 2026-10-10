@@ -1,6 +1,5 @@
 import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
-import * as Drizzle from "alchemy/Drizzle";
 import * as Planetscale from "alchemy/Planetscale";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -11,11 +10,7 @@ import { Hyperdrive, PlanetscaleDb } from "./src/Db.ts";
 export default Alchemy.Stack(
   "CloudflarePlanetscaleMySQLDrizzleExample",
   {
-    providers: Layer.mergeAll(
-      Cloudflare.providers(),
-      Drizzle.providers(),
-      Planetscale.providers(),
-    ),
+    providers: Layer.mergeAll(Cloudflare.providers(), Planetscale.providers()),
     state: Alchemy.localState(),
   },
   Effect.gen(function* () {

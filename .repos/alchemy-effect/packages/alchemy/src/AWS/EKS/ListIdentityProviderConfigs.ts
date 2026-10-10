@@ -10,8 +10,9 @@ import type { Cluster } from "./Cluster.ts";
  * The cluster `clusterName` is injected from the bound {@link Cluster} and `eks:ListIdentityProviderConfigs` is granted on the cluster's ARN.
  * Provide the implementation with
  * `Effect.provide(AWS.EKS.ListIdentityProviderConfigsHttp)`.
- * ### Identity Provider Configs
- * **Example:** List OIDC Identity Provider Configs
+ * @binding
+ * @section Identity Provider Configs
+ * @example List OIDC Identity Provider Configs
  * ```typescript
  * // init
  * const listIdentityProviderConfigs =
@@ -20,8 +21,6 @@ import type { Cluster } from "./Cluster.ts";
  * // runtime
  * const { identityProviderConfigs } = yield* listIdentityProviderConfigs();
  * ```
- *
- * @binding
  */
 export interface ListIdentityProviderConfigs extends Binding.Service<
   ListIdentityProviderConfigs,

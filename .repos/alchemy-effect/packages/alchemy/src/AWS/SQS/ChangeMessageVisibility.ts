@@ -18,8 +18,9 @@ export interface ChangeMessageVisibilityRequest extends Omit<
  * function `sqs:ChangeMessageVisibility` on the queue. Provide the
  * `ChangeMessageVisibilityHttp` layer on the Function to implement the
  * binding.
- * ### Changing Message Visibility
- * **Example:** Release a Message Back to the Queue
+ * @binding
+ * @section Changing Message Visibility
+ * @example Release a Message Back to the Queue
  * ```typescript
  * // init (provide SQS.ChangeMessageVisibilityHttp on the Function)
  * const changeMessageVisibility = yield* SQS.ChangeMessageVisibility(queue);
@@ -31,15 +32,13 @@ export interface ChangeMessageVisibilityRequest extends Omit<
  * });
  * ```
  *
- * **Example:** Extend Processing Time for a Slow Job
+ * @example Extend Processing Time for a Slow Job
  * ```typescript
  * yield* changeMessageVisibility({
  *   ReceiptHandle: message.ReceiptHandle!,
  *   VisibilityTimeout: 600,
  * });
  * ```
- *
- * @binding
  */
 export interface ChangeMessageVisibility extends Binding.Service<
   ChangeMessageVisibility,

@@ -21,8 +21,9 @@ export interface RegisterTargetsRequest extends Omit<
  * compute that registers itself into a target group at boot.
  * Provide the implementation with
  * `Effect.provide(AWS.ELBv2.RegisterTargetsHttp)`.
- * ### Dynamic Target Management
- * **Example:** Register an IP target
+ * @binding
+ * @section Dynamic Target Management
+ * @example Register an IP target
  * ```typescript
  * // init — bind the operation to the target group
  * const registerTargets = yield* AWS.ELBv2.RegisterTargets(targetGroup);
@@ -32,8 +33,6 @@ export interface RegisterTargetsRequest extends Omit<
  *   Targets: [{ Id: "10.0.1.15", Port: 8080 }],
  * });
  * ```
- *
- * @binding
  */
 export interface RegisterTargets extends Binding.Service<
   RegisterTargets,

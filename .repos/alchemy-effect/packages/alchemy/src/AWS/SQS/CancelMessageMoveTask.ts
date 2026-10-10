@@ -17,8 +17,9 @@ export interface CancelMessageMoveTaskRequest
  * `sqs:CancelMessageMoveTask` on the queue. Provide the
  * `CancelMessageMoveTaskHttp` layer on the Function to implement the
  * binding.
- * ### Dead-Letter Queue Redrive
- * **Example:** Cancel a Running Redrive
+ * @binding
+ * @section Dead-Letter Queue Redrive
+ * @example Cancel a Running Redrive
  * ```typescript
  * // init (provide SQS.CancelMessageMoveTaskHttp on the Function)
  * const cancelMessageMoveTask = yield* SQS.CancelMessageMoveTask(dlq);
@@ -26,8 +27,6 @@ export interface CancelMessageMoveTaskRequest
  * // runtime
  * yield* cancelMessageMoveTask({ TaskHandle: taskHandle });
  * ```
- *
- * @binding
  */
 export interface CancelMessageMoveTask extends Binding.Service<
   CancelMessageMoveTask,

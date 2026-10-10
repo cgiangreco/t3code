@@ -16,8 +16,9 @@ export interface StartQAppSessionRequest extends Omit<
  *
  * Starts a new session of the bound Q App, optionally seeding initial card values. Provide the implementation with
  * `Effect.provide(AWS.QApps.StartQAppSessionHttp)`.
- * ### Sessions
- * **Example:** Start a Session
+ * @binding
+ * @section Sessions
+ * @example Start a Session
  * ```typescript
  * // init — bind the operation to the Q App
  * const startQAppSession = yield* AWS.QApps.StartQAppSession(app);
@@ -26,8 +27,6 @@ export interface StartQAppSessionRequest extends Omit<
  * const session = yield* startQAppSession({ appVersion: 1 });
  * console.log(session.sessionId);
  * ```
- *
- * @binding
  */
 export interface StartQAppSession extends Binding.Service<
   StartQAppSession,

@@ -1,16 +1,23 @@
-import { fileBasename } from "@t3tools/shared/path";
-import { formatFilePathPosition } from "@t3tools/shared/fileLinks";
-import {
-  inlineCodeFilePathCandidate,
-  normalizeMarkdownLinkDestination,
-  parseMarkdownFileLink,
-} from "@t3tools/shared/markdownLinks";
-import { parseThreadLinkHref } from "@t3tools/shared/threadLinks";
-import { videoMimeType } from "@t3tools/shared/video";
-
 import type { MARKDOWN_FILE_ICON_SOURCES } from "./markdownFileIcons.generated";
 
+const WINDOWS_DRIVE_PATH_PATTERN = /^[A-Za-z]:[\\/]/;
+const WINDOWS_UNC_PATH_PATTERN = /^\\\\/;
+const RELATIVE_PATH_PREFIX_PATTERN = /^(~\/|\.{1,2}\/)/;
+const RELATIVE_FILE_PATH_PATTERN = /^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)+(?::\d+){0,2}$/;
+const RELATIVE_FILE_NAME_PATTERN = /^[A-Za-z0-9._-]+\.[A-Za-z0-9_-]+(?::\d+){0,2}$/;
 const POSITION_SUFFIX_PATTERN = /:\d+(?::\d+)?$/;
+const POSIX_FILE_ROOT_PREFIXES = [
+  "/Users/",
+  "/home/",
+  "/tmp/",
+  "/var/",
+  "/etc/",
+  "/opt/",
+  "/mnt/",
+  "/Volumes/",
+  "/private/",
+  "/root/",
+] as const;
 
 export type MarkdownLinkPresentation =
   | {
@@ -33,18 +40,6 @@ export type MarkdownLinkPresentation =
     };
 
 export type MarkdownFileIcon = keyof typeof MARKDOWN_FILE_ICON_SOURCES;
-
-export type MarkdownLinkIcon = "github";
-
-/**
- * Sites whose brand mark replaces the generic external-link glyph. The marks
- * are monochrome and tinted with the link color, so they follow the theme.
- */
-export function resolveMarkdownLinkIcon(host: string): MarkdownLinkIcon | null {
-  const hostname = host.toLowerCase();
-  if (hostname === "github.com" || hostname.endsWith(".github.com")) return "github";
-  return null;
-}
 
 const FILE_ICON_BY_NAME: Readonly<Record<string, MarkdownFileIcon>> = {
   ".babelrc": "babel",
@@ -117,7 +112,7 @@ const FILE_ICON_BY_NAME: Readonly<Record<string, MarkdownFileIcon>> = {
   "next.config.mjs": "nextjs",
   "next.config.mts": "nextjs",
   "next.config.ts": "nextjs",
-  "package.json": "npm",
+  "package.json": "package",
   "pnpm-lock.yaml": "pnpm",
   "pnpm-workspace.yaml": "pnpm",
   "postcss.config.js": "postcss",
@@ -128,7 +123,7 @@ const FILE_ICON_BY_NAME: Readonly<Record<string, MarkdownFileIcon>> = {
   "prettier.config.cjs": "prettier",
   "prettier.config.mjs": "prettier",
   rakefile: "ruby",
-  "readme.md": "markdown",
+  "readme.md": "readme",
   "stylelint.config.js": "stylelint",
   "stylelint.config.cjs": "stylelint",
   "stylelint.config.mjs": "stylelint",
@@ -140,7 +135,7 @@ const FILE_ICON_BY_NAME: Readonly<Record<string, MarkdownFileIcon>> = {
   "tailwind.config.cjs": "tailwind",
   "tailwind.config.mjs": "tailwind",
   "tailwind.config.ts": "tailwind",
-  "tsconfig.json": "typescript",
+  "tsconfig.json": "tsconfig",
   "vite.config.js": "vite",
   "vite.config.mjs": "vite",
   "vite.config.mts": "vite",
@@ -243,18 +238,108 @@ const FILE_ICON_BY_EXTENSION: Readonly<Record<string, MarkdownFileIcon>> = {
   zsh: "bash",
 };
 
-/** Native link and media APIs have no document scheme to inherit from protocol-relative URLs. */
-export function normalizeNativeMarkdownUrl(value: string): string {
-  return value.startsWith("//") ? `https:${value}` : value;
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function normalizeDestination(value: string): string {
+  const trimmed = value.trim();
+  return trimmed.startsWith("<") && trimmed.endsWith(">") ? trimmed.slice(1, -1) : trimmed;
+}
+
+function fileUrlTarget(href: string): { readonly path: string; readonly hash: string } | null {
+  try {
+    const parsed = new URL(href);
+    if (parsed.protocol.toLowerCase() !== "file:") {
+      return null;
+    }
+    const path = /^\/[A-Za-z]:[\\/]/.test(parsed.pathname)
+      ? parsed.pathname.slice(1)
+      : parsed.pathname;
+    return { path, hash: parsed.hash };
+  } catch {
+    return null;
+  }
+}
+
+function stripSearchAndHash(value: string): { readonly path: string; readonly hash: string } {
+  const hashIndex = value.indexOf("#");
+  const pathWithSearch = hashIndex >= 0 ? value.slice(0, hashIndex) : value;
+  const hash = hashIndex >= 0 ? value.slice(hashIndex) : "";
+  const queryIndex = pathWithSearch.indexOf("?");
+  return {
+    path: queryIndex >= 0 ? pathWithSearch.slice(0, queryIndex) : pathWithSearch,
+    hash,
+  };
+}
+
+function splitFilePosition(
+  path: string,
+  hash: string,
+): { readonly path: string; readonly line?: number; readonly column?: number } {
+  const suffixMatch = path.match(/:(\d+)(?::(\d+))?$/);
+  const hashMatch = suffixMatch ? null : hash.match(/^#L(\d+)(?:C(\d+))?$/i);
+  const match = suffixMatch ?? hashMatch;
+  if (!match?.[1]) {
+    return { path };
+  }
+
+  const line = Number.parseInt(match[1], 10);
+  const column = match[2] ? Number.parseInt(match[2], 10) : undefined;
+  const pathWithoutPosition = suffixMatch ? path.slice(0, -suffixMatch[0].length) : path;
+  return {
+    path: pathWithoutPosition,
+    ...(line > 0 ? { line } : {}),
+    ...(column !== undefined && column > 0 ? { column } : {}),
+  };
+}
+
+function looksLikePosixFilesystemPath(path: string): boolean {
+  if (!path.startsWith("/")) {
+    return false;
+  }
+  if (POSIX_FILE_ROOT_PREFIXES.some((prefix) => path.startsWith(prefix))) {
+    return true;
+  }
+  if (POSITION_SUFFIX_PATTERN.test(path)) {
+    return true;
+  }
+  const basename = path.slice(path.lastIndexOf("/") + 1);
+  return /\.[A-Za-z0-9_-]+$/.test(basename);
+}
+
+function looksLikeFilePath(value: string): boolean {
+  if (WINDOWS_DRIVE_PATH_PATTERN.test(value) || WINDOWS_UNC_PATH_PATTERN.test(value)) {
+    return true;
+  }
+  if (RELATIVE_PATH_PREFIX_PATTERN.test(value)) {
+    return true;
+  }
+  if (value.startsWith("/")) {
+    return looksLikePosixFilesystemPath(value);
+  }
+  if (FILE_ICON_BY_NAME[value.replace(POSITION_SUFFIX_PATTERN, "").toLowerCase()]) {
+    return true;
+  }
+  return RELATIVE_FILE_PATH_PATTERN.test(value) || RELATIVE_FILE_NAME_PATTERN.test(value);
+}
+
+function fileLabel(value: string): string {
+  const normalized = value.replaceAll("\\", "/");
+  const basename = normalized.slice(normalized.lastIndexOf("/") + 1);
+  return basename || normalized;
 }
 
 export function resolveMarkdownFileIcon(value: string): MarkdownFileIcon {
-  const basename = fileBasename(value).replace(POSITION_SUFFIX_PATTERN, "").toLowerCase();
-  if (videoMimeType({ name: basename, mimeType: "" }) !== null) return "video";
+  const basename = fileLabel(value).replace(POSITION_SUFFIX_PATTERN, "").toLowerCase();
   const exactIcon = FILE_ICON_BY_NAME[basename];
   if (exactIcon) return exactIcon;
   if (basename.startsWith("tsconfig.") && basename.endsWith(".json")) {
-    return "typescript";
+    return "tsconfig";
   }
   const segments = basename.split(".");
   for (let index = 1; index < segments.length; index += 1) {
@@ -265,9 +350,9 @@ export function resolveMarkdownFileIcon(value: string): MarkdownFileIcon {
 }
 
 export function resolveMarkdownLinkPresentation(href: string): MarkdownLinkPresentation {
-  const normalized = normalizeMarkdownLinkDestination(href);
+  const normalized = normalizeDestination(href);
   try {
-    const parsed = new URL(normalizeNativeMarkdownUrl(normalized));
+    const parsed = new URL(normalized);
     if (parsed.protocol === "http:" || parsed.protocol === "https:") {
       return {
         kind: "external",
@@ -279,35 +364,36 @@ export function resolveMarkdownLinkPresentation(href: string): MarkdownLinkPrese
     // Relative paths and non-URL link destinations are handled below.
   }
 
-  const target = parseMarkdownFileLink(normalized);
-  if (target) {
+  const source = normalized.toLowerCase().startsWith("file:")
+    ? fileUrlTarget(normalized)
+    : stripSearchAndHash(normalized);
+  const decodedSource = source
+    ? { path: safeDecode(source.path.trim()), hash: safeDecode(source.hash.trim()) }
+    : null;
+  const fileTarget = decodedSource
+    ? splitFilePosition(decodedSource.path, decodedSource.hash)
+    : null;
+  const targetWithPosition = fileTarget
+    ? `${fileTarget.path}${
+        fileTarget.line
+          ? `:${fileTarget.line}${fileTarget.column ? `:${fileTarget.column}` : ""}`
+          : ""
+      }`
+    : null;
+  if (fileTarget && targetWithPosition && looksLikeFilePath(targetWithPosition)) {
     return {
       kind: "file",
       href: normalized,
-      icon: resolveMarkdownFileIcon(target.path),
-      label: fileBasename(formatFilePathPosition(target)),
-      path: target.path,
-      ...(target.line ? { line: target.line } : {}),
-      ...(target.column ? { column: target.column } : {}),
+      icon: resolveMarkdownFileIcon(fileTarget.path),
+      label: fileLabel(targetWithPosition),
+      path: fileTarget.path,
+      ...(fileTarget.line ? { line: fileTarget.line } : {}),
+      ...(fileTarget.column ? { column: fileTarget.column } : {}),
     };
   }
 
   return {
     kind: "link",
-    // A thread link keeps its href so a press reaches the feed, which opens the thread.
-    href:
-      /^(?:mailto|tel):/i.test(normalized) || parseThreadLinkHref(normalized) !== null
-        ? normalized
-        : null,
+    href: /^(?:mailto|tel):/i.test(normalized) ? normalized : null,
   };
-}
-
-/** Backticks become file references only when the shared path heuristic recognizes the whole span. */
-export function resolveMarkdownInlineCodePresentation(
-  content: string,
-): Extract<MarkdownLinkPresentation, { readonly kind: "file" }> | null {
-  const candidate = inlineCodeFilePathCandidate(content);
-  if (candidate === null) return null;
-  const presentation = resolveMarkdownLinkPresentation(candidate);
-  return presentation.kind === "file" ? presentation : null;
 }

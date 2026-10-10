@@ -72,8 +72,11 @@ export type Pipeline = Resource<
  * The SQL is fixed at creation: changing it (or the name) triggers a
  * replacement. Nothing references a pipeline downstream, so replacements
  * are cheap.
- * ### Creating a Pipeline
- * **Example:** Stream → Sink passthrough
+ * @resource
+ * @product Pipelines
+ * @category Storage & Databases
+ * @section Creating a Pipeline
+ * @example Stream → Sink passthrough
  * ```typescript
  * const stream = yield* Cloudflare.Pipelines.Stream("events", {});
  * const sink = yield* Cloudflare.Pipelines.Sink("events-sink", {
@@ -86,7 +89,7 @@ export type Pipeline = Resource<
  * });
  * ```
  *
- * **Example:** Filtering transform
+ * @example Filtering transform
  * ```typescript
  * const pipeline = yield* Cloudflare.Pipelines.Pipeline("errors-only", {
  *   sql: Output.interpolate`INSERT INTO ${sink.name} SELECT * FROM ${stream.name} WHERE level = 'error'`,
@@ -94,10 +97,6 @@ export type Pipeline = Resource<
  * ```
  *
  * @see https://developers.cloudflare.com/pipelines/
- *
- * @resource
- * @product Pipelines
- * @category Storage & Databases
  */
 export const Pipeline = Resource<Pipeline>(TypeId);
 

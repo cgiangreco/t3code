@@ -11,8 +11,9 @@ import type { Broker } from "./Broker.ts";
  * endpoints (the wire-protocol URIs clients connect to), pending changes,
  * and maintenance information. Provide the implementation with
  * `Effect.provide(AWS.MQ.DescribeBrokerHttp)`.
- * ### Observing a Broker
- * **Example:** Resolve the Broker's Endpoints
+ * @binding
+ * @section Observing a Broker
+ * @example Resolve the Broker's Endpoints
  * ```typescript
  * const describeBroker = yield* MQ.DescribeBroker(broker);
  *
@@ -20,8 +21,6 @@ import type { Broker } from "./Broker.ts";
  * // info.BrokerState → "RUNNING"
  * // info.BrokerInstances?.[0]?.Endpoints → ["ssl://b-….mq.us-west-2.amazonaws.com:61617", …]
  * ```
- *
- * @binding
  */
 export interface DescribeBroker extends Binding.Service<
   DescribeBroker,

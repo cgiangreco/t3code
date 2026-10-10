@@ -254,8 +254,9 @@ export interface DeliveryStream extends Resource<
  * `source` prop. Unless you supply role ARNs, an IAM role is auto-created
  * granting Firehose write access to the destination bucket (and read access
  * to the source stream when one is configured).
- * ### Creating Delivery Streams
- * **Example:** DirectPut stream delivering to S3
+ * @resource
+ * @section Creating Delivery Streams
+ * @example DirectPut stream delivering to S3
  * ```typescript
  * import * as AWS from "alchemy/AWS";
  *
@@ -267,7 +268,7 @@ export interface DeliveryStream extends Resource<
  * });
  * ```
  *
- * **Example:** Tuned buffering and compression
+ * @example Tuned buffering and compression
  * ```typescript
  * const stream = yield* AWS.Firehose.DeliveryStream("Events", {
  *   destination: {
@@ -281,7 +282,7 @@ export interface DeliveryStream extends Resource<
  * });
  * ```
  *
- * **Example:** Server-side encryption at rest
+ * @example Server-side encryption at rest
  * ```typescript
  * const stream = yield* AWS.Firehose.DeliveryStream("Events", {
  *   destination: { bucketArn: bucket.bucketArn },
@@ -289,7 +290,7 @@ export interface DeliveryStream extends Resource<
  * });
  * ```
  *
- * **Example:** Kinesis Data Stream as source
+ * @example Kinesis Data Stream as source
  * ```typescript
  * const source = yield* AWS.Kinesis.Stream("Clickstream");
  * const stream = yield* AWS.Firehose.DeliveryStream("ClickstreamArchive", {
@@ -298,12 +299,12 @@ export interface DeliveryStream extends Resource<
  * });
  * ```
  *
- * ### Runtime Producers
+ * @section Runtime Producers
  * Bind producer operations in the init phase and use them in runtime
  * handlers. Records are buffered by Firehose and appear in S3 after the
  * buffering interval elapses.
  *
- * **Example:** Put a record from a handler
+ * @example Put a record from a handler
  * ```typescript
  * // init
  * const putRecord = yield* AWS.Firehose.PutRecord(stream);
@@ -319,7 +320,7 @@ export interface DeliveryStream extends Resource<
  * };
  * ```
  *
- * **Example:** Put a batch of records
+ * @example Put a batch of records
  * ```typescript
  * // init
  * const putRecordBatch = yield* AWS.Firehose.PutRecordBatch(stream);
@@ -331,8 +332,6 @@ export interface DeliveryStream extends Resource<
  *   })),
  * });
  * ```
- *
- * @resource
  */
 export const DeliveryStream = Resource<DeliveryStream>(
   "AWS.Firehose.DeliveryStream",

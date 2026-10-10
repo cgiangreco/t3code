@@ -8,16 +8,15 @@ import * as Binding from "../../Binding.ts";
  *
  * Lists a domain's individual nodes — type (data/master/UltraWarm), Availability Zone, instance type, and storage — for node-level diagnostics. Provide the implementation with
  * `Effect.provide(AWS.OpenSearch.DescribeDomainNodesHttp)`.
- * ### Monitoring Domains
- * **Example:** List a Domain's Nodes
+ * @binding
+ * @section Monitoring Domains
+ * @example List a Domain's Nodes
  * ```typescript
  * const describeDomainNodes = yield* OpenSearch.DescribeDomainNodes();
  *
  * const result = yield* describeDomainNodes({ DomainName: name });
  * // result.DomainNodesStatusList → one entry per node
  * ```
- *
- * @binding
  */
 export interface DescribeDomainNodes extends Binding.Service<
   DescribeDomainNodes,

@@ -11,8 +11,9 @@ export interface ListTopicsRequest extends sns.ListTopicsInput {}
  * all topic ARNs in the account/region. The binding grants the host function
  * `sns:ListTopics`. Provide the `ListTopicsHttp` layer on the Function to
  * implement the binding.
- * ### Listing Topics
- * **Example:** List Topic ARNs
+ * @binding
+ * @section Listing Topics
+ * @example List Topic ARNs
  * ```typescript
  * // init (provide SNS.ListTopicsHttp on the Function)
  * const listTopics = yield* SNS.ListTopics();
@@ -21,8 +22,6 @@ export interface ListTopicsRequest extends sns.ListTopicsInput {}
  * const response = yield* listTopics();
  * const arns = (response.Topics ?? []).map((topic) => topic.TopicArn);
  * ```
- *
- * @binding
  */
 export interface ListTopics extends Binding.Service<
   ListTopics,

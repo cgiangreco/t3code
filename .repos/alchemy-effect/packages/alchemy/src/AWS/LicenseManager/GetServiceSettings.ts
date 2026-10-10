@@ -15,8 +15,9 @@ export interface GetServiceSettingsRequest
  *
  * Provide the implementation with
  * `Effect.provide(AWS.LicenseManager.GetServiceSettingsHttp)`.
- * ### Resource Inventory and Specifications
- * **Example:** Read the Account's Service Settings
+ * @binding
+ * @section Resource Inventory and Specifications
+ * @example Read the Account's Service Settings
  * ```typescript
  * // init
  * const getServiceSettings =
@@ -26,8 +27,6 @@ export interface GetServiceSettingsRequest
  * const { SnsTopicArn, EnableCrossAccountsDiscovery } =
  *   yield* getServiceSettings();
  * ```
- *
- * @binding
  */
 export interface GetServiceSettings extends Binding.Service<
   GetServiceSettings,

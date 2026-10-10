@@ -10,8 +10,9 @@ import type { Instance } from "./Instance.ts";
  * Removes a group membership from the bound instance's identity store by `MembershipId`. The instance's
  * `IdentityStoreId` is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.IdentityCenter.DeleteGroupMembershipHttp)`.
- * ### Managing Group Memberships
- * **Example:** Remove a User From a Group
+ * @binding
+ * @section Managing Group Memberships
+ * @example Remove a User From a Group
  * ```typescript
  * // init — bind the operation to the Identity Center instance
  * const deleteGroupMembership = yield* AWS.IdentityCenter.DeleteGroupMembership(instance);
@@ -19,8 +20,6 @@ import type { Instance } from "./Instance.ts";
  * // runtime
  * yield* deleteGroupMembership({ MembershipId: membershipId });
  * ```
- *
- * @binding
  */
 export interface DeleteGroupMembership extends Binding.Service<
   DeleteGroupMembership,

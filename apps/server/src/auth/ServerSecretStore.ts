@@ -16,7 +16,7 @@ const secretStoreErrorContext = {
   cause: Schema.Defect(),
 };
 
-export class SecretStoreSecureError extends Schema.TaggedError<SecretStoreSecureError>()(
+export class SecretStoreSecureError extends Schema.TaggedErrorClass<SecretStoreSecureError>()(
   "SecretStoreSecureError",
   {
     ...secretStoreErrorContext,
@@ -27,7 +27,7 @@ export class SecretStoreSecureError extends Schema.TaggedError<SecretStoreSecure
   }
 }
 
-export class SecretStoreReadError extends Schema.TaggedError<SecretStoreReadError>()(
+export class SecretStoreReadError extends Schema.TaggedErrorClass<SecretStoreReadError>()(
   "SecretStoreReadError",
   {
     ...secretStoreErrorContext,
@@ -38,7 +38,7 @@ export class SecretStoreReadError extends Schema.TaggedError<SecretStoreReadErro
   }
 }
 
-export class SecretStoreTemporaryPathError extends Schema.TaggedError<SecretStoreTemporaryPathError>()(
+export class SecretStoreTemporaryPathError extends Schema.TaggedErrorClass<SecretStoreTemporaryPathError>()(
   "SecretStoreTemporaryPathError",
   {
     ...secretStoreErrorContext,
@@ -49,7 +49,7 @@ export class SecretStoreTemporaryPathError extends Schema.TaggedError<SecretStor
   }
 }
 
-export class SecretStorePersistError extends Schema.TaggedError<SecretStorePersistError>()(
+export class SecretStorePersistError extends Schema.TaggedErrorClass<SecretStorePersistError>()(
   "SecretStorePersistError",
   {
     ...secretStoreErrorContext,
@@ -60,7 +60,7 @@ export class SecretStorePersistError extends Schema.TaggedError<SecretStorePersi
   }
 }
 
-export class SecretStoreRandomGenerationError extends Schema.TaggedError<SecretStoreRandomGenerationError>()(
+export class SecretStoreRandomGenerationError extends Schema.TaggedErrorClass<SecretStoreRandomGenerationError>()(
   "SecretStoreRandomGenerationError",
   {
     ...secretStoreErrorContext,
@@ -71,7 +71,7 @@ export class SecretStoreRandomGenerationError extends Schema.TaggedError<SecretS
   }
 }
 
-export class SecretStoreConcurrentReadError extends Schema.TaggedError<SecretStoreConcurrentReadError>()(
+export class SecretStoreConcurrentReadError extends Schema.TaggedErrorClass<SecretStoreConcurrentReadError>()(
   "SecretStoreConcurrentReadError",
   {
     resource: Schema.String,
@@ -82,7 +82,7 @@ export class SecretStoreConcurrentReadError extends Schema.TaggedError<SecretSto
   }
 }
 
-export class SecretStoreRemoveError extends Schema.TaggedError<SecretStoreRemoveError>()(
+export class SecretStoreRemoveError extends Schema.TaggedErrorClass<SecretStoreRemoveError>()(
   "SecretStoreRemoveError",
   {
     ...secretStoreErrorContext,
@@ -93,7 +93,7 @@ export class SecretStoreRemoveError extends Schema.TaggedError<SecretStoreRemove
   }
 }
 
-export class SecretStoreDecodeError extends Schema.TaggedError<SecretStoreDecodeError>()(
+export class SecretStoreDecodeError extends Schema.TaggedErrorClass<SecretStoreDecodeError>()(
   "SecretStoreDecodeError",
   {
     ...secretStoreErrorContext,
@@ -104,7 +104,7 @@ export class SecretStoreDecodeError extends Schema.TaggedError<SecretStoreDecode
   }
 }
 
-export class SecretStoreEncodeError extends Schema.TaggedError<SecretStoreEncodeError>()(
+export class SecretStoreEncodeError extends Schema.TaggedErrorClass<SecretStoreEncodeError>()(
   "SecretStoreEncodeError",
   {
     ...secretStoreErrorContext,
@@ -138,8 +138,6 @@ export const isSecretAlreadyExistsError = (error: SecretStoreError): boolean =>
 export class ServerSecretStore extends Context.Service<
   ServerSecretStore,
   {
-    /** File-backed stores expose their directory for cross-process credential leases. */
-    readonly directory?: string;
     readonly get: (name: string) => Effect.Effect<Option.Option<Uint8Array>, SecretStoreError>;
     readonly set: (name: string, value: Uint8Array) => Effect.Effect<void, SecretStoreError>;
     readonly create: (name: string, value: Uint8Array) => Effect.Effect<void, SecretStoreError>;
@@ -151,7 +149,6 @@ export class ServerSecretStore extends Context.Service<
   }
 >()("t3/auth/ServerSecretStore") {}
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
   const crypto = yield* Crypto.Crypto;
   const fileSystem = yield* FileSystem.FileSystem;
@@ -176,7 +173,7 @@ export const make = Effect.gen(function* () {
       Effect.map((bytes) => Option.some(Uint8Array.from(bytes))),
       Effect.catch((cause) =>
         cause.reason._tag === "NotFound"
-          ? Effect.succeedNone
+          ? Effect.succeed(Option.none())
           : Effect.fail(
               new SecretStoreReadError({
                 resource: `secret ${name}`,
@@ -305,7 +302,6 @@ export const make = Effect.gen(function* () {
     );
 
   return ServerSecretStore.of({
-    directory: serverConfig.secretsDir,
     get,
     set,
     create,

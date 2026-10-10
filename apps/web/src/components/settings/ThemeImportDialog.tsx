@@ -1,4 +1,4 @@
-import { DownloadIcon, PlusIcon } from "lucide-react";
+import { PlusIcon, UploadIcon } from "lucide-react";
 import type { ChangeEvent, DragEvent, UIEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "../../lib/utils";
@@ -20,8 +20,14 @@ import {
 } from "../../vscodeThemeImport";
 import { Alert } from "../ui/alert";
 import { Button } from "../ui/button";
-import { Dialog, DialogHeader, DialogPanel, DialogPopup, DialogTitle } from "../ui/dialog";
-import { ThemeSearchSection } from "./ThemeSearchSection";
+import {
+  Dialog,
+  DialogFooter,
+  DialogHeader,
+  DialogPanel,
+  DialogPopup,
+  DialogTitle,
+} from "../ui/dialog";
 
 /**
  * A full theme export is a few KB, so anything past this is not a theme file.
@@ -72,13 +78,13 @@ function highlightJson(value: string): string {
     const index = match.index ?? 0;
     highlighted += escapeJsonHtml(value.slice(cursor, index));
 
-    let tokenClass = "text-[var(--app-theme-secondary-foreground,var(--color-amber-600))]";
+    let tokenClass = "theme-json-number";
     if (token.startsWith('"')) {
       tokenClass = /^\s*:/.test(value.slice(index + token.length))
-        ? "text-[var(--app-theme-accent,var(--color-blue-600))]"
-        : "text-[var(--app-theme-message-action,var(--color-emerald-600))]";
+        ? "theme-json-key"
+        : "theme-json-string";
     } else if (token === "true" || token === "false" || token === "null") {
-      tokenClass = "text-[var(--app-theme-accent-surface-foreground,var(--color-violet-600))]";
+      tokenClass = "theme-json-constant";
     }
     highlighted += `<span class="${tokenClass}">${escapeJsonHtml(token)}</span>`;
     cursor = index + token.length;
@@ -111,12 +117,12 @@ function ThemeJsonEditor({
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-input bg-background shadow-xs/5 focus-within:border-ring focus-within:ring-3 focus-within:ring-inset focus-within:ring-ring/24">
+    <div className="relative overflow-hidden rounded-xl border border-input bg-background shadow-xs/5 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/24">
       {isPlainText ? null : (
         <pre
           ref={highlightRef}
           aria-hidden
-          className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre-wrap break-words p-3 font-mono text-xs leading-5 text-foreground"
+          className="pointer-events-none absolute inset-0 m-0 overflow-hidden whitespace-pre-wrap break-words p-3 font-mono text-[12px] leading-5 text-foreground"
         >
           <code dangerouslySetInnerHTML={{ __html: highlightedJson }} />
         </pre>
@@ -124,8 +130,8 @@ function ThemeJsonEditor({
       <textarea
         aria-label="Theme JSON"
         className={cn(
-          "relative z-10 block min-h-44 w-full resize-y overflow-auto bg-transparent p-3 font-mono text-xs leading-5 caret-foreground outline-none placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground",
-          isPlainText ? "text-foreground" : "text-transparent",
+          "relative z-10 block min-h-72 w-full resize-y overflow-auto bg-transparent p-3 font-mono text-[12px] leading-5 caret-foreground outline-none placeholder:text-muted-foreground selection:bg-accent/30",
+          isPlainText ? "text-foreground" : "text-transparent selection:text-transparent",
         )}
         id={id}
         onChange={(event) => onChange(event.currentTarget.value)}
@@ -354,16 +360,9 @@ export function ThemeImportDialog({
           : null;
       for (const theme of conflicts) {
         try {
-          const existingTheme =
-            mode === "update"
-              ? getCustomThemes().find((candidate) => candidate.id === theme.id)
-              : undefined;
-          const themeToUpdate = existingTheme?.collection
-            ? { ...theme, collection: existingTheme.collection }
-            : theme;
           resolved.push(
             mode === "update"
-              ? updateCustomTheme(themeToUpdate)
+              ? updateCustomTheme(theme)
               : installCustomTheme(versionedCopy(theme, preferredName)),
           );
         } catch (cause) {
@@ -427,23 +426,7 @@ export function ThemeImportDialog({
         <DialogHeader>
           <DialogTitle>Add a theme</DialogTitle>
         </DialogHeader>
-        <DialogPanel>
-          <ThemeSearchSection
-            onInstalled={(themes, context) => {
-              onImportedMany(themes, context);
-              onOpenChange(false);
-            }}
-            open={open}
-          />
-
-          <div className="flex items-center gap-3" aria-hidden>
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-muted-foreground text-2xs uppercase tracking-wider">
-              or import a file
-            </span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
+        <DialogPanel className="space-y-4">
           {(() => {
             const dropHandlers = {
               onDragEnter: (event: DragEvent<HTMLDivElement>) => {
@@ -473,7 +456,7 @@ export function ThemeImportDialog({
             );
             const chooseButton = (label = "Choose files") => (
               <Button disabled={isReading} size="sm" variant="outline" onClick={openFilePicker}>
-                <DownloadIcon />
+                <UploadIcon />
                 {isReading ? "Reading…" : label}
               </Button>
             );
@@ -506,9 +489,6 @@ export function ThemeImportDialog({
                     <Button size="sm" variant="ghost" onClick={() => setConflicts(null)}>
                       Back
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => onOpenChange(false)}>
-                      Cancel
-                    </Button>
                   </div>
                 </div>
               );
@@ -532,19 +512,6 @@ export function ThemeImportDialog({
                   {fileInput}
                 </div>
                 {editorSection()}
-                {/* The actions live with the import section, not in a DialogFooter,
-                    because Add theme only applies to the file in this section. Pinning
-                    them at the modal bottom would read as a modal-scoped action when
-                    the dialog also has the search and conflict views. */}
-                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                  <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                    Cancel
-                  </Button>
-                  <Button disabled={!json.trim() || isReading} onClick={handleSubmit}>
-                    <PlusIcon />
-                    Add theme
-                  </Button>
-                </div>
               </div>
             );
           })()}
@@ -555,6 +522,15 @@ export function ThemeImportDialog({
             </Alert>
           ) : null}
         </DialogPanel>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button disabled={!json.trim() || isReading} onClick={handleSubmit}>
+            <PlusIcon />
+            Add theme
+          </Button>
+        </DialogFooter>
       </DialogPopup>
     </Dialog>
   );

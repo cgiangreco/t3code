@@ -6,8 +6,9 @@ import type { Project } from "./Project.ts";
 /**
  * Runtime binding for `codebuild:BatchGetCommandExecutions` — reads the
  * status and output of sandbox command executions of the bound project.
- * ### Sandboxes
- * **Example:** Poll a Command Execution
+ * @binding
+ * @section Sandboxes
+ * @example Poll a Command Execution
  * ```typescript
  * const batchGetCommandExecutions = yield* AWS.CodeBuild.BatchGetCommandExecutions(project);
  *
@@ -16,8 +17,6 @@ import type { Project } from "./Project.ts";
  *   commandExecutionIds: [commandId],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchGetCommandExecutions extends Binding.Service<
   BatchGetCommandExecutions,

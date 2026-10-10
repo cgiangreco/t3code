@@ -16,8 +16,9 @@ export interface UntagResourceRequest extends Omit<
  * The binding grants the host function `sns:UntagResource` on the topic.
  * Provide the `UntagResourceHttp` layer on the Function to implement the
  * binding.
- * ### Tagging Topics
- * **Example:** Remove Tags from a Topic
+ * @binding
+ * @section Tagging Topics
+ * @example Remove Tags from a Topic
  * ```typescript
  * // init (provide SNS.UntagResourceHttp on the Function)
  * const untagResource = yield* SNS.UntagResource(topic);
@@ -25,8 +26,6 @@ export interface UntagResourceRequest extends Omit<
  * // runtime
  * yield* untagResource({ TagKeys: ["team"] });
  * ```
- *
- * @binding
  */
 export interface UntagResource extends Binding.Service<
   UntagResource,

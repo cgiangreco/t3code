@@ -19,13 +19,13 @@ import type * as Queue from "./Queue.ts"
 import * as Schema from "./Schema.ts"
 import type * as Scope from "./Scope.ts"
 
-const TypeId = "~effect/Terminal"
+const TypeId = "~effect/platform/Terminal"
 
 /**
  * A `Terminal` represents a command-line interface which can read input from a
  * user and display messages to a user.
  *
- * @category services
+ * @category models
  * @since 4.0.0
  */
 export interface Terminal {
@@ -105,7 +105,7 @@ export interface UserInput {
   readonly key: Key
 }
 
-const QuitErrorTypeId = "~effect/Terminal/QuitError"
+const QuitErrorTypeId = "effect/platform/Terminal/QuitError"
 
 /**
  * Represents an error that occurs when a user attempts to
@@ -118,10 +118,10 @@ const QuitErrorTypeId = "~effect/Terminal/QuitError"
  *
  * @see {@link isQuitError} for checking unknown errors when handling terminal cancellation
  *
- * @category errors
+ * @category QuitError
  * @since 4.0.0
  */
-export class QuitError extends Schema.Error<QuitError>("QuitError")({
+export class QuitError extends Schema.ErrorClass<QuitError>("QuitError")({
   _tag: Schema.tag("QuitError")
 }) {
   /**
@@ -163,7 +163,7 @@ export const isQuitError = (u: unknown): u is QuitError => Predicate.hasProperty
  * @category services
  * @since 4.0.0
  */
-export const Terminal: Context.Service<Terminal, Terminal> = Context.Service("effect/Terminal")
+export const Terminal: Context.Service<Terminal, Terminal> = Context.Service("effect/platform/Terminal")
 
 /**
  * Creates a `Terminal` service implementation.

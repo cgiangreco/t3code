@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * Account-level operation — invoked with the caller's request as-is.
  * Provide the implementation with
  * `Effect.provide(AWS.SecurityHub.GetInvitationsCountHttp)`.
- * ### Members & Organization
- * **Example:** Count Pending Invitations
+ * @binding
+ * @section Members & Organization
+ * @example Count Pending Invitations
  * ```typescript
  * // init — account-level binding, no resource argument
  * const getInvitationsCount = yield* AWS.SecurityHub.GetInvitationsCount();
@@ -18,8 +19,6 @@ import * as Binding from "../../Binding.ts";
  * // runtime
  * const { InvitationsCount } = yield* getInvitationsCount();
  * ```
- *
- * @binding
  */
 export interface GetInvitationsCount extends Binding.Service<
   GetInvitationsCount,

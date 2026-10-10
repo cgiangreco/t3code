@@ -1,7 +1,10 @@
 import type { PreviewViewportSetting } from "@t3tools/contracts";
 import { describe, expect, it, vi } from "vite-plus/test";
 
-import { commitViewportAndAspectRatio } from "./browserDeviceToolbarState";
+import {
+  commitViewportAndAspectRatio,
+  reconcileLockedAspectRatio,
+} from "./browserDeviceToolbarState";
 
 describe("commitViewportAndAspectRatio", () => {
   it("commits the aspect ratio only after the viewport succeeds", async () => {
@@ -34,5 +37,13 @@ describe("commitViewportAndAspectRatio", () => {
       ),
     ).rejects.toThrow("resize failed");
     expect(onAspectRatioChange).not.toHaveBeenCalled();
+  });
+});
+
+describe("reconcileLockedAspectRatio", () => {
+  it("tracks external viewport ratios only while the lock remains active", () => {
+    expect(reconcileLockedAspectRatio(1.5, 16 / 9)).toBe(16 / 9);
+    expect(reconcileLockedAspectRatio(null, 16 / 9)).toBeNull();
+    expect(reconcileLockedAspectRatio(1.5, null)).toBeNull();
   });
 });

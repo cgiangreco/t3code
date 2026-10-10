@@ -10,8 +10,9 @@ import type { Detector } from "./Detector.ts";
  * The detector id is injected from the bound {@link Detector}.
  * Provide the implementation with
  * `Effect.provide(AWS.GuardDuty.GetAdministratorAccountHttp)`.
- * ### Administrator & Invitations
- * **Example:** Read the Administrator
+ * @binding
+ * @section Administrator & Invitations
+ * @example Read the Administrator
  * ```typescript
  * // init
  * const getAdministratorAccount = yield* AWS.GuardDuty.GetAdministratorAccount(detector);
@@ -19,8 +20,6 @@ import type { Detector } from "./Detector.ts";
  * // runtime
  * const { Administrator } = yield* getAdministratorAccount();
  * ```
- *
- * @binding
  */
 export interface GetAdministratorAccount extends Binding.Service<
   GetAdministratorAccount,

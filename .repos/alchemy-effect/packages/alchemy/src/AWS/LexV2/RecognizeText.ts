@@ -19,8 +19,9 @@ export interface RecognizeTextRequest extends Omit<
  *
  * The alias must point at a built bot version (see `BotVersion`).
  *
- * ### Conversing with a Bot
- * **Example:** Recognize Text
+ * @binding
+ * @section Conversing with a Bot
+ * @example Recognize Text
  * ```typescript
  * // init
  * const recognizeText = yield* AWS.LexV2.RecognizeText(alias);
@@ -34,12 +35,12 @@ export interface RecognizeTextRequest extends Omit<
  * const intent = reply.sessionState?.intent?.name;
  * ```
  *
- * **Example:** Wire into a Lambda Function
+ * @example Wire into a Lambda Function
  * ```typescript
  * // Bind the alias in the init phase, call in the handler, and provide
  * // the RecognizeTextHttp layer on the Function's init Effect.
  * export default ChatFunction.make(
- *   { main: import.meta.url, functionUrl: true },
+ *   { main: import.meta.url, url: true },
  *   Effect.gen(function* () {
  *     const alias = yield* AWS.LexV2.BotAlias("Live", {
  *       botId: version.botId,
@@ -61,8 +62,6 @@ export interface RecognizeTextRequest extends Omit<
  *   }).pipe(Effect.provide(AWS.LexV2.RecognizeTextHttp)),
  * );
  * ```
- *
- * @binding
  */
 export interface RecognizeText extends Binding.Service<
   RecognizeText,

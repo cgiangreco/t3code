@@ -12,8 +12,9 @@ export interface DescribeAnomalyDetectorsRequest
  *
  * Provide `CloudWatch.DescribeAnomalyDetectorsHttp` on the hosting Lambda
  * Function to satisfy the requirement.
- * ### Reading Anomaly Detectors
- * **Example:** List Detectors in a Namespace
+ * @binding
+ * @section Reading Anomaly Detectors
+ * @example List Detectors in a Namespace
  * ```typescript
  * // init — grants cloudwatch:DescribeAnomalyDetectors
  * const describeAnomalyDetectors = yield* AWS.CloudWatch.DescribeAnomalyDetectors();
@@ -24,8 +25,6 @@ export interface DescribeAnomalyDetectorsRequest
  * });
  * const detectors = result.AnomalyDetectors ?? [];
  * ```
- *
- * @binding
  */
 export interface DescribeAnomalyDetectors extends Binding.Service<
   DescribeAnomalyDetectors,

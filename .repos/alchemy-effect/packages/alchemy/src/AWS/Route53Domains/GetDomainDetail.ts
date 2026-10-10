@@ -21,8 +21,9 @@ export interface GetDomainDetailRequest
  * implementation with
  * `Effect.provide(AWS.Route53Domains.GetDomainDetailHttp)`.
  *
- * ### Reading Domain Details
- * **Example:** Get the Nameservers of an Owned Domain
+ * @binding
+ * @section Reading Domain Details
+ * @example Get the Nameservers of an Owned Domain
  * ```typescript
  * // init
  * const getDomainDetail = yield* AWS.Route53Domains.GetDomainDetail();
@@ -32,14 +33,12 @@ export interface GetDomainDetailRequest
  * const nameservers = (detail.Nameservers ?? []).map((ns) => ns.Name);
  * ```
  *
- * **Example:** Handle a Domain That Is Not in the Account
+ * @example Handle a Domain That Is Not in the Account
  * ```typescript
  * const detail = yield* getDomainDetail({ DomainName: "example.com" }).pipe(
  *   Effect.catchTag("DomainNotFound", () => Effect.succeed(undefined)),
  * );
  * ```
- *
- * @binding
  */
 export interface GetDomainDetail extends Binding.Service<
   GetDomainDetail,

@@ -118,24 +118,20 @@ const hyperdrive = yield* Cloudflare.Hyperdrive.Connection("app-hyperdrive", {
 });
 ```
 
-At runtime, query through
-[`Drizzle.MySQL`](/sql/drizzle/mysql) or the raw
-[`SQL.MySQL`](/sql/effect-sql/mysql) client — both take Hyperdrive's
-`connectionString` and default to the text protocol the proxy
-requires. See the full example —
+See the full example —
 [cloudflare-planetscale-mysql-drizzle](https://github.com/alchemy-run/alchemy/tree/main/examples/cloudflare-planetscale-mysql-drizzle)
 — for a Worker querying the branch through Hyperdrive with Drizzle.
 
 ## Apply migrations
 
-Point `migrations` at a directory of `.sql` files — on either the
+Point `migrationsDir` at a directory of `.sql` files — on either the
 database (applied to the default branch) or a branch:
 
 ```typescript
 const branch = yield* Planetscale.MySQLBranch("app-branch", {
   database,
   isProduction: false,
-  migrations: "./migrations",
+  migrationsDir: "./migrations",
 });
 ```
 
@@ -176,8 +172,6 @@ guide walks through the whole pattern.
   files in depth.
 - [Hyperdrive](/cloudflare/data/hyperdrive) — pooled edge connections
   from Workers.
-- [Drizzle: MySQL](/sql/drizzle/mysql) /
-  [Effect SQL: MySQL](/sql/effect-sql/mysql) — the runtime clients.
 - [Postgres](/planetscale/data/postgres) — the PostgreSQL side of
   PlanetScale.
 

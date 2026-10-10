@@ -19,8 +19,9 @@ export interface BatchEvaluateGeofencesRequest extends Omit<
  * `geo:BatchEvaluateGeofences`), scoped to one {@link GeofenceCollection}. Provide the implementation with
  * `Effect.provide(AWS.Location.BatchEvaluateGeofencesHttp)`.
  *
- * ### Evaluating Positions Against Geofences
- * **Example:** Evaluate Positions
+ * @binding
+ * @section Evaluating Positions Against Geofences
+ * @example Evaluate Positions
  * ```typescript
  * const evaluate = yield* Location.BatchEvaluateGeofences(collection);
  *
@@ -34,8 +35,6 @@ export interface BatchEvaluateGeofencesRequest extends Omit<
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface BatchEvaluateGeofences extends Binding.Service<
   BatchEvaluateGeofences,

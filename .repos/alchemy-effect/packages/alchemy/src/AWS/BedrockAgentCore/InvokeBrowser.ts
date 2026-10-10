@@ -17,8 +17,9 @@ export interface InvokeBrowserRequest extends Omit<
  * AgentCore data-plane API against it. Provide `AgentCore.InvokeBrowserHttp`
  * on the Function effect to implement the binding.
  *
- * ### Browser Automation
- * **Example:** Take a Screenshot
+ * @binding
+ * @section Browser Automation
+ * @example Take a Screenshot
  * ```typescript
  * // init
  * const invokeBrowser = yield* AgentCore.InvokeBrowser(browser);
@@ -34,8 +35,6 @@ export interface InvokeBrowserRequest extends Omit<
  *   }),
  * };
  * ```
- *
- * @binding
  */
 export interface InvokeBrowser extends Binding.Service<
   InvokeBrowser,

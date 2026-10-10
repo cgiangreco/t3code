@@ -9,8 +9,9 @@ import * as Binding from "../../Binding.ts";
  * requires both `FromTime` and `ToTime` on the range.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.SearchInsightsHttp)`.
- * ### Inspecting Insights
- * **Example:** Search Insights by Severity
+ * @binding
+ * @section Inspecting Insights
+ * @example Search Insights by Severity
  * ```typescript
  * // init — account-level binding, no resource argument
  * const searchInsights = yield* AWS.DevOpsGuru.SearchInsights();
@@ -26,8 +27,6 @@ import * as Binding from "../../Binding.ts";
  * });
  * yield* Effect.log(`high severity: ${ReactiveInsights?.length}`);
  * ```
- *
- * @binding
  */
 export interface SearchInsights extends Binding.Service<
   SearchInsights,

@@ -23,8 +23,9 @@ export interface ListWhatsAppFlowsRequest extends Omit<
  * into every request.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.ListWhatsAppFlowsHttp)`.
- * ### Managing WhatsApp Flows
- * **Example:** List Flows
+ * @binding
+ * @section Managing WhatsApp Flows
+ * @example List Flows
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const listFlows = yield* AWS.SocialMessaging.ListWhatsAppFlows(account);
@@ -32,8 +33,6 @@ export interface ListWhatsAppFlowsRequest extends Omit<
  * // runtime
  * const { flows } = yield* listFlows({ maxResults: 25 });
  * ```
- *
- * @binding
  */
 export interface ListWhatsAppFlows extends Binding.Service<
   ListWhatsAppFlows,

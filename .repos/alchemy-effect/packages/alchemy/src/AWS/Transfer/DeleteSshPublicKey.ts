@@ -13,8 +13,9 @@ import type { User } from "./User.ts";
  * that no longer exists fails with the typed `ResourceNotFoundException`.
  * Provide the implementation with
  * `Effect.provide(AWS.Transfer.DeleteSshPublicKeyHttp)`.
- * ### Managing SSH Keys at Runtime
- * **Example:** Revoke a User's Key
+ * @binding
+ * @section Managing SSH Keys at Runtime
+ * @example Revoke a User's Key
  * ```typescript
  * // init — bind the operation to the user
  * const deleteSshPublicKey = yield* AWS.Transfer.DeleteSshPublicKey(user);
@@ -24,8 +25,6 @@ import type { User } from "./User.ts";
  *   Effect.catchTag("ResourceNotFoundException", () => Effect.void),
  * );
  * ```
- *
- * @binding
  */
 export interface DeleteSshPublicKey extends Binding.Service<
   DeleteSshPublicKey,

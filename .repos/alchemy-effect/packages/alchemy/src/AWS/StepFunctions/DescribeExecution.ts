@@ -11,16 +11,15 @@ export interface DescribeExecutionRequest extends sfn.DescribeExecutionInput {}
  * Bind this operation to a {@link StateMachine} inside a function runtime to
  * poll the status and output of that machine's executions. IAM access is
  * scoped to executions of the bound state machine.
- * ### Polling Executions
- * **Example:** Check an execution's status
+ * @binding
+ * @section Polling Executions
+ * @example Check an execution's status
  * ```typescript
  * const describeExecution = yield* StepFunctions.DescribeExecution(machine);
  *
  * const execution = yield* describeExecution({ executionArn });
  * // execution.status: "RUNNING" | "SUCCEEDED" | "FAILED" | ...
  * ```
- *
- * @binding
  */
 export interface DescribeExecution extends Binding.Service<
   DescribeExecution,

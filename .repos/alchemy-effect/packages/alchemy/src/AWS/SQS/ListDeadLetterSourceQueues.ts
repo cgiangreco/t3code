@@ -16,8 +16,9 @@ export interface ListDeadLetterSourceQueuesRequest extends Omit<
  * The binding grants the host function `sqs:ListDeadLetterSourceQueues` on
  * the queue. Provide the `ListDeadLetterSourceQueuesHttp` layer on the
  * Function to implement the binding.
- * ### Dead-Letter Queue Redrive
- * **Example:** List Source Queues of a Dead-Letter Queue
+ * @binding
+ * @section Dead-Letter Queue Redrive
+ * @example List Source Queues of a Dead-Letter Queue
  * ```typescript
  * // init (provide SQS.ListDeadLetterSourceQueuesHttp on the Function)
  * const listDeadLetterSourceQueues =
@@ -27,8 +28,6 @@ export interface ListDeadLetterSourceQueuesRequest extends Omit<
  * const result = yield* listDeadLetterSourceQueues();
  * // result.queueUrls: URLs of every queue using `dlq` as its DLQ
  * ```
- *
- * @binding
  */
 export interface ListDeadLetterSourceQueues extends Binding.Service<
   ListDeadLetterSourceQueues,

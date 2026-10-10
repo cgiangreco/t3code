@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * Provide the implementation with
  * `Effect.provide(AWS.Forecast.CreateForecastExportJobHttp)`.
  *
- * ### Exporting Forecasts
- * **Example:** Export the Forecast to S3
+ * @binding
+ * @section Exporting Forecasts
+ * @example Export the Forecast to S3
  * ```typescript
  * // init
  * const createForecastExportJob = yield* AWS.Forecast.CreateForecastExportJob();
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  *   },
  * });
  * ```
- *
- * @binding
  */
 export interface CreateForecastExportJob extends Binding.Service<
   CreateForecastExportJob,

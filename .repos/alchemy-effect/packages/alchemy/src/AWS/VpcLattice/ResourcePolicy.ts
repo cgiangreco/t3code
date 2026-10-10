@@ -47,8 +47,9 @@ export interface ResourcePolicy extends Resource<
  * network — the policy AWS RAM manages when sharing Lattice resources across
  * accounts, attachable directly for fine-grained cross-account control.
  *
- * ### Attaching Resource Policies
- * **Example:** Allow Another Account to Associate with a Service Network
+ * @resource
+ * @section Attaching Resource Policies
+ * @example Allow Another Account to Associate with a Service Network
  * ```typescript
  * const network = yield* ServiceNetwork("SharedNetwork", {});
  * const policy = yield* ResourcePolicy("SharePolicy", {
@@ -70,8 +71,6 @@ export interface ResourcePolicy extends Resource<
  *   },
  * });
  * ```
- *
- * @resource
  */
 export const ResourcePolicy = Resource<ResourcePolicy>(
   "AWS.VpcLattice.ResourcePolicy",

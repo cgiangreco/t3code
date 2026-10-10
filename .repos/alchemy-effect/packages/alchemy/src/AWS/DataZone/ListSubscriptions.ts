@@ -14,8 +14,9 @@ export interface ListSubscriptionsRequest extends Omit<
  * Lists subscriptions in the bound domain, optionally by status. The domain id is injected from the binding.
  * Provide the implementation with
  * `Effect.provide(AWS.DataZone.ListSubscriptionsHttp)`.
- * ### Subscription Workflows
- * **Example:** List Approved Subscriptions
+ * @binding
+ * @section Subscription Workflows
+ * @example List Approved Subscriptions
  * ```typescript
  * // init — bind the operation to the domain
  * const listSubscriptions = yield* AWS.DataZone.ListSubscriptions(domain);
@@ -23,8 +24,6 @@ export interface ListSubscriptionsRequest extends Omit<
  * // runtime
  * const subs = yield* listSubscriptions({ status: "APPROVED" });
  * ```
- *
- * @binding
  */
 export interface ListSubscriptions extends Binding.Service<
   ListSubscriptions,

@@ -17,8 +17,9 @@ import * as Binding from "../../Binding.ts";
  * role) are rejected with a typed `AccessDeniedException` even when the
  * `greengrass:ResolveComponentCandidates` permission is granted — use this
  * binding only from device-credentialed contexts.
- * ### Reading Components
- * **Example:** Resolve Versions For A Platform
+ * @binding
+ * @section Reading Components
+ * @example Resolve Versions For A Platform
  * ```typescript
  * // init — account-level binding, no resource argument
  * const resolveComponentCandidates =
@@ -32,8 +33,6 @@ import * as Binding from "../../Binding.ts";
  *   ],
  * });
  * ```
- *
- * @binding
  */
 export interface ResolveComponentCandidates extends Binding.Service<
   ResolveComponentCandidates,

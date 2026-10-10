@@ -9,13 +9,12 @@ import { useAtomValue } from "@effect/atom-react";
 import { scopedThreadKey } from "@t3tools/client-runtime/environment";
 import {
   type DesktopPreviewColorScheme,
-  type DesktopPreviewFavicon,
   type PreviewEvent,
   type PreviewListResult,
   type PreviewSessionSnapshot,
   type ScopedThreadRef,
 } from "@t3tools/contracts";
-import { Atom } from "effect/reactivity";
+import { Atom } from "effect/unstable/reactivity";
 
 import { PREVIEW_RECENT_URL_LIMIT } from "./components/preview/previewConstants";
 import { appAtomRegistry } from "./rpc/atomRegistry";
@@ -28,10 +27,7 @@ export interface DesktopPreviewOverlay {
   zoomFactor: number;
   pictureInPicture: boolean;
   colorScheme: DesktopPreviewColorScheme;
-  audioMuted: boolean;
-  audible: boolean;
   controller: "human" | "agent" | "none";
-  favicon: DesktopPreviewFavicon | null;
 }
 
 export interface ThreadPreviewState {
@@ -43,8 +39,6 @@ export interface ThreadPreviewState {
   desktopOverlay: DesktopPreviewOverlay | null;
   desktopByTabId: Record<string, DesktopPreviewOverlay>;
   recentlySeenUrls: string[];
-  /** Whether the first authoritative tab list has arrived. */
-  listLoaded: boolean;
   /** Server process currently authoritative for revision ordering. */
   serverEpoch: string | null;
   /** Latest ordered server revision applied from a list response or event. */
@@ -59,7 +53,6 @@ const EMPTY_THREAD_PREVIEW_STATE: ThreadPreviewState = Object.freeze({
   desktopOverlay: null,
   desktopByTabId: {},
   recentlySeenUrls: [] as string[],
-  listLoaded: false,
   serverEpoch: null,
   serverRevision: 0,
 });
@@ -176,6 +169,19 @@ export function readThreadPreviewState(ref: ScopedThreadRef): ThreadPreviewState
   return appAtomRegistry.get(previewStateAtom(scopedThreadKey(ref)));
 }
 
+export function subscribeThreadPreviewState(
+  ref: ScopedThreadRef,
+  listener: (state: ThreadPreviewState, previous: ThreadPreviewState) => void,
+): () => void {
+  const atom = previewStateAtom(scopedThreadKey(ref));
+  let previous = appAtomRegistry.get(atom);
+  return appAtomRegistry.subscribe(atom, (state) => {
+    const prior = previous;
+    previous = state;
+    listener(state, prior);
+  });
+}
+
 export function applyPreviewServerEvent(ref: ScopedThreadRef, event: PreviewEvent): void {
   updateThreadPreviewState(ref, (current) => {
     if (current.serverEpoch !== null && event.serverEpoch !== current.serverEpoch) return current;
@@ -214,7 +220,6 @@ export function applyPreviewServerEvent(ref: ScopedThreadRef, event: PreviewEven
               title: event.title,
               code: event.code,
               description: event.description,
-              ...(event.download === undefined ? {} : { download: event.download }),
             },
             updatedAt: event.createdAt,
           };
@@ -315,9 +320,7 @@ export function reconcilePreviewServerSessions(
 ): void {
   updateThreadPreviewState(ref, (current) => {
     const sameServer = current.serverEpoch === result.serverEpoch;
-    if (sameServer && result.revision < current.serverRevision) {
-      return current;
-    }
+    if (sameServer && result.revision < current.serverRevision) return current;
     const snapshots = result.sessions;
     const sessions: Record<string, PreviewSessionSnapshot> = {};
     const currentSuppressedTabIds = sameServer ? current.suppressedTabIds : new Set<string>();
@@ -355,35 +358,10 @@ export function reconcilePreviewServerSessions(
       desktopByTabId,
       desktopOverlay: activeTabId ? (desktopByTabId[activeTabId] ?? null) : null,
       recentlySeenUrls,
-      listLoaded: true,
       serverEpoch: result.serverEpoch,
       serverRevision: result.revision,
     };
   });
-}
-
-function isPreviewStateEqual(
-  previous: DesktopPreviewOverlay | null,
-  next: DesktopPreviewOverlay | null,
-) {
-  return (
-    previous === next ||
-    (previous !== null &&
-      next !== null &&
-      previous.hasWebContents === next.hasWebContents &&
-      previous.canGoBack === next.canGoBack &&
-      previous.canGoForward === next.canGoForward &&
-      previous.loading === next.loading &&
-      previous.zoomFactor === next.zoomFactor &&
-      previous.pictureInPicture === next.pictureInPicture &&
-      previous.colorScheme === next.colorScheme &&
-      previous.audioMuted === next.audioMuted &&
-      previous.audible === next.audible &&
-      previous.controller === next.controller &&
-      previous.favicon?.dataUrl === next.favicon?.dataUrl &&
-      previous.favicon?.pageUrl === next.favicon?.pageUrl &&
-      previous.favicon?.capturedAt === next.favicon?.capturedAt)
-  );
 }
 
 export function applyPreviewDesktopState(
@@ -392,9 +370,6 @@ export function applyPreviewDesktopState(
   overlay: DesktopPreviewOverlay | null,
 ): void {
   updateThreadPreviewState(ref, (current) => {
-    if (isPreviewStateEqual(current.desktopByTabId[tabId] ?? null, overlay)) {
-      return current;
-    }
     const desktopByTabId = { ...current.desktopByTabId };
     if (overlay) desktopByTabId[tabId] = overlay;
     else delete desktopByTabId[tabId];
@@ -458,35 +433,6 @@ export function setActivePreviewTab(ref: ScopedThreadRef, tabId: string): void {
   });
 }
 
-/**
- * Runs `action` once the thread's preview state has the tab, which a popup's
- * `opened` event may deliver after the stream that announced it. Gives up
- * after `timeoutMs`. Returns a cancel function.
- */
-export function whenPreviewTabKnown(
-  ref: ScopedThreadRef,
-  tabId: string,
-  action: () => void,
-  timeoutMs = 5_000,
-): () => void {
-  const atom = previewStateAtom(scopedThreadKey(ref));
-  if (appAtomRegistry.get(atom).sessions[tabId]) {
-    action();
-    return () => {};
-  }
-  const stop = () => {
-    clearTimeout(timer);
-    unsubscribe();
-  };
-  const unsubscribe = appAtomRegistry.subscribe(atom, (state) => {
-    if (!state.sessions[tabId]) return;
-    stop();
-    action();
-  });
-  const timer = setTimeout(stop, timeoutMs);
-  return stop;
-}
-
 export function rememberPreviewUrl(ref: ScopedThreadRef, url: string): void {
   if (url.trim().length === 0) return;
   updateThreadPreviewState(ref, (current) => ({
@@ -495,19 +441,16 @@ export function rememberPreviewUrl(ref: ScopedThreadRef, url: string): void {
   }));
 }
 
+export function removePreviewThread(ref: ScopedThreadRef): void {
+  const threadKey = scopedThreadKey(ref);
+  appAtomRegistry.set(previewStateAtom(threadKey), EMPTY_THREAD_PREVIEW_STATE);
+  syncActivePreviewThread(threadKey, EMPTY_THREAD_PREVIEW_STATE);
+  changedPreviewThreadKeys.delete(threadKey);
+}
+
 export function isPreviewSupportedInRuntime(): boolean {
   if (typeof window === "undefined") return false;
   return Boolean(window.desktopBridge?.preview);
-}
-
-/**
- * Forgets a deleted thread's previews. The server closes their sessions too,
- * but the desktop host keeps a page for every session held here.
- */
-export function clearThreadPreviewState(ref: ScopedThreadRef): void {
-  updateThreadPreviewState(ref, (current) =>
-    Object.keys(current.sessions).length === 0 ? current : EMPTY_THREAD_PREVIEW_STATE,
-  );
 }
 
 export function resetPreviewStateForTests(): void {

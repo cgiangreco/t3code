@@ -10,8 +10,9 @@ import * as Binding from "../../Binding.ts";
  * `READY` backup you own with other accounts (AWS recommends RAM for
  * discoverable multi-resource shares; this is the direct API). Provide the
  * implementation with `Effect.provide(AWS.CloudHSMV2.PutResourcePolicyHttp)`.
- * ### Sharing Backups
- * **Example:** Share A Backup With Another Account
+ * @binding
+ * @section Sharing Backups
+ * @example Share A Backup With Another Account
  * ```typescript
  * const putResourcePolicy = yield* AWS.CloudHSMV2.PutResourcePolicy();
  *
@@ -28,8 +29,6 @@ import * as Binding from "../../Binding.ts";
  *   }),
  * });
  * ```
- *
- * @binding
  */
 export interface PutResourcePolicy extends Binding.Service<
   PutResourcePolicy,

@@ -20,8 +20,9 @@ export interface RenderEmailTemplateRequest extends Omit<
  * personalization data — useful for previews and for validating template
  * data before a send. The binding grants the function
  * `ses:TestRenderEmailTemplate` scoped to the template.
- * ### Rendering Templates
- * **Example:** Render the Bound Template
+ * @binding
+ * @section Rendering Templates
+ * @example Render the Bound Template
  * ```typescript
  * // init
  * const renderTemplate = yield* SES.RenderEmailTemplate(template);
@@ -31,8 +32,6 @@ export interface RenderEmailTemplateRequest extends Omit<
  *   TemplateData: JSON.stringify({ name: "Ada" }),
  * });
  * ```
- *
- * @binding
  */
 export interface RenderEmailTemplate extends Binding.Service<
   RenderEmailTemplate,

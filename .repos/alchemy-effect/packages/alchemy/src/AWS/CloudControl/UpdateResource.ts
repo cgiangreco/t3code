@@ -12,8 +12,9 @@ import type { CloudControlBindingOptions } from "./BindingOptions.ts";
  * Control invokes the resource type's update handler with the caller's
  * credentials, pass the handler's underlying permissions via
  * {@link CloudControlBindingOptions.handlerPolicyStatements}.
- * ### Provisioning Resources
- * **Example:** Patch an SSM Parameter's value
+ * @binding
+ * @section Provisioning Resources
+ * @example Patch an SSM Parameter's value
  * ```typescript
  * const updateResource = yield* CloudControl.UpdateResource({
  *   handlerPolicyStatements: [
@@ -34,8 +35,6 @@ import type { CloudControlBindingOptions } from "./BindingOptions.ts";
  *   ]),
  * });
  * ```
- *
- * @binding
  */
 export interface UpdateResource extends Binding.Service<
   UpdateResource,

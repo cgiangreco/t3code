@@ -249,17 +249,15 @@ export interface ManagedRuntime<in R, out ER> {
  *
  * **Example** (Creating a managed runtime)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Context, Effect, Layer, ManagedRuntime } from "effect"
- *
- * const notifications: Array<string> = []
  *
  * class Notifications extends Context.Service<Notifications, {
  *   readonly notify: (message: string) => Effect.Effect<void>
  * }>()("Notifications") {
  *   static readonly layer = Layer.succeed(this)({
  *     notify: Effect.fn("Notifications.notify")((message) =>
- *       Effect.sync(() => notifications.push(message))
+ *       Effect.sync(() => console.log(message))
  *     )
  *   })
  * }
@@ -271,15 +269,15 @@ export interface ManagedRuntime<in R, out ER> {
  *   (_) => _.notify("Hello, world!")
  * ).pipe(Effect.ensuring(runtime.disposeEffect))
  *
- * await runtime.runPromise(program)
- * notifications // => ["Hello, world!"]
+ * runtime.runPromise(program)
+ * // Hello, world!
  * ```
  *
  * @see {@link ManagedRuntime} for the returned runtime interface
  * @see {@link Layer.MemoMap} for shared layer memoization
  * @see {@link Layer.build} for lower-level scoped layer construction
  *
- * @category constructors
+ * @category runtime class
  * @since 2.0.0
  */
 export const make = <R, ER>(
@@ -289,11 +287,10 @@ export const make = <R, ER>(
   } | undefined
 ): ManagedRuntime<R, ER> => {
   const memoMap = options?.memoMap ?? Layer.makeMemoMapUnsafe()
-  const scope = Scope.makeUnsafe("sequential")
+  const scope = Scope.makeUnsafe("parallel")
   const layerScope = Scope.forkUnsafe(scope, "sequential")
-  const fiberScope = Scope.forkUnsafe(scope, "parallel")
   const defaultRunOptions: Effect.RunOptions = {
-    onFiberStart: Fiber.runIn(fiberScope)
+    onFiberStart: Fiber.runIn(scope)
   }
   const mergeRunOptions = <O extends Effect.RunOptions>(options?: O): O =>
     options
@@ -318,7 +315,7 @@ export const make = <R, ER>(
               self.cachedContext = context
             })
         ),
-        { ...defaultRunOptions, scheduler: fiber.cache.scheduler }
+        { ...defaultRunOptions, scheduler: fiber.currentScheduler }
       )
     }
     return Effect.flatten(Fiber.await(buildFiber))

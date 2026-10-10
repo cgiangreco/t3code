@@ -5,13 +5,13 @@ import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 
 import * as Electron from "electron";
-import * as HostProcess from "@t3tools/shared/HostProcess";
+import { HostProcessPlatform } from "@t3tools/shared/hostProcess";
 
 const electronSafeStorageErrorFields = {
   cause: Schema.Defect(),
 };
 
-export class ElectronSafeStorageAvailabilityError extends Schema.TaggedError<ElectronSafeStorageAvailabilityError>()(
+export class ElectronSafeStorageAvailabilityError extends Schema.TaggedErrorClass<ElectronSafeStorageAvailabilityError>()(
   "ElectronSafeStorageAvailabilityError",
   {
     ...electronSafeStorageErrorFields,
@@ -22,7 +22,7 @@ export class ElectronSafeStorageAvailabilityError extends Schema.TaggedError<Ele
   }
 }
 
-export class ElectronSafeStorageEncryptError extends Schema.TaggedError<ElectronSafeStorageEncryptError>()(
+export class ElectronSafeStorageEncryptError extends Schema.TaggedErrorClass<ElectronSafeStorageEncryptError>()(
   "ElectronSafeStorageEncryptError",
   {
     ...electronSafeStorageErrorFields,
@@ -33,7 +33,7 @@ export class ElectronSafeStorageEncryptError extends Schema.TaggedError<Electron
   }
 }
 
-export class ElectronSafeStorageDecryptError extends Schema.TaggedError<ElectronSafeStorageDecryptError>()(
+export class ElectronSafeStorageDecryptError extends Schema.TaggedErrorClass<ElectronSafeStorageDecryptError>()(
   "ElectronSafeStorageDecryptError",
   {
     ...electronSafeStorageErrorFields,
@@ -50,6 +50,7 @@ export const ElectronSafeStorageError = Schema.Union([
   ElectronSafeStorageDecryptError,
 ]);
 export type ElectronSafeStorageError = typeof ElectronSafeStorageError.Type;
+export const isElectronSafeStorageError = Schema.is(ElectronSafeStorageError);
 
 export class ElectronSafeStorage extends Context.Service<
   ElectronSafeStorage,
@@ -65,9 +66,8 @@ export class ElectronSafeStorage extends Context.Service<
   }
 >()("@t3tools/desktop/electron/ElectronSafeStorage") {}
 
-/** @public Service construction is part of the canonical Effect module API. */
 export const make = Effect.gen(function* () {
-  const platform = yield* HostProcess.Platform;
+  const platform = yield* HostProcessPlatform;
 
   return ElectronSafeStorage.of({
     isEncryptionAvailable: Effect.try({

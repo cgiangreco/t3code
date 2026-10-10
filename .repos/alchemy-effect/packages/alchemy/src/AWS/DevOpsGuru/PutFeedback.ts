@@ -8,8 +8,9 @@ import * as Binding from "../../Binding.ts";
  * Records feedback on an insight's usefulness (`VALID` / `NOT_VALID` and variants) — feeding triage decisions back into DevOps Guru.
  * Provide the implementation with
  * `Effect.provide(AWS.DevOpsGuru.PutFeedbackHttp)`.
- * ### Feedback
- * **Example:** Rate an Insight
+ * @binding
+ * @section Feedback
+ * @example Rate an Insight
  * ```typescript
  * // init — account-level binding, no resource argument
  * const putFeedback = yield* AWS.DevOpsGuru.PutFeedback();
@@ -19,8 +20,6 @@ import * as Binding from "../../Binding.ts";
  *   InsightFeedback: { Id: insightId, Feedback: "VALID_COLLECTION" },
  * });
  * ```
- *
- * @binding
  */
 export interface PutFeedback extends Binding.Service<
   PutFeedback,

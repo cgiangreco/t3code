@@ -13,8 +13,9 @@ import * as Binding from "../../Binding.ts";
  * and grants `forecast:CreateAutoPredictor` on `*`. Provide the
  * implementation with `Effect.provide(AWS.Forecast.CreateAutoPredictorHttp)`.
  *
- * ### Training Predictors
- * **Example:** Retrain a Predictor
+ * @binding
+ * @section Training Predictors
+ * @example Retrain a Predictor
  * ```typescript
  * // init
  * const createAutoPredictor = yield* AWS.Forecast.CreateAutoPredictor();
@@ -27,8 +28,6 @@ import * as Binding from "../../Binding.ts";
  *   DataConfig: { DatasetGroupArn: group.datasetGroupArn },
  * });
  * ```
- *
- * @binding
  */
 export interface CreateAutoPredictor extends Binding.Service<
   CreateAutoPredictor,

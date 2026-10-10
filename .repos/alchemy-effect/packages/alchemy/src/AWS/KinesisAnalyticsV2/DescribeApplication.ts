@@ -13,16 +13,15 @@ export interface DescribeApplicationRequest extends Omit<
  * bound application's full detail (status, version, runtime environment,
  * configuration), the building block of ops automation that reacts to the
  * Flink job's lifecycle state.
- * ### Observing the Application
- * **Example:** Check whether the Flink job is running
+ * @binding
+ * @section Observing the Application
+ * @example Check whether the Flink job is running
  * ```typescript
  * const describeApplication = yield* AWS.KinesisAnalyticsV2.DescribeApplication(app);
  *
  * const { ApplicationDetail } = yield* describeApplication();
  * const running = ApplicationDetail.ApplicationStatus === "RUNNING";
  * ```
- *
- * @binding
  */
 export interface DescribeApplication extends Binding.Service<
   DescribeApplication,

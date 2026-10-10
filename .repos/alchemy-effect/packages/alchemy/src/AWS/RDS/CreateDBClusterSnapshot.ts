@@ -12,8 +12,9 @@ import type { DBCluster } from "./DBCluster.ts";
  * pre-migration backup function or a scheduled snapshot-rotation job. The
  * cluster identifier is injected from the binding. Provide the implementation with
  * `Effect.provide(AWS.RDS.CreateDBClusterSnapshotHttp)`.
- * ### Managing Cluster Snapshots
- * **Example:** Take a Manual Cluster Snapshot
+ * @binding
+ * @section Managing Cluster Snapshots
+ * @example Take a Manual Cluster Snapshot
  * ```typescript
  * // init — bind the operation to the cluster
  * const createDBClusterSnapshot =
@@ -24,8 +25,6 @@ import type { DBCluster } from "./DBCluster.ts";
  *   DBClusterSnapshotIdentifier: `pre-migration-${runId}`,
  * });
  * ```
- *
- * @binding
  */
 export interface CreateDBClusterSnapshot extends Binding.Service<
   CreateDBClusterSnapshot,

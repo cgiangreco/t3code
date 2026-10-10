@@ -32,8 +32,9 @@ export interface StartDominantLanguageDetectionJobRequest extends Omit<
  * {@link DescribeDominantLanguageDetectionJob} and stop it with
  * {@link StopDominantLanguageDetectionJob}.
  *
- * ### Starting Analysis Jobs
- * **Example:** Start an Asynchronous DominantLanguage Detection Job
+ * @binding
+ * @section Starting Analysis Jobs
+ * @example Start an Asynchronous DominantLanguage Detection Job
  * ```typescript
  * // deploy time — bind the Comprehend data-access role
  * const startDominantLanguageDetectionJob = yield* AWS.Comprehend.StartDominantLanguageDetectionJob(dataAccessRole);
@@ -46,8 +47,6 @@ export interface StartDominantLanguageDetectionJobRequest extends Omit<
  * });
  * // job.JobId, job.JobStatus === "SUBMITTED"
  * ```
- *
- * @binding
  */
 export interface StartDominantLanguageDetectionJob extends Binding.Service<
   StartDominantLanguageDetectionJob,

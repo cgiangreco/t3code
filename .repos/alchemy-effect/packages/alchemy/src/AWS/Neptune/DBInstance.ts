@@ -111,8 +111,9 @@ export interface DBInstance extends Resource<
  * Mutable fields (`dbInstanceClass`, `promotionTier`, maintenance window)
  * are reconciled in place; immutable fields (`engine`,
  * `dbClusterIdentifier`, `availabilityZone`) force a replacement.
- * ### Adding an Instance
- * **Example:** A Neptune writer instance
+ * @resource
+ * @section Adding an Instance
+ * @example A Neptune writer instance
  * ```typescript
  * const writer = yield* DBInstance("Writer", {
  *   dbClusterIdentifier: cluster.dbClusterIdentifier,
@@ -120,15 +121,13 @@ export interface DBInstance extends Resource<
  * });
  * ```
  *
- * **Example:** A serverless instance
+ * @example A serverless instance
  * ```typescript
  * const writer = yield* DBInstance("Writer", {
  *   dbClusterIdentifier: cluster.dbClusterIdentifier,
  *   dbInstanceClass: "db.serverless",
  * });
  * ```
- *
- * @resource
  */
 export const DBInstance = Resource<DBInstance>("AWS.Neptune.DBInstance");
 

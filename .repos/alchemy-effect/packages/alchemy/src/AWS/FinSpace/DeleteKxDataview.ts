@@ -7,8 +7,9 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  * Runtime binding for `finspace:DeleteKxDataview` — deletes a dataview of a kdb database in the bound environment.
  * Provide the implementation with
  * `Effect.provide(AWS.FinSpace.DeleteKxDataviewHttp)`.
- * ### Managing Dataviews
- * **Example:** Delete a Dataview
+ * @binding
+ * @section Managing Dataviews
+ * @example Delete a Dataview
  * ```typescript
  * const deleteDataview = yield* AWS.FinSpace.DeleteKxDataview(kdb);
  *
@@ -18,8 +19,6 @@ import type { KxEnvironment } from "./KxEnvironment.ts";
  *   clientToken: crypto.randomUUID(),
  * });
  * ```
- *
- * @binding
  */
 export interface DeleteKxDataview extends Binding.Service<
   DeleteKxDataview,

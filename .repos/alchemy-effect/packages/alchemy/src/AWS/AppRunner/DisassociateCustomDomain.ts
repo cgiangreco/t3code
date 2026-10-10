@@ -16,15 +16,14 @@ export interface DisassociateCustomDomainRequest extends Omit<
  * Provide `AppRunner.DisassociateCustomDomainHttp` on the hosting
  * function's Effect to implement the binding.
  *
- * ### Custom Domains
- * **Example:** Remove a customer domain
+ * @binding
+ * @section Custom Domains
+ * @example Remove a customer domain
  * ```typescript
  * const disassociateCustomDomain =
  *   yield* AppRunner.DisassociateCustomDomain(service);
  * yield* disassociateCustomDomain({ DomainName: "app.customer.com" });
  * ```
- *
- * @binding
  */
 export interface DisassociateCustomDomain extends Binding.Service<
   DisassociateCustomDomain,

@@ -22,7 +22,8 @@ import type { BudgetAction } from "./BudgetAction.ts";
 /**
  * Build the impl Effect for a budget-scoped operation: the runtime callable
  * injects the bound {@link Budget}'s `AccountId` and `BudgetName` and the
- * deploy-time half grants `actions` on the budget ARN.
+ * deploy-time half grants `actions` on the budget ARN (or, for budget-action
+ * listings, on `budget/{name}/action/*` via `actionWildcard`).
  */
 export const makeBudgetHttpBinding = <
   I extends { AccountId: string; BudgetName: string },
@@ -36,6 +37,12 @@ export const makeBudgetHttpBinding = <
   operation: Effect.Effect<(input: I) => Effect.Effect<A, E>, never, R>;
   /** IAM actions granted on the budget ARN. */
   actions: readonly string[];
+  /**
+   * Grant on `{budgetArn}/action/*` instead of the budget ARN — the
+   * budget-action listing operations authorize on the budgetAction resource
+   * type, whose IDs are unknowable at deploy time.
+   */
+  actionWildcard?: boolean;
 }) =>
   Effect.gen(function* () {
     const op = yield* options.operation;
@@ -51,7 +58,11 @@ export const makeBudgetHttpBinding = <
               {
                 Effect: "Allow",
                 Action: [...options.actions],
-                Resource: [Output.interpolate`${budget.budgetArn}`],
+                Resource: [
+                  options.actionWildcard
+                    ? Output.interpolate`${budget.budgetArn}/action/*`
+                    : Output.interpolate`${budget.budgetArn}`,
+                ],
               },
             ],
           });

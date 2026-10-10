@@ -14,8 +14,9 @@ import type { LinkedWhatsAppBusinessAccount } from "./LinkedWhatsAppBusinessAcco
  * the deploy-time half grants `social-messaging:GetLinkedWhatsAppBusinessAccountPhoneNumber` on `*`.
  * Provide the implementation with
  * `Effect.provide(AWS.SocialMessaging.GetLinkedWhatsAppBusinessAccountPhoneNumberHttp)`.
- * ### Reading Phone Numbers
- * **Example:** Read Phone Number Details
+ * @binding
+ * @section Reading Phone Numbers
+ * @example Read Phone Number Details
  * ```typescript
  * // init — bind the operation to the linked WABA
  * const getPhoneNumber = yield* AWS.SocialMessaging.GetLinkedWhatsAppBusinessAccountPhoneNumber(account);
@@ -26,8 +27,6 @@ import type { LinkedWhatsAppBusinessAccount } from "./LinkedWhatsAppBusinessAcco
  * });
  * const rating = details.phoneNumber?.qualityRating;
  * ```
- *
- * @binding
  */
 export interface GetLinkedWhatsAppBusinessAccountPhoneNumber extends Binding.Service<
   GetLinkedWhatsAppBusinessAccountPhoneNumber,
